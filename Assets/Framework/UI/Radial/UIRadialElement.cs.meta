@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: ae0badd581c547f4faac55714273a331
+labels:
+- Ui
+- Radial
+- Menu
+- Pie
+- Circular
+- Selection
+timeCreated: 1448225980
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

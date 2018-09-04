@@ -1,0 +1,41 @@
+﻿using UnityEngine;
+using System.Collections;
+
+namespace PixelComrades {
+    public class UIIdentifyDrop : UIGenericDrop {
+        protected override void OnDropEvent() {
+            if (UIDragDropHandler.CurrentData == null) {
+                if (UIDragDropHandler.Active) {
+                    UIDragDropHandler.Return();
+                }
+                return;
+            }
+            if (UIDragDropHandler.CurrentData.Get<InventoryItem>()?.Identified ?? false) {
+                UIFloatingText.Spawn("Doesn't need to be identified", transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+                UIDragDropHandler.Return();
+                return;
+            }
+            var price = RpgSystem.IdentifyEstimate(UIDragDropHandler.CurrentData);
+            if (Player.Currency.Value < price) {
+                UIFloatingText.Spawn(string.Format("Identify Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+                UIDragDropHandler.Return();
+                return;
+            }
+            UIModalQuestion.Set(ConfirmIdentify, string.Format("Identify for {0} {1}?", price, GameLabels.Currency));
+        }
+
+        private void ConfirmIdentify(int id) {
+            if (id > 0 || UIDragDropHandler.CurrentData == null) {
+                if (UIDragDropHandler.Active) {
+                    UIDragDropHandler.Return();
+                }
+                return;
+            }
+            var price = RpgSystem.IdentifyEstimate(UIDragDropHandler.CurrentData);
+            UIFloatingText.Spawn(string.Format("Identified for {0} {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            Player.Currency.AddToValue(-price);
+            UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Identified = true);
+            UIDragDropHandler.Return();
+        }
+    }
+}
