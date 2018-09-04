@@ -114,30 +114,6 @@ namespace PixelComrades.DungeonCrawler {
             return template != null ? CreateItem(template) : null;
         }
 
-        //public static bool TryEquip(PlayerCharacterNode actor, string id) {
-        //    var item = GetItem(id);
-        //    if (item != null) {
-        //        return actor.EquipSlots.c.TryEquip(item);
-        //    }
-        //    return false;
-        //}
-
-        //public static void TryEquipOutfit(PlayerCharacterNode actor, string outfit) {
-        //    for (int i = 1; i <= (int) EquipSlotType.Hands; i++) {
-        //        var slot = (EquipSlotType) i;
-        //        var id = string.Format("{0}_{1}", outfit, slot);
-        //        var template = GetTemplate(id);
-        //        if (template != null) {
-        //            var item = template.New();
-        //            if (item != null) {
-        //                if (!actor.EquipSlots.c.TryEquip(item)) {
-        //                    Player.MainInventory.Add(item);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
         public static Entity CreateItem(ItemTemplate template) {
             return CreateItem(template, RpgSystem.ItemRandomCurrentLevel(), template.Rarity);
         }

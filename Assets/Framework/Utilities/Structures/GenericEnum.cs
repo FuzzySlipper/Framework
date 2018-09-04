@@ -193,8 +193,8 @@ namespace PixelComrades {
             return indexList.ToArray();
         }
 
-        public static string[] GetNames() {
-            return _names.ToArray();
+        public static List<string> GetNames() {
+            return _names;
         }
 
         public static string[] GetNames(U value) {

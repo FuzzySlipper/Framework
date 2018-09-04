@@ -10,8 +10,6 @@ namespace PixelComrades {
 
         public System.Action<bool> OnPlayerStatus;
 
-        
-
         public BaseCell this[DirectionsEight index] {
             get { return _neighbors[(int)index]; }
             set { _neighbors[(int)index] = value; }
@@ -19,9 +17,9 @@ namespace PixelComrades {
 
         public int Length { get { return _neighbors.Length; } }
         public BaseCell[] Neighbors { get { return _neighbors; } }
-        public bool Walkable { get; private set; }
-        public Point3 WorldPosition { get; private set; }
-        
+        public bool Walkable { get; protected set; }
+        public Point3 WorldPosition { get; protected set; }
+        public virtual Vector3 WorldBottomV3 { get { return WorldPosition.GenericGridToWorld(Game.MapCellSize) - new Vector3(0, Game.MapCellSize * 0.5f, 0); } }
         public bool Explored { get; set; }
         public bool IsVisible { get; set; }
         
@@ -42,18 +40,22 @@ namespace PixelComrades {
         }
 
 
+        public virtual void Clear() {
+            _neighbors = new BaseCell[DirectionsExtensions.DiagonalLength3D];
+        }
+
         public bool BlocksVision(Directions dir) {
             return BlocksVision(dir.ToDirectionEight());
         }
 
-        public bool BlocksVision(DirectionsEight dir) {
+        public virtual bool BlocksVision(DirectionsEight dir) {
             if (!CanExit(dir)) {
                 return true;
             }
             return false;
         }
 
-        public bool CanExit(DirectionsEight dir) {
+        public virtual bool CanExit(DirectionsEight dir) {
             if (_neighbors[(int) dir] == null || !_neighbors[(int) dir].Walkable) {
                 return false;
             }
