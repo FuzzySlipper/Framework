@@ -115,7 +115,6 @@ public class DebugLogManager : MonoBehaviour {
         DebugLogConsole.AddCommandInstance("FlyCam", "FlyCam", this);
         DebugLogConsole.AddCommandInstance("TestTimers", "TestTimers", this);
         DebugLogConsole.AddCommandInstance("Version", "Version", this);
-
     }
 
     private void Version() {
@@ -190,10 +189,7 @@ public class DebugLogManager : MonoBehaviour {
     }
 
     void OnDisable() {
-        // Stop receiving debug entries
         Application.logMessageReceived -= ReceivedLog;
-
-        // Stop receiving commands
         commandInputField.onValidateInput -= OnValidateCommand;
     }
 
