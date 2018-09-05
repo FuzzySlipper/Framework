@@ -12,7 +12,7 @@ namespace PixelComrades {
             return entity.HasComponent<InventoryItem>();
         }
 
-        public override void Add(int item, bool isContainerSystem = false) {
+        public override void Add(Entity item, bool isContainerSystem = false) {
             base.Add(item, isContainerSystem);
             CheckIndices();
         }

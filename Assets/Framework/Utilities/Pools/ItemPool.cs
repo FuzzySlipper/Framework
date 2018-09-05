@@ -64,34 +64,30 @@ namespace PixelComrades {
                 HashSet<GameObject> goList = new HashSet<GameObject>();
                 for (int i = 0; i < worldEntities.Length; i++) {
                     worldEntities[i].SetStatic();
-                    worldEntities[i].Register(false, false);
-                    worldEntities[i].SetActive(true);
                     goList.Add(worldEntities[i].gameObject);
                 }
-                var updates = rootList[l].GetComponentsInChildren<ISystemUpdate>(true);
-                for (int i = 0; i < updates.Length; i++) {
-                    var update = updates[i];
-                    var unityComponent = update as UnityEngine.Component;
-                    if (!FindExistingComponents(unityComponent, ref goList)) {
-                        continue;
-                    }
-                    SystemManager.Add(update);
-                }
-                var turnUpdates = rootList[l].GetComponentsInChildren<ITurnUpdate>(true);
-                for (int i = 0; i < turnUpdates.Length; i++) {
-                    var update = turnUpdates[i];
-                    var unityComponent = update as UnityEngine.Component;
-                    if (!FindExistingComponents(unityComponent, ref goList)) {
-                        continue;
-                    }
-                    SystemManager.AddTurn(update);
-                }
+                LookForNeededEntities(rootList[l].GetComponentsInChildren<IOnCreate>(true), ref goList);
+                LookForNeededEntities(rootList[l].GetComponentsInChildren<IPoolEvents>(true), ref goList);
+                LookForNeededEntities(rootList[l].GetComponentsInChildren<ISystemUpdate>(true), ref goList);
+                LookForNeededEntities(rootList[l].GetComponentsInChildren<ITurnUpdate>(true), ref goList);
             }
         }
 
-        private static bool FindExistingComponents(UnityEngine.Component unityComponent, ref HashSet<GameObject> goList) {
-            if (unityComponent == null) {
-                return true;
+        private static void LookForNeededEntities<T>(IList<T> list, ref HashSet<GameObject> goList) {
+            for (int i = 0; i < list.Count; i++) {
+                var c = list[i];
+                var unityComponent = c as UnityEngine.Component;
+                if (unityComponent == null || !NeedsComponentAdded(unityComponent, ref goList)) {
+                    continue;
+                }
+                unityComponent.gameObject.AddComponent<PrefabEntity>().SetStatic();
+                goList.Add(unityComponent.gameObject);
+            }
+        }
+
+        private static bool NeedsComponentAdded(UnityEngine.Component unityComponent, ref HashSet<GameObject> goList) {
+            if (unityComponent == null || unityComponent.GetComponent<PrefabEntity>() != null) {
+                return false;
             }
             if (goList.Contains(unityComponent.gameObject)) {
                 return false;
@@ -399,7 +395,7 @@ namespace PixelComrades {
                 _stringToId.Add(itemName, entity.PrefabId);
                 return entity.PrefabId;
             }
-            entity = temp.AddComponent<PrefabEntity>();
+            entity = temp.GetOrAddComponent<PrefabEntity>();
             entity.SetId(GetResourcePath(temp));
             _stringToId.Add(itemName, entity.PrefabId);
             _referenceItems.Add(entity.PrefabId, entity);

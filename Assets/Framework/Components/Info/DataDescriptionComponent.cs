@@ -21,5 +21,6 @@ namespace PixelComrades {
         public DataDescriptionComponent(string text){
             _text = text;
         }
+        public DataDescriptionComponent(){}
     }
 }

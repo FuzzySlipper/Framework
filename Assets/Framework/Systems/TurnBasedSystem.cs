@@ -64,7 +64,7 @@ namespace PixelComrades {
         }
 
         public void TurnStats() {
-            DebugLogManager.Log(string.Format("Turn: {0}", TurnCounter), string.Format("Active {0}, Queue {1} State {2}", _active.Count, _queueActivate.Count, _turnState), LogType.Log);
+            Debug.LogFormat("Turn: {0} Active {1}, Queue {2} State {3}", TurnCounter,_active.Count, _queueActivate.Count, _turnState);
         }
 
         public static void Remove(ITurnBasedUnit unit) {

@@ -107,12 +107,6 @@ public class PlayerInput : MonoSingleton<PlayerInput> {
             }
             return;
         }
-        //for (int i = 0; i < _numericKeys.Length; i++) {
-        //    if (Input.GetKeyDown(_numericKeys[i])) {
-        //        UIHotBar.UseSlot(i);
-        //        //UIPlayerComponents.HotbarUI.FlashActive(2.5f);
-        //    }
-        //}
         if (InputSystem.GetButtonDown(BaseControls.Use)) {
             if (!WorldControlMonitor.Use()) {
                 UICenterButton.TryClickEvent();
@@ -122,14 +116,9 @@ public class PlayerInput : MonoSingleton<PlayerInput> {
     }
 
     protected virtual void MenuInput() {
-        //if (InputSystem.GetButtonDown(BaseControls.Inventory)) {
-        //    UIPlayerComponents.InventoryUI.ToggleActive();
-        //}
         if (InputSystem.GetButtonDown(BaseControls.Map)) {
             UIMap.main.ToggleActive();
         }
-        
-
     }
 
     //protected virtual void CheckForOpenMenus() {
@@ -172,9 +161,6 @@ public class PlayerInput : MonoSingleton<PlayerInput> {
     private void CheckDebugInput() {
         if (!Game.Debug) {
             return;
-        }
-        if (Input.GetKeyDown(KeyCode.J)) {
-            DebugLogManager.instance.Toggle();
         }
         if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyDown(KeyCode.F)) {
             UIFrameCounter.main.Toggle();

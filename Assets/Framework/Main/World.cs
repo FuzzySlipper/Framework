@@ -90,14 +90,14 @@ namespace PixelComrades {
         public static T Get<T>() where T : SystemBase {
             var type = typeof(T);
             if (type.IsAbstract) {
-                return _systems.TryGetValue(FindSystemThatImplements(type), out var implementedSystem) ? implementedSystem as T : null;
+                return _systems.TryGetValue(FindSystemThatImplements(type), out var implementedSystem) ? implementedSystem as T : default(T);
             }
             return _systems.TryGetValue(type, out var system) ? system as T: AddSystem<T>();
         }
 
         public static System.Type FindSystemThatImplements(System.Type type) {
             for (int i = 0; i < _systemTypes.Count; i++) {
-                if (_systemTypes[i].IsAssignableFrom(type)) {
+                if (type.IsAssignableFrom(_systemTypes[i])) {
                     return _systemTypes[i];
                 }
             }

@@ -3,36 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class ContainerItem : IComponent {
-        public int StackAmount;
-        public EntityContainer Container;
-
-        public int Owner { get; set; }
-
-        public ContainerItem(int owner, int stackAmount = 1) {
-            StackAmount = stackAmount;
-            Owner = owner;
-        }
-    }
-
-    
     public class EntityContainer : IComponent {
 
         public int Owner { get; set; }
         public int Limit = -1;
         public event System.Action OnRefreshItemList;
 
-        private List<int> _list = new List<int>();
+        private List<Entity> _list = new List<Entity>();
         
         public Entity this[int index] { get { return EntityController.GetEntity(_list[index]); } }
         public bool IsFull { get { return Limit >= 0 && _list.Count >= Limit; } }
         public int Count { get { return _list.Count; } }
 
-        public bool Contains(int item) {
+        public bool Contains(Entity item) {
             return _list.Contains(item);
         }
 
-        public virtual void Add(int item, bool isContainerSystem = false) {
+        public virtual void Add(Entity item, bool isContainerSystem = false) {
+            if (item < 0) {
+                return;
+            }
             if (!isContainerSystem) {
                 ContainerSystem.TryAddToContainer(this, EntityController.GetEntity(item));
                 return;
@@ -45,7 +35,7 @@ namespace PixelComrades {
             return ContainerSystem.TryAddToContainer(this, item);
         }
 
-        public void Remove(int item, bool isContainerSystem = false) {
+        public void Remove(Entity item, bool isContainerSystem = false) {
             if (!isContainerSystem) {
                 ContainerSystem.TryRemoveFromContainer(this, EntityController.GetEntity(item));
                 return;
@@ -55,7 +45,7 @@ namespace PixelComrades {
         }
 
         public virtual bool CanAdd(Entity entity) {
-            if (Contains(entity.Id) || IsFull) {
+            if (Contains(entity) || IsFull) {
                 return false;
             }
             return true;

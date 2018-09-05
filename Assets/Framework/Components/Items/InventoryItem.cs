@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class InventoryItem : IComponent, IReceive<ContainerStatusChanged> {
+    public class InventoryItem : IComponent {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -20,8 +20,8 @@ namespace PixelComrades {
         public bool Identified = true;
         public EntityContainer Inventory { get; private set; }
 
-        public void Handle(ContainerStatusChanged arg) {
-            Inventory = arg.EntityContainer;
+        public void SetContainer(EntityContainer container) {
+            Inventory = container;
         }
 
         public bool CanStack(Entity entity) {

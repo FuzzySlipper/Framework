@@ -11,6 +11,8 @@ namespace PixelComrades {
             Sprite = sprite;
         }
 
+        public IconComponent(){}
+
         public static implicit operator Sprite(IconComponent component) {
             if (component == null) {
                 return null;

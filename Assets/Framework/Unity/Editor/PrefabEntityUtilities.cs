@@ -4,17 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
 namespace PixelComrades {
-    [InitializeOnLoad]
+    //[InitializeOnLoad]
     public static class PrefabEntityUtilities {
 
-        static PrefabEntityUtilities() {
-            CheckForModifiedPrefabs();
-        }    
+        //TODO: enable this later
+        //static PrefabEntityUtilities() {
+        //    CheckForModifiedPrefabs();
+        //} 
 
         private const string ResourcesPath = "Resources/";
         private static HashSet<Object> _processedObjects = new HashSet<Object>();
@@ -25,6 +25,13 @@ namespace PixelComrades {
             _processedObjects.Clear();
             _ids.Clear();
             AddDataInPath(Application.dataPath + "\\GameData\\");
+        }
+
+        [MenuItem("Tools/Generate Art Ids")]
+        public static void GenerateArtIds() {
+            _processedObjects.Clear();
+            _ids.Clear();
+            AddDataInPath(Application.dataPath + "\\Art\\");
         }
 
         private static void AddDataInPath(string folderPath) {

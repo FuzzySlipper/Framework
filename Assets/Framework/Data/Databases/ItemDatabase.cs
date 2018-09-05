@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
-namespace PixelComrades.DungeonCrawler {
+namespace PixelComrades {
 
     public class ItemDatabase : GenericDatabase<ItemTemplate> {
 
@@ -18,13 +18,8 @@ namespace PixelComrades.DungeonCrawler {
             }
         }
 
-        [SerializeField] private ItemTemplate _spellScroll = null;
-        [SerializeField] private PrefabEntity _defaultGoldPickup = null;
-        [SerializeField] private float _explosiveForce = 10;
-        [SerializeField] private float _explosiveRadius = 5;
         [SerializeField] private float _percentChanceRarity = 10;
         [SerializeField] private List<ItemModifier> _itemModifiers = new List<ItemModifier>();
-        [SerializeField] private ActionFx _defaultMeleeFx = null;
         
         private ShuffleBag<ItemTemplate>[] _maxRarityBags;
         private ShuffleBag<ItemTemplate>[] _specificRarityBags;
@@ -71,8 +66,8 @@ namespace PixelComrades.DungeonCrawler {
             }
             RunActionOnData(template => {
                 if (template.Rarity != ItemRarity.Special) {
-                    var index = (int) template.Rarity;
-                    if (index >= 0 && index <= rarity.Length - 1) {
+                    var index = template.Rarity;
+                    if (rarity.HasIndex(index)) {
                         rarity[index].Add(template);
                     }
                 }
@@ -101,12 +96,12 @@ namespace PixelComrades.DungeonCrawler {
         //    return money;
         //}
 
-        public static void SpawnWorldGold(int amt, Vector3 position) {
-            for (int i = 0; i < amt; i++) {
-                var gold = ItemPool.Spawn(Instance._defaultGoldPickup, position + UnityEngine.Random.insideUnitSphere * 1.5f, Quaternion.identity,  true, true);
-                gold.GetComponent<Rigidbody>().AddExplosionForce(Instance._explosiveForce, position,  Instance._explosiveRadius);
-            }
-        }
+        //public static void SpawnWorldGold(int amt, Vector3 position) {
+        //    for (int i = 0; i < amt; i++) {
+        //        var gold = ItemPool.Spawn(Instance._defaultGoldPickup, position + UnityEngine.Random.insideUnitSphere * 1.5f, Quaternion.identity,  true, true);
+        //        gold.GetComponent<Rigidbody>().AddExplosionForce(Instance._explosiveForce, position,  Instance._explosiveRadius);
+        //    }
+        //}
 
         public static Entity GetItem(string id) {
             CheckBags();
@@ -205,7 +200,7 @@ namespace PixelComrades.DungeonCrawler {
         public IGenericImporter Importer;
 
         [Button("Test Create Item")]
-        public void TestItemCreate() {
+        public Entity TestItemCreate() {
             ProcessData();
             CheckBags();
             var limiter = new WhileLoopLimiter(1500);
@@ -218,12 +213,13 @@ namespace PixelComrades.DungeonCrawler {
             }
             if (templateList == null) {
                 Debug.Log("couldn't find template");
-                return;
+                return null;
             }
             var template = templateList.RandomElement();
             var level = UnityEngine.Random.Range(1, 10);
             var item = template.New(level, GetMod(level, template.ModifierGroup, true), GetMod(level, template.ModifierGroup, false));
-            Debug.LogFormat("Item: {0} Level {1}", item.Get<LabelComponent>(), item.Get<InventoryItem>());
+            Debug.LogFormat("Item: {0} Level {1}", item.Get<LabelComponent>()?.Text ?? "No Label", item.Get<EntityLevelComponent>()?.Level ?? 0);
+            return item;
         }
 
         #if UNITY_EDITOR

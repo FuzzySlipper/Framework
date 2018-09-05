@@ -101,7 +101,6 @@ namespace PixelComrades {
 
         void Awake() {
             _main = this;
-            DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
             _currentRayDistance = _rayDistance;
             _currentEnemyRayDistance = _enemyDistance;
         }

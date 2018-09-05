@@ -121,7 +121,6 @@ namespace PixelComrades {
             //if (Application.isEditor) {
             //    main.Canvas.alpha = 1;
             //}
-            DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
             if (Application.isPlaying && Application.isEditor && _startEnabled) {
                 Toggle();
             }

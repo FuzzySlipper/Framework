@@ -6,21 +6,21 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public static class SystemManager {
 
-        private static List<ISystemUpdate> _everyUpdate = new List<ISystemUpdate>();
-        private static List<ISystemFixedUpdate> _fixedUpdate = new List<ISystemFixedUpdate>();
-        private static List<ITurnUpdate> _turnUpdates = new List<ITurnUpdate>();
+        public static List<ISystemUpdate> EveryUpdate = new List<ISystemUpdate>();
+        public static List<ISystemFixedUpdate> FixedUpdate = new List<ISystemFixedUpdate>();
+        public static List<ITurnUpdate> TurnUpdates = new List<ITurnUpdate>();
 
         public static void Add(ISystemUpdate update) {
             //CheckAddUpdate(update);
-            _everyUpdate.Add(update);
+            EveryUpdate.Add(update);
         }
 
         public static void AddFixed(ISystemFixedUpdate update) {
-            _fixedUpdate.Add(update);
+            FixedUpdate.Add(update);
         }
 
         public static void AddTurn(ITurnUpdate update) {
-            _turnUpdates.Add(update);
+            TurnUpdates.Add(update);
         }
 
         public static void Remove(ISystemUpdate update) {
@@ -28,27 +28,27 @@ namespace PixelComrades {
         }
 
         public static void Remove(ISystemFixedUpdate update) {
-            _fixedUpdate.Remove(update);
+            FixedUpdate.Remove(update);
         }
 
         public static void RemoveTurn(ITurnUpdate update) {
-            _turnUpdates.Remove(update);
+            TurnUpdates.Remove(update);
         }
 
         public static void TurnUpdate(bool fullTurn) {
-            for (int i = 0; i < _turnUpdates.Count; i++) {
-                _turnUpdates[i].TurnUpdate(fullTurn);
+            for (int i = 0; i < TurnUpdates.Count; i++) {
+                TurnUpdates[i].TurnUpdate(fullTurn);
             }
         }
 
         public static void CheckForDuplicates() {
-            for (int i = 0; i < _everyUpdate.Count; i++) {
-                var update = _everyUpdate[i];
-                for (int t = 0; t < _everyUpdate.Count; t++) {
+            for (int i = 0; i < EveryUpdate.Count; i++) {
+                var update = EveryUpdate[i];
+                for (int t = 0; t < EveryUpdate.Count; t++) {
                     if (t == i) {
                         continue;
                     }
-                    var otherUpdate = _everyUpdate[t];
+                    var otherUpdate = EveryUpdate[t];
                     if (update == otherUpdate) {
                         var unityUpdate = update as UnityEngine.Component;
                         var otherUnity = otherUpdate as UnityEngine.Component;
@@ -62,13 +62,13 @@ namespace PixelComrades {
                     }
                 }
             }
-            for (int i = 0; i < _turnUpdates.Count; i++) {
-                var update = _turnUpdates[i];
-                for (int t = 0; t < _turnUpdates.Count; t++) {
+            for (int i = 0; i < TurnUpdates.Count; i++) {
+                var update = TurnUpdates[i];
+                for (int t = 0; t < TurnUpdates.Count; t++) {
                     if (t == i) {
                         continue;
                     }
-                    var otherUpdate = _turnUpdates[t];
+                    var otherUpdate = TurnUpdates[t];
                     if (update == otherUpdate) {
                         var unityUpdate = update as UnityEngine.Component;
                         var otherUnity = otherUpdate as UnityEngine.Component;
@@ -85,25 +85,25 @@ namespace PixelComrades {
         }
 
         private static void CheckAddUpdate(ISystemUpdate newUpdate) {
-            if (!_everyUpdate.Contains(newUpdate)) {
-                _everyUpdate.Add(newUpdate);
+            if (!EveryUpdate.Contains(newUpdate)) {
+                EveryUpdate.Add(newUpdate);
             }
         }
 
         private static void RemoveUpdate(ISystemUpdate oldUpdate) {
-            _everyUpdate.Remove(oldUpdate);
+            EveryUpdate.Remove(oldUpdate);
         }
 
         public static void SystemUpdate() {
-            for (int i = _everyUpdate.Count - 1; i >= 0; i--) {
-                if (_everyUpdate[i] == null) {
-                    _everyUpdate.RemoveAt(i);
+            for (int i = EveryUpdate.Count - 1; i >= 0; i--) {
+                if (EveryUpdate[i] == null) {
+                    EveryUpdate.RemoveAt(i);
                     continue;
                 }
-                if (Game.Paused && !_everyUpdate[i].Unscaled) {
+                if (Game.Paused && !EveryUpdate[i].Unscaled) {
                     continue;
                 }
-                _everyUpdate[i].OnSystemUpdate(_everyUpdate[i].Unscaled ? TimeManager.DeltaUnscaled : TimeManager.DeltaTime);
+                EveryUpdate[i].OnSystemUpdate(EveryUpdate[i].Unscaled ? TimeManager.DeltaUnscaled : TimeManager.DeltaTime);
             }
         }
 
@@ -111,8 +111,8 @@ namespace PixelComrades {
             if (Game.Paused) {
                 return;
             }
-            for (int i = 0; i < _fixedUpdate.Count; i++) {
-                _fixedUpdate[i].OnFixedSystemUpdate(delta);
+            for (int i = 0; i < FixedUpdate.Count; i++) {
+                FixedUpdate[i].OnFixedSystemUpdate(delta);
             }
         }
     }

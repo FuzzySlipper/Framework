@@ -14,7 +14,7 @@ namespace PixelComrades {
         public const int Loading = 1;
         public const int LoadingFinished = 2;
         public const int LevelClear = 3;
-        public const int NewControllerLoaded = 4;
+        public const int NewLevelControllerLoaded = 4;
         public const int LevelLoadingFinished = 5;
         public const int LevelChanged = 6;
         

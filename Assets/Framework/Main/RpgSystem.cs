@@ -74,6 +74,9 @@ namespace PixelComrades {
             get {
                 int level = 1;
                 for (int i = 0; i < Player.Entities.Length; i++) {
+                    if (Player.Entities[i] == null) {
+                        continue;
+                    }
                     level = MathEx.Max(Player.Entities[i].Get<EntityLevelComponent>().Level, level);
                 }
                 return level;

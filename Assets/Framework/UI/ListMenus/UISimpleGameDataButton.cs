@@ -40,11 +40,18 @@ namespace PixelComrades {
             }
             private set { _entity = value; }
         }
-        public RectTransform RectTransform { get { return _rectTransform; } }
         public int Index { get { return _listIndex; } set { _listIndex = value; } }
         public Entity Data { get; protected set; }
         public TextMeshProUGUI Amount { get { return _amount; } }
         public TextMeshProUGUI Label { get { return _label; } }
+        public RectTransform RectTransform {
+            get {
+                if (_rectTransform == null) {
+                    _rectTransform = transform as RectTransform;
+                }
+                return _rectTransform;
+            }
+        }
 
         public virtual void OnCreate(PrefabEntity entity) {
             Entity = entity;

@@ -41,7 +41,9 @@ namespace PixelComrades {
         protected void SetupBaseItem(Entity entity, int level) {
             entity.Add(new TypeId(Id));
             entity.Add(new InventoryItem(MaxStack, Price, Rarity));
+            entity.Add(new LabelComponent(Name));
             entity.Add(new DescriptionComponent(Description));
+            entity.Add(new IconComponent(Icon));
             entity.Add(new EntityLevelComponent(level));
         }
 

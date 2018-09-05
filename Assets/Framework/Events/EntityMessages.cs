@@ -25,7 +25,7 @@ namespace PixelComrades {
         public const int RaiseDead = 117;
         public const int EquipmentDetailsChanged = 118;
         public const int TurnReady = 119;
-        public const int TurnEnded = 119;
+        public const int TurnEnded = 120;
 
         public override int Parse(string value, int defaultValue) {
             if (int.TryParse(value, out var val)) {

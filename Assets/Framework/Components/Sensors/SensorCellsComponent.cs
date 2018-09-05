@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class SensorCellsComponent : IComponent {
         public int Owner { get; set; }
+        public System.Action OnUpdate;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
-        
         public int MaxHearDistance { get; private set; }
         public int MaxVisionDistance { get; private set; }
         public int MaxTurnsNpcVisible = 12;
@@ -36,6 +36,7 @@ namespace PixelComrades {
             }
             Cells.PreviousList.Clear();
             UpdateWatchTargets();
+            OnUpdate?.Invoke();
         }
         public void AddWatch(Entity entity, bool isVision) {
             if (entity == null) {

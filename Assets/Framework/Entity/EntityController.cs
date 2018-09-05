@@ -180,10 +180,16 @@ namespace PixelComrades {
         }
 
         public static Entity GetEntity(this IComponent component) {
-            return _entities[component.Owner];
+            if (component == null) {
+                return null;
+            }
+            return GetEntity(component.Owner);
         }
 
         public static Entity GetEntity(int index) {
+            if (index < 0) {
+                return null;
+            }
             return _entities[index];
         }
 
@@ -212,6 +218,9 @@ namespace PixelComrades {
 
         //no more multiple components on an entity, might need to check for Container<T> when getting <T> and null
         public static T Add<T>(this Entity entity, T newComponent) where T : IComponent {
+            if (entity == null) {
+                return default(T);
+            }
             var type = typeof(T);
             if (!_components.TryGetValue(type, out var componentList)) {
                 componentList = new ManagedArray<T>();
@@ -269,6 +278,9 @@ namespace PixelComrades {
         }
 
         public static T GetSelfOrParent<T>(this Entity entity) where T : IComponent {
+            if (entity == null) {
+                return default(T);
+            }
             var parent = entity.GetParent();
             if (parent == null) {
                 return entity.Get<T>();
@@ -291,6 +303,9 @@ namespace PixelComrades {
         }
 
         public static T Get<T>(this Entity entity) where T : IComponent {
+            if (entity == null) {
+                return default(T);
+            }
             if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
                 return default(T);
             }
@@ -302,6 +317,9 @@ namespace PixelComrades {
         }
 
         public static T GetDerived<T>(this Entity entity) where T : IComponent {
+            if (entity == null) {
+                return default(T);
+            }
             if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
                 return default(T);
             }
@@ -315,6 +333,9 @@ namespace PixelComrades {
         }
 
         public static T GetOrAdd<T>(this Entity entity) where T : IComponent, new() {
+            if (entity == null) {
+                return default(T);
+            }
             if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
                 var component = new T();
                 entity.Add(component);

@@ -799,26 +799,35 @@ namespace PixelComrades {
             return Directions.Left;
         }
 
+        private static WhileLoopLimiter _deleteLimiter = new WhileLoopLimiter(15000);
         public static void DeleteChildren(this Transform tr) {
-            int childCount = tr.childCount;
-            for (int i = 0; i < childCount; i++) {
+            int i = 0;
+            _deleteLimiter.Reset();
+            while (tr.childCount > 0) {
+                if (tr.childCount >= i) {
+                    i = 0;
+                }
+                var child = tr.GetChild(i);
+                i++;
+                if (!_deleteLimiter.Advance()) {
+                    break;
+                }
 #if UNITY_EDITOR
                 if (Application.isPlaying) {
-                    UnityEngine.Object.Destroy(tr.GetChild(0).gameObject);
+                    UnityEngine.Object.Destroy(child.gameObject);
                 }
                 else {
-                    UnityEngine.Object.DestroyImmediate(tr.GetChild(0).gameObject);
+                    UnityEngine.Object.DestroyImmediate(child.gameObject);
                 }
 #else
-            UnityEngine.Object.Destroy(tr.GetChild(0).gameObject);
+            UnityEngine.Object.Destroy(child.gameObject);
 #endif
             }
         }
 
         public static void DespawnChildren(this Transform tr) {
-            int childCount = tr.childCount;
-            for (int i = 0; i < childCount; i++) {
-                ItemPool.Despawn(tr.GetChild(0).gameObject);
+            foreach (Transform child in tr) {
+                ItemPool.Despawn(child.gameObject);
             }
         }
 

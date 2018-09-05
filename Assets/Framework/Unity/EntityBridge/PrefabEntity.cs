@@ -46,6 +46,8 @@ namespace PixelComrades {
             _objectType = AssetType.Scene;
             ScanObject();
             CheckCreate();
+            Register(true, false);
+            RegisterInterfaces(true);
         }
 
         public void SetId(ref HashSet<int> ids, string path) {
@@ -174,10 +176,14 @@ namespace PixelComrades {
                 return;
             }
             gameObject.SetActive(status);
-            _active = status;
             if (!Application.isPlaying) {
                 return;
             }
+            RegisterInterfaces(status);
+        }
+
+        private void RegisterInterfaces(bool status) {
+            _active = status;
             if (_systemFixedUpdate != null) {
                 for (int i = 0; i < _systemFixedUpdate.Length; i++) {
                     if (_systemFixedUpdate[i] == null) {
