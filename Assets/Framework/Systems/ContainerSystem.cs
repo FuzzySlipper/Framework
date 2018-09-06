@@ -10,15 +10,19 @@ namespace PixelComrades {
             if (!container.CanAdd(entity)) {
                 return false;
             }
-            var containerItem = entity.Get<InventoryItem>();
-            if (containerItem == null) {
-                return false;
-            }
-            if (containerItem.Inventory != null) {
-                TryRemoveFromContainer(containerItem.Inventory, entity);
+            InventoryItem containerItem = entity.Get<InventoryItem>();
+            if (container.RequiresInventoryComponent) {
+                if (containerItem == null) {
+                    return false;
+                }
+                if (containerItem.Inventory != null) {
+                    TryRemoveFromContainer(containerItem.Inventory, entity);
+                }
             }
             container.Add(entity, true);
-            containerItem.SetContainer(container);
+            if (containerItem != null) {
+                containerItem.SetContainer(container);
+            }
             entity.ParentId = container.Owner;
             var msg = new ContainerStatusChanged(container, entity);
             entity.Post(msg);

@@ -179,6 +179,14 @@ namespace PixelComrades {
             return entityList.ContainsKey(type);
         }
 
+        public static bool HasDerivedComponent<T>(this Entity entity) {
+            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
+                return false;
+            }
+            var type = typeof(T);
+            return entityList.ContainsDerivedType(type);
+        }
+
         public static Entity GetEntity(this IComponent component) {
             if (component == null) {
                 return null;
@@ -259,22 +267,56 @@ namespace PixelComrades {
             return newComponent;
         }
 
-        public static T GetParentOrSelf<T>(this Entity entity) where T : IComponent {
+        public static bool Find<T>(this Entity entity, Action<T> del) where T : IComponent {
+            if (entity == null) {
+                return false;
+            }
+            if (entity.HasComponent<T>() || entity.HasDerivedComponent<T>()) {
+                return entity.Get<T>(del);
+            }
             var parent = entity.GetParent();
-            if (parent == null) {
-                return entity.Get<T>();
-            }
-            if (!_entityComponents.TryGetValue(parent.Id, out var parentList)) {
-                return entity.Get<T>();
-            }
+            _loopLimiter.Reset();
             var type = typeof(T);
-            if (parentList.ContainsKey(type)) {
-                return parent.Get<T>();
+            while (_loopLimiter.Advance()) {
+                if (parent == null) {
+                    break;
+                }
+                _entityComponents.TryGetValue(parent.Id, out var parentList);
+                if (parentList != null && parentList.ContainsKey(type)) {
+                    return parent.Get<T>(del);
+                }
+                if (parentList != null && parentList.ContainsDerivedType(type)) {
+                    return parent.GetDerived<T>(del);
+                }
+                parent = parent.GetParent();
             }
-            if (parentList.ContainsDerivedType(type)) {
-                return parent.GetDerived<T>();
+            return false;
+        }
+
+        public static T Find<T>(this Entity entity) where T : IComponent {
+            if (entity == null) {
+                return default(T);
             }
-            return entity.Get<T>();
+            if (entity.HasComponent<T>() || entity.HasDerivedComponent<T>()) {
+                return entity.Get<T>();
+            }
+            var parent = entity.GetParent();
+            _loopLimiter.Reset();
+            var type = typeof(T);
+            while (_loopLimiter.Advance()) {
+                if (parent == null) {
+                    break;
+                }
+                _entityComponents.TryGetValue(parent.Id, out var parentList);
+                if (parentList != null && parentList.ContainsKey(type)) {
+                    return parent.Get<T>();
+                }
+                if (parentList != null && parentList.ContainsDerivedType(type)) {
+                    return parent.GetDerived<T>();
+                }
+                parent = parent.GetParent();
+            }
+            return default(T);
         }
 
         public static T GetSelfOrParent<T>(this Entity entity) where T : IComponent {
@@ -325,11 +367,27 @@ namespace PixelComrades {
             }
             var type = typeof(T);
             foreach (var cref in entityList) {
-                if (cref.Key.IsAssignableFrom(type)) {
+                if (type.IsAssignableFrom(cref.Key)) {
                     return (T) cref.Value.Get();
                 }
             }
             return default(T);
+        }
+
+        public static bool GetDerived<T>(this Entity entity, Action<T> del) where T : IComponent {
+            if (entity == null) {
+                return false;
+            }
+            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
+                return false;
+            }
+            var type = typeof(T);
+            foreach (var cref in entityList) {
+                if (type.IsAssignableFrom(cref.Key)) {
+                    del((T) cref.Value.Get());
+                }
+            }
+            return false;
         }
 
         public static T GetOrAdd<T>(this Entity entity) where T : IComponent, new() {
@@ -414,6 +472,7 @@ namespace PixelComrades {
             if (component is IDisposable dispose) {
                 dispose.Dispose();
             }
+            component.Owner = -1;
         }
 
         public static Entity GetParentOrSelf(this Entity entity) {
@@ -428,11 +487,45 @@ namespace PixelComrades {
             return entity.ParentId < 0 ? null : GetEntity(entity.ParentId);
         }
 
+        public static void TryRoot(this Entity entity, Action<Entity> del) {
+            var parent = entity.GetRoot();
+            if (parent != null) {
+                del(parent);
+            }
+        }
+
         public static void TryParent(this Entity entity, Action<Entity> del) {
             var parent = entity.GetParent();
             if (parent != null) {
                 del(parent);
             }
+        }
+
+        public static Entity GetRoot(this IComponent component) {
+            if (component == null) {
+                return null;
+            }
+            return GetRoot(GetEntity(component.Owner));
+        }
+
+        private static WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(5000);
+
+        public static Entity GetRoot(this Entity entity) {
+            if (entity == null) {
+                return null;
+            }
+            _loopLimiter.Reset();
+            var root = entity;
+            while (_loopLimiter.Advance()) {
+                var newRoot = GetEntity(root.ParentId);
+                if (newRoot != null) {
+                    root = newRoot;
+                }
+                else {
+                    break;
+                }
+            }
+            return root;
         }
 
         public static Vector3 GetPosition(this Entity entity) {

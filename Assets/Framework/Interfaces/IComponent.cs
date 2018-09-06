@@ -95,9 +95,13 @@ namespace PixelComrades {
             }
         }
 
-        public void Dispose() {
+        public void Clear() {
             _array = null;
             _index = -1;
+        }
+
+        public void Dispose() {
+            Clear();
         }
 
         public static implicit operator T(CachedComponent<T> reference) {

@@ -26,6 +26,16 @@ namespace PixelComrades {
 
         private Entity(){}
 
+        public void ClearParent() {
+            ParentId = -1;
+        }
+
+        public void ClearParent(int matchId) {
+            if (ParentId == matchId) {
+                ParentId = -1;
+            }
+        }
+
         public static implicit operator int(Entity reference) {
             if (reference == null) {
                 return -1;

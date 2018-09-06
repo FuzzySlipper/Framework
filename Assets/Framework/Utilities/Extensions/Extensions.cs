@@ -1663,6 +1663,29 @@ namespace PixelComrades {
         }
     }
 
+    public static class SortHelper {
+        /// <summary>
+        /// (i, i1) => i > i1 is ascending
+        /// (i, i1) => i < i1 is descending
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arr"></param>
+        /// <param name="isHigher"></param>
+        public static void BubbleSort<T>(this IList<T> arr, Func<T,T, bool> isHigher) {
+            T temp;
+            for (int write = 0; write < arr.Count; write++) {
+                for (int sort = 0; sort < arr.Count - 1; sort++) {
+                    if (isHigher(arr[sort], arr[sort + 1])) {
+                        temp = arr[sort + 1];
+                        arr[sort + 1] = arr[sort];
+                        arr[sort] = temp;
+                    }
+                }
+            }
+            
+        }
+    }
+
     public static class RaycastHitExtensions {
         public static void SortByDistanceDesc(this RaycastHit[] rayHits, int hitLimit) {
             for (int write = 0; write < hitLimit; write++) {

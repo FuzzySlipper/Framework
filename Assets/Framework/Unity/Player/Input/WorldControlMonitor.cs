@@ -40,7 +40,7 @@ namespace PixelComrades {
         private static UnscaledTimer _clickTimeout = new UnscaledTimer(0.5f);
         //private List<IMenuControl> _openMenu = new List<IMenuControl>();
         private TriggerableUnscaledTimer _clearTimer = new TriggerableUnscaledTimer();
-        
+        private List<IWorldControl> _tempControls = new List<IWorldControl>(25);
 
         public static System.Action AlternativeUse;
         public static IWorldControl Current { get { return _main != null ? _main._current : null; } }
@@ -146,14 +146,15 @@ namespace PixelComrades {
                         continue;
                     }
                     if (hit.distance <= _currentRayDistance) {
-                        var newCurrents = hit.transform.GetComponents<IWorldControl>();
-                        if (newCurrents != null) {
-                            for (int j = 0; j < newCurrents.Length; j++) {
-                                if (newCurrents[j].WorldControlActive) {
-                                    SetNewCurrent(newCurrents[j], hit.transform.gameObject);
-                                    _foundControl = true;
-                                    break;
-                                }
+                        hit.transform.GetComponentsInChildren(_tempControls);
+                        for (int j = 0; j < _tempControls.Count; j++) {
+                            if (_tempControls[j] == null) {
+                                continue;
+                            }
+                            if (_tempControls[j].WorldControlActive) {
+                                SetNewCurrent(_tempControls[j], hit.transform.gameObject);
+                                _foundControl = true;
+                                break;
                             }
                         }
                     }

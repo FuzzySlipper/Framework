@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
     public enum TurnBasedState {
@@ -55,7 +56,7 @@ namespace PixelComrades {
         public static TurnBasedState TurnState {  get { return _turnState; } }
         public int TurnCounter { get; private set; }
         public List<ITurnBasedUnit> Active { get { return _active; } }
-        private float TurnRecoverAmount { get { return TurnBased.RecoveryStepPerSecond * TimeManager.DeltaTime; } }
+        private float TurnRecoverAmount { get { return 1 * TimeManager.DeltaTime; } }
 
         public static void Add(ITurnBasedUnit unit) {
             if (!_queueActivate.Contains(unit) && !_active.Contains(unit)) {
@@ -107,7 +108,7 @@ namespace PixelComrades {
             if (TurnCancel()) {
                 return;
             }
-            _active.Sort(CompareActorsBySpeed);
+            _active.BubbleSort((i, i1) => i.Speed < i1.Speed);
             for (int i = 0; i < _active.Count; i++) {
                 if (TurnCancel()) {
                     return;

@@ -14,6 +14,7 @@ namespace PixelComrades {
         public Entity this[int index] { get { return EntityController.GetEntity(_list[index]); } }
         public bool IsFull { get { return Limit >= 0 && _list.Count >= Limit; } }
         public int Count { get { return _list.Count; } }
+        public virtual bool RequiresInventoryComponent { get { return true; } }
 
         public bool Contains(Entity item) {
             return _list.Contains(item);

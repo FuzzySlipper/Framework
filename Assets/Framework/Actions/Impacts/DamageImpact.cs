@@ -24,7 +24,7 @@ namespace PixelComrades {
             if (_actionFx != null) {
                 _actionFx.TriggerEvent(stateEvent);
             }
-            var stats = owner.Get<GenericStats>();
+            var stats = owner.Find<GenericStats>();
             if (stats == null) {
                 return;
             }

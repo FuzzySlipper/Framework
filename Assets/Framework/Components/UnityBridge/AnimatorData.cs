@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [System.Serializable]
-    public struct AnimatorData : IComponent {
+    public class AnimatorData : IComponent {
         public IAnimator Animator;
         public AnimatorEvent? Event;
         public int Owner { get; set; }

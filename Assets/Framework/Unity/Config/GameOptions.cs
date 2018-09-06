@@ -19,7 +19,7 @@ namespace PixelComrades {
         [SerializeField] private bool _showMiss = false;
         [SerializeField] private bool _useCulling = true;
         [SerializeField] private bool _debugMode = true;
-
+        
         public static bool UseShaking { get { return Main._shaking; } set { Main._shaking = value; } }
         public static bool UsePainFlash { get { return Main._painFlash; } set { Main._painFlash = value; } }
         public static float LookSmooth { get { return Main._lookSmooth; } set { Main._lookSmooth = value; } }

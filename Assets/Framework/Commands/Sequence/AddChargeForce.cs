@@ -11,18 +11,18 @@ namespace PixelComrades {
             StateEvent = stateEvent;
         }
 
-        [SerializeField] private FloatRange _forceRange = new FloatRange(100, 4000);
-        [SerializeField, Range(0, 3)] private float _maxChargeTime = 2;
+        public FloatRange ForceRange = new FloatRange(100, 4000);
+        public float MaxChargeTime = 2;
 
         public void Start(Entity entity) {
-            var charging = entity.Get<ActionTimer>();
-            var transform = entity.GetSelfOrParent<TransformComponent>().Tr;
+            var charging = entity.Find<ActionTimer>();
+            var transform = entity.Find<TransformComponent>().Tr;
             if (transform == null || charging == null) {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            var force = transform.forward * _forceRange.Lerp( Mathf.Clamp01(charging.ElapsedTime / _maxChargeTime));
-            new AddForceEvent(entity.Get<RigidbodyComponent>().Rb, force).Post(entity);
+            var force = transform.forward * ForceRange.Lerp( Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
+            new AddForceEvent(entity.Find<RigidbodyComponent>().Rb, force).Post(entity);
             Owner.DefaultPostAdvance(this);
         }
     }

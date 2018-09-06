@@ -33,6 +33,11 @@ namespace PixelComrades {
             _entity.Post(EntitySignals.TagsChanged);
         }
 
+        public void AddWithRoot(int id) {
+            Add(id);
+            _entity.TryRoot(e => e.Tags.Add(id));
+        }
+
         public void AddWithParent(int id) {
             Add(id);
             _entity.TryParent(e => e.Tags.Add(id));
@@ -81,8 +86,13 @@ namespace PixelComrades {
             _entity.Post(EntitySignals.TagsChanged);
         }
 
-        public void RemoveWithParent(int id) {
+        public void RemoveWithRoot(int id) {
             Remove(id);
+            _entity.TryRoot(e => e.Tags.Remove(id));
+        }
+
+        public void RemoveWithParent(int id) {
+            Add(id);
             _entity.TryParent(e => e.Tags.Remove(id));
         }
 

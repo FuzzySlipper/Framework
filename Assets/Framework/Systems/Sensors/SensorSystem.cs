@@ -4,14 +4,20 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class SensorSystem : SystemBase, IPeriodicUpdate {
 
+        private ManagedArray<SensorSimpleComponent> _simpleList;
+        private ManagedArray<SensorSimpleComponent>.RunDel<SensorSimpleComponent> _del;
+
         public void OnPeriodicUpdate() {
             //var cellList = EntityController.GetList<SensorCellsComponent>();
             //if (cellList != null) {
             //    cellList.RunAction(UpdateSenses);
             //}
-            var simpleList = EntityController.GetComponentArray<SensorSimpleComponent>();
-            if (simpleList != null) {
-                simpleList.RunAction(UpdateSenses);
+            if (_simpleList == null) {
+                _del = UpdateSenses;
+                _simpleList = EntityController.GetComponentArray<SensorSimpleComponent>();
+            }
+            if (_simpleList != null) {
+                _simpleList.Run(_del);
             }
         }
         

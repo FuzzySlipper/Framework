@@ -13,10 +13,10 @@ namespace PixelComrades {
             entity.Add(new DeathStatus());
             entity.Add(new ModifiersContainer(null));
             entity.Add(new StatusContainer());
+            entity.Add(new StatusUpdateComponent());
             entity.Add(new GridPosition());
             entity.Add(new FactionComponent());
             entity.Add(new PronounComponent(PlayerPronouns.They));
-            entity.Post(new EntitySetup(entity));
             //entity.Get<EntityCollection<BaseStat>>("Attributes")[Attributes.Agility].AddDerivedStat(0.2f, new BaseStat.DerivedGeneric(100, f => entity.Get<MoveSpeed>().Speed = f, null, "Speed"));
             return entity;
         }

@@ -19,7 +19,7 @@ namespace PixelComrades {
             }
             CollisionExtensions.GenerateHitLocDir(entity, Owner.Target.Target, out var hitpnt, out var dir);
             Owner.Target.Target.Post(new CollisionEvent(entity, Owner.Target.Target, hitpnt, dir, Owner.CurrentData));
-            Owner.DefaultPostAdvance(this);
+            Owner.PostAdvance(Owner.Target.Target, hitpnt, Quaternion.Euler(dir), StateEvent);
         }
     }
 }

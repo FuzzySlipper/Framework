@@ -14,8 +14,6 @@ namespace PixelComrades {
         [SerializeField] private int _itemRandomLevelRange = 3;
         [SerializeField] private int _maxItemLevel = 10;
         [SerializeField] private float _weightRecoveryPenaltyMulti = 0.05f;
-        [SerializeField] private float _defaultAttackMin = 0.2f;
-        [SerializeField] private float _defaultAttackMax = 0.2f;
         [SerializeField] private float _defaultCritChance = 0.2f;
         [SerializeField] private float _stealthDistanceModPerCell = 0.2f;
         [SerializeField] private float _unidentifiedSaleModifier = 0.5f;
@@ -40,8 +38,6 @@ namespace PixelComrades {
         public static float BaseSellPercent { get { return Main._baseSellPercent; } set { Main._baseSellPercent = value; } }
         public static int ItemRandomLevelRange { get { return Main._itemRandomLevelRange; } set { Main._itemRandomLevelRange = value; } }
         public static float WeightRecoveryPenaltyMulti { get { return Main._weightRecoveryPenaltyMulti; } set { Main._weightRecoveryPenaltyMulti = value; } }
-        public static float DefaultAttackMin { get { return Main._defaultAttackMin; } set { Main._defaultAttackMin = value; } }
-        public static float DefaultAttackMax { get { return Main._defaultAttackMax; } set { Main._defaultAttackMax = value; } }
         public static float DefaultCritChance { get { return Main._defaultCritChance; } set { Main._defaultCritChance = value; } }
         public static float StealthDistanceModPerCell { get { return Main._stealthDistanceModPerCell; } set { Main._stealthDistanceModPerCell = value; } }
         public static float UnidentifiedSaleModifier { get { return Main._unidentifiedSaleModifier; } set { Main._unidentifiedSaleModifier = value; } }

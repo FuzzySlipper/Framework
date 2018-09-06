@@ -43,6 +43,10 @@ namespace PixelComrades {
             return true;
         }
 
+        public override bool CanBeReplacedBy(Command otherCommand) {
+            return Current == null;
+        }
+
         public override bool TryComplete() {
             return Current == null;
         }
@@ -57,7 +61,7 @@ namespace PixelComrades {
             _current = 0;
             LastStateEvent = null;
             CurrentData = -1;
-            Target = EntityOwner.Get<CommandTarget>();
+            Target = EntityOwner.Find<CommandTarget>();
             if (Current != null) {
                 Current.Start(EntityOwner);
             }
@@ -69,21 +73,28 @@ namespace PixelComrades {
                 Current.Start(EntityOwner);
             }
             else {
-                EntityOwner.Post(new CommandComplete(EntityOwner));
+                Post(new CommandComplete(EntityOwner));
             }
         }
 
         public void DefaultPostAdvance(ICommandElement element) {
             if (element.StateEvent != ActionStateEvents.None) {
-                LastStateEvent = new ActionStateEvent(EntityOwner, Target?.Target.Id ?? -1, EntityOwner.GetPosition(), EntityOwner.GetRotation(), element.StateEvent);
-                LastStateEvent.Value.Post(EntityOwner);
+                Post(Target?.Target?.Id ?? Owner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), element.StateEvent);
             }
             Advance();
         }
 
-        public void Post(ActionStateEvent stateEvent) {
-            LastStateEvent = stateEvent;
-            LastStateEvent.Value.Post(this.GetEntity());
+        public void PostAdvance(int target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+            Post(target, position, rotation, state);
+            Advance();
+        }
+
+        public void Post(int target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+            if (state == ActionStateEvents.None) {
+                return;
+            }
+            LastStateEvent = new ActionStateEvent(EntityOwner, target, position, rotation, state);
+            Post(LastStateEvent.Value);
         }
     }
 

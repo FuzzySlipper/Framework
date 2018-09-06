@@ -57,7 +57,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Remove(T item) {
+        public virtual void Remove(T item) {
             List.Remove(item);
         }
 
@@ -102,7 +102,7 @@ namespace PixelComrades {
             List.Add(item);
         }
 
-        public void Remove(T item) {
+        public virtual void Remove(T item) {
             List.Remove(item);
         }
 

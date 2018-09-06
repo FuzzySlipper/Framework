@@ -13,11 +13,12 @@ namespace PixelComrades {
         }
 
         public void Start(Entity entity) {
-            if (Owner.Target?.Target == null) {
+            var target = Owner.Target?.Target;
+            if (target == null) {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            Owner.CurrentData = ToHitCalculation.Calculate(entity, Owner.Target.Target);
+            Owner.CurrentData = ToHitCalculation.Calculate(entity, target);
             Owner.DefaultPostAdvance(this);
         }
     }

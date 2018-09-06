@@ -6,11 +6,16 @@ namespace PixelComrades {
     [Priority(Priority.Lowest)]
     public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation> {
 
+        private ManagedArray<AnimatorData> _list;
+        private ManagedArray<AnimatorData>.RunDel<AnimatorData> _del;
 
         public void OnSystemUpdate(float dt) {
-            var list = EntityController.GetComponentArray<AnimatorData>();
-            if (list != null) {
-                list.RunAction(CheckPlayingAnimation);
+            if (_list == null) {
+                _del = CheckPlayingAnimation;
+                _list = EntityController.GetComponentArray<AnimatorData>();
+            }
+            if (_list != null) {
+                _list.Run(_del);
             }
         }
 
@@ -18,7 +23,6 @@ namespace PixelComrades {
             if (data.Event != null) {
                 var msg = data.Event.Value;
                 if (msg.OnEventComplete && data.Animator.IsAnimationEventComplete(msg.Clip) || data.Animator.IsAnimationComplete(msg.Clip)) {
-                    data.Event.Value.Post(data.Event.Value.Target);
                     msg.Target.Post(data.Event.Value);
                     data.Event = null;
                 }

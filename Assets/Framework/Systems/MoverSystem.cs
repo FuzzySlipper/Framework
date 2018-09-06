@@ -8,7 +8,14 @@ namespace PixelComrades {
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-        
+
+        private ManagedArray<RotateToTarget> _rotateList;
+        private ManagedArray<RotateToTarget>.RunDel<RotateToTarget> _rotateDel;
+        private ManagedArray<SimplerMover> _simpleMoveList;
+        private ManagedArray<SimplerMover>.RunDel<SimplerMover> _simpleMoveDel;
+        private ManagedArray<ArcMover> _arcMoverList;
+        private ManagedArray<ArcMover>.RunDel<ArcMover> _arcMoveDel;
+
         public void OnSystemUpdate(float dt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
                 _moveTweens[i].Tr.position = _moveTweens[i].Tween.Get();
@@ -20,17 +27,26 @@ namespace PixelComrades {
                     _moveTweens.RemoveAt(i);
                 }
             }
-            var rotateList = EntityController.GetComponentArray<RotateToTarget>();
-            if (rotateList != null) {
-                rotateList.RunAction(HandleRotation);
+            if (_rotateList == null) {
+                _rotateDel = HandleRotation;
+                _rotateList = EntityController.GetComponentArray<RotateToTarget>();
             }
-            var simpleMover = EntityController.GetComponentArray<SimplerMover>();
-            if (simpleMover != null) {
-                simpleMover.RunAction(HandleMoveSimple);
+            if (_rotateList != null) {
+                _rotateList.Run(_rotateDel);
             }
-            var arcMover = EntityController.GetComponentArray<ArcMover>();
-            if (arcMover != null) {
-                arcMover.RunAction(HandleArcMovement);
+            if (_simpleMoveList == null) {
+                _simpleMoveDel = HandleMoveSimple;
+                _simpleMoveList = EntityController.GetComponentArray<SimplerMover>();
+            }
+            if (_simpleMoveList != null) {
+                _simpleMoveList.Run(_simpleMoveDel);
+            }
+            if (_arcMoverList == null) {
+                _arcMoveDel = HandleArcMovement;
+                _arcMoverList = EntityController.GetComponentArray<ArcMover>();
+            }
+            if (_arcMoverList != null) {
+                _arcMoverList.Run(_arcMoveDel);
             }
         }
         

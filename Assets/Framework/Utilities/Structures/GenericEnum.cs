@@ -16,11 +16,11 @@ namespace PixelComrades {
 
     public abstract class GenericEnum<T, U> where T : GenericEnum<T, U>, new() {
         private static readonly List<string> _names;
+        private static readonly List<string> _ids;
         private static readonly List<string> _descriptions;
         private static readonly List<int> _associatedValues;
         private static readonly List<U> _values;
         private static bool _allowInstanceExceptions;
-        private static string _typeName;
         protected int _index;
 
         public abstract U Parse(string value, U defValue);
@@ -52,18 +52,20 @@ namespace PixelComrades {
             if (t == u) {
                 throw new InvalidOperationException(string.Format("{0} and its underlying type cannot be the same", t.Name));
             }
-            _typeName = t.Name + ".";
+            var typeName = t.Name + ".";
             BindingFlags bf = BindingFlags.Static | BindingFlags.Public;
             FieldInfo[] fia = t.GetFields(bf);
             _names = new List<string>();
             _descriptions = new List<string>();
             _associatedValues = new List<int>();
+            _ids = new List<string>();
             _easyList = new ValueDropdownList<U>();
             _values = new List<U>();
             for (int i = 0; i < fia.Length; i++) {
                 if (fia[i].FieldType == u && (fia[i].IsLiteral || fia[i].IsInitOnly)) {
                     _names.Add(fia[i].Name);
                     _values.Add((U) fia[i].GetValue(null));
+                    _ids.Add(typeName + _names.LastElement());
                     _easyList.Add(new ValueDropdownItem<U>(_names.LastElement(), _values.LastElement()));
                     DescriptionAttribute description = Attribute.GetCustomAttribute(fia[i], typeof(DescriptionAttribute)) as DescriptionAttribute;
                     _descriptions.Add(description != null ? description.Description : fia[i].Name);
@@ -245,7 +247,7 @@ namespace PixelComrades {
 
         public static string GetIdAt(int index) {
             if (index >= 0 && index < Count) {
-                return _typeName + _names[index];
+                return _ids[index];
             }
             throw new IndexOutOfRangeException(string.Format("Index must be between 0 and {0}", Count - 1));
         }
@@ -298,24 +300,5 @@ namespace PixelComrades {
         public static ValueDropdownList<U> GetDropdownList() {
             return _easyList;
         }
-
-        //public static Componenc<BaseStat> GetBaseStat(IEntity owner) {
-        //    var stats = new BaseStat[Count];
-        //    for (int i = 0; i < stats.Length; i++) {
-        //        stats[i] = owner.Add(new BaseStat(GetDefaultValue(i), GetIdAt(i)));
-
-        //    }
-        //    return new EntityCollection<BaseStat>(_typeName.Substring(0, _typeName.Length - 1), stats);
-        //}
-
-        //public static EntityCollection<VitalStat> GetVitalStat(IEntity owner) {
-        //    var stats = new VitalStat[Count];
-        //    for (int i = 0; i < stats.Length; i++) {
-        //        stats[i] = owner.Add(new VitalStat(GetDefaultValue(i), GetIdAt(i)));
-
-        //    }
-        //    return new EntityCollection<VitalStat>(_typeName.Substring(0, _typeName.Length - 1), stats);
-        //}
     }
-
 }

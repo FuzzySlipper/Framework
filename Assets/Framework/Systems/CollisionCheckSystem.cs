@@ -7,10 +7,16 @@ namespace PixelComrades {
 
         private RaycastHit[] _rayHits = new RaycastHit[25];
 
+        private ManagedArray<CollisionCheckForward> _list;
+        private ManagedArray<CollisionCheckForward>.RunDel<CollisionCheckForward> _del;
+
         public void OnSystemUpdate(float dt) {
-            var rayForward = EntityController.GetComponentArray<CollisionCheckForward>();
-            if (rayForward != null) {
-                rayForward.RunAction(CheckRayFwd);
+            if (_list == null) {
+                _del = CheckRayFwd;
+                _list = EntityController.GetComponentArray<CollisionCheckForward>();
+            }
+            if (_list != null) {
+                _list.Run(_del);
             }
         }
 

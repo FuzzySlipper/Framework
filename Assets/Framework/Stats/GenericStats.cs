@@ -5,34 +5,39 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class GenericStats : ComponentContainer<BaseStat> {
 
+        private Dictionary<string, BaseStat> _dict = new Dictionary<string, BaseStat>();
+
         public GenericStats(BaseStat[] values) : base(values) {}
 
-        public BaseStat Get(string id) {
-            for (int i = 0; i < Count; i++) {
-                if (this[i].Id == id) {
-                    return this[i];
-                }
+        public override void Add(BaseStat item) {
+            base.Add(item);
+            if (_dict.ContainsKey(item.Id)) {
+                _dict[item.Id] = item;
             }
-            return null;
+            else {
+                _dict.Add(item.Id, item);
+            }
+        }
+
+        public override void Remove(BaseStat item) {
+            base.Remove(item);
+            _dict.Remove(item.Id);
+        }
+
+        public BaseStat Get(string id) {
+            return _dict.TryGetValue(id, out var stat) ? stat : null;
         }
 
         public float GetValue(string id) {
-            for (int i = 0; i < Count; i++) {
-                if (this[i].Id == id) {
-                    return this[i].Value;
-                }
-            }
-            return 0;
+            return _dict.TryGetValue(id, out var stat) ? stat.Value : 0;
         }
 
         public bool GetValue(string id, out float value) {
-            for (int i = 0; i < Count; i++) {
-                if (this[i].Id == id) {
-                    value = this[i].Value;
-                    return true;
-                }
+            if (_dict.TryGetValue(id, out var stat)) {
+                value = stat.Value;
+                return true;
             }
-            value = 0f;
+            value = 0;
             return false;
         }
 

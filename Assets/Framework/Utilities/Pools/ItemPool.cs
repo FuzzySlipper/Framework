@@ -257,7 +257,7 @@ namespace PixelComrades {
             T returnType = item.GetComponent<T>();
             if (returnType == null) {
                 returnType = item.gameObject.AddComponent<T>();
-                item.RescanObject();
+                item.Setup();
             }
             return returnType;
         }
@@ -328,7 +328,8 @@ namespace PixelComrades {
 
         private PrefabEntity CreateNewPrefab(PrefabEntity prefab) {
             GameObject newItem = Instantiate(prefab.gameObject);
-            var prefabCopy = SetNewPooledObject(newItem, prefab.PrefabId, prefab.ObjectType);
+            var prefabCopy = newItem.GetOrAddComponent<PrefabEntity>();
+            prefabCopy.Setup();
             return prefabCopy;
         }
 
@@ -375,10 +376,6 @@ namespace PixelComrades {
             }
         }
 
-        private PrefabEntity SetNewPooledObject(GameObject pooledObj, int id, AssetType type) {
-            return pooledObj.GetOrAddComponent<PrefabEntity>();
-        }
-
         private int AddNewLoadedResource(string itemName) {
             if (string.IsNullOrEmpty(itemName)) {
                 Debug.LogError(itemName + " is blank");
@@ -406,8 +403,6 @@ namespace PixelComrades {
             PrefabEntity prefab;
             if (_referenceItems.TryGetValue(uniqueId, out prefab)) {
                 return CreateNewPrefab(prefab);
-                //var pooledObject = Instantiate(prefab);
-                //return SetNewPooledObject(pooledObject, uniqueId, AssetType.Prefab);
             }
             Debug.LogError(uniqueId + " is not in reference dictionary");
             return null;

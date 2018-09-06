@@ -47,8 +47,6 @@ namespace PixelComrades {
         public const int QuestEventsChanged = 81;
 
         public const int MenuClosed = 90;
-        public const int MenuOpened = 91;
-        public const int MenuStatusChanged = 92;
         public const int MessageLog = 93;
         public const int ModifiersUpdated = 94;
 

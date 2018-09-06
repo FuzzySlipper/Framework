@@ -18,7 +18,7 @@ namespace PixelComrades {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            var spawnTr = entity.GetSelfOrParent<AnimTr>().Tr;
+            var spawnTr = entity.Find<AnimTr>().Tr;
             Vector3 spawnPos;
             Quaternion spawnRot;
             if (spawnTr != null) {
@@ -63,15 +63,14 @@ namespace PixelComrades {
             spawnEntity.Add(new MoveSpeed(spawnEntity, spawnComponent.Speed));
             spawnEntity.Add(new RotationSpeed(spawnEntity, spawnComponent.Speed));
             spawnEntity.Add(new SimplerMover(spawnEntity));
-            spawnEntity.AddObserver<MoveComplete>(this);
+            spawnEntity.AddObserver(this);
             spawnEntity.Post(new StartMoveEvent(spawnEntity, target, null));
         }
 
         public void Handle(MoveComplete arg) {
             var target = EntityController.GetEntity(arg.Target);
-            Owner.Post(new ActionStateEvent(Owner.EntityOwner, arg.Target, arg.MoveTarget, target.GetRotation(), StateEvent));
+            Owner.PostAdvance(arg.Target, arg.MoveTarget, target.GetRotation(), StateEvent);
             target.Destroy();
-            Owner.Advance();
         }
     }
 }

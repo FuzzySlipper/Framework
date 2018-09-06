@@ -50,5 +50,7 @@ namespace PixelComrades {
             TargetTr = target.GetNode<VisibleNode>();
             ExplicitPosition = null;
         }
+
+        public CommandTarget(){}
     }
 }

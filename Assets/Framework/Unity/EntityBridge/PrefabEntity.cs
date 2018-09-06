@@ -64,8 +64,9 @@ namespace PixelComrades {
             _hashId = _resourcePath.GetHashCode();
         }
 
-        public void RescanObject() {
+        public void Setup() {
             ScanObject();
+            CheckCreate();
         }
 
         private void CheckCreate() {

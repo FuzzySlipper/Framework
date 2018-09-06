@@ -7,10 +7,16 @@ namespace PixelComrades {
 
         private const float ReachedDestination = 0.1f;
 
+        private ManagedArray<VelocityMover> _list;
+        private ManagedArray<VelocityMover>.RunDel<VelocityMover> _del;
+
         public void OnFixedSystemUpdate() {
-            var list = EntityController.GetComponentArray<VelocityMover>();
-            if (list != null) {
-                list.RunAction(HandleVelocityMover);
+            if (_list == null) {
+                _del = HandleVelocityMover;
+                _list = EntityController.GetComponentArray<VelocityMover>();
+            }
+            if (_list != null) {
+                _list.Run(_del);
             }
         }
 

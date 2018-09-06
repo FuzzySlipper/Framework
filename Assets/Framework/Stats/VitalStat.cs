@@ -5,7 +5,7 @@ using System.Collections;
 namespace PixelComrades {
     [System.Serializable] public class VitalStat : BaseStat {
 
-        private const int RecoverMinimum = 5;
+        private const float RecoverMinimum = 2.5f;
 
         public VitalStat() {}
 

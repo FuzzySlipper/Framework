@@ -27,6 +27,11 @@ namespace PixelComrades {
             TimeManager.StartUnscaled(RunTimerTest(1));
         }
 
+        //[SeawispHunter.MinibufferConsole.Command]
+        //public static void SetVital(int entity, int vital, float amount) {
+        //    entity.
+        //}
+
         private static IEnumerator RunTimerTest(float length) {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();

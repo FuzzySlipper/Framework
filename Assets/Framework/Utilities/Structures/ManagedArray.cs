@@ -20,6 +20,8 @@ namespace PixelComrades {
         private int _max = 0;
         private int _initialSize;
 
+        public int Max { get { return _max; } }
+
         public T this[int index] {
             get { return _list[index]; }
             set { _list[index] = value; }
@@ -85,6 +87,14 @@ namespace PixelComrades {
             _max = 0;
         }
 
+        public bool IsInvalid(int index) {
+            return _invalidIndices.Contains(index);
+        }
+
+        /// <summary>
+        /// Be careful this allocates
+        /// </summary>
+        /// <param name="del"></param>
         public void RunAction(Action<T> del) {
             if (_max == 0) {
                 return;
@@ -96,6 +106,21 @@ namespace PixelComrades {
                 del(_list[i]);
             }
         }
+
+        public void Run(RunDel<T> del) {
+            if (_max == 0) {
+                return;
+            }
+            for (int i = 0; i < _max; i++) {
+                if (_invalidIndices.Contains(i)) {
+                    continue;
+                }
+                del(_list[i]);
+            }
+        }
+
+
+        public delegate void RunDel<T>(T value);
     }
 
     public struct ComponentReference {

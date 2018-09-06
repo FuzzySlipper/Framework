@@ -8,8 +8,7 @@ namespace PixelComrades {
         public int Owner { get; set; }
         public Rigidbody Rb;
 
-        public RigidbodyComponent(int owner, Rigidbody rb) {
-            Owner = owner;
+        public RigidbodyComponent(Rigidbody rb) : this() {
             Rb = rb;
         }
     }

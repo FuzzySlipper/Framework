@@ -36,6 +36,7 @@ namespace PixelComrades {
             _commands.Swap();
             for (int i = 0; i < _commands.PreviousList.Count; i++) {
                 if (_commands.PreviousList[i].TryComplete()) {
+                    _commands.PreviousList[i].Complete();
                     _commands.CurrentList.Remove(_commands.PreviousList[i]);
                 }
             }
