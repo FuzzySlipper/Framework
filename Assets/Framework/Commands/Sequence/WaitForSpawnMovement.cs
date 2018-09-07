@@ -42,7 +42,7 @@ namespace PixelComrades {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            var spawnEntity = Entity.New();
+            var spawnEntity = Entity.New("Spawn");
             spawnEntity.Add(new TransformComponent(spawn.Transform));
             MonoBehaviourToEntity.RegisterToEntity(spawn.gameObject, spawnEntity);
             Vector3 target;

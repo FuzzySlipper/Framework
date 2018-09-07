@@ -20,29 +20,50 @@ namespace PixelComrades {
             return _list.Contains(item);
         }
 
-        public virtual void Add(Entity item, bool isContainerSystem = false) {
-            if (item < 0) {
-                return;
+        public virtual bool Add(Entity entity) {
+            if (entity == null) {
+                return false;
             }
-            if (!isContainerSystem) {
-                ContainerSystem.TryAddToContainer(this, EntityController.GetEntity(item));
-                return;
+            if (!CanAdd(entity)) {
+                return false;
             }
-            _list.Add(item);
+            InventoryItem containerItem = entity.Get<InventoryItem>();
+            if (RequiresInventoryComponent) {
+                if (containerItem == null) {
+                    return false;
+                }
+                if (containerItem.Inventory != null) {
+                    containerItem.Inventory.Remove(entity);
+                }
+            }
+            if (containerItem != null) {
+                containerItem.SetContainer(this);
+            }
+            _list.Add(entity);
+            entity.ParentId = Owner;
+            var msg = new ContainerStatusChanged(this, entity);
+            entity.Post(msg);
+            this.GetEntity().Post(msg);
             OnRefreshItemList.SafeInvoke();
+            return true;
         }
 
         public bool TryAdd(Entity item) {
-            return ContainerSystem.TryAddToContainer(this, item);
+            return Add(item);
         }
 
-        public void Remove(Entity item, bool isContainerSystem = false) {
-            if (!isContainerSystem) {
-                ContainerSystem.TryRemoveFromContainer(this, EntityController.GetEntity(item));
-                return;
+        public bool Remove(Entity entity) {
+            if (!_list.Contains(entity)) {
+                return false;
             }
-            _list.Remove(item);
+            _list.Remove(entity);
+            entity.Get<InventoryItem>(e => e.SetContainer(null));
+            entity.ParentId = -1;
+            var msg = new ContainerStatusChanged(null, entity);
+            entity.Post(msg);
+            this.GetEntity().Post(msg);
             OnRefreshItemList.SafeInvoke();
+            return true;
         }
 
         public virtual bool CanAdd(Entity entity) {
@@ -74,4 +95,13 @@ namespace PixelComrades {
         }
     }
 
+    public struct ContainerStatusChanged : IEntityMessage {
+        public EntityContainer EntityContainer;
+        public Entity Entity;
+
+        public ContainerStatusChanged(EntityContainer entityContainer, Entity entity) {
+            EntityContainer = entityContainer;
+            Entity = entity;
+        }
+    }
 }

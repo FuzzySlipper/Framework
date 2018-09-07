@@ -7,13 +7,16 @@ namespace PixelComrades {
         private ManagedArray<SensorSimpleComponent> _simpleList;
         private ManagedArray<SensorSimpleComponent>.RunDel<SensorSimpleComponent> _del;
 
+        public SensorSystem() {
+            _del = UpdateSenses;
+        }
+
         public void OnPeriodicUpdate() {
             //var cellList = EntityController.GetList<SensorCellsComponent>();
             //if (cellList != null) {
             //    cellList.RunAction(UpdateSenses);
             //}
             if (_simpleList == null) {
-                _del = UpdateSenses;
                 _simpleList = EntityController.GetComponentArray<SensorSimpleComponent>();
             }
             if (_simpleList != null) {

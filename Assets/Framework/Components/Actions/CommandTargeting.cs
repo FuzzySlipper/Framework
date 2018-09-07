@@ -103,30 +103,40 @@ namespace PixelComrades {
             switch (targeting.Criteria) {
                 case TargetType.Enemy:
                     if (!World.Get<FactionSystem>().AreEnemies(owner, target.Target)) {
+                        owner.Find<StatusUpdateComponent>(s => s.Status = "Not an enemy");
                         return false;
                     }
                     break;
                 case TargetType.Friendly:
                     if (!World.Get<FactionSystem>().AreFriends(owner, target.Target)) {
+                        owner.Find<StatusUpdateComponent>(s => s.Status = "Not friendly");
                         return false;
                     }
                     break;
                 case TargetType.Self:
                     if (target.Target != null && target.Target.Id != targeting.Owner) {
+                        owner.Find<StatusUpdateComponent>(s => s.Status = "Self only");
                         return false;
                     }
                     break;
             }
             if (targeting.RequireLoS) {
                 if (target.Target != null && !World.Get<LineOfSightSystem>().CanSee(owner, target.Target)) {
+                    owner.Find<StatusUpdateComponent>(s => s.Status = "Can't see target");
                     return false;
                 }
                 if (target.Target == null && !World.Get<LineOfSightSystem>().CanSee(owner, target.GetPosition)) {
+                    owner.Find<StatusUpdateComponent>(s => s.Status = "Can't see target");
                     return false;
                 }
             }
             if (targeting.Range > 0.25f) {
-                return DistanceSystem.GetDistance(owner, target.GetPosition) >= targeting.Range;
+                var distance = DistanceSystem.GetDistance(owner, target.GetPosition);
+                if (distance > targeting.Range) {
+                    Debug.LogFormat("Distance: {0} out of range", distance);
+                    owner.Find<StatusUpdateComponent>(s => s.Status = string.Format("Distance: {0} out of range", distance));
+                    return false;
+                }
             }
             return true;
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
+    [System.Serializable]
     public class ComponentContainer<T> : IComponent where T : class, IComponent{
 
         /// <summary>
@@ -19,7 +20,7 @@ namespace PixelComrades {
         }
 
         protected List<T> List = new List<T>();
-        private int _owner;
+        [SerializeField] private int _owner;
         public int Owner {
             get {
                 return _owner;

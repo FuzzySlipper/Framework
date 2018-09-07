@@ -137,7 +137,7 @@ namespace PixelComrades {
             //    _item.Durability.OnStatChanged += UpdateDurability;
             //}
             if (_cooldownImage != null) {
-                _item.AddObserver(Messages.CooldownTimerChanged, CheckCooldown);
+                _item.AddObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
             _item.AddObserver(this);
             CheckContent(_item);
@@ -161,7 +161,7 @@ namespace PixelComrades {
                 return;
             }
             if (_cooldownImage != null) {
-                _item.RemoveObserver(Messages.CooldownTimerChanged, CheckCooldown);
+                _item.RemoveObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
             _item.RemoveObserver(this);
             //if (_durabilitySlider != null && _item != null) {

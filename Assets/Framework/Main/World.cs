@@ -43,7 +43,6 @@ namespace PixelComrades {
             Get<CollisionCheckSystem>();
             Get<CommandSystem>();
             Get<CollisionEventSystem>();
-            Get<ContainerSystem>();
             Get<DespawnEntitySystem>();
             Get<DistanceSystem>();
             Get<EntityModifierSystem>();
@@ -263,27 +262,17 @@ namespace PixelComrades {
         }
 
         private class TypedMessageQueue<T> : TypedMessageQueue where T : struct, IEntityMessage {
-            private List<T>[] _msgs;
-            private int _current = 0;
-            private List<T> List { get { return _msgs[_current]; } }
-
-            public TypedMessageQueue() {
-                _msgs = new[] {
-                    new List<T>(), new List<T>()
-                };
-            }
+            private BufferedList<T> _msgs = new BufferedList<T>();
 
             public void Enqueue(T message) {
-                List.Add(message);
+                _msgs.CurrentList.Add(message);
             }
 
             public override void Process(List<IReceive> list) {
-                var msgList = List;
-                _current = (int) MathEx.WrapAround(_current + 1, 0, _msgs.Length);
+                _msgs.Advance();
                 for (int i = 0; i < list.Count; i++) {
-                    (list[i] as IReceiveGlobal<T>)?.HandleGlobal(msgList);
+                    (list[i] as IReceiveGlobal<T>)?.HandleGlobal(_msgs.PreviousList);
                 }
-                msgList.Clear();
             }
         }
     }

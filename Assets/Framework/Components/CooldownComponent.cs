@@ -14,7 +14,7 @@ namespace PixelComrades {
         public void ActivateTimer(float length) {
             if (Cooldown != null) {
                 Cooldown.StartNewTime(length);
-                this.GetEntity().Post(Messages.CooldownTimerChanged);
+                this.GetEntity().Post(EntitySignals.CooldownTimerChanged);
             }
         }
     }

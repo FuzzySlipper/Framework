@@ -13,6 +13,7 @@ namespace PixelComrades {
             var otherCmd = GetCommand(cmd.EntityOwner.Id);
             if (otherCmd != null) {
                 if (!otherCmd.CanBeReplacedBy(cmd)) {
+                    cmd.EntityOwner.Get<StatusUpdateComponent>(s => s.Status = "Can't replace current command");
                     return false;
                 }
                 otherCmd.Cancel();

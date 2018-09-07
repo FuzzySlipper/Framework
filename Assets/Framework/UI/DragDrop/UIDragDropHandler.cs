@@ -81,7 +81,7 @@ namespace PixelComrades {
         }
 
         public static void AddItemToPlayer() {
-            if (ContainerSystem.TryAddToContainer(Player.MainInventory, CurrentData)) {
+            if (Player.MainInventory.TryAdd(CurrentData)) {
                 Take();
             }
             else {

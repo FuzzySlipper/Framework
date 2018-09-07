@@ -9,9 +9,12 @@ namespace PixelComrades {
         private ManagedArray<AnimatorData> _list;
         private ManagedArray<AnimatorData>.RunDel<AnimatorData> _del;
 
+        public AnimatorSystem() {
+            _del = CheckPlayingAnimation;
+        }
+
         public void OnSystemUpdate(float dt) {
             if (_list == null) {
-                _del = CheckPlayingAnimation;
                 _list = EntityController.GetComponentArray<AnimatorData>();
             }
             if (_list != null) {
@@ -35,18 +38,18 @@ namespace PixelComrades {
         public void HandleGlobal(List<PlayAnimation> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 var msg = arg[i];
-                var anim = msg.Target.Get<AnimatorData>();
-                if (anim.Animator == null) {
-                    anim = msg.Target.GetParent()?.Get<AnimatorData>() ?? anim;
+                if (msg.Target == null) {
+                    continue;
                 }
-                if (anim.Animator == null) {
+                var anim = msg.Target.Find<AnimatorData>();
+                if (anim?.Animator == null) {
                     if (msg.Event != null) {
                         msg.Event.Value.Target.Post(msg.Event.Value);
                     }
                     return;
                 }
-                anim.Animator.PlayAnimation(msg.Clip);
                 anim.Event = msg.Event;
+                anim.Animator.PlayAnimation(msg.Clip);
             }
         }
     }

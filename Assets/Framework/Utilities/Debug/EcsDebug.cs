@@ -9,7 +9,18 @@ using PixelComrades.DungeonCrawler;
 using SeawispHunter.MinibufferConsole;
 
 namespace PixelComrades {
-    public static class EcsDebug  {
+
+    public class TestReceiver<T>  : IReceive<T> where T : IEntityMessage {
+
+        public System.Action<TestReceiver<T>> OnDel;
+
+        public void Handle(T arg) {
+            Debug.LogFormat("Received {0}", arg.GetType());
+            OnDel.SafeInvoke(this);
+        }
+    }
+
+    public static class EcsDebug {
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
         //DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
 
@@ -26,6 +37,20 @@ namespace PixelComrades {
         public static void TestTimers() {
             TimeManager.StartUnscaled(RunTimerTest(1));
         }
+
+        [SeawispHunter.MinibufferConsole.Command]
+        public static void TestAnimationEvent(int entityId, string clip) {
+            var entity = EntityController.GetEntity(entityId);
+            if (entity == null) {
+                return;
+            }
+            var handle = new TestReceiver<AnimatorEvent>();
+            entity.AddObserver(handle);
+            entity.Post(new PlayAnimation(entity, clip, new AnimatorEvent(entity, clip, true, true)));
+            handle.OnDel += receiver => entity.RemoveObserver(handle);
+        }
+
+
 
         //[SeawispHunter.MinibufferConsole.Command]
         //public static void SetVital(int entity, int vital, float amount) {

@@ -61,6 +61,9 @@ namespace PixelComrades {
         }
 
         public bool AreFriends(int faction, int other) {
+            if (faction == other) {
+                return true;
+            }
             return _factionToAllies.TryGetValue(faction, out var list) && list.Contains(other);
         }
 
@@ -72,14 +75,14 @@ namespace PixelComrades {
             if (source == null || target == null) {
                 return false;
             }
-            return AreFriends(source.Get<FactionComponent>().Faction, target.Get<FactionComponent>().Faction);
+            return AreFriends(source.Find<FactionComponent>().Faction, target.Find<FactionComponent>().Faction);
         }
 
         public bool AreEnemies(Entity source, Entity target) {
             if (source == null || target == null) {
                 return false;
             }
-            return AreEnemies(source.Get<FactionComponent>().Faction, target.Get<FactionComponent>().Faction);
+            return AreEnemies(source.Find<FactionComponent>().Faction, target.Find<FactionComponent>().Faction);
         }
     }
 }

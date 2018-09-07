@@ -8,53 +8,45 @@ namespace PixelComrades {
 
     public static class Messages {
 
-        public const int SetupNewGame = 1000;
-        public const int StartNewGame = 1001;
-        public const int GameStarted = 0;
-        public const int Loading = 1;
-        public const int LoadingFinished = 2;
-        public const int LevelClear = 3;
-        public const int NewLevelControllerLoaded = 4;
-        public const int LevelLoadingFinished = 5;
-        public const int LevelChanged = 6;
+        public const int SetupNewGame = 0;
+        public const int StartNewGame = 1;
+        public const int GameStarted = 2;
+        public const int Loading = 3;
+        public const int LoadingFinished = 4;
+        public const int LevelClear = 5;
+        public const int NewLevelControllerLoaded = 6;
+        public const int LevelLoadingFinished = 7;
+        public const int LevelChanged = 8;
         
         public const int PlayerNewGame = 10;
         public const int PlayerDead = 11;
         public const int PlayerDamaged = 12;
-        public const int PlayerAttachedChanged = 13;
         public const int SelectedActorChanged = 14;
+        public const int PlayerMoving = 15;
+        public const int PlayerRotated = 16;
+        public const int PlayerReachedDestination = 17;
+        public const int PlayerCharactersChanged = 18;
 
-        public const int PlayerMoving = 20;
-        public const int PlayerRotated = 21;
-        public const int PlayerReachedDestination = 22;
-        public const int PlayerCharactersChanged = 23;
+        public const int SwitchToggle = 25;
+        public const int Locked = 26;
+        public const int Unlocked = 27;
+        public const int EncounterStatusChanged = 28;
+        
+        public const int TownEntered = 30;
+        public const int TownExited = 31;
+        public const int QuestEntriesChanged = 32;
+        public const int QuestEventsChanged = 33;
+        public const int CombatStarted = 34;
+        public const int CombatEnded = 35;
 
-        public const int SwitchToggle = 50;
-        public const int Locked = 51;
-        public const int Unlocked = 52;
-        public const int EncounterStatusChanged = 53;
-
-        public const int TownEntered = 60;
-        public const int TownExited = 61;
-
-        public const int GlobalDataChanged = 70;
-        public const int TurnBasedChanged = 71;
-        public const int LoadTextChanged = 72;
-        public const int PauseChanged = 73;
-        public const int CameraFocusChanged = 74;
-
-        public const int QuestEntriesChanged = 80;
-        public const int QuestEventsChanged = 81;
-
-        public const int MenuClosed = 90;
-        public const int MessageLog = 93;
-        public const int ModifiersUpdated = 94;
-
-        public const int CombatStarted = 100;
-        public const int CombatEnded = 101;
-
-        public const int CooldownTimerChanged = 500;
-
+        public const int GlobalDataChanged = 40;
+        public const int TurnBasedChanged = 41;
+        public const int LoadTextChanged = 42;
+        public const int PauseChanged = 43;
+        public const int CameraFocusChanged = 44;
+        public const int MenuClosed = 45;
+        public const int MessageLog = 46;
+        public const int ModifiersUpdated = 47;
     }
 
     public enum DialogueMsg {

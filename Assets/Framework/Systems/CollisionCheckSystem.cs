@@ -10,9 +10,12 @@ namespace PixelComrades {
         private ManagedArray<CollisionCheckForward> _list;
         private ManagedArray<CollisionCheckForward>.RunDel<CollisionCheckForward> _del;
 
+        public CollisionCheckSystem() {
+            _del = CheckRayFwd;
+        }
+
         public void OnSystemUpdate(float dt) {
             if (_list == null) {
-                _del = CheckRayFwd;
                 _list = EntityController.GetComponentArray<CollisionCheckForward>();
             }
             if (_list != null) {

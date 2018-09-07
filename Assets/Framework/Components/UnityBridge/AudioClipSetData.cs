@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class AudioClipSetData : IComponent, ISignalReceiver {
 
         private int _owner = -1;
-        private CachedPosition _cachedPosition;
+        private CachedComponent<PositionComponent> _cachedPosition;
         public int Owner {
             get {
                 return _owner;
@@ -17,7 +17,7 @@ namespace PixelComrades {
                     var entity = EntityController.GetEntity(value);
                     if (entity != null) {
                         entity.AddObserver(this);
-                        _cachedPosition = new CachedPosition(entity);
+                        _cachedPosition = new CachedComponent<PositionComponent>(entity);
                     }
                 }
             }
@@ -30,7 +30,7 @@ namespace PixelComrades {
         }
 
         public void Handle(int signal) {
-            Set.PlayAudio(signal, _cachedPosition?.Position ?? Vector3.zero);
+            Set.PlayAudio(signal, _cachedPosition.c?.Position ?? Vector3.zero);
         }
     }
 }

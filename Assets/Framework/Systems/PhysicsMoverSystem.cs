@@ -10,9 +10,12 @@ namespace PixelComrades {
         private ManagedArray<VelocityMover> _list;
         private ManagedArray<VelocityMover>.RunDel<VelocityMover> _del;
 
+        public PhysicsMoverSystem() {
+            _del = HandleVelocityMover;
+        }
+
         public void OnFixedSystemUpdate() {
             if (_list == null) {
-                _del = HandleVelocityMover;
                 _list = EntityController.GetComponentArray<VelocityMover>();
             }
             if (_list != null) {

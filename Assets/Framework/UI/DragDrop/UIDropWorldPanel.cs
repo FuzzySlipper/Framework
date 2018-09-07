@@ -55,7 +55,8 @@ namespace PixelComrades {
                 }
                 var screenPnt = Player.Cam.ScreenToViewportPoint(Input.mousePosition);
                 if (screenPnt.y < _maxPlaceScreenY) {
-                    if (ContainerSystem.TryRemoveFromContainer(item)) {
+                    var inventoryItem = item.Get<InventoryItem>();
+                    if (inventoryItem != null && inventoryItem.Inventory.Remove(item)) {
                         UIDragDropHandler.Take();
                         World.Get<ItemSceneSystem>().Drop(hit.point + new Vector3(0, 0.5f, 0));
                         return;

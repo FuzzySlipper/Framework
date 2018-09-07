@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class CostItself : CommandCost {
 
         public override void ProcessCost(Entity entity) {
-            entity.Get<EntityContainer>(f => ContainerSystem.TryRemoveFromContainer(f, entity));
+            entity.Get<InventoryItem>(i => i.Inventory?.Remove(entity));
             entity.Destroy();
         }
 

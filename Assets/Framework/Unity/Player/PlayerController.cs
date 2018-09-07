@@ -31,7 +31,7 @@ namespace PixelComrades {
             Tr = transform;
             Player.Currency = _currency;
             MessageKit.addObserver(Messages.LoadingFinished, EnablePlayer);
-            ControllerEntity = Entity.New();
+            ControllerEntity = Entity.New("PlayerController");
             ControllerEntity.Add(new LabelComponent("PlayerController"));
             ControllerEntity.Add(new TransformComponent(Tr));
         }
@@ -66,7 +66,6 @@ namespace PixelComrades {
         public virtual void SetExperience(float amount) {}
 
         protected virtual void OnDeath() {
-            MessageKit<GameObject>.post(Messages.PlayerAttachedChanged, gameObject);
             MessageKit.post(Messages.PlayerDead);
             Game.SetGameActive(false);
         }

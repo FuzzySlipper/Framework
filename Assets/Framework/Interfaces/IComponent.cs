@@ -10,42 +10,6 @@ namespace PixelComrades {
         //TODO: mandatory Dispose and Serialize
     }
 
-    public class CachedPosition {
-        private CachedComponent<TransformComponent> _trComponent;
-        private CachedComponent<PositionComponent> _positionComponent;
-        private Entity _entity;
-
-        public CachedPosition(Entity owner) {
-            _entity = owner;
-            if (owner.Get<TransformComponent>().Tr != null) {
-                _trComponent = new CachedComponent<TransformComponent>(owner);
-            }
-            else {
-                _positionComponent = new CachedComponent<PositionComponent>(owner);
-            }
-        }
-
-        public Vector3 Position {
-            get {
-                if (_trComponent == null && _positionComponent == null) {
-                    return Vector3.zero;
-                }
-                return _trComponent?.c.Tr.position ?? _positionComponent.c.Value.toVector3();
-            }
-        }
-
-        public void Dispose() {
-            _trComponent.Dispose();
-            _trComponent = null;
-            _positionComponent.Dispose();
-            _positionComponent = null;
-        }
-
-        public static implicit operator Vector3(CachedPosition reference) {
-            return reference.Position;
-        }
-    }
-
     public class CachedComponent<T> : IDisposable where T: IComponent {
         private int _index = -1;
         private ManagedArray<T> _array;

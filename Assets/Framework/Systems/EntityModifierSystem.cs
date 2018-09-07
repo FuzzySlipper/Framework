@@ -8,9 +8,12 @@ namespace PixelComrades {
         private ManagedArray<ModifiersContainer> _list;
         private ManagedArray<ModifiersContainer>.RunDel<ModifiersContainer> _del;
 
+        public EntityModifierSystem() {
+            _del = Update;
+        }
+
         public void OnSystemUpdate(float dt) {
             if (_list == null) {
-                _del = Update;
                 _list = EntityController.GetComponentArray<ModifiersContainer>();
             }
             if (_list != null) {

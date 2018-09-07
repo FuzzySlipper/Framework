@@ -7,6 +7,19 @@ namespace PixelComrades {
         private Dictionary<int, ICharacterRect> _entityRect = new Dictionary<int, ICharacterRect>();
         public Dictionary<int, ICharacterRect> EntityRect { get => _entityRect; }
 
+        public void Remove(int index) {
+            _entityRect.Remove(index);
+        }
+
+        public void Add(int index, ICharacterRect rect) {
+            if (_entityRect.ContainsKey(index)) {
+                _entityRect[index] = rect;
+            }
+            else {
+                _entityRect.Add(index, rect);
+            }
+        }
+
         public ICharacterRect GetEntityRect(int entity) {
             return _entityRect.TryGetValue(entity, out var rect) ? rect : null;
         }

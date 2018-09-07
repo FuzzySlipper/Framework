@@ -37,5 +37,10 @@ namespace PixelComrades {
             CurrentList.Clear(); 
             CurrentList.AddRange(PreviousList);
         }
+
+        public void Clear() {
+            CurrentList.Clear();
+            PreviousList.Clear();
+        }
     }
 }

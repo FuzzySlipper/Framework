@@ -18,7 +18,7 @@ namespace PixelComrades {
                 entity = _pooled.Pop();
             }
             else {
-                entity = Entity.New();
+                entity = Entity.New("UIPool");
                 entity.Add(new TransformComponent(null));
                 entity.Add(new ModelComponent(null));
                 entity.Add(new LabelComponent(""));

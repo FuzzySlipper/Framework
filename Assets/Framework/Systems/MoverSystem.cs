@@ -16,6 +16,12 @@ namespace PixelComrades {
         private ManagedArray<ArcMover> _arcMoverList;
         private ManagedArray<ArcMover>.RunDel<ArcMover> _arcMoveDel;
 
+        public MoverSystem() {
+            _rotateDel = HandleRotation;
+            _simpleMoveDel = HandleMoveSimple;
+            _arcMoveDel = HandleArcMovement;
+        }
+
         public void OnSystemUpdate(float dt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
                 _moveTweens[i].Tr.position = _moveTweens[i].Tween.Get();
@@ -28,21 +34,18 @@ namespace PixelComrades {
                 }
             }
             if (_rotateList == null) {
-                _rotateDel = HandleRotation;
                 _rotateList = EntityController.GetComponentArray<RotateToTarget>();
             }
             if (_rotateList != null) {
                 _rotateList.Run(_rotateDel);
             }
             if (_simpleMoveList == null) {
-                _simpleMoveDel = HandleMoveSimple;
                 _simpleMoveList = EntityController.GetComponentArray<SimplerMover>();
             }
             if (_simpleMoveList != null) {
                 _simpleMoveList.Run(_simpleMoveDel);
             }
             if (_arcMoverList == null) {
-                _arcMoveDel = HandleArcMovement;
                 _arcMoverList = EntityController.GetComponentArray<ArcMover>();
             }
             if (_arcMoverList != null) {

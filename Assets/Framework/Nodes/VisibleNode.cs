@@ -24,8 +24,8 @@ namespace PixelComrades {
             _rotation = new CachedComponent<RotationComponent>(entity, list);
         }
 
-        public Vector3 position { get { return Tr.c.Tr?.position ?? _position.c?.Value.toVector3() ?? Vector3.zero; } }
-        public Quaternion rotation { get { return Tr.c.Tr?.rotation ?? _rotation.c?.Rotation.toQuaternion() ?? Quaternion.identity; } }
+        public Vector3 position { get { return Tr.c.Tr?.position ?? _position.c?.Position ?? Vector3.zero; } }
+        public Quaternion rotation { get { return Tr.c.Tr?.rotation ?? _rotation.c?.Rotation ?? Quaternion.identity; } }
 
         public void Dispose() {
             Tr.Dispose();

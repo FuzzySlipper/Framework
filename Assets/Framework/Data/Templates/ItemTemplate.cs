@@ -33,7 +33,7 @@ namespace PixelComrades {
         }
 
         public virtual Entity New(int level, ItemModifier prefix, ItemModifier suffix) {
-            var entity = Entity.New();
+            var entity = Entity.New(Name);
             SetupBaseItem(entity, level);
             return entity;
         }

@@ -10,7 +10,7 @@ namespace PixelComrades {
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
         private static Dictionary<int, Dictionary<Type, ComponentReference>> _entityComponents = new Dictionary<int, Dictionary<Type, ComponentReference>>();
-        private static Dictionary<int, List<IReceive>> _entityMessageList = new Dictionary<int, List<IReceive>>();
+        private static Dictionary<int, BufferedList<IReceive>> _entityMessageList = new Dictionary<int, BufferedList<IReceive>>();
         private static Dictionary<int, MessageKitLocal> _simpleEntityMessages = new Dictionary<int, MessageKitLocal>();
         private static Dictionary<Type, List<NodeFilter>> _filtersToCheck = new Dictionary<Type, List<NodeFilter>>();
         private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
@@ -20,20 +20,26 @@ namespace PixelComrades {
 
         public static void Post<T>(this T msg, Entity entity) where T : struct, IEntityMessage {
             if (entity != null) {
-                entity.Post(msg);
+                entity.ProcessEntityPost(msg);
             }
             World.Enqueue(msg);
         }
 
-        public static void Post<T>(this Entity entity, T msg) where T : IEntityMessage {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
+        public static void Post<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
+            entity.ProcessEntityPost<T>(msg);
+            World.Enqueue(msg);
+        }
+
+        private static void ProcessEntityPost<T>(this Entity entity, T msg) where T : IEntityMessage {
+            if (!_entityMessageList.TryGetValue(entity.Id, out var bufferedList)) {
                 return;
             }
-            var len = list.Count;
-            for (int i = 0; i < len; i++) {
+            bufferedList.Swap();
+            var list = bufferedList.PreviousList;
+            for (int i = 0; i < list.Count; i++) {
                 (list[i] as IReceiveRef<T>)?.Handle(ref msg);
             }
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < list.Count; i++) {
                 (list[i] as IReceive<T>)?.Handle(msg);
             }
         }
@@ -47,26 +53,26 @@ namespace PixelComrades {
 
         public static void AddObserver<T>(this Entity entity, IReceive<T> handler) {
             if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                list = new List<IReceive>();
+                list = new BufferedList<IReceive>();
                 _entityMessageList.Add(entity.Id, list);
             }
-            if (list.Contains(handler)) {
+            if (list.CurrentList.Contains(handler)) {
                 return;
             }
-            list.Add(handler);
-            list.Sort(_msgSorter);
+            list.CurrentList.Add(handler);
+            list.CurrentList.Sort(_msgSorter);
         }
 
         public static void AddObserver(this Entity entity, IReceive handler) {
             if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                list = new List<IReceive>();
+                list = new BufferedList<IReceive>();
                 _entityMessageList.Add(entity.Id, list);
             }
-            if (list.Contains(handler)) {
+            if (list.CurrentList.Contains(handler)) {
                 return;
             }
-            list.Add(handler);
-            list.Sort(_msgSorter);
+            list.CurrentList.Add(handler);
+            list.CurrentList.Sort(_msgSorter);
         }
 
         public static void AddObserver(this Entity entity, int message,  System.Action handler) {
@@ -529,29 +535,17 @@ namespace PixelComrades {
         }
 
         public static Vector3 GetPosition(this Entity entity) {
-            if (!_entityComponents.TryGetValue(entity.Id, out var list)) {
+            if (entity == null) {
                 return Vector3.zero;
             }
-            if (list.TryGetValue(typeof(PositionComponent), out var pos)) {
-                return ((ManagedArray<PositionComponent>) pos.Array)[pos.Index].Value;
-            }
-            if (list.TryGetValue(typeof(TransformComponent), out var tr)) {
-                return ((ManagedArray<TransformComponent>) tr.Array)[tr.Index].Tr?.position ?? Vector3.zero;
-            }
-            return Vector3.zero;
+            return entity.Find<PositionComponent>()?.Position ?? Vector3.zero;
         }
 
         public static Quaternion GetRotation(this Entity entity) {
-            if (!_entityComponents.TryGetValue(entity.Id, out var list)) {
+            if (entity == null) {
                 return Quaternion.identity;
             }
-            if (list.TryGetValue(typeof(RotationComponent), out var pos)) {
-                return ((ManagedArray<RotationComponent>) pos.Array)[pos.Index].Rotation;
-            }
-            if (list.TryGetValue(typeof(TransformComponent), out var tr)) {
-                return ((ManagedArray<TransformComponent>) tr.Array)[tr.Index].Tr?.rotation ?? Quaternion.identity;
-            }
-            return Quaternion.identity;
+            return entity.Find<RotationComponent>()?.Rotation ?? Quaternion.identity;
         }
 
         public static void Spawn(this Entity entity, out Vector3 spawnPos, out Quaternion spawnRot) {

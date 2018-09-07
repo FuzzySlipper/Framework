@@ -20,12 +20,11 @@ namespace PixelComrades {
         }
 
         public void Start(Entity entity) {
-            entity.AddObserver(this);
             if (!entity.Find<AnimatorData>(
                 a => {
                     var target = a.GetEntity();
-                    entity.AddObserver(this);
-                    target.Post(new PlayAnimation(target, _animationClip, new AnimatorEvent(entity, _animationClip, _onEvent, _onComplete)));
+                    target.AddObserver(this);
+                    target.Post(new PlayAnimation(target, _animationClip, new AnimatorEvent(target, _animationClip, _onEvent, _onComplete)));
                 })) {
                 Owner.DefaultPostAdvance(this);
             }

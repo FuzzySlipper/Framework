@@ -6,11 +6,12 @@ using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
 
+    [System.Serializable]
     public abstract class Command : IComponent {
         public abstract Sprite Icon { get; }
         public abstract bool TryComplete();
 
-        private int _owner;
+        [SerializeField] private int _owner;
         public int Owner {
             get { return _owner; }
             set {
@@ -77,7 +78,7 @@ namespace PixelComrades {
             Post(new ActionStateEvent(EntityOwner, EntityOwner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), ActionStateEvents.Start));
         }
 
-        public void Post<T>(T msg) where T : IEntityMessage {
+        public void Post<T>(T msg) where T : struct, IEntityMessage {
             EntityOwner.Post<T>(msg);
             if (Parent != null) {
                 Parent.Post<T>(msg);

@@ -6,6 +6,7 @@ namespace PixelComrades {
     public class Entity : IEquatable<Entity> {
 
         public int Id;
+        public string Name;
         public TagsComponent Tags;
         public int ParentId = -1;
 
@@ -18,8 +19,9 @@ namespace PixelComrades {
             EntityController.RemoveEntity(this);
         }
 
-        public static Entity New() {
+        public static Entity New(string name) {
             var entity = EntityController.AddEntity(new Entity());
+            entity.Name = name;
             entity.Init();
             return entity;
         }
