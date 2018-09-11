@@ -18,25 +18,7 @@ namespace PixelComrades {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            var spawnTr = entity.Find<AnimTr>().Tr;
-            Vector3 spawnPos;
-            Quaternion spawnRot;
-            if (spawnTr != null) {
-                spawnPos = spawnTr.position;
-                spawnRot = spawnTr.rotation;
-            }
-            else if (Owner.Target != null) {
-                spawnPos = Owner.Target.GetPosition;
-                spawnRot = Owner.Target.GetRotation;
-            }
-            else if (Owner.LastStateEvent != null) {
-                spawnPos = Owner.LastStateEvent.Value.Position;
-                spawnRot = Owner.LastStateEvent.Value.Rotation;
-            }
-            else {
-                spawnPos = entity.GetPosition();
-                spawnRot = entity.GetRotation();
-            }
+            entity.FindSpawn(out var spawnPos, out var spawnRot);
             var spawn = ItemPool.Spawn(spawnComponent.Prefab, spawnPos, spawnRot);
             if (spawn == null) {
                 Owner.DefaultPostAdvance(this);

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace PixelComrades.DungeonCrawler {
+namespace PixelComrades {
     public class CommandLog : ScriptableObject {
 
         private static CommandLog _static;

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using PixelComrades.DungeonCrawler;
+using PixelComrades;
 
 namespace PixelComrades {
     public class SerializedItem : ISerializable {

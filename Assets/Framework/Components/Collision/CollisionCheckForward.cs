@@ -9,8 +9,7 @@ namespace PixelComrades {
         public float RayDistance { get; }
         public Vector3 LastPos { get; set; }
 
-        public CollisionCheckForward(int owner, float rayDistance) {
-            Owner = owner;
+        public CollisionCheckForward(float rayDistance) {
             RayDistance = rayDistance;
         }
     }

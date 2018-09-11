@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using PixelComrades;
-using PixelComrades.DungeonCrawler;
+using PixelComrades;
 using Rewired.Integration.UnityUI;
 using UnityEngine.EventSystems;
 

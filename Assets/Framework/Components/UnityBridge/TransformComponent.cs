@@ -16,5 +16,16 @@ namespace PixelComrades {
             return tr.Tr;
         }
 
+        public Vector3 position {
+            get { return Tr.position; }
+            set { Tr.position = value; }
+        }
+
+        public Quaternion rotation {
+            get { return Tr.rotation; }
+            set { Tr.rotation = value; }
+        }
+
+        public Vector3 forward { get { return Tr.forward; } }
     }
 }

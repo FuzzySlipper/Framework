@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class BaseStat : IComponent {
+    public class BaseStat : IComponent, IDisposable {
 
         public int Owner { get; set; }
 
@@ -63,6 +63,11 @@ namespace PixelComrades {
             _baseValue = newBase;
             _baseValue = Mathf.Clamp(_baseValue, -MaxBaseValue, MaxBaseValue);
             StatChanged();
+        }
+
+        public void Dispose() {
+            ClearMods();
+            ClearListeners();
         }
 
         public override string ToString() {

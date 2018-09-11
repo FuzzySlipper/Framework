@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class CharacterNode : INode {
-        public Entity Entity;
+        public Entity Entity { get; }
 
         public CachedComponent<LabelComponent> Label;
         public CachedComponent<GenericStats> Stats;
@@ -15,7 +15,7 @@ namespace PixelComrades {
         public CachedComponent<GridPosition> Position;
         public CachedComponent<FactionComponent> Faction;
         public CachedComponent<CommandsContainer> Commands;
-
+        public CachedComponent<EquipmentSlots> Slots;
 
         public CharacterNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
             Entity = entity;
@@ -28,6 +28,7 @@ namespace PixelComrades {
             Position = new CachedComponent<GridPosition>(entity, list);
             Faction = new CachedComponent<FactionComponent>(entity, list);
             Commands = new CachedComponent<CommandsContainer>(entity, list);
+            Slots = new CachedComponent<EquipmentSlots>(entity, list);
         }
 
 
@@ -50,6 +51,8 @@ namespace PixelComrades {
             Faction = null;
             Commands.Dispose();
             Commands = null;
+            Slots.Dispose();
+            Slots = null;
         }
 
         public static System.Type[] GetTypes() {

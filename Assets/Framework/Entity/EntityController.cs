@@ -579,6 +579,26 @@ namespace PixelComrades {
             return entity.Tags.Contain(EntityTags.IsDead);
         }
 
+        public static void FindSpawn(this Entity entity, out Vector3 spawnPos, out Quaternion spawnRot) {
+            var spawnTr = entity.Find<AnimTr>().Tr;
+            var target = entity.Find<CommandTarget>();
+            if (spawnTr != null) {
+                spawnPos = spawnTr.position;
+                spawnRot = spawnTr.rotation;
+            }
+            else if (target != null) {
+                spawnPos = target.GetPosition;
+                spawnRot = target.GetRotation;
+            }
+            //else if (Owner.LastStateEvent != null) {
+            //    spawnPos = Owner.LastStateEvent.Value.Position;
+            //    spawnRot = Owner.LastStateEvent.Value.Rotation;
+            //}
+            else {
+                spawnPos = entity.GetPosition();
+                spawnRot = entity.GetRotation();
+            }
+        }
 
         //public static List<T> GetAll<T>(this Entity entity) where T : IComponent {
         //    var type = typeof(T);

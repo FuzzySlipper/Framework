@@ -8,7 +8,6 @@ namespace PixelComrades {
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-
         private ManagedArray<RotateToTarget> _rotateList;
         private ManagedArray<RotateToTarget>.RunDel<RotateToTarget> _rotateDel;
         private ManagedArray<SimplerMover> _simpleMoveList;

@@ -37,7 +37,8 @@ namespace PixelComrades {
         }
     }
 
-    [System.Serializable] public class RigidbodySettings {
+    [System.Serializable] 
+    public class RigidbodySettings {
 
         private static RigidbodyConstraints _freezeConstraints = RigidbodyConstraints.FreezeAll;
 

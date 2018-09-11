@@ -30,8 +30,22 @@ namespace PixelComrades {
             TargetV3 = null;
         }
 
-        public MoveTarget(int owner) {
-            Owner = owner;
+        public MoveTarget(Entity entity) {
+            var tr = entity.Get<TransformComponent>().Tr;
+            if (tr != null) {
+                TargetTr = tr;
+            }
+            else {
+                TargetV3 = entity.GetPosition();
+            }
+        }
+
+        public MoveTarget(Vector3 target) {
+            TargetV3 = target;
+        }
+
+        public MoveTarget(Transform tr) {
+            TargetTr = tr;
         }
     }
 }

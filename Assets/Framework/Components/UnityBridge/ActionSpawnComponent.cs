@@ -9,11 +9,12 @@ namespace PixelComrades {
         public GameObject Prefab;
         public int Owner { get; set; }
         public float Speed { get; }
+        public float Rotation { get; }
 
-        public ActionSpawnComponent(GameObject prefab, float speed) {
-            Owner = -1;
+        public ActionSpawnComponent(GameObject prefab, float speed, float rotation) : this() {
             Prefab = prefab;
             Speed = speed;
+            Rotation = rotation;
         }
     }
 

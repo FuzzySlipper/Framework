@@ -17,6 +17,12 @@ namespace PixelComrades {
 
         public void Destroy() {
             EntityController.RemoveEntity(this);
+            Id = -1;
+            Name = "Destroyed";
+        }
+
+        public bool IsDestroyed() {
+            return Id < 0;
         }
 
         public static Entity New(string name) {

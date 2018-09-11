@@ -6,33 +6,79 @@ namespace PixelComrades {
     public class PhysicsMoverSystem : SystemBase, IMainFixedUpdate, IReceiveGlobal<AddForceEvent> {
 
         private const float ReachedDestination = 0.1f;
-
-        private ManagedArray<VelocityMover> _list;
-        private ManagedArray<VelocityMover>.RunDel<VelocityMover> _del;
+        
+        private bool _frozen = false;
+        private List<RigidbodyMoverNode> _moverList;
+        private ManagedArray<RigidbodyComponent> _rbList;
+        private ManagedArray<RigidbodyComponent>.RunDel<RigidbodyComponent> _checkPauseDel;
 
         public PhysicsMoverSystem() {
-            _del = HandleVelocityMover;
+            MessageKit.addObserver(Messages.PauseChanged, CheckPause);
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            MessageKit.removeObserver(Messages.PauseChanged, CheckPause);
         }
 
         public void OnFixedSystemUpdate() {
-            if (_list == null) {
-                _list = EntityController.GetComponentArray<VelocityMover>();
+            if (_moverList == null) {
+                _moverList = EntityController.GetNodeList<RigidbodyMoverNode>();
             }
-            if (_list != null) {
-                _list.Run(_del);
+            if (_moverList != null) {
+                for (int i = 0; i < _moverList.Count; i++) {
+                    HandleVelocityMover(_moverList[i]);
+                }
+            }
+            if (_frozen) {
+                CheckRigidbodies();
             }
         }
 
-        private void HandleVelocityMover(VelocityMover mover) {
+        private void CheckPause() {
+            if (_frozen == Game.Paused) {
+                return;
+            }
+            _frozen = Game.Paused;
+            CheckRigidbodies();
+        }
+
+        private void CheckRigidbodies() {
+            if (_rbList == null) {
+                _rbList= EntityController.GetComponentArray<RigidbodyComponent>();
+            }
+            if (_rbList != null) {
+                _rbList.Run(CheckPaused);
+            }
+        }
+
+        private void CheckPaused(RigidbodyComponent component) {
+            if (component.RigidbodySetup.IsFrozen == _frozen) {
+                return;
+            }
+            if (_frozen) {
+                component.RigidbodySetup.Freeze();
+            }
+            else {
+                component.RigidbodySetup.Restore();
+            }
+        }
+
+        private void HandleVelocityMover(RigidbodyMoverNode mover) {
             var dt = TimeManager.DeltaTime;
-            mover.CurrentSpeed = Mathf.MoveTowards(mover.CurrentSpeed, mover.Speed, mover.Acceleration * dt);
-            var moveTarget = mover.Target.GetTargetPosition;
-            var dir = moveTarget - mover.Rigidbody.Rb.position;
-            mover.Rigidbody.Rb.AddForce(dir.normalized * mover.Speed * dt);
+            var rb = mover.Rb.c.Rb;
+            if (rb == null) {
+                return;
+            }
+            var moveSpeed = mover.MoveSpeed.c;
+            mover.Mover.c.CurrentSpeed = Mathf.MoveTowards(mover.Mover.c.CurrentSpeed, moveSpeed , moveSpeed * 0.25f * dt);
+            var moveTarget = mover.Target.c.GetTargetPosition;
+            var dir = moveTarget - rb.position;
+            rb.AddForce(dir.normalized * mover.Mover.c.CurrentSpeed * dt);
             var targetRotation = Quaternion.LookRotation(dir);
-            mover.Rigidbody.Rb.MoveRotation(Quaternion.RotateTowards(mover.Transform.Tr.rotation, targetRotation, mover.Rotation * dt));
-            if (Vector3.Distance(moveTarget, mover.Rigidbody.Rb.position) < ReachedDestination) {
-                FinishMove(mover.GetEntity(), moveTarget);
+            rb.MoveRotation(Quaternion.RotateTowards(mover.Tr.c.rotation, targetRotation, mover.RotationSpeed.c.Speed * dt));
+            if (Vector3.Distance(moveTarget, rb.position) < ReachedDestination) {
+                FinishMove(mover.Entity, moveTarget);
             }
         }
 

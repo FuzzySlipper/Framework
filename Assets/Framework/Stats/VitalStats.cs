@@ -29,6 +29,15 @@ namespace PixelComrades {
             return this[index];
         }
 
+        public VitalStat Get(string id) {
+            for (int i = 0; i < List.Count; i++) {
+                if (List[i].Id == id) {
+                    return List[i];
+                }
+            }
+            return null;
+        }
+
         public void SetMax() {
             for (int i = 0; i < Count; i++) {
                 List[i].SetMax();

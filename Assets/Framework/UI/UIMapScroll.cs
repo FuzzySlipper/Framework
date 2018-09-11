@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using PixelComrades.DungeonCrawler;
+using PixelComrades;
 using UnityEngine.EventSystems;
 
 namespace PixelComrades {
