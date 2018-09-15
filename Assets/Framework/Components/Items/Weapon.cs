@@ -21,19 +21,16 @@ namespace PixelComrades {
         }
 
         private WeaponTemplate _template;
-        private bool _jammed = false;
         private int _level;
         private CommandSequence _attack;
         private CommandsContainer _current;
 
-        public bool IsRangedWeapon { get { return _template.ItemType != ItemTypes.WeaponMelee; } }
-        public bool Jammed { get { return _jammed; } }
         public WeaponTemplate Template { get { return _template; } }
-        public bool TwoHanded { get { return _template.TwoHanded; } }
         public ItemAttackModifier PrefixAttack { get; }
         public ItemAttackModifier SuffixAttack { get; }
         public ActorAnimations Animation { get { return ActorAnimations.Action; } }
         public TargetType Targeting { get { return TargetType.Enemy; } }
+        public CommandSequence Attack => _attack;
 
         public Weapon(WeaponTemplate template, int level, ItemModifier prefix, ItemModifier suffix, CommandSequence attack) {
             _template = template;
@@ -57,37 +54,8 @@ namespace PixelComrades {
                 sb.Append(SuffixAttack.DescriptiveName);
             }
             entity.Add(new LabelComponent(sb.ToString()));
-            entity.GetOrAdd<DataDescriptionComponent>().Text += BuildDataDescription;
         }
 
-        public string BuildDataDescription{
-            get {
-                StringBuilder sb = new StringBuilder();
-                sb.NewLine();
-                sb.Append("Damage: ");
-                sb.Append(_template.Damage.Min.ToString("F0"));
-                sb.Append("-");
-                sb.Append(_template.Damage.Max.ToString("F0"));
-                if (PrefixAttack != null && !string.IsNullOrEmpty(PrefixAttack.ActionDescription(this))) {
-                    sb.Append(" + ");
-                    sb.Append(PrefixAttack.ActionDescription(this));
-                }
-                if (SuffixAttack != null && !string.IsNullOrEmpty(SuffixAttack.ActionDescription(this))) {
-                    sb.Append(" + ");
-                    sb.Append(SuffixAttack.ActionDescription(this));
-                }
-                sb.NewLine();
-                sb.Append("ToHit: ");
-                sb.Append(_template.ToHitBonus.ToString("F0"));
-                sb.NewLine();
-                sb.Append("Crit: ");
-                sb.Append(_template.CritChance.ToString("F0"));
-                sb.NewLine();
-                sb.Append("Crit Multi: ");
-                sb.Append(_template.CritMultiplier.ToString("F0"));
-                return sb.ToString();
-            }
-        }
         //protected override bool CanStart() {
         //    if (_weapon.Jammed) {
         //        LastStatusUpdate = "Weapon Jammed";
@@ -100,19 +68,6 @@ namespace PixelComrades {
         //    return base.CanStart();
         //}
 
-        public bool UnjamWeapon(int maxJamLvl) {
-            if (maxJamLvl >= (int) Template.TechLevel) {
-                _jammed = false;
-                this.GetEntity().Post(new StatusUpdate("Weapon Cleared", Color.green));
-                return true;
-            }
-            return false;
-        }
-
-        public void Jam() {
-            _jammed = true;
-            this.GetEntity().Post(new StatusUpdate("Weapon Jammed", Color.red));
-        }
 
         public void Handle(EquipmentChanged arg) {
             if (_current != null) {

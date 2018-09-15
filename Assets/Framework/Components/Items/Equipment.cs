@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,7 +24,6 @@ namespace PixelComrades {
         private int _level;
         private EquipmentSlot _equip;
 
-        public Sprite Icon { get; set; }
         public bool Equipped { get { return _equip != null; } }
         public EquipmentSlot EquipmentSlot { get { return _equip; } }
         public int Skill { get; set; }
