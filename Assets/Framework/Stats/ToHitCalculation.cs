@@ -16,14 +16,12 @@ namespace PixelComrades {
             if (target.Get<FactionComponent>().Faction == origin.Get<FactionComponent>().Faction) {
                 return CollisionResult.Hit;
             }
-            var targetStats = target.Get<GenericStats>();
-            var ownerStats = origin.Get<GenericStats>();
-            var defendTotal = targetStats?.GetValue(Stats.Evasion) ?? 0;
-            var attackTotal = ownerStats?.GetValue(Stats.ToHit) ?? 0;
+            var defendTotal = target.Stats.GetValue(Stats.Evasion);
+            var attackTotal = origin.Stats.GetValue(Stats.ToHit);
             //var finalAttack = Mathf.Clamp((attackTotal - defendTotal), 5, 100) + Game.Random.Next(1, 100);
             var finalAttack = Game.Random.Next(1, 100) + (attackTotal - defendTotal);
             var result = CollisionResult.Miss;
-            if (finalAttack >= Critical - (ownerStats?.GetValue(Stats.CriticalHit) ?? 0)) {
+            if (finalAttack >= Critical - origin.Stats.GetValue(Stats.CriticalHit)) {
                 result = CollisionResult.CriticalHit;
             }
             else if (finalAttack >= GrazeMax) {

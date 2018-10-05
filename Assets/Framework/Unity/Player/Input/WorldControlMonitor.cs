@@ -127,11 +127,11 @@ namespace PixelComrades {
             //EventSystem.current.RaycastAll(_eventData, _result);
             if (PlayerInput.IsCursorOverUI) {
                 SetCurrentNull();
-                if (_debug) {
-                    var go = PlayerInput.CurrentInput != null ? PlayerInput.CurrentInput.GameObjectUnderPointer() : null;
-                    DebugText.UpdatePermText("World Control", string.Format("Over UI: {0}", go != null ? go.name :
-                        EventSystem.current.currentSelectedGameObject != null ? EventSystem.current.currentSelectedGameObject.name : " null ?"));
-                }
+                //if (_debug) {
+                //    var go = PlayerInput.CurrentInput != null ? PlayerInput.CurrentInput.GameObjectUnderPointer() : null;
+                //    DebugText.UpdatePermText("World Control", string.Format("Over UI: {0}", go != null ? go.name :
+                //        EventSystem.current.currentSelectedGameObject != null ? EventSystem.current.currentSelectedGameObject.name : " null ?"));
+                //}
                 return;
             }
             _mouseRay = Cam.ScreenPointToRay(Input.mousePosition);

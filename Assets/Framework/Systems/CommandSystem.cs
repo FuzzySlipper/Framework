@@ -26,7 +26,7 @@ namespace PixelComrades {
 
         private Command GetCommand(int id) {
             for (int i = 0; i < _commands.Count; i++) {
-                if (_commands[i].EntityOwner.Id == id) {
+                if (_commands[i]?.EntityOwner.Id == id) {
                     return _commands[i];
                 }
             }
@@ -36,6 +36,9 @@ namespace PixelComrades {
         public void OnSystemUpdate(float dt) {
             _commands.Swap();
             for (int i = 0; i < _commands.PreviousList.Count; i++) {
+                if (_commands.PreviousList[i] == null) {
+                    continue;
+                }
                 if (_commands.PreviousList[i].TryComplete()) {
                     _commands.PreviousList[i].Complete();
                     _commands.CurrentList.Remove(_commands.PreviousList[i]);

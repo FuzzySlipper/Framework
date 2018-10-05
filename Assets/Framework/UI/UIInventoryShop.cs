@@ -135,7 +135,7 @@ namespace PixelComrades {
                 FloatingText(button.RectTransform, "Inventory full");
                 return;
             }
-            var price = RpgSystem.PriceEstimateSell(item.GetEntity());
+            var price = GameOptions.PriceEstimateSell(item.GetEntity());
             _currentButton = button;
             UIModalQuestion.Set(CheckSell, string.Format("Sell for {0} {1}?", price, GameLabels.Currency));
         }
@@ -150,7 +150,7 @@ namespace PixelComrades {
                 _currentButton = null;
                 return;
             }
-            var price = RpgSystem.PriceEstimateSell(item.GetEntity());
+            var price = GameOptions.PriceEstimateSell(item.GetEntity());
             FloatingText(_currentButton.RectTransform, string.Format("Sold for {0} {1}", price, GameLabels.Currency));
             Player.Currency.AddToValue(price);
             _sellingInventory.TryAdd(item.GetEntity());

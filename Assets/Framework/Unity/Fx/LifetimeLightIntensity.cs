@@ -38,7 +38,7 @@ namespace PixelComrades {
                 TimeManager.StartUnscaled(UpdateLight());
             }
             else {
-                TimeManager.Start(UpdateLight());
+                TimeManager.StartTask(UpdateLight());
             }
         }
 

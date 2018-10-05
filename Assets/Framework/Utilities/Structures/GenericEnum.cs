@@ -14,6 +14,21 @@ namespace PixelComrades {
         }
     }
 
+    public abstract class IntEnum<T> : GenericEnum<T, int> where T : GenericEnum<T, int>, new() {
+        public override int Parse(string value, int defaultValue) {
+            if (int.TryParse(value, out var val)) {
+                return val;
+            }
+            return TryValueOf(value, out val) ? val : defaultValue;
+        }
+    }
+
+    public abstract class StringEnum<T> : GenericEnum<T, string> where T : GenericEnum<T, string>, new() {
+        public override string Parse(string value, string defaultValue) {
+            return value;
+        }
+    }
+
     public abstract class GenericEnum<T, U> where T : GenericEnum<T, U>, new() {
         private static readonly List<string> _names;
         private static readonly List<string> _ids;

@@ -47,11 +47,15 @@ namespace PixelComrades {
         public void StartExplosion(PrefabEntity entity, Vector3 velocity) {
             var totalCount = 0;
             for (int i = 0; i < entity.Renderers.Length; i++) {
-                if (entity.Renderers[i].SkinnedMesh != null) {
-                    totalCount += entity.Renderers[i].SkinnedMesh.sharedMesh.vertexCount;
+                if (entity.Renderers[i] is SkinnedMeshRenderer skinned) {
+                    totalCount += skinned.sharedMesh.vertexCount;
                 }
-                else if (entity.Renderers[i].Mesh != null) {
-                    totalCount += entity.Renderers[i].Mesh.vertexCount;
+                else if (entity.Renderers[i] is MeshRenderer mesh) {
+                    var mf = entity.Renderers[i].GetComponent<MeshFilter>();
+                    if (mf != null) {
+                        totalCount += mf.sharedMesh.vertexCount;
+                    }
+                    
                 }
             }
             var verts = new List<Vector3>(totalCount);
@@ -59,12 +63,15 @@ namespace PixelComrades {
             for (int i = 0; i < entity.Renderers.Length; i++) {
                 var entityRenderer = entity.Renderers[i];
                 Mesh newMesh = null;
-                if (entityRenderer.SkinnedMesh != null) {
+                if (entityRenderer is SkinnedMeshRenderer skinned) {
                     newMesh = new Mesh();
-                    entityRenderer.SkinnedMesh.BakeMesh(newMesh);
+                    skinned.BakeMesh(newMesh);
                 }
-                else if (entityRenderer.Mesh != null) {
-                    newMesh = entityRenderer.Mesh;
+                else {
+                    var mf = entityRenderer.GetComponent<MeshFilter>();
+                    if (mf != null) {
+                        newMesh = mf.sharedMesh;
+                    }
                 }
                 if (newMesh == null) {
                     continue;
@@ -202,7 +209,7 @@ namespace PixelComrades {
             }
             _particleSystem.SetParticles(_particles, emitCount);
             if (Application.isPlaying) {
-                TimeManager.Start(DespawnParticles());
+                TimeManager.StartTask(DespawnParticles());
             }
         }
 

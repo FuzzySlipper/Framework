@@ -35,7 +35,7 @@ namespace PixelComrades {
             }
         }
 
-        public void HandleGlobal(List<PlayAnimation> arg) {
+        public void HandleGlobal(ManagedArray<PlayAnimation> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 var msg = arg[i];
                 if (msg.Target == null) {

@@ -25,6 +25,7 @@ namespace PixelComrades {
     }
 
     public interface IModelComponent {
+        Transform Tr { get; }
         MaterialPropertyBlock[] GetMatBlocks { get; }
         Renderer[] GetRenderers { get; }
         void ApplyMaterialBlocks(MaterialPropertyBlock[] matBlocks);

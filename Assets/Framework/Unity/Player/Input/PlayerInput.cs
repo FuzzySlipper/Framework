@@ -31,9 +31,9 @@ public class PlayerInput : MonoSingleton<PlayerInput> {
                 if (UIDropWorldPanel.Active) {
                     return false;
                 }
-                if (CurrentInput != null && CurrentInput.GameObjectUnderPointer() == UIDropWorldPanel.main.gameObject) {
-                    return false;
-                }
+                //if (CurrentInput != null && CurrentInput. == UIDropWorldPanel.main.gameObject) {
+                //    return false;
+                //}
                 return true;
             }
             return false;

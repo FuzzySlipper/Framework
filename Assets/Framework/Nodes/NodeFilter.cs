@@ -45,20 +45,19 @@ namespace PixelComrades {
         public abstract bool ContainsEntity(Entity entity);
     }
 
-    public class NodeFilter<T> : NodeFilter where T : class, INode {
+    public class NodeFilter<T> : NodeFilter where T : class, INode, new() {
 
         private Dictionary<int, T> _nodes = new Dictionary<int, T>();
         private List<T> _allNodes = new List<T>();
-        private Func<Entity, Dictionary<System.Type, ComponentReference>, T> _createNodeFunc;
+        private GenericPool<T> _pool = new GenericPool<T>(25, obj => obj.Dispose());
 
         public List<T> AllNodes { get => _allNodes; }
 
-        public NodeFilter(System.Type[] types, Func<Entity, Dictionary<System.Type, ComponentReference>, T> func) : base(types) {
-            _createNodeFunc = func;
+        public NodeFilter(System.Type[] types) : base(types) {
         }
 
-        public static void New(System.Type[] types, Func<Entity, Dictionary<System.Type, ComponentReference>, T> func) {
-            EntityController.RegisterNodeFilter(new NodeFilter<T>(types, func), typeof(T));
+        public static void New(System.Type[] types) {
+            EntityController.RegisterNodeFilter(new NodeFilter<T>(types), typeof(T));
         }
 
         public override bool ContainsEntity(Entity entity) {
@@ -69,7 +68,8 @@ namespace PixelComrades {
             if (_nodes.ContainsKey(entity)) {
                 return;
             }
-            var node = _createNodeFunc(entity, references);
+            T node = _pool.New();
+            node.Register(entity, references);
             _allNodes.Add(node);
             _nodes.Add(entity, node);
         }
@@ -80,7 +80,7 @@ namespace PixelComrades {
             }
             _allNodes.Remove(node);
             _nodes.Remove(entity);
-            node.Dispose();
+            _pool.Store(node);
         }
 
         public T GetNode(Entity entity) {

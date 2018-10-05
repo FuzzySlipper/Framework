@@ -6,8 +6,7 @@ namespace PixelComrades {
         public int Owner { get; set; }
         public float Speed;
 
-        public MoveSpeed(int owner, float speed) {
-            Owner = owner;
+        public MoveSpeed(float speed) {
             Speed = speed;
         }
 

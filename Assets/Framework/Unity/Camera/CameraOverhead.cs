@@ -39,7 +39,7 @@ namespace PixelComrades {
         }
 
         public void UpdateDrag(Vector3 moveDelta) {
-            _camTr.Translate(moveDelta.Multiply(_moveSpeed), Space.World);
+            _camTr.Translate(moveDelta.Multiply(_moveSpeed), UnityEngine.Space.World);
             if (_clampPos) {
                 RestrictPosition();
             }

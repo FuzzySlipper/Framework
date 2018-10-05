@@ -12,7 +12,7 @@ namespace PixelComrades {
 
         void OnBecameInvisible() {
             _visible = false;
-            TimeManager.Start(CheckVisibleStatus());
+            TimeManager.StartTask(CheckVisibleStatus());
         }
 
         void OnBecameVisible() {

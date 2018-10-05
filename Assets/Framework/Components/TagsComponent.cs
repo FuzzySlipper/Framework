@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PixelComrades {
     [Serializable]
-    public class TagsComponent : IComponent {
+    public class TagsComponent {
 
         private Entity _entity;
 
@@ -15,6 +15,12 @@ namespace PixelComrades {
         public void Dispose() {
             _tags = null;
             _entity = null;
+        }
+
+        public void Clear() {
+            for (int i = 0; i < _tags.Length; i++) {
+                _tags[i] = 0;
+            }
         }
 
         public void Add(params int[] ids) {
@@ -35,12 +41,18 @@ namespace PixelComrades {
 
         public void AddWithRoot(int id) {
             Add(id);
-            _entity.TryRoot(e => e.Tags.Add(id));
+            var parent = _entity.GetRoot();
+            if (parent != null) {
+                parent.Tags.Add(id);
+            }
         }
 
         public void AddWithParent(int id) {
             Add(id);
-            _entity.TryParent(e => e.Tags.Add(id));
+            var parent =_entity.GetParent();
+            if (parent != null) {
+                parent.Tags.Add(id);
+            }
         }
 
         public bool Contain(int val) {
@@ -88,12 +100,18 @@ namespace PixelComrades {
 
         public void RemoveWithRoot(int id) {
             Remove(id);
-            _entity.TryRoot(e => e.Tags.Remove(id));
+            var parent = _entity.GetRoot();
+            if (parent != null) {
+                parent.Tags.Remove(id);
+            }
         }
 
         public void RemoveWithParent(int id) {
             Add(id);
-            _entity.TryParent(e => e.Tags.Remove(id));
+            var parent = _entity.GetParent();
+            if (parent != null) {
+                parent.Tags.Remove(id);
+            }
         }
 
         public TagsComponent(Entity owner) {

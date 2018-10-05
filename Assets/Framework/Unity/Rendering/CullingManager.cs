@@ -9,14 +9,9 @@ namespace PixelComrades {
         private static Dictionary<Point3, List<GameObject>> _sectorLevelObjects = new Dictionary<Point3, List<GameObject>>();
 
         private UnscaledTimer _updateTimer = new UnscaledTimer(1);
-        private int _currentIndex = 0;
-        
-        private List<Point3>[] _list = new List<Point3>[2] {
-            new List<Point3>(), new List<Point3>()
-        };
+        private BufferedList<Point3> _list = new BufferedList<Point3>();
 
-        public List<Point3> CurrentList { get { return _list[_currentIndex]; } }
-        public List<Point3> PreviousList { get { return _list[_currentIndex == 0 ? 1 : 0]; } }
+        
 
         public CullingManager() {
             MessageKit.addObserver(Messages.LevelClear, ClearList);
@@ -28,8 +23,8 @@ namespace PixelComrades {
                 return;
             }
             _updateTimer.StartTimer();
-            for (int i = 0; i < CurrentList.Count; i++) {
-                var sectorPos = CurrentList[i];
+            for (int i = 0; i < _list.CurrentList.Count; i++) {
+                var sectorPos = _list.CurrentList[i];
                 var list = GetList(sectorPos);
                 for (int listIdx = list.Count - 1; listIdx >= 0; listIdx--) {
                     var entity = list[listIdx];
@@ -49,8 +44,8 @@ namespace PixelComrades {
 
         public void UpdatePlayerPosition() {
             var playPos = Game.WorldToSector(Player.Tr.position);
-            if (!CurrentList.Contains(playPos)) {
-                CurrentList.Add(playPos);
+            if (!_list.CurrentList.Contains(playPos)) {
+                _list.CurrentList.Add(playPos);
                 SetSector(playPos, true);
             }
         }
@@ -71,7 +66,7 @@ namespace PixelComrades {
         private void SetEntityList(PrefabEntity entity) {
             var list = GetList(entity.SectorPosition);
             list.Add(entity);
-            var active = CurrentList.Contains(entity.SectorPosition);
+            var active = _list.CurrentList.Contains(entity.SectorPosition);
             entity.SetActive(active);
         }
 
@@ -109,16 +104,14 @@ namespace PixelComrades {
         private void ClearList() {
             _sectorObjects.Clear();
             _sectorLevelObjects.Clear();
-            CurrentList.Clear();
-            PreviousList.Clear();
+            _list.Clear();
         }
 
         private void UpdateVisibility() {
             if (!GameOptions.UseCulling) {
                 return;
             }
-            _currentIndex = _currentIndex == 0 ? 1 : 0;
-            CurrentList.Clear();
+            _list.Swap();
             //for (int i = 0; i < Player.Controller.ActorSenses.CurrentList.Count; i++) {
             //    var pos = Player.Controller.ActorSenses.CurrentList[i];
             //    var sector = Game.WorldToSector(pos.WorldPositionV3);
@@ -131,13 +124,13 @@ namespace PixelComrades {
         }
 
         private void SetList(bool active) {
-            var list = active ? CurrentList : PreviousList;
+            var list = active ? _list.CurrentList: _list.PreviousList;
             for (int i = 0; i < list.Count; i++) {
                 var pos = list[i];
-                if (active && !PreviousList.Contains(pos)) {
+                if (active && !_list.PreviousList.Contains(pos)) {
                     SetSector(pos, true);
                 }
-                else if (!active && !CurrentList.Contains(pos)) {
+                else if (!active && !_list.CurrentList.Contains(pos)) {
                     SetSector(pos, false);
                 }
             }

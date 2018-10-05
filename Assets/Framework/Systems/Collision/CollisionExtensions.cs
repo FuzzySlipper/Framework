@@ -22,10 +22,10 @@ namespace PixelComrades {
             }
         }
 
-        public static float HitMultiplier(int hit, GenericStats stats) {
+        public static float GetHitMultiplier(int hit, Entity entity) {
             var multi = 1f;
             if (hit == CollisionResult.CriticalHit) {
-                var critStat = stats.Get(Stats.CriticalMulti);
+                var critStat = entity.Stats.Get(Stats.CriticalMulti);
                 if (critStat != null) {
                     multi = critStat.Value;
                 }

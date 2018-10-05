@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class CurrencyItem : IComponent, IReceive<ContainerStatusChanged> {
-        private int _owner;
+        private int _owner = -1;
         public int Owner {
             get { return _owner; }
             set {

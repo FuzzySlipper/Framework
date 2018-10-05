@@ -6,7 +6,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class RotationComponent : IComponent {
         [SerializeField] private Float4 _rotation;
-        [SerializeField] private int _owner;
+        [SerializeField] private int _owner = -1;
         private CachedComponent<TransformComponent> _cached;
 
         public int Owner {

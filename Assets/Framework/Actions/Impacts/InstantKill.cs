@@ -20,8 +20,8 @@ namespace PixelComrades {
                 _actionFx.TriggerEvent(stateEvent);
             }
             if (Game.DiceRollSuccess(_chance)) {
-                new DeathEvent(owner, target).Post(target);
-                new FloatingTextMessage("Lethal Hit!", Color.red, target).Post(target);
+                target.Post(new DeathEvent(owner, target));
+                target.Post(new FloatingTextMessage("Lethal Hit!", Color.red, target));
             }
         }
     }

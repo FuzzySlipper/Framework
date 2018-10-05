@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PixelComrades {
     public class Equipment : IComponent{
-        private int _owner;
+        private int _owner = -1;
         public int Owner {
             get { return _owner; }
             set {
@@ -19,77 +19,69 @@ namespace PixelComrades {
             }
         }
         
-        private EquipmentTemplate _template = null;
-        private bool _isMagic = false;
-        private int _level;
         private EquipmentSlot _equip;
+        private StatModHolder[] _mods;
+        private List<string> _statsToEquip = new List<string>();
 
         public bool Equipped { get { return _equip != null; } }
         public EquipmentSlot EquipmentSlot { get { return _equip; } }
-        public int Skill { get; set; }
-        public int SkillRank { get; set; }
-        public int EquipmentSlotType { get; set; }
-        public EquipmentTemplate Template { get { return _template; } }
-        public ItemEquipmentModifier PrefixEquip { get; }
-        public ItemEquipmentModifier SuffixEquip { get; }
+        public int EquipmentSlotType { get;}
 
-        public Equipment(EquipmentTemplate template, int level, ItemEquipmentModifier prefix, ItemEquipmentModifier suffix) {
-            _template = template;
-            PrefixEquip = prefix;
-            SuffixEquip = suffix;
-            _level = level;
-        }
-
-        public void SetMagic() {
-            _isMagic = true;
+        public Equipment(int equip) {
+            EquipmentSlotType = equip;
         }
 
         public void Handle(Entity entity) {
-            StringBuilder sb = new StringBuilder();
-            if (PrefixEquip != null) {
-                PrefixEquip.Init(_level, entity);
-                sb.Append(PrefixEquip.DescriptiveName);
-                sb.Append(" ");
-            }
-            sb.Append(_template.Name);
-            if (SuffixEquip != null) {
-                SuffixEquip.Init(_level, entity);
-                sb.Append(" ");
-                sb.Append(SuffixEquip.DescriptiveName);
-            }
-            entity.Add(new LabelComponent(sb.ToString()));
             entity.GetOrAdd<TooltipComponent>().OnTooltipDel += OnTooltip;
         }
-        
 
+        public void AddStat(string stat) {
+            if (_statsToEquip.Contains(stat)) {
+                return;
+            }
+            _statsToEquip.Add(stat);
+        }
+        
         public void OnTooltip(IComponent component) {
             var container = this.Get<InventoryItem>();
             if (container?.Inventory == null) {
                 return;
             }
-            var compareItem = container.Inventory.GetEntity().Get<EquipmentSlots>()?.GetSlot(_template.EquipSlot).Item ?? null;
+            var compareItem = container.Inventory.GetEntity().Get<EquipmentSlots>()?.GetSlot(EquipmentSlotType).Item ?? null;
             if (compareItem != null && compareItem.Id != Owner) {
                 Game.DisplayCompareData(compareItem);
             }
         }
 
-        public void Equip(EquipmentSlot slot) {
-            _equip = slot;
-            if (PrefixEquip != null) {
-                PrefixEquip.SetEquipped(this, true);
+        private void ClearCurrentMods() {
+            if (_mods == null) {
+                return;
             }
-            if (SuffixEquip != null) {
-                SuffixEquip.SetEquipped(this, true);
+            for (int i = 0; i < _mods.Length; i++) {
+                _mods[i].Remove();
             }
         }
 
-        public void Unequip() {
-            if (PrefixEquip != null) {
-                PrefixEquip.SetEquipped(this, false);
+        public void Equip(EquipmentSlot slot) {
+            ClearCurrentMods();
+            if (_mods == null || _mods.Length != _statsToEquip.Count) {
+                var owner = this.GetEntity();
+                _mods = new StatModHolder[_statsToEquip.Count];
+                for (int i = 0; i < _mods.Length; i++) {
+                    _mods[i] = new DerivedStatModHolder(owner.Stats.Get(_statsToEquip[i]), 1);
+                }
             }
-            if (SuffixEquip != null) {
-                SuffixEquip.SetEquipped(this, false);
+            _equip = slot;
+            if (slot == null) {
+                return;
             }
+            for (int i = 0; i < _mods.Length; i++) {
+                _mods[i].Attach(_equip.SlotOwner.GetEntity().Stats.Get(_mods[i].StatID));
+            }
+        }
+
+        public void UnEquip() {
+            ClearCurrentMods();
             _equip = null;
         }
 

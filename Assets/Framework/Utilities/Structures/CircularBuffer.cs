@@ -36,9 +36,7 @@ namespace PixelComrades {
             if (_currentIndex >= _buffer.Length) {
                 _currentIndex = 0;
             }
-            if (_clearAction != null) {
-                _clearAction(newValue);
-            }
+            _clearAction?.Invoke(newValue);
             return newValue;
         }
     }

@@ -10,126 +10,9 @@ namespace PixelComrades {
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
         private static Dictionary<int, Dictionary<Type, ComponentReference>> _entityComponents = new Dictionary<int, Dictionary<Type, ComponentReference>>();
-        private static Dictionary<int, BufferedList<IReceive>> _entityMessageList = new Dictionary<int, BufferedList<IReceive>>();
-        private static Dictionary<int, MessageKitLocal> _simpleEntityMessages = new Dictionary<int, MessageKitLocal>();
         private static Dictionary<Type, List<NodeFilter>> _filtersToCheck = new Dictionary<Type, List<NodeFilter>>();
         private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
-        private static SortByPriorityReceiver _msgSorter = new SortByPriorityReceiver();
-
         public static ManagedArray<Entity> EntitiesArray { get => _entities; }
-
-        public static void Post<T>(this T msg, Entity entity) where T : struct, IEntityMessage {
-            if (entity != null) {
-                entity.ProcessEntityPost(msg);
-            }
-            World.Enqueue(msg);
-        }
-
-        public static void Post<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
-            entity.ProcessEntityPost<T>(msg);
-            World.Enqueue(msg);
-        }
-
-        private static void ProcessEntityPost<T>(this Entity entity, T msg) where T : IEntityMessage {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var bufferedList)) {
-                return;
-            }
-            bufferedList.Swap();
-            var list = bufferedList.PreviousList;
-            for (int i = 0; i < list.Count; i++) {
-                (list[i] as IReceiveRef<T>)?.Handle(ref msg);
-            }
-            for (int i = 0; i < list.Count; i++) {
-                (list[i] as IReceive<T>)?.Handle(msg);
-            }
-        }
-
-        public static void Post(this Entity entity, int msg) {
-            if (!_simpleEntityMessages.TryGetValue(entity.Id, out var list)) {
-                return;
-            }
-            list.post(msg);
-        }
-
-        public static void AddObserver<T>(this Entity entity, IReceive<T> handler) {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                list = new BufferedList<IReceive>();
-                _entityMessageList.Add(entity.Id, list);
-            }
-            if (list.CurrentList.Contains(handler)) {
-                return;
-            }
-            list.CurrentList.Add(handler);
-            list.CurrentList.Sort(_msgSorter);
-        }
-
-        public static void AddObserver(this Entity entity, IReceive handler) {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                list = new BufferedList<IReceive>();
-                _entityMessageList.Add(entity.Id, list);
-            }
-            if (list.CurrentList.Contains(handler)) {
-                return;
-            }
-            list.CurrentList.Add(handler);
-            list.CurrentList.Sort(_msgSorter);
-        }
-
-        public static void AddObserver(this Entity entity, int message,  System.Action handler) {
-            if (!_simpleEntityMessages.TryGetValue(entity.Id, out var list)) {
-                list = new MessageKitLocal();
-                _simpleEntityMessages.Add(entity.Id, list);
-            }
-            list.addObserver(message, handler);
-        }
-
-        public static void AddObserver(this Entity entity, ISignalReceiver generic) {
-            if (!_simpleEntityMessages.TryGetValue(entity.Id, out var list)) {
-                list = new MessageKitLocal();
-                _simpleEntityMessages.Add(entity.Id, list);
-            }
-            list.addObserver(generic);
-        }
-
-        public static void RemoveObserver<T>(this Entity entity, IReceive<T> handler) {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                return;
-            }
-            list.Remove(handler);
-        }
-
-        public static void RemoveObserver(this Entity entity, IReceive handler) {
-            if (!_entityMessageList.TryGetValue(entity.Id, out var list)) {
-                return;
-            }
-            list.Remove(handler);
-        }
-
-        public static void RemoveObserver(this Entity entity, int message, System.Action handler) {
-            if (!_simpleEntityMessages.TryGetValue(entity.Id, out var list)) {
-                return;
-            }
-            list.removeObserver(message, handler);
-        }
-
-        public static void RemoveObserver(this Entity entity, ISignalReceiver generic) {
-            if (!_simpleEntityMessages.TryGetValue(entity.Id, out var list)) {
-                return;
-            }
-            list.removeObserver(generic);
-        }
-
-        public static void ClearAllMessages() {
-            var enumerator = _entityMessageList.GetEnumerator();
-            try {
-                while (enumerator.MoveNext()) {
-                    enumerator.Current.Value.Clear();
-                }
-            }
-            finally {
-                enumerator.Dispose();
-            }
-        }
 
         public static void RegisterNodeFilter(NodeFilter filter, System.Type handleType) {
             for (int i = 0; i < filter.RequiredTypes.Length; i++) {
@@ -144,12 +27,12 @@ namespace PixelComrades {
             }
         }
 
-        public static T GetNode<T>(this Entity entity) where T : class, INode {
+        public static T GetNode<T>(this Entity entity) where T : class, INode, new() {
             var type = typeof(T);
             return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).GetNode(entity);
         }
 
-        public static List<T> GetNodeList<T>() where T : class, INode {
+        public static List<T> GetNodeList<T>() where T : class, INode, new() {
             var type = typeof(T);
             return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).AllNodes;
         }
@@ -160,6 +43,7 @@ namespace PixelComrades {
 
         public static ManagedArray GetGenericComponentArray(System.Type type) {
             return _components.TryGetValue(type, out var list) ? list : null;
+           
         }
 
         public static Dictionary<Type, ComponentReference> GetEntityComponentDict(int entity) {
@@ -207,19 +91,12 @@ namespace PixelComrades {
             return _entities[index];
         }
 
-        public static Entity AddEntity(Entity entity) {
-            entity.Id = _entities.Add(entity);
-            return entity;
+        public static int AddEntityToMainList(Entity entity) {
+            return _entities.Add(entity);
         }
 
-        public static void RemoveEntity(Entity entity) {
-            entity.Post(new EntityDisposed(entity));
+        public static void FinishDeleteEntity(Entity entity) {
             _entities.Remove(entity.Id);
-            if (_entityMessageList.TryGetValue(entity.Id, out var msgList)) {
-                msgList.Clear();
-                _entityMessageList.Remove(entity.Id);
-            }
-            MonoBehaviourToEntity.Unregister(entity);
             if (!_entityComponents.TryGetValue(entity, out var componentList)) {
                 return;
             }
@@ -303,24 +180,21 @@ namespace PixelComrades {
             if (entity == null) {
                 return default(T);
             }
-            if (entity.HasComponent<T>() || entity.HasDerivedComponent<T>()) {
-                return entity.Get<T>();
-            }
-            var parent = entity.GetParent();
+            var checkEntity = entity;
             _loopLimiter.Reset();
             var type = typeof(T);
             while (_loopLimiter.Advance()) {
-                if (parent == null) {
+                if (checkEntity == null) {
                     break;
                 }
-                _entityComponents.TryGetValue(parent.Id, out var parentList);
+                _entityComponents.TryGetValue(checkEntity.Id, out var parentList);
                 if (parentList != null && parentList.ContainsKey(type)) {
-                    return parent.Get<T>();
+                    return checkEntity.Get<T>();
                 }
                 if (parentList != null && parentList.ContainsDerivedType(type)) {
-                    return parent.GetDerived<T>();
+                    return checkEntity.GetDerived<T>();
                 }
-                parent = parent.GetParent();
+                checkEntity = checkEntity.GetParent();
             }
             return default(T);
         }
@@ -348,6 +222,28 @@ namespace PixelComrades {
 
         public static T Get<T>(this IComponent component) where T : IComponent {
             return GetEntity(component.Owner).Get<T>();
+        }
+
+        public static System.Object GetComponent(Entity entity, string type) {
+            return GetComponent(entity, ParseUtilities.ParseType(type));
+        }
+
+        public static System.Object GetComponent(Entity entity, System.Type type) {
+            if (entity == null) {
+                return null;
+            }
+            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
+                return null;
+            }
+            if (entityList.TryGetValue(type, out var cref)) {
+                return cref.Get();
+            }
+            foreach (var cr in entityList) {
+                if (type.IsAssignableFrom(cr.Key)) {
+                    return cr.Value.Get();
+                }
+            }
+            return null;
         }
 
         public static T Get<T>(this Entity entity) where T : IComponent {
@@ -564,8 +460,7 @@ namespace PixelComrades {
             if (entity.HasComponent<MoveSpeed>()) {
                 return entity.Get<MoveSpeed>().Speed;
             }
-            var stats = entity.Get<GenericStats>();
-            return stats.GetValue(Stats.Speed);
+            return 1;
         }
 
         public static float Distance(this Entity entity, Transform other) {
@@ -579,6 +474,41 @@ namespace PixelComrades {
             return entity.Tags.Contain(EntityTags.IsDead);
         }
 
+        public static T FindStat<T>(this Entity entity, string statFullID) where T : BaseStat {
+            WhileLoopLimiter.ResetInstance();
+            var currentEntity = entity;
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                if (currentEntity == null) {
+                    return null;
+                }
+                var stat = currentEntity.Stats.Get<T>(statFullID);
+                if (stat != null) {
+                    return stat;
+                }
+                currentEntity = currentEntity.GetParent();
+            }
+            return null;
+        }
+
+        public static bool FindStat<T>(this Entity entity, string statFullID, System.Action<T> del) where T : BaseStat {
+            WhileLoopLimiter.ResetInstance();
+            var currentEntity = entity;
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                if (currentEntity == null) {
+                    return false;
+                }
+                if (currentEntity.Stats.HasStat(statFullID)) {
+                    var stat = currentEntity.Stats.Get<T>(statFullID);
+                    if (stat != null) {
+                        del(stat);
+                        return true;
+                    }
+                }
+                currentEntity = currentEntity.GetParent();
+            }
+            return false;
+        }
+
         public static void FindSpawn(this Entity entity, out Vector3 spawnPos, out Quaternion spawnRot) {
             var spawnTr = entity.Find<AnimTr>().Tr;
             var target = entity.Find<CommandTarget>();
@@ -590,10 +520,6 @@ namespace PixelComrades {
                 spawnPos = target.GetPosition;
                 spawnRot = target.GetRotation;
             }
-            //else if (Owner.LastStateEvent != null) {
-            //    spawnPos = Owner.LastStateEvent.Value.Position;
-            //    spawnRot = Owner.LastStateEvent.Value.Rotation;
-            //}
             else {
                 spawnPos = entity.GetPosition();
                 spawnRot = entity.GetRotation();

@@ -26,6 +26,7 @@ namespace PixelComrades {
         private float _yDeg = 2.5f;
         private Status _currentStatus = Status.Inactive;
         private Task _resetView;
+        private float _lookSensitivity;
 
         private bool ShouldCancelRotation {
             get {
@@ -43,6 +44,11 @@ namespace PixelComrades {
             _startingRotation = transform.localRotation;
             MessageKit.addObserver(Messages.PlayerMoving, ResetView);
             MessageKit.addObserver(Messages.PlayerRotated, ResetView);
+            MessageKit.addObserver(Messages.OptionsChanged, SetOptions);
+        }
+
+        private void SetOptions() {
+            _lookSensitivity = GameOptions.Get("LookSensitivity", 2.5f);
         }
 
         private void ResetView() {
@@ -102,8 +108,8 @@ namespace PixelComrades {
         private void FreeLook() {
             //_xDeg += (Input.GetAxis("Mouse X")*_xSpeed*0.02f);
             //_yDeg -= (Input.GetAxis("Mouse Y")*_ySpeed*0.02f);
-            _xDeg += (PlayerInput.LookInput.x * GameOptions.LookSensitivity);
-            _yDeg -= (PlayerInput.LookInput.y * GameOptions.LookSensitivity);
+            _xDeg += (PlayerInput.LookInput.x * _lookSensitivity);
+            _yDeg -= (PlayerInput.LookInput.y * _lookSensitivity);
             _xDeg = ClampAngle(_xDeg, _xMinLimit, _xMaxLimit);
             _yDeg = ClampAngle(_yDeg, _yMinLimit, _yMaxLimit);
             _desiredRotation = Quaternion.Euler(_yDeg, _xDeg, 0.0f);

@@ -3,6 +3,16 @@ using System.Collections;
 
 public class WhileLoopLimiter {
 
+    public static WhileLoopLimiter Instance = new WhileLoopLimiter(5500);
+
+    public static void ResetInstance() {
+        Instance.Reset();
+    }
+
+    public static bool InstanceAdvance() {
+        return Instance.Advance();
+    }
+    
     public WhileLoopLimiter(int limit) {
         Activate(limit);
     }

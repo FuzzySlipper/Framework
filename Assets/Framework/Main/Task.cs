@@ -13,22 +13,21 @@ namespace PixelComrades {
         }
 
         public event Action OnFinish;
-        public string Id { get; private set; }
         public bool Unscaled { get; private set; }
         public float Current { get { return _current; } }
         public UpdateMode Mode { get { return _mode; } }
         public float WaitFor { get { return _waitFor; } }
+        public IEnumerator Routine { get; private set; }
 
-        private IEnumerator _routine = null;
         private UpdateMode _mode = UpdateMode.None;
         private float _waitFor = 0f;
         private float _current = 0;
         private bool _isFinished = false;
+        
 
-        public void Set(IEnumerator routine, string taskId, bool unscaled) {
+        public void Set(IEnumerator routine, bool unscaled) {
             _isFinished = false;
-            _routine = routine;
-            Id = taskId;
+            Routine = routine;
             Unscaled = unscaled;
         }
 
@@ -46,10 +45,9 @@ namespace PixelComrades {
         public void Clear() {
             Finished = true;
             Unscaled = false;
-            _routine = null;
+            Routine = null;
             _current = 0;
             _waitFor = 0f;
-            Id = "Cleared";
             _mode = UpdateMode.None;
         }
 
@@ -85,20 +83,20 @@ namespace PixelComrades {
 
         private void UpdateRoutine() {
             _current = 0;
-            if (_routine == null || !_routine.MoveNext() || Finished) {
+            if (Routine == null || !Routine.MoveNext() || Finished) {
                 Finished = true;
                 return;
             }
-            if (_routine == null) {
-                Debug.LogError(Id + " hit null");
+            if (Routine == null) {
+                Debug.LogError(Routine.ToString() + " hit null");
                 return;
             }
-            if (_routine.Current == null) {
+            if (Routine.Current == null) {
                 _waitFor = 1;
                 _mode = UpdateMode.Frame;
                 return;
             }
-            var yieldCommand = _routine.Current;
+            var yieldCommand = Routine.Current;
             if (yieldCommand is int) {
                 _waitFor = (int) yieldCommand;
                 _mode = UpdateMode.Frame;
@@ -112,7 +110,7 @@ namespace PixelComrades {
             IEnumerator routine = yieldCommand as IEnumerator;
             Task waitTask;
             if (routine != null) {
-                waitTask = TimeManager.Start(routine, Unscaled);
+                waitTask = TimeManager.StartTask(routine, Unscaled);
             }
             else {
                 waitTask = yieldCommand as Task;
@@ -132,7 +130,7 @@ namespace PixelComrades {
                 _waitFor = taskArray.Count - 1;
                 return;
             }
-            Debug.LogError(string.Format("Unexpected yield type: {0} in {1}", yieldCommand.GetType(), Id));
+            Debug.LogError(string.Format("Unexpected yield type: {0} in {1}", yieldCommand.GetType(), Routine.ToString()));
             Finished = true;
         }
     }

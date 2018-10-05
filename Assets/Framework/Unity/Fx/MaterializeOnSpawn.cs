@@ -12,9 +12,9 @@ namespace PixelComrades {
 
         public void OnPoolSpawned() {
             for (int i = 0; i < _entity.Renderers.Length; i++) {
-                _entity.Renderers[i].Renderer.material.SetFloat("_DissolveAmount", 0);
+                _entity.Renderers[i].material.SetFloat("_DissolveAmount", 0);
             }
-            TimeManager.Start(FadeInItem());
+            TimeManager.StartTask(FadeInItem());
         }
 
         public void OnPoolDespawned() {
@@ -25,7 +25,7 @@ namespace PixelComrades {
             tweener.Init();
             while (tweener.Active) {
                 for (int i = 0; i < _entity.Renderers.Length; i++) {
-                    _entity.Renderers[i].Renderer.material.SetFloat("_DissolveAmount", tweener.Get());
+                    _entity.Renderers[i].material.SetFloat("_DissolveAmount", tweener.Get());
                 }
                 yield return null;
             }

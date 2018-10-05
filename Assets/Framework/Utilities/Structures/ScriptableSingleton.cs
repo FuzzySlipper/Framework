@@ -6,6 +6,10 @@ using UnityEditor;
 #endif
 
 public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
+
+    private const string FullDirectory = "Assets/GameData/Resources/Systems/";
+    private const string LoadDirectory = "Systems/";
+
     private static T _main;
     private static object _lock = new object();
     public static T Main {
@@ -15,11 +19,11 @@ public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObjec
             }
             lock (_lock) {
                 if (_main == null) {
-                    _main = Resources.Load<T>(typeof(T).Name);
+                    _main = Resources.Load<T>(string.Format("{0}{1}", LoadDirectory, typeof(T).Name));
                     if (_main == null) {
                         _main = CreateInstance<T>();
 #if UNITY_EDITOR
-                        var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/GameData/System/Resources/" + typeof(T).Name + ".asset");
+                        var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(FullDirectory + typeof(T).Name + ".asset");
                         AssetDatabase.CreateAsset(_main, assetPathAndName);
                         AssetDatabase.SaveAssets();
                         AssetDatabase.Refresh();

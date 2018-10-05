@@ -13,6 +13,7 @@ namespace PixelComrades {
             var script = (PrefabEntity)target;
             EditorGUILayout.LabelField(string.Format("Active {0}", script.SceneActive));
             EditorGUILayout.LabelField(string.Format("Sector {0}", script.SectorPosition));
+            EditorGUILayout.LabelField(string.Format("Entity {0}", script.Entity));
             base.OnInspectorGUI();
         }
     }

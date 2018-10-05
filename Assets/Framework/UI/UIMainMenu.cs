@@ -171,7 +171,10 @@ namespace PixelComrades {
             SetupButton(_layoutGroups[IndexOptions].transform, "Input", SetTargetOptionsMenu);
             SetupButton(_layoutGroups[IndexOptions].transform, "Audio", SetTargetOptionsMenu);
             SetupButton(_layoutGroups[IndexOptions].transform, "Video", SetTargetOptionsMenu);
-            SetupButton(_layoutGroups[IndexOptions].transform, "Return", LoadMainMenu);
+            SetupButton(_layoutGroups[IndexOptions].transform, "Return", (index)=> {
+                ClearTargetOptions();
+                LoadMainMenu(index);
+            });
         }
 
         private void LoadMainMenu(int index) {
@@ -465,8 +468,8 @@ namespace PixelComrades {
             _optionsLabel.text = "Gameplay";
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Look Sensitivity").gameObject);
-            _targetOptions.Add(SetupSlider(_optionControlsTr, GameOptions.LookSensitivity,
-                0.1f, 6, (slider, f) => { GameOptions.LookSensitivity = f; }, false).gameObject);
+            _targetOptions.Add(SetupSlider(_optionControlsTr, GameOptions.Get("LookSensitivity", 2.5f),
+                0.1f, 6, (slider, f) => { GameOptions.Set("LookSensitivity", f); }, false).gameObject);
 
             //_targetOptions.Add(SetupLabel(_optionControlsTr, "Look Smoothing").gameObject);
             //_targetOptions.Add(SetupSlider(_optionControlsTr, GameOptions.LookSmooth,
@@ -474,22 +477,22 @@ namespace PixelComrades {
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Verbose Inventory").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.VerboseInventory, delegate (bool b) {
-                GameOptions.VerboseInventory = b;
+                GameOptions.VerboseInventory.Value = b;
             }, "Explicit status messages in the inventory").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Show Misses").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.ShowMiss, delegate (bool b) {
-                GameOptions.ShowMiss = b;
+                GameOptions.ShowMiss.Value = b;
             }, "Log messages on every miss").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Log All Damage").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.LogAllDamage, delegate (bool b) {
-                GameOptions.LogAllDamage = b;
+                GameOptions.LogAllDamage.Value = b;
             }, "Log all damage for player and all npcs").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Pause On Player Input").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.PauseForInput, delegate (bool b) {
-                GameOptions.PauseForInput = b;
+                GameOptions.PauseForInput.Value = b;
             }, "Phased mode where the action pauses when the player starts input").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Turn Based").gameObject);
@@ -503,7 +506,7 @@ namespace PixelComrades {
             }, "Mouse Look locks the cursor during normal gameplay. Disable for keyboard turning only").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Ready Messages").gameObject);
-            _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.ReadyNotice, delegate(bool b) { GameOptions.ReadyNotice= b; }, "Shows a message in the center of screen when a party member can act").gameObject);
+            _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.ReadyNotice, delegate(bool b) { GameOptions.ReadyNotice.Value = b; }, "Shows a message in the center of screen when a party member can act").gameObject);
 
 
             //_targetOptions.Add(SetupLabel(_optionControlsTr, "Menu Pause").gameObject);
@@ -520,12 +523,12 @@ namespace PixelComrades {
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Camera Shaking").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.UseShaking, delegate (bool b) {
-                GameOptions.UseShaking = b;
+                GameOptions.UseShaking.Value = b;
             }, "Should the camera shake on damage").gameObject);
 
             _targetOptions.Add(SetupLabel(_optionControlsTr, "Camera Pain Flash").gameObject);
             _targetOptions.Add(SetupToggle(_optionControlsTr, GameOptions.UsePainFlash, delegate (bool b) {
-                GameOptions.UsePainFlash = b;
+                GameOptions.UsePainFlash.Value = b;
             }, "Should the camera flash a color on damage").gameObject);
         }
 
@@ -596,6 +599,7 @@ namespace PixelComrades {
         }
 
         private void ClearTargetOptions() {
+            MessageKit.post(Messages.OptionsChanged);
             _inputMapper.RemoveAllEventListeners();
             for (int i = 0; i < _targetOptions.Count; i++) {
                 ItemPool.Despawn(_targetOptions[i]);

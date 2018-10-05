@@ -4,16 +4,21 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class BufferedList<T> {
-        private int _currentIndex = 0;
-        private List<T>[] _list = new List<T>[2] {
-            new List<T>(), new List<T>()
-        };
 
-        public List<T> CurrentList { get { return _list[_currentIndex]; } }
-        public List<T> PreviousList { get { return _list[_currentIndex == 0 ? 1 : 0]; } }
+        private int _currentIndex = 0;
+        private ManagedArray<T>[] _list = new ManagedArray<T>[2];
+
+        public BufferedList(int size = 10) {
+            _list[0] = new ManagedArray<T>(size);
+            _list[1] = new ManagedArray<T>(size);
+        }
+
+        public ManagedArray<T> CurrentList { get { return _list[_currentIndex]; } }
+        public ManagedArray<T> PreviousList { get { return _list[_currentIndex == 0 ? 1 : 0]; } }
+
+        public T this[int index] { get { return CurrentList[index]; } }
 
         public int Count { get { return CurrentList.Count; } }
-        public T this[int index] { get { return CurrentList[index]; } }
 
         public void Add(T newVal) {
             CurrentList.Add(newVal);
@@ -24,7 +29,7 @@ namespace PixelComrades {
         }
 
         public void RemoveAt(int index) {
-            CurrentList.RemoveAt(index);
+            CurrentList.Remove(index);
         }
 
         public void Advance() {
@@ -34,8 +39,7 @@ namespace PixelComrades {
 
         public void Swap() {
             _currentIndex = _currentIndex == 0 ? 1 : 0;
-            CurrentList.Clear(); 
-            CurrentList.AddRange(PreviousList);
+            CurrentList.Replace(PreviousList);
         }
 
         public void Clear() {

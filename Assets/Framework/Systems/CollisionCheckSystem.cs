@@ -47,7 +47,7 @@ namespace PixelComrades {
                 if (hitEntity == null || hitEntity == entity) {
                     continue;
                 }
-                new CollisionEvent(entity, hitEntity, _rayHits[i].point, _rayHits[i].normal).Post(entity);
+                entity.Post(new CollisionEvent(entity, hitEntity, _rayHits[i].point, _rayHits[i].normal));
             }
         }
 
@@ -55,7 +55,7 @@ namespace PixelComrades {
         //    var hitLimit = Physics.BoxCastNonAlloc(_lastPos, Owner.Collider.bounds.extents, dir.normalized, _rayHits, Tr.rotation, dir.magnitude, LayerMasks.DefaultCollision);
         //}
 
-        public void HandleGlobal(List<SphereCastEvent> arg) {
+        public void HandleGlobal(ManagedArray<SphereCastEvent> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 var rayEvent = arg[i];
                 var rayLimit = Physics.SphereCastNonAlloc(rayEvent.Ray, rayEvent.Radius, _rayHits, rayEvent.Distance, LayerMasks.DefaultCollision);

@@ -1,8 +1,27 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public static class Root {
-    public static Canvas PlayerCanvas { get; set; }
-    public static Canvas Canvas { get; set; }
-    public static Canvas CanvasMisc { get;set; }
+namespace PixelComrades {
+    public enum UIRoot {
+        Player,
+        Debug,
+        Edge,
+        Misc,
+    }
+
+    public static class Root {
+        private static Dictionary<UIRoot, Canvas> _canvases = new Dictionary<UIRoot, Canvas>();
+
+        public static void Register(UIRoot root, Canvas canvas) {
+            if (canvas == null) {
+                return;
+            }
+            _canvases.SafeAdd(root, canvas);
+        }
+
+        public static Canvas Get(this UIRoot root) {
+            return _canvases.TryGetValue(root, out var canvas) ? canvas : null;
+        }
+    }
 }

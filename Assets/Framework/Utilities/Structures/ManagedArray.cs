@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
 
@@ -21,6 +22,8 @@ namespace PixelComrades {
         private int _initialSize;
 
         public int Max { get { return _max; } }
+        public int Count { get { return _max; } }
+        public bool IsFull { get { return _max == _list.Length; } }
 
         public T this[int index] {
             get { return _list[index]; }
@@ -55,11 +58,33 @@ namespace PixelComrades {
             return _max - 1;
         }
 
+        public void Replace(ManagedArray<T> source) {
+            Clear();
+            if (_list.Length < source.Count) {
+                Array.Resize(ref _list, source.Count * 2);
+            }
+            for (int i = 0; i < source.Count; i++) {
+                _list[i] = source[i];
+            }
+            _max = source.Max;
+        }
+
         public void Remove(T component) {
             var index = _list.FindIndex(component);
             if (index >= 0) {
                 Remove(index);
             }
+        }
+
+        public T Pop() {
+            for (int i = 0; i < _max; i++) {
+                if (_list[i] != null) {
+                    var value = _list[i];
+                    Remove(i);
+                    return value;
+                }
+            }
+            return default(T);
         }
 
         public override void Remove(int index) {
@@ -89,6 +114,30 @@ namespace PixelComrades {
 
         public bool IsInvalid(int index) {
             return _invalidIndices.Contains(index);
+        }
+
+        public bool Contains(T value) {
+            for (int a = 0; a < Max; a++) {
+                if (_list[a].Equals(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Must sort nulls to top
+        /// </summary>
+        /// <param name="comparer"></param>
+        public void Sort(IComparer<T> comparer) {
+            _freeIndices.Clear();
+            Array.Sort(_list, comparer);
+            for (int i = 0; i < _list.Length; i++) {
+                if (_list[i] == null) {
+                    _max = i;
+                    break;
+                }
+            }
         }
 
         /// <summary>

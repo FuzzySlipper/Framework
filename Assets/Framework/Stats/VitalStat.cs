@@ -53,11 +53,13 @@ namespace PixelComrades {
         //}
 
         public override string ToString() {
-            return string.Format("<b>{0}:</b> {1}/{2}", Label, _current.ToString("F0"), Value.ToString("F0"));
+            return string.Format("{0}: {1}/{2}", Label, Current, Value);
+
         }
 
-        public override string ToDebugString() {
-            return string.Format("{0}: {1}/{2}", Label, Current, Value);
+        public override string ToLabelString() {
+            return string.Format("<b>{0}:</b> {1}/{2}", Label, _current.ToString("F0"), Value.ToString("F0"));
+
         }
 
         public void SetMax() {

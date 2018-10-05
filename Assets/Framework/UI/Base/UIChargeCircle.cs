@@ -20,11 +20,11 @@ namespace PixelComrades {
         }
 
         public static void StartCharge(float lerpTime) {
-            TimeManager.Start(main.Charge(lerpTime));
+            TimeManager.StartTask(main.Charge(lerpTime));
         }
 
         public static void StopCharge() {
-            TimeManager.Start(main.Fade());
+            TimeManager.StartTask(main.Fade());
         }
 
         private IEnumerator Fade() {

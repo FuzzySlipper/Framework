@@ -4,18 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class SpriteDatabase : ScriptableObject {
-
-        private static SpriteDatabase _main;
-
-        public static SpriteDatabase Main {
-            get {
-                if (_main == null) {
-                    _main = Resources.Load<SpriteDatabase>("SpriteDatabase");
-                }
-                return _main;
-            }
-        }
+    public class SpriteDatabase : ScriptableSingleton<SpriteDatabase> {
 
         [SerializeField] private Sprite _attackIcon = null;
         [SerializeField] private Sprite _rangeAttackIcon = null;

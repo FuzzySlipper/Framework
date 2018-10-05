@@ -6,22 +6,33 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class VisibleNode : INode {
         public Entity Entity;
-        public CachedComponent<TransformComponent> Tr;
-        public CachedComponent<RigidbodyComponent> Rb;
-        public CachedComponent<ModelComponent> Model;
-        public CachedComponent<LabelComponent> Label;
+        public CachedComponent<TransformComponent> Tr = new CachedComponent<TransformComponent>();
+        public CachedComponent<ModelComponent> Model = new CachedComponent<ModelComponent>();
+        public CachedComponent<LabelComponent> Label = new CachedComponent<LabelComponent>();
+        public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
 
-        private CachedComponent<RotationComponent> _rotation;
-        private CachedComponent<PositionComponent> _position;
-
+        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
+        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
+        
         public VisibleNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+            Register(entity, list);
+        }
+
+        public VisibleNode() {}
+
+        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
             Entity = entity;
-            Tr = new CachedComponent<TransformComponent>(entity, list);
-            Rb = new CachedComponent<RigidbodyComponent>(entity, list);
-            Model = new CachedComponent<ModelComponent>(entity, list);
-            Label = new CachedComponent<LabelComponent>(entity, list);
-            _position = new CachedComponent<PositionComponent>(entity, list);
-            _rotation = new CachedComponent<RotationComponent>(entity, list);
+            Tr.Set(entity, list);
+            Model.Set(entity, list);
+            Label.Set(entity, list);
+            Rb.Set(entity, list);
+            _position.Set(entity, list);
+            _rotation.Set(entity, list);
+        }
+
+        public void Setup(GameObject obj) {
+            Model.c.Model = obj.GetComponent<ModelWrapper>();
+            Tr.Assign(new TransformComponent(obj.transform));
         }
 
         public Vector3 position { get { return Tr.c.Tr?.position ?? _position.c?.Position ?? Vector3.zero; } }
@@ -29,17 +40,11 @@ namespace PixelComrades {
 
         public void Dispose() {
             Tr.Dispose();
-            Tr = null;
             Rb.Dispose();
-            Rb = null;
             Model.Dispose();
-            Model = null;
             Label.Dispose();
-            Label = null;
             _position.Dispose();
-            _position = null;
             _rotation.Dispose();
-            _rotation = null;
         }
 
         public static System.Type[] GetTypes() {

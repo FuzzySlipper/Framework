@@ -11,7 +11,7 @@ namespace PixelComrades {
         public abstract Sprite Icon { get; }
         public abstract bool TryComplete();
 
-        [SerializeField] private int _owner;
+        [SerializeField] private int _owner = -1;
         public int Owner {
             get { return _owner; }
             set {

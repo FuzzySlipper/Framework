@@ -16,7 +16,7 @@ namespace PixelComrades {
         private ISystemUpdate[] _systemUpdate;
         private ITurnUpdate[] _turnUpdate;
         private IPoolEvents[] _poolListeners;
-        private RendererTracker[] _renderers;
+        private Renderer[] _renderers;
         private Light[] _lights;
         private bool _active = true;
         private bool _isSceneObject = false;
@@ -30,7 +30,7 @@ namespace PixelComrades {
         public bool IsSceneObject { get { return _isSceneObject; } } // careful using this
         public Point3 SectorPosition { get; set; }
         public SerializedMetaData Metadata { get { return _metadata; } set { _metadata = value; } }
-        public RendererTracker[] Renderers { get { return _renderers; } }
+        public Renderer[] Renderers { get { return _renderers; } }
         public bool SceneActive { get { return _active; } }
         public Transform Transform {
             get {
@@ -85,27 +85,16 @@ namespace PixelComrades {
             _poolListeners = GetComponentsInChildren<IPoolEvents>(true);
             _turnUpdate = GetComponentsInChildren<ITurnUpdate>(true);
             _lights = GetComponentsInChildren<Light>(true);
-            var meshRenderers = GetComponentsInChildren<Renderer>(true);
-            var renders = new List<RendererTracker>();
-            for (int i = 0; i < meshRenderers.Length; i++) {
-                var renderTracker = meshRenderers[i].gameObject.GetComponent<RendererTracker>();
-                if (renderTracker == null) {
-                    renderTracker = meshRenderers[i].gameObject.AddComponent<RendererTracker>();
-                }
-                renderTracker.Setup(meshRenderers[i]);
-                renders.Add(renderTracker);
-            }
-            _renderers = renders.ToArray();
+            _renderers = GetComponentsInChildren<Renderer>(true);
         }
 
         public Bounds MaxBounds() {
             var bound = new Bounds(transform.position, Vector3.zero);
-            var meshes = GetComponentsInChildren<Renderer>();
-            if (meshes == null || meshes.Length == 0) {
+            if (_renderers == null || _renderers.Length == 0) {
                 return bound;
             }
-            for (int i = 0; i < meshes.Length; i++) {
-                bound.Encapsulate(meshes[i].bounds);
+            for (int i = 0; i < _renderers.Length; i++) {
+                bound.Encapsulate(_renderers[i].bounds);
             }
             var localCenter = bound.center - transform.position;
             bound.center = transform.TransformPoint(localCenter);
@@ -229,7 +218,7 @@ namespace PixelComrades {
         public void SetVisible(bool status) {
             if (_renderers != null) {
                 for (var i = 0; i < _renderers.Length; i++) {
-                    _renderers[i].SetVisible(status);
+                    _renderers[i].enabled = status;
                 }
             }
             if (_lights != null) {
@@ -237,6 +226,15 @@ namespace PixelComrades {
                     _lights[i].enabled = status;
                 }
             }
+        }
+
+        public MaterialPropertyBlock[] GatherMatBlocks() {
+            var blocks = new MaterialPropertyBlock[_renderers.Length];
+            for (int i = 0; i < blocks.Length; i++) {
+                blocks[i] = new MaterialPropertyBlock();
+                _renderers[i].GetPropertyBlock(blocks[i]);
+            }
+            return blocks;
         }
 
         public static int GetStableHashCode(string str) {

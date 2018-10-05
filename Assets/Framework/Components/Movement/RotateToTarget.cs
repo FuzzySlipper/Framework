@@ -39,7 +39,10 @@ namespace PixelComrades {
             TargetTr = targetTr;
             Owner = owner;
             RotationSpeed = rotationSpeed;
-            Rb = owner.Get<RigidbodyComponent>().Rb;
+            var rb = owner.Get<RigidbodyComponent>();
+            if (rb != null) {
+                Rb = rb.Rb;
+            }
             if (Rb == null) {
                 RotateTr = owner.Get<TransformComponent>().Tr;
             }

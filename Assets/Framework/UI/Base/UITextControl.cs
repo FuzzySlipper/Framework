@@ -50,7 +50,7 @@ namespace PixelComrades {
         }
 
         public void TypeWriterText(string displayText, float speed, bool unscaled, System.Action onComplete) {
-            TimeManager.Start(DisplayText(displayText, speed), unscaled, onComplete);
+            TimeManager.StartTask(DisplayText(displayText, speed), unscaled, onComplete);
         }
 
         private IEnumerator DisplayText(string textValue, float speed) {

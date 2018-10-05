@@ -62,7 +62,7 @@ namespace PixelComrades {
             _main._currentLayer.Confirm(index);
         }
 
-        public static bool Active { get { return _main._state != State.Disabled; } }
+        public static bool Active { get { return _main != null && _main._state != State.Disabled; } }
         public static RectTransform PanelTransform { get; private set; }
         public float ScreenSize { get { return MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) * _panelOffset / 2.0f; } }
         public float TransitionLength { get { return _transitionLength; } }

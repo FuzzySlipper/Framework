@@ -10,7 +10,7 @@ namespace PixelComrades {
         public bool IsDead = false;
 
         public void Handle(DamageEvent arg) {
-            if (this.GetEntity().Get<VitalStats>()[0].Current > 0.05f) {
+            if (this.GetEntity().Stats.HealthStat?.Current > 0.05f) {
                 return;
             }
             IsDead = true;

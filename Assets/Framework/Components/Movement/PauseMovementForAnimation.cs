@@ -14,12 +14,12 @@ namespace PixelComrades {
 
         public void PauseForClip(string clip) {
             var entity = this.GetEntity();
-            TimeManager.Start(PauseMovementForDamage(entity, entity.Get<AnimatorData>(), clip));
+            TimeManager.StartTask(PauseMovementForDamage(entity, entity.Get<AnimatorData>(), clip));
         }
 
         public void Handle(DamageEvent arg) {
             var entity = this.GetEntity();
-            TimeManager.Start(PauseMovementForDamage(entity, entity.Get<AnimatorData>(), _damageClip));
+            TimeManager.StartTask(PauseMovementForDamage(entity, entity.Get<AnimatorData>(), _damageClip));
         }
 
         private IEnumerator PauseMovementForDamage(Entity owner, AnimatorData animator, string clip) {

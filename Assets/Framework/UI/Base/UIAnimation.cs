@@ -41,7 +41,7 @@ namespace PixelComrades {
         }
 
         private void Play() {
-            TimeManager.Start(PlayAnimation(), _unscaled);
+            TimeManager.StartTask(PlayAnimation(), _unscaled);
         }
 
         private void SetupRect() {

@@ -30,7 +30,7 @@ namespace PixelComrades {
                 }
                 return;
             }
-            var price = RpgSystem.RepairEstimate(UIDragDropHandler.CurrentData);
+            var price = GameOptions.RepairEstimate(UIDragDropHandler.CurrentData);
             UIFloatingText.Spawn(string.Format("Repaired for {0} {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
             Player.Currency.AddToValue(-price);
             //UIDragDropHandler.CurrentData.Durability.SetMax();

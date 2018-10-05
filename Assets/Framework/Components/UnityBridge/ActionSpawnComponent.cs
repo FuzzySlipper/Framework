@@ -5,16 +5,14 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public struct ActionSpawnComponent : IComponent {
-
-        public GameObject Prefab;
         public int Owner { get; set; }
-        public float Speed { get; }
-        public float Rotation { get; }
 
-        public ActionSpawnComponent(GameObject prefab, float speed, float rotation) : this() {
-            Prefab = prefab;
-            Speed = speed;
-            Rotation = rotation;
+        public string Prefab { get; }
+        public DataEntry Data { get; }
+
+        public ActionSpawnComponent(DataEntry data) : this() {
+            Data = data;
+            Prefab = data.GetValue<string>(DatabaseFields.Model);
         }
     }
 

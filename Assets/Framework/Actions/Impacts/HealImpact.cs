@@ -5,11 +5,11 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class HealImpact : IActionImpact {
 
-        private int _targetVital;
+        private string _targetVital;
         private float _damagePercent;
         private ActionFx _actionFx;
 
-        public HealImpact(int targetVital, float damagePercent, ActionFx actionFx) {
+        public HealImpact(string targetVital, float damagePercent, ActionFx actionFx) {
             _targetVital = targetVital;
             _damagePercent = damagePercent;
             _actionFx = actionFx;
@@ -22,11 +22,7 @@ namespace PixelComrades {
             if (_actionFx != null) {
                 _actionFx.TriggerEvent(stateEvent);
             }
-            var stats = owner.Get<GenericStats>();
-            if (stats == null) {
-                return;
-            }
-            new HealEvent(stats.GetValue(Stats.Power) * _damagePercent, owner, target, _targetVital).Post(target);
+            target.Post(new HealEvent(collisionEvent.Target.Stats.GetValue(Stats.Power) * _damagePercent, owner, target, _targetVital));
         }
     }
 }

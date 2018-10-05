@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [Priority(Priority.High)]
     public class EntityModifierSystem : SystemBase, IMainSystemUpdate {
 
         private ManagedArray<ModifiersContainer> _list;

@@ -3,17 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class CommandLog : ScriptableObject {
-
-        private static CommandLog _static;
-        public static CommandLog Instance {
-            get {
-                if (_static == null) {
-                    _static = Resources.Load<CommandLog>("CommandLog");
-                }
-                return _static;
-            }
-        }
+    public class CommandLog : ScriptableSingleton<CommandLog> {
 
         private const int LimitStore = 50;
 
@@ -24,21 +14,21 @@ namespace PixelComrades {
 
         public List<Command> CurrentCommands { get { return _currentCommands; } }
         public Queue<Command> PastCommands { get { return _pastCommands; } }
-        public static bool LoggingActive { get { return Instance._loggingActive; } }
+        public static bool LoggingActive { get { return Main._loggingActive; } }
 
         public static void CommandActive(Command active) {
             if (!LoggingActive) {
                 return;
             }
-            Instance._currentCommands.Add(active);
+            Main._currentCommands.Add(active);
         }
 
         public static void CommandCompleted(Command command) {
             if (!LoggingActive) {
                 return;
             }
-            Instance._currentCommands.Remove(command);
-            Instance.StoreInternal(command);
+            Main._currentCommands.Remove(command);
+            Main.StoreInternal(command);
         }
 
         private void StoreInternal(Command command) {

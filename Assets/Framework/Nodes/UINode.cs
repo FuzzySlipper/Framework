@@ -5,27 +5,34 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class UINode : INode {
         public Entity Entity;
-        public CachedComponent<TransformComponent> Tr;
-        public CachedComponent<ModelComponent> Model;
-        public CachedComponent<LabelComponent> Label;
-        public CachedComponent<DescriptionComponent> Description;
-        public CachedComponent<DataDescriptionComponent> DataDescription;
-        public CachedComponent<IconComponent> Icon;
+        public CachedComponent<TransformComponent> Tr = new CachedComponent<TransformComponent>();
+        public CachedComponent<ModelComponent> Model = new CachedComponent<ModelComponent>();
+        public CachedComponent<LabelComponent> Label = new CachedComponent<LabelComponent>();
+        public CachedComponent<DescriptionComponent> Description = new CachedComponent<DescriptionComponent>();
+        public CachedComponent<DataDescriptionComponent> DataDescription = new CachedComponent<DataDescriptionComponent>();
+        public CachedComponent<IconComponent> Icon = new CachedComponent<IconComponent>();
 
+        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
+        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
 
-        private CachedComponent<RotationComponent> _rotation;
-        private CachedComponent<PositionComponent> _position;
 
         public UINode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+            Register(entity, list);
+        }
+
+        public UINode() {
+        }
+
+        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
             Entity = entity;
-            Tr = new CachedComponent<TransformComponent>(entity, list);
-            Description = new CachedComponent<DescriptionComponent>(entity, list);
-            DataDescription = new CachedComponent<DataDescriptionComponent>(entity, list);
-            Icon = new CachedComponent<IconComponent>(entity, list);
-            Label = new CachedComponent<LabelComponent>(entity, list);
-            Model = new CachedComponent<ModelComponent>(entity, list);
-            _position = new CachedComponent<PositionComponent>(entity, list);
-            _rotation = new CachedComponent<RotationComponent>(entity, list);
+            Tr.Set(entity, list);
+            Model.Set(entity, list);
+            Label.Set(entity, list);
+            Description.Set(entity, list);
+            DataDescription.Set(entity, list);
+            Icon.Set(entity, list);
+            _position.Set(entity, list);
+            _rotation.Set(entity, list);
         }
 
         public void Setup(GameObject obj) {
@@ -43,21 +50,13 @@ namespace PixelComrades {
 
         public void Dispose() {
             Tr.Dispose();
-            Tr = null;
             Model.Dispose();
-            Model = null;
             Label.Dispose();
-            Label = null;
             _position.Dispose();
-            _position = null;
             _rotation.Dispose();
-            _rotation = null;
             Icon.Dispose();
-            Icon = null;
             Description.Dispose();
-            Description = null;
             DataDescription.Dispose();
-            DataDescription = null;
         }
 
         public static System.Type[] GetTypes() {

@@ -42,7 +42,7 @@ namespace PixelComrades {
         }
 
         public void StartText(string text, float duration, Vector3 end, Color color) {
-            TimeManager.Start(SetTargetText(text, duration, end, color));
+            TimeManager.StartTask(SetTargetText(text, duration, end, color));
         }
 
         public IEnumerator SetTargetText(string text, float duration, Vector3 end, Color color) {

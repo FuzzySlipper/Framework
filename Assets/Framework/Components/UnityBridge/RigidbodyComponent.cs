@@ -4,16 +4,23 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public struct RigidbodyComponent : IComponent, IDisposable {
+    public class RigidbodyComponent : IComponent, IDisposable {
 
         public int Owner { get; set; }
-        public Rigidbody Rb;
+        public Rigidbody Rb { get; private set; }
 
         public RigidbodySettings RigidbodySetup;
 
-        public RigidbodyComponent(Rigidbody rb) : this() {
-            Rb = rb;
+        public RigidbodyComponent(Rigidbody rb) {
             RigidbodySetup = new RigidbodySettings();
+            Rb = rb;
+            if (Rb != null) {
+                RigidbodySetup.Setup(Rb);
+            }
+        }
+
+        public void SetRb(Rigidbody rb) {
+            Rb = rb;
             if (Rb != null) {
                 RigidbodySetup.Setup(Rb);
             }

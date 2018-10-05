@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class DespawnTimer : IComponent {
-        private int _owner;
+        private int _owner = -1;
         public int Owner {
             get { return _owner; }
             set {
@@ -12,28 +12,38 @@ namespace PixelComrades {
                     return;
                 }
                 _owner = value;
-                if (_owner < 0) {
+                if (_owner < 0 || !_autoStart) {
                     return;
                 }
-                TimeManager.Start(WaitTimer(), Unscaled);
+                StartTimer();
             }
         }
-        public float Time { get; }
+        public float Time { get; set; }
         public bool Unscaled { get; }
+        public IEntityPool Pool;
 
-        public DespawnTimer(float time, bool unscaled) {
+        private bool _autoStart;
+
+        public DespawnTimer(float time, bool unscaled, IEntityPool pool, bool autoStart = true) {
             Time = time;
             Unscaled = unscaled;
+            Pool = pool;
+            _autoStart = autoStart;
+        }
+
+        public void StartTimer() {
+            TimeManager.StartTask(WaitTimer(), Unscaled);
         }
 
         private IEnumerator WaitTimer() {
-            yield return Time;
             var entity = this.GetEntity();
-            if (entity != null && !entity.IsDestroyed()) {
-                entity.Destroy();
+            if (entity == null) {
+                yield break;
+            }
+            while (!entity.IsDestroyed()) {
+                yield return Time;
+                entity.Destroy(Pool);
             }
         }
-
-
     }
 }

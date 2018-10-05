@@ -18,7 +18,7 @@ namespace PixelComrades {
                 return;
             }
             var collisionPnt = collision.contacts[0];
-            new CollisionEvent(entity, hitEntity, collisionPnt.point, collisionPnt.normal).Post(entity);
+            entity.Post(new CollisionEvent(entity, hitEntity, collisionPnt.point, collisionPnt.normal));
         }
     }
 }

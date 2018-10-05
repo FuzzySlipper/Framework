@@ -5,69 +5,20 @@ using System.Text;
 
 namespace PixelComrades {
     public class Weapon : IComponent, IReceive<EquipmentChanged> {
-        private int _owner;
+        private int _owner = -1;
         public int Owner {
             get { return _owner; }
-            set {
-                if (_owner == value) {
-                    return;
-                }
-                _owner = value;
-                if (_owner < 0) {
-                    return;
-                }
-                Handle(this.GetEntity());
-            }
+            set {_owner = value; }
         }
 
-        private WeaponTemplate _template;
-        private int _level;
         private CommandSequence _attack;
         private CommandsContainer _current;
 
-        public WeaponTemplate Template { get { return _template; } }
-        public ItemAttackModifier PrefixAttack { get; }
-        public ItemAttackModifier SuffixAttack { get; }
-        public ActorAnimations Animation { get { return ActorAnimations.Action; } }
-        public TargetType Targeting { get { return TargetType.Enemy; } }
-        public CommandSequence Attack => _attack;
+        public CommandSequence Attack { get => _attack; }
 
-        public Weapon(WeaponTemplate template, int level, ItemModifier prefix, ItemModifier suffix, CommandSequence attack) {
-            _template = template;
-            PrefixAttack = prefix as ItemAttackModifier;
-            SuffixAttack = suffix as ItemAttackModifier;
-            _level = level;
+        public Weapon(CommandSequence attack) {
             _attack = attack;
         }
-
-        public void Handle(Entity entity) {
-            StringBuilder sb = new StringBuilder();
-            if (PrefixAttack != null) {
-                PrefixAttack.Init(_level, entity);
-                sb.Append(PrefixAttack.DescriptiveName);
-                sb.Append(" ");
-            }
-            sb.Append(_template.Name);
-            if (SuffixAttack != null) {
-                SuffixAttack.Init(_level, entity);
-                sb.Append(" ");
-                sb.Append(SuffixAttack.DescriptiveName);
-            }
-            entity.Add(new LabelComponent(sb.ToString()));
-        }
-
-        //protected override bool CanStart() {
-        //    if (_weapon.Jammed) {
-        //        LastStatusUpdate = "Weapon Jammed";
-        //        return false;
-        //    }
-        //    if (Owner != null && Owner.VitalStats[Vitals.Energy].Current <= 0) {
-        //        LastStatusUpdate = "Too tired";
-        //        return false;
-        //    }
-        //    return base.CanStart();
-        //}
-
 
         public void Handle(EquipmentChanged arg) {
             if (_current != null) {

@@ -22,7 +22,11 @@ namespace PixelComrades {
                 return;
             }
             var force = transform.forward * ForceRange.Lerp( Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
-            new AddForceEvent(entity.Find<RigidbodyComponent>().Rb, force).Post(entity);
+            
+            var rb = entity.Find<RigidbodyComponent>();
+            if (rb != null) {
+                entity.Post(new AddForceEvent(rb.Rb, force));
+            }
             Owner.DefaultPostAdvance(this);
         }
     }

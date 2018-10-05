@@ -11,7 +11,7 @@ namespace PixelComrades {
     }
 
     public interface IReceiveGlobal<T> : IReceive {
-        void HandleGlobal(List<T> arg);
+        void HandleGlobal(ManagedArray<T> arg);
     }
 
     public interface IReceive {}

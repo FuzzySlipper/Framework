@@ -34,7 +34,7 @@ namespace PixelComrades {
             if (_task != null) {
                 TimeManager.Cancel(_task);
             }
-            _task = TimeManager.Start(PlayAnimation(), _unscaled, Finish);
+            _task = TimeManager.StartTask(PlayAnimation(), _unscaled, Finish);
         }
 
         public void OnPoolSpawned() {

@@ -7,10 +7,10 @@ namespace PixelComrades {
         public float Amount;
         public Entity Origin { get; }
         public Entity Target { get; }
-        public int DamageType { get; }
-        public int TargetVital { get; }
+        public string DamageType { get; }
+        public string TargetVital { get; }
 
-        public DamageEvent(float amount, Entity origin, Entity target, int damageType, int targetVital) {
+        public DamageEvent(float amount, Entity origin, Entity target, string damageType, string targetVital) {
             Amount = amount;
             Origin = origin;
             Target = target;
@@ -19,7 +19,7 @@ namespace PixelComrades {
         }
 
         public string ToDescription() {
-            return string.Format("{0:F0} {1}", Amount, DamageTypes.GetDescriptionAt(DamageType));
+            return string.Format("{0:F0} {1}", Amount, GameData.DamageTypes.GetDescriptionAt(DamageType));
         }
     }
 
@@ -27,9 +27,9 @@ namespace PixelComrades {
         public float Amount;
         public Entity Origin { get; }
         public Entity Target { get; }
-        public int TargetVital { get; }
+        public string TargetVital { get; }
 
-        public HealEvent(float amount, Entity origin, Entity target, int targetVital) {
+        public HealEvent(float amount, Entity origin, Entity target, string targetVital) {
             Amount = amount;
             Origin = origin;
             Target = target;

@@ -5,8 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json;
-using PixelComrades;
-using SeawispHunter.MinibufferConsole;
 
 namespace PixelComrades {
 
@@ -21,24 +19,30 @@ namespace PixelComrades {
     }
 
     public static class EcsDebug {
+
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
         //DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
 
         public static void RegisterDebugCommands() {
-            Minibuffer.Register(typeof(EcsDebug));
+            //Minibuffer.Register(typeof(EcsDebug));
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
         public static void Version() {
             Debug.LogFormat("Game Version: {0}", Game.Version);
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
         public static void TestTimers() {
             TimeManager.StartUnscaled(RunTimerTest(1));
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        public static void DebugVelocity(Entity entity) {
+            var rb = entity.Get<RigidbodyComponent>().Rb;
+            if (rb != null) {
+                UIGenericValueWatcher.Get(UIAnchor.TopLeft, 0.25f, () => string.Format("Velocity: {0:F1} / {1:F1}",  
+                    rb.velocity.magnitude, entity.Stats.GetValue("Attributes.Speed")));
+            }
+        }
+
         public static void TestAnimationEvent(int entityId, string clip) {
             var entity = EntityController.GetEntity(entityId);
             if (entity == null) {
@@ -49,13 +53,6 @@ namespace PixelComrades {
             entity.Post(new PlayAnimation(entity, clip, new AnimatorEvent(entity, clip, true, true)));
             handle.OnDel += receiver => entity.RemoveObserver(handle);
         }
-
-
-
-        //[SeawispHunter.MinibufferConsole.Command]
-        //public static void SetVital(int entity, int vital, float amount) {
-        //    entity.
-        //}
 
         private static IEnumerator RunTimerTest(float length) {
             var watch = new System.Diagnostics.Stopwatch();
@@ -70,23 +67,22 @@ namespace PixelComrades {
             Debug.LogFormat("Stop Watch Seconds {0} Ms {1} Manual {2} Timer {3}", watch.Elapsed.TotalSeconds, watch.Elapsed.Milliseconds, TimeManager.TimeUnscaled - startTime, length);
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
         public static void FlyCam() {
             PixelComrades.FlyCam.main.ToggleActive();
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void Screenshot() {
             ScreenCapture.CaptureScreenshot(
                 string.Format( "Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png", Game.Title, System.DateTime.Now));
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void FPS() {
             UIFrameCounter.main.Toggle();
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void FixMouse() {
             if (GameOptions.MouseLook && !Game.CursorUnlocked) {
                 Cursor.lockState = CursorLockMode.Locked;
@@ -96,17 +92,17 @@ namespace PixelComrades {
             }
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void DebugMouseLock() {
             Debug.LogFormat("MouseUnlocked {0}", Game.CursorUnlockedHolder.Debug());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void DebugPause() {
             Debug.LogFormat("DebugPause {0}", Game.PauseHolder.Debug());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void DebugMenus() {
             if (UIBasicMenu.OpenMenus.Count == 0) {
                 Debug.Log("DebugMenus: 0");
@@ -120,22 +116,17 @@ namespace PixelComrades {
             }
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void PostSignal(int entity, int message) {
             EntityController.GetEntity(entity)?.Post(message);
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void AddItem(string template) {
-            Player.MainInventory.Add(ItemDatabase.GetItem(template));
+            Player.MainInventory.Add(ItemFactory.GetItem(template));
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
-        public static void AddRandomItem() {
-            Player.MainInventory.Add(ItemDatabase.Instance.TestItemCreate());
-        }
-
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void ListUpdaters() {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < SystemManager.EveryUpdate.Count; i++) {
@@ -152,7 +143,7 @@ namespace PixelComrades {
             Debug.Log(sb.ToString());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void ListTurnUpdaters() {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < SystemManager.TurnUpdates.Count; i++) {
@@ -169,7 +160,7 @@ namespace PixelComrades {
             Debug.Log(sb.ToString());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void ListEntities() {
             StringBuilder sb = new StringBuilder();
             EntityController.EntitiesArray.RunAction(e => {
@@ -182,7 +173,7 @@ namespace PixelComrades {
             Debug.LogFormat("entities {0}", sb.ToString());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void ListComponents(int id) {
             var dict = EntityController.GetEntityComponentDict(id);
             if (dict == null) {
@@ -190,13 +181,16 @@ namespace PixelComrades {
                 return;
             }
             StringBuilder sb = new StringBuilder();
+            sb.Append(EntityController.GetEntity(id).Name);
+            sb.AppendNewLine(" Components");
             foreach (var cRef in dict) {
                 sb.AppendNewLine(string.Format("Type {0} Index {1}", cRef.Key, cRef.Value.Index));
             }
-            Debug.LogFormat("{0} components {1}", id, sb.ToString());
+            
+            Debug.Log(sb.ToString());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void ListEntityContainer(int id, string typeName) {
             var dict = EntityController.GetEntityComponentDict(id);
             if (dict == null) {
@@ -221,7 +215,7 @@ namespace PixelComrades {
             }
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void DebugComponent(int id, string typeName) {
             var dict = EntityController.GetEntityComponentDict(id);
             if (dict == null) {
@@ -249,7 +243,7 @@ namespace PixelComrades {
             Debug.LogFormat("{0} {1}: {2}", id, typeName, sb.ToString());
         }
 
-        [SeawispHunter.MinibufferConsole.Command]
+        
         public static void TestSerializeComponent(int id, string typeName) {
             var dict = EntityController.GetEntityComponentDict(id);
             if (dict == null) {
@@ -268,10 +262,15 @@ namespace PixelComrades {
                 Debug.LogFormat("{0} doesn't have component {1}", id, typeName);
                 return;
             }
+            TestSerializeComponent(instance);
+        }
+
+        public static void TestSerializeComponent(IComponent instance) {
             var json = JsonConvert.SerializeObject(instance, Formatting.Indented, Serializer.ConverterSettings);
             if (json != null) {
                 Debug.Log(json);
             }
         }
+
     }
 }

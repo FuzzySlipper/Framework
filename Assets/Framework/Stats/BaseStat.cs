@@ -5,9 +5,7 @@ using System.Text;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class BaseStat : IComponent, IDisposable {
-
-        public int Owner { get; set; }
+    public class BaseStat : IDisposable {
 
         public BaseStat() {
         }
@@ -44,7 +42,7 @@ namespace PixelComrades {
         private List<Derived> _derivedStats = new List<Derived>();
         private float _modTotal;
 
-        public string Id { get { return _id; } }
+        public string ID { get { return _id; } }
         public string Label { get { return _label; } }
         public float BaseValue { get { return _baseValue; } }
         public float ModTotal { get { return _modTotal; } }
@@ -71,11 +69,11 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-            return Label.ToBoldLabel(Value.ToString("F0"));
+            return string.Format("{0}: {1}", Label, Value);
         }
 
-        public virtual string ToDebugString() {
-            return string.Format("{0}: {1}", Label, Value);
+        public virtual string ToLabelString() {
+            return Label.ToBoldLabel(Value.ToString("F0"));
         }
 
         public string AddValueMod(float amount) {
@@ -91,10 +89,7 @@ namespace PixelComrades {
         }
 
         public string AddPercentMod(float normalizedAmt, string id = "") {
-            if (normalizedAmt > 5f) {
-                //I'm assuming anything greater than normalized 300% is actually a straight percent
-                normalizedAmt = normalizedAmt * 0.01f;
-            }
+            normalizedAmt = normalizedAmt.CheckNormalized();
             var mod = new StatValueMod(normalizedAmt, id);
             _percentMods.Add(mod);
             CalcModValue();
@@ -262,11 +257,11 @@ namespace PixelComrades {
 
             protected Derived(float percent) {
                 _value = float.MinValue;
-                _percent = percent;
+                _percent = percent.CheckNormalized();
             }
 
             public void UpdatePercent(float newValue) {
-                _percent = newValue;
+                _percent = newValue.CheckNormalized();
                 UpdateTarget();
             }
 

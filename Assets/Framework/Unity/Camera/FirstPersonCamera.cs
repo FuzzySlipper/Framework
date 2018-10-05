@@ -21,6 +21,7 @@ namespace PixelComrades {
         private Vector3 _cameraOffset = Vector3.up;
         private Quaternion _nativeRotation;
         private float _rotationX, _rotationY;
+        private float _lookSmooth;
 
         public bool Unscaled { get { return true; } }
 
@@ -30,6 +31,11 @@ namespace PixelComrades {
             _nativeRotation = Tr.localRotation;
             _nativeRotation.eulerAngles = Vector3.up * Tr.localEulerAngles.y;
             HoldStartPosition = _holdTransform.localPosition;
+            MessageKit.addObserver(Messages.OptionsChanged, SetOptions);
+        }
+
+        private void SetOptions() {
+            _lookSmooth = GameOptions.Get("LookSmooth", 0.75f);
         }
 
         public void OnSystemUpdate(float delta) {
@@ -54,7 +60,7 @@ namespace PixelComrades {
             Quaternion camTargetRotation = _nativeRotation * Quaternion.Euler(-1f * _rotationY + (GameOptions.UseHeadBob ? CameraHeadBob.XTilt * _tiltForce : 0f), 0f, 0f);
             Quaternion bodyTargetRotation = _nativeRotation * Quaternion.Euler(0f, _rotationX + (GameOptions.UseHeadBob ? CameraHeadBob.YTilt * _tiltForce : 0f), 0f);
 
-            float smoothRotation = GameOptions.LookSmooth * (TimeManager.DeltaUnscaled * 50f);
+            float smoothRotation = _lookSmooth * (TimeManager.DeltaUnscaled * 50f);
             Tr.localRotation = Quaternion.Slerp(Tr.localRotation, camTargetRotation, smoothRotation);
             FirstPersonController.Tr.localRotation = Quaternion.Slerp(
                 FirstPersonController.Tr.localRotation,

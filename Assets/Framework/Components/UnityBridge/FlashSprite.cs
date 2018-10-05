@@ -16,7 +16,7 @@ namespace PixelComrades {
 
         public void Animate() {
             if (!_animatingColor && _spriteRender != null) {
-                TimeManager.Start(DamageTween());
+                TimeManager.StartTask(DamageTween());
             }
         }
 

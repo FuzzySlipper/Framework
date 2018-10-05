@@ -27,5 +27,7 @@ namespace PixelComrades {
         }
 
         public Vector3 forward { get { return Tr.forward; } }
+
+        public Vector3 up { get { return Tr.up; } }
     }
 }

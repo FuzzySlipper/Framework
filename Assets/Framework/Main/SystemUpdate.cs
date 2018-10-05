@@ -21,7 +21,7 @@ namespace PixelComrades {
     }
 
     public interface IMainFixedUpdate {
-        void OnFixedSystemUpdate();
+        void OnFixedSystemUpdate(float dt);
     }
 
     public interface ISystemFixedUpdate {

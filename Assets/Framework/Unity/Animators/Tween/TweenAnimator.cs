@@ -24,7 +24,7 @@ namespace PixelComrades {
             if (_task != null) {
                 TimeManager.Cancel(_task);
             }
-            _task = TimeManager.Start(PlayAnimation(), UnScaled, Finish);
+            _task = TimeManager.StartTask(PlayAnimation(), UnScaled, Finish);
         }
 
         private void Finish() {
@@ -53,7 +53,7 @@ namespace PixelComrades {
                 break;
             }
             if (_chain != null) {
-                yield return TimeManager.Start(_chain.PlayAnimation(), _chain.Tween.UnScaled);
+                yield return TimeManager.StartTask(_chain.PlayAnimation(), _chain.Tween.UnScaled);
             }
         }
     }

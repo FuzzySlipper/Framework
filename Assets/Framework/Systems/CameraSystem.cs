@@ -7,7 +7,7 @@ namespace PixelComrades {
 
         private bool _isShaking;
 
-        public void HandleGlobal(List<CameraShakeEvent> arg) {
+        public void HandleGlobal(ManagedArray<CameraShakeEvent> arg) {
             if (!GameOptions.UseShaking || _isShaking) {
                 return;
             }

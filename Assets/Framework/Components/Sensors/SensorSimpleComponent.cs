@@ -88,7 +88,7 @@ namespace PixelComrades {
             }
             for (int i = WatchTargets.Count - 1; i >= 0; i--) {
                 var watchTarget = WatchTargets[i];
-                if (watchTarget.Target == null || watchTarget.Target.Get<VitalStats>()[0].Current < 0) {
+                if (watchTarget.Target == null || watchTarget.Target.Stats.HealthStat?.Current < 0) {
                     RemoveWatchTarget(i);
                     continue;
                 }

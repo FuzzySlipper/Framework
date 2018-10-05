@@ -47,6 +47,7 @@ namespace PixelComrades {
         public const int MenuClosed = 45;
         public const int MessageLog = 46;
         public const int ModifiersUpdated = 47;
+        public const int OptionsChanged = 48;
     }
 
     public enum DialogueMsg {

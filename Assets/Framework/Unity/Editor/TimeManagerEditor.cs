@@ -12,7 +12,7 @@ namespace PixelComrades {
             var script = (TimeManager) target;
             _expandedList = EditorGUILayout.Foldout(_expandedList, "Tasks");
             if (_expandedList) {
-                for (int i = 0; i < script.ActiveCount; i++) {
+                for (int i = 0; i < TimeManager.ActiveCount; i++) {
                     if (i > MaxList) {
                         break;
                     }
@@ -21,7 +21,7 @@ namespace PixelComrades {
                         continue;
                     }
                     var taskDisplay = string.Format("{0}: {1} Scale {2} Curr {3} Wait {4}",
-                        current.Id, current.Mode, !current.Unscaled, current.Current.ToString("F2"), current.WaitFor);
+                        current.Routine.ToString(), current.Mode, !current.Unscaled, current.Current.ToString("F2"), current.WaitFor);
                     if (GUILayout.Button(taskDisplay)) {
                         script.CancelInternal(current);
                     }
@@ -32,19 +32,10 @@ namespace PixelComrades {
             }
             if (GUILayout.Button("Check Editor")) {
                 script.CheckEditor();
-                Debug.Log(script.ActiveCount);
+                Debug.Log(TimeManager.ActiveCount);
             }
             if (GUILayout.Button("Test")) {
-                TimeManager.Start(Test3(1.5f));
-            }
-            if (GUILayout.Button("Cancel Correct")) {
-                TimeManager.Cancel(Test3(1.5f).ToString());
-            }
-            if (GUILayout.Button("Cancel Different Time")) {
-                TimeManager.Cancel(Test3(2f).ToString());
-            }
-            if (GUILayout.Button("Cancel Different Routine")) {
-                TimeManager.Cancel(Test(15f).ToString());
+                TimeManager.StartTask(Test3(1.5f));
             }
             EditorGUILayout.LabelField(string.Format("Scale {0} Fixed {1} Time {2} TimeUn {3}", 
                 TimeManager.TimeScale, TimeManager.FixedDelta, TimeManager.Time, TimeManager.TimeUnscaled));
@@ -60,7 +51,7 @@ namespace PixelComrades {
             yield return 1;
             yield return extraWait;
             yield return new Task[] {
-                TimeManager.Start(Test(2)), TimeManager.Start(Test(4))
+                TimeManager.StartTask(Test(2)), TimeManager.StartTask(Test(4))
             };
             Log(extraWait, 3);
         }

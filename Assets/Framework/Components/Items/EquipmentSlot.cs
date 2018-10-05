@@ -10,20 +10,22 @@ namespace PixelComrades {
         public Action<Entity> OnItemChanged;
 
         private int _targetSlot;
+        private Transform _equipTr;
 
-        public EquipmentSlot(int targetSlot) {
+        public EquipmentSlot(int targetSlot, Transform equipTr) {
             _targetSlot = targetSlot;
+            _equipTr = equipTr;
         }
 
         private Entity _item;
         private string _lastEquipStatus = "";
-        private List<StatModHolder> _currentStats = new List<StatModHolder>();
         
         public Equipment CurrentEquipment { get; private set; }
         public Entity Item { get { return _item; } }
         public string LastEquipStatus { get { return _lastEquipStatus; } }
         public int TargetSlot { get { return _targetSlot; } }
-        public string Name {get { return EquipSlotType.GetDescriptionAt(_targetSlot);} }
+        public string Name {get { return GameData.Enums.GetFakeEnum(EnumTypes.EquipSlotTypes).GetDescriptionAt(_targetSlot);} }
+        public Transform EquipTr { get => _equipTr; }
 
         public bool AddItem(Entity item) {
             if (item == null) {
@@ -69,7 +71,7 @@ namespace PixelComrades {
                 OnItemChanged(_item);
             }
             var owner = SlotOwner.GetEntity();
-            var msg = new EquipmentChanged(owner);
+            var msg = new EquipmentChanged(owner, this);
             _item.Post(msg);
             owner.Post(msg);
             _lastEquipStatus = "";
@@ -77,13 +79,6 @@ namespace PixelComrades {
         }
 
         protected virtual void SetStats() {}
-
-        private void ClearStats() {
-            for (int i = 0; i < _currentStats.Count; i++) {
-                _currentStats[i].Remove();
-            }
-            _currentStats.Clear();
-        }
 
         //public float RecoveryPenalty() {
         //    if (_item == null) {
@@ -110,16 +105,15 @@ namespace PixelComrades {
         }
 
         private void ClearEquippedItem(bool isSwap) {
-            ClearStats();
             if (_item != null) {
                 _item.ClearParent(SlotOwner.Owner);
-                _item.Get<Equipment>().Unequip();
+                _item.Get<Equipment>().UnEquip();
                 _item.RemoveObserver(SlotOwner);
-                _item.Post(new EquipmentChanged(null));
+                _item.Post(new EquipmentChanged(null, null));
                 _item = null;
                 if (!isSwap) {
                     var owner = SlotOwner.GetEntity();
-                    owner.Post(new EquipmentChanged(owner));
+                    owner.Post(new EquipmentChanged(owner, this));
                     OnItemChanged?.Invoke(null);
                 }
             }
@@ -137,21 +131,93 @@ namespace PixelComrades {
         }
     }
 
-    public struct StatModHolder {
-        private string _id;
-        private BaseStat _stat;
+    public abstract class StatModHolder {
+        
+        public abstract void Attach(BaseStat target);
+        public abstract void Remove();
+        public abstract string StatID { get;}
+    }
 
-        public StatModHolder(BaseStat source, BaseStat target, float percent) {
-            _stat = source;
-            _id = _stat.AddDerivedStat(percent, target);
+    public class BasicValueModHolder : StatModHolder {
+        private string _id;
+        private BaseStat _targetStat;
+        private float _amount;
+
+        public override string StatID { get { return _targetStat.ID; } }
+
+        public BasicValueModHolder(float amount) {
+            _amount = amount;
         }
 
-        public void Remove() {
-            if (_stat == null) {
+        public override void Attach(BaseStat target) {
+            if (target == null) {
                 return;
             }
-            _stat.RemoveDerivedStat(_id);
-            _stat = null;
+            _id = target.AddValueMod(_amount);
+        }
+
+        public override void Remove() {
+            if (_targetStat != null) {
+                _targetStat.RemoveMod(_id);
+            }
+            _targetStat = null;
+            _id = "";
+        }
+    }
+
+    public class BasicPercentModHolder : StatModHolder {
+        private string _id;
+        private BaseStat _targetStat;
+        private float _percent;
+
+        public override string StatID { get { return _targetStat.ID; } }
+
+        public BasicPercentModHolder(float percent) {
+            _percent = percent;
+        }
+
+        public override void Attach(BaseStat target) {
+            if (target == null) {
+                return;
+            }
+            _id = target.AddPercentMod(_percent);
+        }
+
+        public override void Remove() {
+            if (_targetStat != null) {
+                _targetStat.RemoveMod(_id);
+            }
+            _targetStat = null;
+            _id = "";
+        }
+    }
+
+    public class DerivedStatModHolder : StatModHolder {
+
+        private string _id;
+        private BaseStat _sourceStat;
+        private float _percent;
+
+        public override string StatID { get { return _sourceStat.ID; } }
+
+        public DerivedStatModHolder(BaseStat source, float percent) {
+            _sourceStat = source;
+            _percent = percent;
+        }
+
+        public override void Attach(BaseStat target) {
+            if (target == null) {
+                return;
+            }
+            _id = _sourceStat.AddDerivedStat(_percent, target);
+        }
+
+        public override void Remove() {
+            if (_sourceStat == null) {
+                return;
+            }
+            _sourceStat.RemoveDerivedStat(_id);
+            _sourceStat = null;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace PixelComrades {
         }
 
         public void OnPoolSpawned() {
-            TimeManager.Start(DespawnParticles(), _unscaled);
+            TimeManager.StartTask(DespawnParticles(), _unscaled);
         }
 
         public void OnPoolDespawned() {

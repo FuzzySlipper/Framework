@@ -5,34 +5,72 @@ using UnityEngine;
 namespace PixelComrades {
     public class Entity : IEquatable<Entity> {
 
-        public int Id;
+        private static EntityPool _pool = new EntityPool(50);
+        private static List<Entity> _toDeleteList = new List<Entity>(25);
+
+        public int Id { get; private set;}
         public string Name;
         public TagsComponent Tags;
+        public StatsContainer Stats;
         public int ParentId = -1;
+        public bool Pooled = false;
 
-        public void Init() {
-            Tags = new TagsComponent(this);
-            this.Add(Tags);
-        }
+        private EntityEventHub _eventHub;
 
-        public void Destroy() {
-            EntityController.RemoveEntity(this);
-            Id = -1;
-            Name = "Destroyed";
-        }
-
-        public bool IsDestroyed() {
-            return Id < 0;
+        public static void ProcessPendingDeletes() {
+            for (int i = 0; i < _toDeleteList.Count; i++) {
+                _pool.Store(_toDeleteList[i]);
+            }
+            _toDeleteList.Clear();
         }
 
         public static Entity New(string name) {
-            var entity = EntityController.AddEntity(new Entity());
+            var entity = _pool.New();
+            entity.Id = EntityController.AddEntityToMainList(entity);
             entity.Name = name;
-            entity.Init();
             return entity;
         }
 
-        private Entity(){}
+        private Entity() {
+            Tags = new TagsComponent(this);
+            Stats = new StatsContainer(this);
+            _eventHub = new EntityEventHub();
+        }
+
+        public bool IsDestroyed() {
+            return Id < 0 || Pooled;
+        }
+
+        public void Destroy() {
+            if (_toDeleteList.Contains(this) || IsDestroyed()) {
+                return;
+            }
+            _toDeleteList.Add(this);
+        }
+
+        public void Destroy(IEntityPool pool) {
+            if (_toDeleteList.Contains(this) || IsDestroyed()) {
+                return;
+            }
+            if (pool != null) {
+                pool.Store(this);
+            }
+            else {
+                _toDeleteList.Add(this);
+            }
+        }
+
+        private void Clear() {
+            Post(new EntityDisposed(this));
+            MonoBehaviourToEntity.Unregister(this);
+            EntityController.FinishDeleteEntity(this);
+            Id = -1;
+            Name = "Destroyed";
+            ClearParent();
+            _eventHub.Clear();
+            Tags.Clear();
+            Stats.Clear();
+        }
 
         public void ClearParent() {
             ParentId = -1;
@@ -42,6 +80,47 @@ namespace PixelComrades {
             if (ParentId == matchId) {
                 ParentId = -1;
             }
+        }
+
+        public void Post(int msg) {
+            _eventHub.PostSignal(msg);
+        }
+
+        public void Post<T>(T msg) where T : struct, IEntityMessage {
+            _eventHub.Post<T>(msg);
+            World.Enqueue(msg);
+        }
+
+        public void AddObserver<T>(IReceive<T> handler) {
+            _eventHub.AddObserver(handler);
+        }
+
+        public void AddObserver(IReceive handler) {
+            _eventHub.AddObserver(handler);
+        }
+
+        public void AddObserver(int message,  System.Action handler) {
+            _eventHub.AddObserver(message, handler);
+        }
+
+        public void AddObserver(ISignalReceiver generic) {
+            _eventHub.AddObserver(generic);
+        }
+
+        public void RemoveObserver<T>(IReceive<T> handler) {
+            _eventHub.MessageReceivers.Remove(handler);
+        }
+
+        public void RemoveObserver(IReceive handler) {
+            _eventHub.MessageReceivers.Remove(handler);
+        }
+
+        public void RemoveObserver(int message, System.Action handler) {
+            _eventHub.RemoveObserver(message, handler);
+        }
+
+        public void RemoveObserver(ISignalReceiver generic) {
+            _eventHub.RemoveObserver(generic);
         }
 
         public static implicit operator int(Entity reference) {
@@ -78,6 +157,23 @@ namespace PixelComrades {
 
         public static bool operator !=(Entity entity, Entity other) {
             return !(entity == other);
+        }
+
+        private class EntityPool {
+            private Queue<Entity> _queue;
+
+            public EntityPool(int initialSize) {
+                _queue = new Queue<Entity>(initialSize);
+            }
+
+            public Entity New() {
+                return _queue.Count > 0 ? _queue.Dequeue() : new Entity();
+            }
+
+            public void Store(Entity entity) {
+                entity.Clear();
+                _queue.Enqueue(entity);
+            }
         }
     }
 }

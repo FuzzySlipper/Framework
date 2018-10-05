@@ -16,7 +16,7 @@ public class SampleClipTool: EditorWindow {
 	protected float time = 0.0f;
 	protected bool lockSelection = false;
 	protected bool animationMode = false;
-    private ActorAnimations _testClip = ActorAnimations.Action;
+    
 
     [MenuItem("Tools/SampleClip", false, 2000)]
 	public static void DoWindow() {
@@ -52,22 +52,6 @@ public class SampleClipTool: EditorWindow {
 		GUILayout.EndHorizontal();
 		EditorGUILayout.BeginVertical();
 		animationClip = EditorGUILayout.ObjectField(animationClip, typeof(AnimationClip), false) as AnimationClip;
-        _testClip = (ActorAnimations) EditorGUILayout.EnumPopup("Actor Animation Clip", _testClip);
-	    if (GUILayout.Button("Load Actor Clip")) {
-            Animator animator = go.GetComponent<Animator>();
-            if (animator != null && animator.runtimeAnimatorController != null) {
-                var controller = animator.runtimeAnimatorController as AnimatorController;
-                if (controller != null) {
-                    var states = controller.layers[0].stateMachine.states;
-                    var testClip = _testClip.ToString();
-                    for (int i = 0; i < states.Length; i++) {
-                        if (states[i].state.name == testClip) {
-                            animationClip = states[i].state.motion as AnimationClip;
-                        }
-                    }
-                }
-            }
-        }
         if (animationClip != null) {
 			float startTime = 0.0f;
 			float stopTime  = animationClip.length;

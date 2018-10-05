@@ -36,6 +36,8 @@ namespace PixelComrades {
             _array[_index] = component;
         }
 
+        public CachedComponent(){}
+
         public CachedComponent(Entity owner) {
             _entity = owner;
             _array = EntityController.GetComponentArray<T>();
@@ -46,6 +48,15 @@ namespace PixelComrades {
         }
 
         public CachedComponent(Entity owner, Dictionary<Type, ComponentReference> list) {
+            _entity = owner;
+            var type = typeof(T);
+            if (list.TryGetValue(type, out var cref)) {
+                _index = cref.Index;
+                _array = (ManagedArray<T>) cref.Array;
+            }
+        }
+
+        public void Set(Entity owner, Dictionary<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
             if (list.TryGetValue(type, out var cref)) {

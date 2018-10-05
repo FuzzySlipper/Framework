@@ -62,33 +62,35 @@ namespace PixelComrades {
                 return _timeUnscaled;
             }
         }
-        public int ActiveCount { get { return _active.Count; } }
+        public static int ActiveCount { get { return main._active.Count; } }
         public Task this[int index] { get { return index < _active.Count ? _active[index] : null; } }
 
-        public static Task Start(IEnumerator routine, bool unscaled, System.Action del = null) {
-            return main.StartTask(routine, routine.ToString(), unscaled, del);
+        public static Task GetTask(int index) { return index < main._active.Count ? main._active[index] : null; }
+
+        public static Task StartTask(IEnumerator routine, bool unscaled, System.Action del = null) {
+            return main.StartTaskInternal(routine, unscaled, del);
         }
 
-        public static Task Start(IEnumerator routine, System.Action del = null) {
+        public static Task StartTask(IEnumerator routine, System.Action del = null) {
             if (!main) {
                 return null;
             }
-            return main.StartTask(routine, routine.ToString(), false, del);
+            return main.StartTaskInternal(routine, false, del);
         }
 
         public static Task StartUnscaled(IEnumerator routine, System.Action del = null) {
             if (!main) {
                 return null;
             }
-            return main.StartTask(routine, routine.ToString(), true, del);
+            return main.StartTaskInternal(routine, true, del);
         }
 
         public static void PauseFor(float time, bool unScaled, System.Action onComplete) {
-            main.StartTask(main.GenericPause(time), "GenericPause", unScaled, onComplete);
+            main.StartTaskInternal(main.GenericPause(time), unScaled, onComplete);
         }
 
         public static void PauseFrame(System.Action onComplete) {
-            main.StartTask(main.GenericPause(), "GenericPause", true, onComplete);
+            main.StartTaskInternal(main.GenericPause(), true, onComplete);
         }
 
         private IEnumerator GenericPause(float time) {
@@ -103,13 +105,9 @@ namespace PixelComrades {
             main.CancelInternal(task);
         }
 
-        public static void Cancel(string task) {
-            main.CancelInternal(task);
-        }
-
-        public Task StartTask(IEnumerator routine, string id, bool unscaled = false, System.Action del = null) {
+        private Task StartTaskInternal(IEnumerator routine, bool unscaled = false, System.Action del = null) {
             var task = _taskPool.New();
-            task.Set(routine, id, unscaled);
+            task.Set(routine, unscaled);
             if (del != null) {
                 task.OnFinish += del;
             }
@@ -120,17 +118,6 @@ namespace PixelComrades {
             }
 #endif
             return task;
-        }
-
-        public void CancelInternal(string id) {
-            for (int i = _active.Count - 1; i >= 0; i--) {
-                if (_active[i].Id != id) {
-                    continue;
-                }
-                var finishedTask = _active[i];
-                _active.RemoveAt(i);
-                _taskPool.Store(finishedTask);
-            }
         }
 
         public void CancelInternal(Task task) {
@@ -182,11 +169,13 @@ namespace PixelComrades {
             //if (GameOptions.UseCulling) {
             //    CullingManager.Main.Update();
             //}
+            Entity.ProcessPendingDeletes();
         }
 
         void FixedUpdate() {
             _fixedDelta = UnityEngine.Time.fixedDeltaTime * TimeScale;
             SystemManager.FixedSystemUpdate(FixedDelta);
+            World.FixedUpdate(FixedDelta);
         }
 
         private void RunUpdate() {

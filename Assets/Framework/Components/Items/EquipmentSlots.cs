@@ -29,7 +29,20 @@ namespace PixelComrades {
             if (equip == null) {
                 return false;
             }
+            if (TryEquip(equip, entity, false)) {
+                return true;
+            }
+            if (TryEquip(equip, entity, true)) {
+                return true;
+            }
+            return false;
+        }
+
+        private bool TryEquip(Equipment equip, Entity entity, bool overrideCurrent) {
             for (int i = 0; i < List.Count; i++) {
+                if (List[i].Item != null && !overrideCurrent) {
+                    continue;
+                }
                 if (List[i].SlotIsCompatible(equip.EquipmentSlotType) && List[i].EquipItem(entity)) {
                     return true;
                 }
@@ -53,9 +66,11 @@ namespace PixelComrades {
 
     public struct EquipmentChanged : IEntityMessage {
         public Entity Owner;
+        public EquipmentSlot Slot;
 
-        public EquipmentChanged(Entity owner) {
+        public EquipmentChanged(Entity owner, EquipmentSlot slot) {
             Owner = owner;
+            Slot = slot;
         }
     }
 }

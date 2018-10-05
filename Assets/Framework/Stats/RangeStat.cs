@@ -12,7 +12,7 @@ namespace PixelComrades {
             _max = (range.Max - range.Min);
         }
 
-        public RangeStat(string label, float rangeMin, float rangeMax) : base(label, rangeMin) {
+        public RangeStat(string label, string id, float rangeMin, float rangeMax) : base(label, id, rangeMin) {
             _max = rangeMax - rangeMin;
         }
 
@@ -20,7 +20,7 @@ namespace PixelComrades {
 
         public void SetValue(float rangeMin, float rangeMax) {
             ChangeBase(rangeMin);
-            _max = rangeMax - rangeMin;
+            _max = rangeMax < rangeMin ? rangeMax : (rangeMax - rangeMin);
         }
 
         public void SetValue(float increase) {
@@ -36,6 +36,11 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
+            var baseVal = BaseValue + ModTotal;
+            return string.Format("{0}: {1:F0}-{2:F0}", Label, baseVal, baseVal + _max);
+        }
+
+        public override string ToLabelString() {
             var baseVal = BaseValue + ModTotal;
             return Label.ToBoldLabel(string.Format("{0:F0}-{1:F0}", baseVal, baseVal + _max));
         }

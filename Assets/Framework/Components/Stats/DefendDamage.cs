@@ -10,7 +10,7 @@ namespace PixelComrades {
         public int Owner { get; set; }
         private List<StatEntry> _stats = new List<StatEntry>();
 
-        public void AddStat(int type, string id, BaseStat stat) {
+        public void AddStat(string type, string id, BaseStat stat) {
             var statEntry = FindStat(type);
             if (statEntry == null) {
                 statEntry = new StatEntry();
@@ -21,7 +21,7 @@ namespace PixelComrades {
             statEntry.DamageType = type;
         }
 
-        private StatEntry FindStat(int type) {
+        private StatEntry FindStat(string type) {
             for (int i = 0; i < _stats.Count; i++) {
                 if (_stats[i].DamageType == type) {
                     return _stats[i];
@@ -39,21 +39,18 @@ namespace PixelComrades {
                 return;
             }
             if (statEntry.Stat == null) {
-                var genericStats = this.GetEntity().Get<GenericStats>();
-                if (genericStats != null) {
-                    statEntry.Stat = genericStats.Get(statEntry.Id);
-                }
+                statEntry.Stat = this.GetEntity().Stats.Get(statEntry.Id);
             }
             if (statEntry.Stat == null || statEntry.Stat.Value <= 0) {
                 return;
             }
-            var amtDefended = RpgSystem.GetDefenseAmount(arg.Amount, statEntry.Stat.Value);
+            var amtDefended = GameOptions.GetDefenseAmount(arg.Amount, statEntry.Stat.Value);
             arg.Amount = MathEx.Max(0, arg.Amount - amtDefended);
         }
 
         public class StatEntry {
             public BaseStat Stat;
-            public int DamageType;
+            public string DamageType;
             public string Id;
         }
     }
@@ -65,7 +62,7 @@ namespace PixelComrades {
 
         private List<DefendType> _validTypes = new List<DefendType>();
 
-        public DefendDamageFlat(int[] validTypes, float amount, float limitAmount = -1f) {
+        public DefendDamageFlat(string[] validTypes, float amount, float limitAmount = -1f) {
             if (validTypes != null) {
                 for (int i = 0; i < validTypes.Length; i++) {
                     _validTypes.Add(new DefendType(validTypes[i], amount, limitAmount));
@@ -73,7 +70,7 @@ namespace PixelComrades {
             }
         }
 
-        public void AddDefend(int type, float amount, float limitAmount = -1) {
+        public void AddDefend(string type, float amount, float limitAmount = -1) {
             var defendType = GetType(type);
             if (defendType == null) {
                 defendType = new DefendType(type, amount, limitAmount);
@@ -87,7 +84,7 @@ namespace PixelComrades {
             }
         }
 
-        public DefendType GetType(int type) {
+        public DefendType GetType(string type) {
             for (int i = 0; i < _validTypes.Count; i++) {
                 if (_validTypes[i].Type == type) {
                     return _validTypes[i];
@@ -101,7 +98,7 @@ namespace PixelComrades {
             if (defendType == null || Math.Abs(defendType.Amount) < 0.01f) {
                 return;
             }
-            var amtDefended = RpgSystem.GetDefenseAmount(arg.Amount, defendType.Amount);
+            var amtDefended = GameOptions.GetDefenseAmount(arg.Amount, defendType.Amount);
             arg.Amount = MathEx.Max(0, arg.Amount - amtDefended);
             if (defendType.DefendLimit < 0) {
                 return;
@@ -113,11 +110,11 @@ namespace PixelComrades {
         }
 
         public class DefendType {
-            public int Type;
+            public string Type;
             public float Amount;
             public float DefendLimit;
 
-            public DefendType(int type, float amount, float defendLimit) {
+            public DefendType(string type, float amount, float defendLimit) {
                 Type = type;
                 Amount = amount;
                 DefendLimit = defendLimit;

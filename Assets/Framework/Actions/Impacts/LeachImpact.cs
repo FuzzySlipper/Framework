@@ -6,12 +6,12 @@ namespace PixelComrades {
     [Priority(Priority.Lowest)]
     public class LeachImpact : IActionImpact, IReceive<DamageEvent> {
 
-        private int _damageType;
-        private int _targetVital;
+        private string _damageType;
+        private string _targetVital;
         private float _damagePercent;
         private ActionFx _actionFx;
 
-        public LeachImpact(int damageType, int targetVital, float damagePercent, ActionFx actionFx) {
+        public LeachImpact(string damageType, string targetVital, float damagePercent, ActionFx actionFx) {
             _damageType = damageType;
             _targetVital = targetVital;
             _damagePercent = damagePercent;
@@ -26,16 +26,12 @@ namespace PixelComrades {
                 _actionFx.TriggerEvent(stateEvent);
             }
             target.AddObserver(this);
-            var stats = owner.Get<GenericStats>();
-            if (stats == null) {
-                return;
-            }
-            new DamageEvent(stats.GetValue(Stats.Power) * _damagePercent * CollisionExtensions.HitMultiplier(collisionEvent.Hit, stats), owner, target, _damageType, _targetVital).Post(target);
+            target.Post(new DamageEvent(owner.Stats.GetValue(Stats.Power) * _damagePercent * CollisionExtensions.GetHitMultiplier(collisionEvent.Hit, owner), owner, target, _damageType, _targetVital));
         }
 
         public void Handle(DamageEvent arg) {
             arg.Target.RemoveObserver(this);
-            new HealEvent(arg.Amount, arg.Target, arg.Origin, arg.TargetVital).Post(arg.Origin);
+            arg.Origin.Post(new HealEvent(arg.Amount, arg.Target, arg.Origin, arg.TargetVital));
         }
     }
 }

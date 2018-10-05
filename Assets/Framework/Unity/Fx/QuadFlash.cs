@@ -8,7 +8,7 @@ namespace PixelComrades {
 
         public void OnPoolSpawned() {
             transform.rotation *= Quaternion.Euler(0, 0, Random.Range(-360, 360));
-            TimeManager.Start(WaitForDespawn());
+            TimeManager.StartTask(WaitForDespawn());
         }
 
         private IEnumerator WaitForDespawn() {

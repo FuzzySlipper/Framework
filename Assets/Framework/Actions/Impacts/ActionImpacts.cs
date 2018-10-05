@@ -19,6 +19,7 @@ namespace PixelComrades {
                 this[i].ProcessAction(collisionEvent, stateEvent, owner, target);
             }
         }
+        public ActionImpacts(){}
 
         public ActionImpacts Clone() {
             return new ActionImpacts(List.ToArray());

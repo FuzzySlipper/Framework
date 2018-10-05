@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class EntityUIPoolSystem : SystemBase {
+    public class EntityUIPoolSystem : SystemBase, IEntityPool {
 
         private Stack<Entity> _pooled = new Stack<Entity>();
 
         public void Store(Entity entity) {
             entity.GetNode<UINode>().Clear();
+            entity.Pooled = true;
+            entity.ParentId = -1;
             _pooled.Push(entity);
         }
 

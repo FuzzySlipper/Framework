@@ -108,14 +108,14 @@ namespace PixelComrades {
             }
         }
 
-        public void HandleGlobal(List<MoveTweenEvent> arg) {
+        public void HandleGlobal(ManagedArray<MoveTweenEvent> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 _moveTweens.Add(arg[i]);
                 arg[i].Owner.Tags.Add(EntityTags.Moving);
             }
         }
 
-        public void HandleGlobal(List<StartMoveEvent> arg) {
+        public void HandleGlobal(ManagedArray<StartMoveEvent> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 var moveEvent = arg[i];
                 moveEvent.Origin.Tags.Add(EntityTags.Moving);

@@ -15,22 +15,6 @@ namespace PixelComrades {
 
         private static List<PrefabEntity> _sceneObjects = new List<PrefabEntity>();
         public static List<PrefabEntity> SceneObjects { get => _sceneObjects; }
-        //private static ItemPool main {
-        //    get {
-        //        if (_main == null && !IsQuitting) {
-        //            var scene = FindObjectOfType<ItemPool>();
-        //            if (scene != null) {
-        //                _main = scene;
-        //            }
-        //            else {
-        //                GameObject pool = new GameObject("ItemPool");
-        //                _main = pool.AddComponent<ItemPool>();
-        //            }
-        //            _main.SetMain();
-        //        }
-        //        return _main;
-        //    }
-        //}
         private static Transform PoolTransform {
             get {
                 if (Main._inactiveSceneTr == null && !TimeManager.IsQuitting) {
@@ -55,6 +39,10 @@ namespace PixelComrades {
                 RegisterSceneEntities(scene);
             }
             SystemManager.CheckForDuplicates();
+        }
+
+        public static Queue<PrefabEntity> GetQueue(int id) {
+            return Main._pooledDict.TryGetValue(id, out var queue) ? queue : null;
         }
 
         public static void RegisterSceneEntities(Scene scene) {
@@ -124,13 +112,26 @@ namespace PixelComrades {
             Resources.UnloadUnusedAssets();
         }
 
-        public static T LoadAsset<T>(string location) where T : UnityEngine.Object {
+        private static FastString _stringBuilder = new FastString();
+
+        public static T LoadAsset<T>(string dir, string file) where T : UnityEngine.Object {
+            if (string.IsNullOrEmpty(file)) {
+                return default(T);
+            }
+            _stringBuilder.Clear();
 #if UNITY_EDITOR
             //var path = string.Format("{0}{1}.{2}", UnityDirs.EditorFolder, location, AssetTypeExtensions.GetExtensionFromType<T>());
             //return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(string.Format("{0}{1}.{2}", UnityDirs.EditorFolder, location, AssetTypeExtensions.GetExtensionFromType<T>()));
+            _stringBuilder.Append(UnityDirs.EditorFolder);
+            _stringBuilder.Append(dir);
+            _stringBuilder.Append(file);
+            _stringBuilder.Append(".");
+            _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(_stringBuilder.ToString());
 #else
-            return Resources.Load<T>(location);
+            _stringBuilder.Append(dir);        
+            _stringBuilder.Append(file);
+            return Resources.Load<T>(_stringBuilder.ToString());
 #endif
         }
 
@@ -138,16 +139,23 @@ namespace PixelComrades {
             return Main.SpawnByString(itemName, isSceneObject, Vector3.zero, Quaternion.identity, null, isCulled);
         }
 
-        public static T Spawn<T>(string itemName, bool isSceneObject, bool isCulled) where T : MonoBehaviour {
+        public static PrefabEntity Spawn(string dir, string file, Vector3 position, Quaternion rotation, bool isSceneObject = false, bool isCulled = true) {
+            _stringBuilder.Clear();
+            _stringBuilder.Append(dir);
+            _stringBuilder.Append(file);
+            return Main.SpawnByString(_stringBuilder.ToString(), isSceneObject, position, rotation, null, isCulled);
+        }
+
+        public static PrefabEntity Spawn(string itemName, Vector3 position, Quaternion rotation, bool isSceneObject = false, bool isCulled = true) {
+            return Main.SpawnByString(itemName, isSceneObject, position, rotation, null, isCulled);
+        }
+
+        public static T Spawn<T>(string itemName, bool isSceneObject = true, bool isCulled = true) where T : MonoBehaviour {
             return GetWorldEntityComponent<T>(Main.SpawnByString(itemName, isSceneObject, Vector3.zero, Quaternion.identity, null, isCulled));
         }
 
-        public static T Spawn<T>(string itemName, Vector3 position, Quaternion rotation, bool isScene, bool isCulled) where T : MonoBehaviour {
+        public static T Spawn<T>(string itemName, Vector3 position, Quaternion rotation, bool isScene = true, bool isCulled = true) where T : MonoBehaviour {
             return GetWorldEntityComponent<T>(Main.SpawnByString(itemName, isScene, position, rotation, null, isCulled));
-        }
-
-        public static T SpawnScenePrefab<T>(PrefabEntity targetObject, Vector3 pos, Quaternion rot) where T : MonoBehaviour {
-            return GetWorldEntityComponent<T>(Main.GetPrefabCopy(targetObject, true, true, pos, rot));
         }
 
         public static PrefabEntity Spawn(PrefabEntity targetObject, bool isSceneObject = false, bool isCulled = false) {
@@ -160,10 +168,6 @@ namespace PixelComrades {
 
         public static PrefabEntity Spawn(GameObject targetObject, Vector3 pos, Quaternion rot, bool isScene = true, bool isCulled = true) {
             return Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), isScene, isCulled, pos, rot);
-        }
-
-        public static PrefabEntity SpawnScenePrefab(GameObject targetObject) {
-            return Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), true, true, Vector3.zero, Quaternion.identity);
         }
 
         public static GameObject SpawnScenePrefab(GameObject targetObject, Vector3 pos, Quaternion rot) {
@@ -200,12 +204,6 @@ namespace PixelComrades {
 
         public static T SpawnUIPrefab<T>(GameObject targetObject, Transform parent) where T : MonoBehaviour {
             var newObject = Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), false, false, parent.position, parent.rotation, parent);
-            newObject.transform.localScale = Vector3.one;
-            return GetWorldEntityComponent<T>(newObject);
-        }
-
-        public static T SpawnUIPrefab<T>(PrefabEntity targetObject, Transform parent) where T : MonoBehaviour {
-            var newObject = Main.GetPrefabCopy(targetObject, false, false, parent.position, parent.rotation, parent);
             newObject.transform.localScale = Vector3.one;
             return GetWorldEntityComponent<T>(newObject);
         }
@@ -272,8 +270,7 @@ namespace PixelComrades {
                 var go = GameObject.Instantiate(temp, pos, rot);
                 return go.GetOrAddComponent<PrefabEntity>();
             }
-            int itemId;
-            if (!_stringToId.TryGetValue(itemName, out itemId)) {
+            if (!_stringToId.TryGetValue(itemName, out var itemId)) {
                 itemId = AddNewLoadedResource(itemName);
             }
             PrefabEntity item = GetPooledEntity(itemId);
@@ -400,8 +397,7 @@ namespace PixelComrades {
         }
 
         private PrefabEntity GetNewStringLoaded(int uniqueId) {
-            PrefabEntity prefab;
-            if (_referenceItems.TryGetValue(uniqueId, out prefab)) {
+            if (_referenceItems.TryGetValue(uniqueId, out var prefab)) {
                 return CreateNewPrefab(prefab);
             }
             Debug.LogError(uniqueId + " is not in reference dictionary");
@@ -409,8 +405,7 @@ namespace PixelComrades {
         }
 
         private PrefabEntity GetPooledEntity(int uniqueId) {
-            Queue<PrefabEntity> list;
-            if (!_pooledDict.TryGetValue(uniqueId, out list) || list.Count == 0) {
+            if (!_pooledDict.TryGetValue(uniqueId, out var list) || list.Count == 0) {
                 return null;
             }
             while (list.Count > 0) {

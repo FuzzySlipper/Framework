@@ -6,7 +6,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class PositionComponent : IComponent {
         [SerializeField] public Float3 _position;
-        [SerializeField] private int _owner;
+        [SerializeField] private int _owner = -1;
         private CachedComponent<TransformComponent> _cached;
 
         public int Owner {

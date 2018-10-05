@@ -17,7 +17,7 @@ namespace PixelComrades {
                 return;
             }
             var hitPnt = other.ClosestPointOnBounds(transform.position);
-            new CollisionEvent(entity, hitEntity, hitPnt, (hitPnt - transform.position).normalized).Post(entity);
+            entity.Post(new CollisionEvent(entity, hitEntity, hitPnt, (hitPnt - transform.position).normalized));
         }
     }
 }

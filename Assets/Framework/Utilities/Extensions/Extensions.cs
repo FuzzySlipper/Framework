@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -332,6 +334,14 @@ namespace PixelComrades {
         public static float ToFloatPercentFromBase100(this float fltVal) {
             return fltVal * 0.01f;
         }
+
+        public static float CheckNormalized(this float current) {
+            if (current > 5f) {
+                //I'm assuming anything greater than normalized X00% is actually a straight percent
+                return current * 0.01f;
+            }
+            return current;
+        }
     }
 
     public static class IntExtension {
@@ -490,6 +500,12 @@ namespace PixelComrades {
             tr.anchorMax = anchor;
         }
 
+        public static void SetAnchorsAndPivots(this RectTransform tr, Vector2 anchor) {
+            tr.anchorMin = anchor;
+            tr.anchorMax = anchor;
+            tr.pivot = anchor;
+        }
+
         public static RectTransform Resize(this RectTransform transform, float percentage, float arcSize) {
             RectTransform parent = transform.parent as RectTransform;
             float arcPercentage = arcSize / parent.rect.width;
@@ -538,6 +554,13 @@ namespace PixelComrades {
         }
     }
 
+    public static class DirectoryExtensions {
+        public static IEnumerable<FileInfo> GetFilesByExtensions(this DirectoryInfo dirInfo, params string[] extensions) {
+            var allowedExtensions = new HashSet<string>(extensions, StringComparer.OrdinalIgnoreCase);
+            return dirInfo.EnumerateFiles().Where(f => allowedExtensions.Contains(f.Extension));
+        }
+    }
+
     public static class DictionaryExtensions {
         public static bool TryAdd<T, TV>(this Dictionary<T, TV> dict, T key, TV val) {
             if (dict.ContainsKey(key)) {
@@ -545,6 +568,15 @@ namespace PixelComrades {
             }
             dict.Add(key, val);
             return true;
+        }
+
+        public static void SafeAdd<T, TV>(this Dictionary<T, TV> dict, T key, TV val) {
+            if (dict.ContainsKey(key)) {
+                dict[key] = val;
+            }
+            else {
+                dict.Add(key, val);
+            }
         }
 
         public static TV GetOrAdd<T, TV>(this Dictionary<T, TV> dict, T key) where TV : new() {
@@ -732,7 +764,7 @@ namespace PixelComrades {
         //}
 
         public static void SetParentResetPos(this Transform child, Transform parent) {
-            child.SetParent(parent);
+            child.SetParent(parent, true);
             child.localPosition = Vector3.zero;
             child.localRotation = Quaternion.identity;
         }
@@ -1642,13 +1674,6 @@ namespace PixelComrades {
     }
 
     
-    public static class ActionDistanceExtensions {
-        
-        public static float ToFloat(this ActionDistance distance) {
-            return RpgSystem.ActionDistances[(int) distance];
-        }
-    }
-
     public static class ActionExtensions {
         public static void SafeInvoke(this System.Action callback) {
             if (callback != null) {
@@ -2138,6 +2163,9 @@ namespace PixelComrades {
 
         public static bool Contains<T>(this IList<T> array1, T item) {
             for (int a = 0; a < array1.Count; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return true;
                 }
@@ -2147,6 +2175,9 @@ namespace PixelComrades {
 
         public static bool Contains<T>(this List<T> array1, T item) {
             for (int a = 0; a < array1.Count; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return true;
                 }
@@ -2156,6 +2187,9 @@ namespace PixelComrades {
 
         public static bool Contains<T>(this T[] array1, T item) {
             for (int a = 0; a < array1.Length; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return true;
                 }
@@ -2183,6 +2217,9 @@ namespace PixelComrades {
 
         public static int FindIndex(this IList<string> array, string target) {
             for (int i = 0; i < array.Count; i++) {
+                if (array[i] == null) {
+                    continue;
+                }
                 if (target.CompareCaseInsensitive(array[i])) {
                     return i;
                 }
@@ -2192,6 +2229,9 @@ namespace PixelComrades {
 
         public static int FindIndex<T>(this IList<T> array1, T item) {
             for (int a = 0; a < array1.Count; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return a;
                 }
@@ -2201,6 +2241,9 @@ namespace PixelComrades {
 
         public static int FindIndex<T>(this List<T> array1, T item) {
             for (int a = 0; a < array1.Count; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return a;
                 }
@@ -2210,6 +2253,9 @@ namespace PixelComrades {
 
         public static int FindIndex<T>(this T[] array1, T item) {
             for (int a = 0; a < array1.Length; a++) {
+                if (array1[a] == null) {
+                    continue;
+                }
                 if (array1[a].Equals(item)) {
                     return a;
                 }
@@ -2245,6 +2291,17 @@ namespace PixelComrades {
     }
 
     public static class ParseUtilities {
+
+        public static System.Type ParseType(string typeName) {
+            var type = System.Type.GetType(typeName, false, false);
+            if (type == null) {
+                type = System.Type.GetType(string.Format("PixelComrades.{0}", typeName), false, false);
+            }
+            if (type == null) {
+                type = System.Type.GetType(string.Format("PixelComrades.{0}.{1}", Game.GameNamespace, typeName), false, false);
+            }
+            return type;
+        }
 
         public static int TryParseInt(this IList<string> lines, ref int parseIndex) {
             return lines.TryParse(ref parseIndex, 0);

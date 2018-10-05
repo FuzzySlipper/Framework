@@ -34,7 +34,7 @@ namespace PixelComrades {
 
         public void RemoveActor() {
             if (_actor != null) {
-                _actor.Vitals.c[_targetStat].OnStatChanged -= CheckStat;
+                _actor.GetVital(_targetStat).OnStatChanged -= CheckStat;
                 _actor.Entity.RemoveObserver(this);
             }
             _statSlider.value = 0;
@@ -56,10 +56,10 @@ namespace PixelComrades {
                 return;
             }
             if (_statTween.Length <= 0) {
-                _statSlider.value = _actor.Vitals.c[_targetStat].CurrentPercent;
+                _statSlider.value = _actor.GetVital(_targetStat).CurrentPercent;
                 return;
             }
-            var percent = _actor.Vitals.c[_targetStat].CurrentPercent;
+            var percent = _actor.GetVital(_targetStat).CurrentPercent;
             var statDifference = Mathf.Abs(_statSlider.value - percent);
             if (statDifference > 0.05f) {
                 _statTween.Restart
@@ -72,10 +72,10 @@ namespace PixelComrades {
                 return;
             }
             if (_statText != null) {
-                _statText.text = _actor.Vitals.c[_targetStat].ToString();
+                _statText.text = _actor.GetVital(_targetStat).ToString();
             }
-            _actor.Vitals.c[_targetStat].OnStatChanged += CheckStat;
-            _statSlider.value = _actor.Vitals.c[_targetStat].CurrentPercent;
+            _actor.GetVital(_targetStat).OnStatChanged += CheckStat;
+            _statSlider.value = _actor.GetVital(_targetStat).CurrentPercent;
         }
 
 

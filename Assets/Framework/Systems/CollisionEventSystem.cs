@@ -8,7 +8,7 @@ namespace PixelComrades {
 
         public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
 
-        public void HandleGlobal(List<CollisionEvent> arg) {
+        public void HandleGlobal(ManagedArray<CollisionEvent> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 var msg = arg[i];
                 if (msg.Hit < 0) {
@@ -22,8 +22,8 @@ namespace PixelComrades {
                 }
                 msg.Target.Post(new ActionStateEvent(msg.Origin.Id, msg.Target.Id, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Collision));
                 var actionStateEvent = new ActionStateEvent(msg.Origin.Id, msg.Target.Id, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.AppliedImpact);
+                msg.Origin.Find<ActionImpacts>(c => c.ProcessAction(msg, actionStateEvent, msg.Target));
                 msg.Origin.Post(actionStateEvent);
-                msg.Origin.Get<ActionImpacts>(c => c.ProcessAction(msg, actionStateEvent, msg.Target));
             }
         }
     }

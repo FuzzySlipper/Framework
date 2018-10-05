@@ -8,7 +8,6 @@ namespace PixelComrades {
 
         //[SerializeField] private PlayerSaveData _playerData;
         [SerializeField] private string[] _currentActors = new string[4];
-        [SerializeField] private List<SerializedItem> _inventoryItems = new List<SerializedItem>();
 
         public void Load() {
             //Player.Data = _playerData;
@@ -29,14 +28,12 @@ namespace PixelComrades {
         public SerializedPlayerData(SerializationInfo info, StreamingContext context) {
             //_playerData = (PlayerSaveData)info.GetValue("PlayerData", typeof(PlayerSaveData));
             _currentActors = (string[]) info.GetValue("CurrentActors", typeof(string[]));
-            _inventoryItems = (List<SerializedItem>) info.GetValue("InventoryItems", typeof(List<SerializedItem>));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             UpdateCurrentData();
             //info.AddValue("PlayerData", _playerData, typeof(PlayerSaveData));
             info.AddValue("CurrentActors", _currentActors, typeof(string[]));
-            info.AddValue("InventoryItems", _inventoryItems, typeof(List<SerializedItem>));
         }
 
         private void UpdateCurrentData() {

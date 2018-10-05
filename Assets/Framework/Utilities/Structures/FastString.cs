@@ -37,6 +37,9 @@ namespace PixelComrades {
 
         ///<summary>Append a string without memory allocation</summary>
         public FastString Append(string value) {
+            if (string.IsNullOrEmpty(value)) {
+                return this;
+            }
             ReallocateIfn(value.Length);
             int n = value.Length;
             for (int i = 0; i < n; i++) {

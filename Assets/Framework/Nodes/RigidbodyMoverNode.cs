@@ -4,38 +4,38 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class RigidbodyMoverNode : INode {
-        public Entity Entity { get; }
+        public Entity Entity { get; private set; }
 
-        public CachedComponent<RigidbodyComponent> Rb;
-        public CachedComponent<MoveSpeed> MoveSpeed;
-        public CachedComponent<RotationSpeed> RotationSpeed;
-        public CachedComponent<TransformComponent> Tr;
-        public CachedComponent<MoveTarget> Target;
-        public CachedComponent<VelocityMover> Mover;
+        public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
+        public CachedComponent<MoveSpeed> MoveSpeed = new CachedComponent<MoveSpeed>();
+        public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
+        public CachedComponent<TransformComponent> Tr = new CachedComponent<TransformComponent>();
+        public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
+        public CachedComponent<VelocityMover> Mover = new CachedComponent<VelocityMover>();
 
         public RigidbodyMoverNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+            Register(entity, list);
+        }
+
+        public RigidbodyMoverNode(){}
+
+        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
             Entity = entity;
-            Rb = new CachedComponent<RigidbodyComponent>(entity, list);
-            MoveSpeed = new CachedComponent<MoveSpeed>(entity, list);
-            RotationSpeed = new CachedComponent<RotationSpeed>(entity, list);
-            Tr = new CachedComponent<TransformComponent>(entity, list);
-            Target = new CachedComponent<MoveTarget>(entity, list);
-            Mover = new CachedComponent<VelocityMover>(entity, list);
+            Rb.Set(entity, list);
+            MoveSpeed.Set(entity, list);
+            RotationSpeed.Set(entity, list);
+            Tr.Set(entity, list);
+            Target.Set(entity, list);
+            Mover.Set(entity, list);
         }
 
         public void Dispose() {
             Rb.Dispose();
-            Rb = null;
             MoveSpeed.Dispose();
-            MoveSpeed = null;
             RotationSpeed.Dispose();
-            RotationSpeed = null;
             Tr.Dispose();
-            Tr = null;
             Target.Dispose();
-            Target = null;
             Mover.Dispose();
-            Mover = null;
         }
 
         public static System.Type[] GetTypes() {

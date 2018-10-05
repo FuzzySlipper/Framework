@@ -15,7 +15,7 @@ namespace PixelComrades {
                 UIDragDropHandler.Return();
                 return;
             }
-            var price = RpgSystem.IdentifyEstimate(UIDragDropHandler.CurrentData);
+            var price = GameOptions.IdentifyEstimate(UIDragDropHandler.CurrentData);
             if (Player.Currency.Value < price) {
                 UIFloatingText.Spawn(string.Format("Identify Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
                 UIDragDropHandler.Return();
@@ -31,7 +31,7 @@ namespace PixelComrades {
                 }
                 return;
             }
-            var price = RpgSystem.IdentifyEstimate(UIDragDropHandler.CurrentData);
+            var price = GameOptions.IdentifyEstimate(UIDragDropHandler.CurrentData);
             UIFloatingText.Spawn(string.Format("Identified for {0} {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
             Player.Currency.AddToValue(-price);
             UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Identified = true);

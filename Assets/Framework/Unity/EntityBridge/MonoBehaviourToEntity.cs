@@ -50,6 +50,16 @@ namespace PixelComrades {
                 }
                 _colliderToDictionary.Remove(_tempColliders[i]);
             }
+            ItemPool.Despawn(tr.gameObject);
+        }
+    }
+
+    public static class UnityToEntityBridge {
+        public static void LoadUnityData(Entity entity, DataEntry data) {
+
+            if (data.TryGetValue<string>(DatabaseFields.Model, out var model)) {
+                
+            }
         }
     }
 }

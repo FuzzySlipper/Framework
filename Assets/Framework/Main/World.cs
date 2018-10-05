@@ -21,10 +21,13 @@ namespace PixelComrades {
         private static Dictionary<Type, SystemBase> _systems = new Dictionary<Type, SystemBase>();
         private static List<System.Type> _systemTypes = new List<Type>();
         private static List<IMainSystemUpdate> _updaters = new List<IMainSystemUpdate>();
+        private static List<IMainFixedUpdate> _fixedUpdates = new List<IMainFixedUpdate>();
+        private static List<IPeriodicUpdate> _periodicUpdates = new List<IPeriodicUpdate>();
         private static Dictionary<Type, List<IReceive>> _globalReceivers = new Dictionary<Type, List<IReceive>>();
         //private static Queue<Type> _msgTypesAwaitingProcess = new Queue<Type>();
         private static List<Type>[] _typeEvents = new []{ new List<Type>(), new List<Type>()};
         private static int _typeListIdx = 0;
+        private static UnscaledTimer _periodicTimer = new UnscaledTimer(0.75f);
         private static List<Type> TypeList { get { return _typeEvents[_typeListIdx]; } }
         private static Dictionary<Type, TypedMessageQueue> _msgLists = new Dictionary<Type, TypedMessageQueue>();
         private static SortByPriorityClass _typeSorter = new SortByPriorityClass();
@@ -35,8 +38,8 @@ namespace PixelComrades {
             if (Instance == null) {
                 return;
             }
-            NodeFilter<VisibleNode>.New(VisibleNode.GetTypes(), (entity, list) => new VisibleNode(entity, list));
-            NodeFilter<CharacterNode>.New(CharacterNode.GetTypes(), (entity, list) => new CharacterNode(entity, list));
+            NodeFilter<VisibleNode>.New(VisibleNode.GetTypes());
+            NodeFilter<CharacterNode>.New(CharacterNode.GetTypes());
             Get<ActionFxSystem>();
             Get<AnimatorSystem>();
             Get<CameraSystem>();
@@ -62,11 +65,10 @@ namespace PixelComrades {
         public static T Add<T>(Type type = null) where T : new() {
             var hash = type == null ? typeof(T).GetHashCode() : type.GetHashCode();
             if (Instance._data.TryGetValue(hash, out var o)) {
-                InitializeObject(o);
                 return (T) o;
             }
             var created = new T();
-            InitializeObject(created);
+            //InitializeObject(created);
             Instance._data.Add(hash, created);
             return created;
         }
@@ -79,9 +81,7 @@ namespace PixelComrades {
             system = Activator.CreateInstance<T>();
             _systems.Add(type, system);
             _systemTypes.Add(type);
-            if (system is IMainSystemUpdate update) {
-                _updaters.Add(update);
-            }
+            CheckUpdates(system, true);
             Add(system);
             return (T) system;
         }
@@ -128,10 +128,12 @@ namespace PixelComrades {
             return Instance._data.ContainsKey(typeof(T).GetHashCode());
         }
 
-        public static object Get(Type t) {
-            object resolve;
-            Instance._data.TryGetValue(t.GetHashCode(), out resolve);
-            return resolve;
+        public static SystemBase GetType(string typeName) {
+            var type = ParseUtilities.ParseType(typeName);
+            if (type != null) {
+                return _systems.TryGetValue(type, out var system) ? system : null;
+            }
+            return null;
         }
 
         //public static T Get<T>() {
@@ -142,12 +144,6 @@ namespace PixelComrades {
         //    return (T) resolve;
         //}
 
-        public static void InitializeObject(object obj) {
-            var awakeble = obj as IAwake;
-            if (awakeble != null) {
-                awakeble.OnAwake();
-            }
-        }
         
         public static void Add(object obj) {
             var reciever = obj as IReceive;
@@ -184,11 +180,36 @@ namespace PixelComrades {
         }
         
         public static void RemoveSystem(SystemBase system) {
-            if (system is IMainSystemUpdate update) {
-                _updaters.Remove(update);
-            }
+            CheckUpdates(system, false);
             _systems.Remove(system.GetType());
             Remove(system);
+        }
+
+        private static void CheckUpdates(SystemBase system, bool add) {
+            if (system is IMainSystemUpdate update) {
+                if (add) {
+                    _updaters.Add(update);
+                }
+                else {
+                    _updaters.Remove(update);
+                }
+            }
+            if (system is IMainFixedUpdate fixedUpdate) {
+                if (add) {
+                    _fixedUpdates.Add(fixedUpdate);
+                }
+                else {
+                    _fixedUpdates.Remove(fixedUpdate);
+                }
+            }
+            if (system is IPeriodicUpdate periodicUpdate) {
+                if (add) {
+                    _periodicUpdates.Add(periodicUpdate);
+                }
+                else {
+                    _periodicUpdates.Remove(periodicUpdate);
+                }
+            }
         }
 
         public static void Remove(object obj) {
@@ -244,6 +265,12 @@ namespace PixelComrades {
             for (int i = 0; i < _updaters.Count; i++) {
                 _updaters[i].OnSystemUpdate(dt);
             }
+            if (!_periodicTimer.IsActive) {
+                _periodicTimer.StartTimer();
+                for (int i = 0; i < _periodicUpdates.Count; i++) {
+                    _periodicUpdates[i].OnPeriodicUpdate();
+                }
+            }
             var list = TypeList;
             list.Sort(_typeSorter);
             _typeListIdx = (int) MathEx.WrapAround(_typeListIdx + 1, 0, _typeEvents.Length);
@@ -255,6 +282,12 @@ namespace PixelComrades {
                 _msgLists[type].Process(receiverList);
             }
             list.Clear();
+        }
+
+        public static void FixedUpdate(float dt) {
+            for (int i = 0; i < _fixedUpdates.Count; i++) {
+                _fixedUpdates[i].OnFixedSystemUpdate(dt);
+            }
         }
 
         private abstract class TypedMessageQueue {

@@ -14,7 +14,7 @@ namespace PixelComrades {
         }
 
         public override void Enter() {
-            TimeManager.Start(SitDown());
+            TimeManager.StartTask(SitDown());
         }
 
         public override void Stop() {
@@ -25,7 +25,7 @@ namespace PixelComrades {
                 out FloorHit, _nativeCapsuleHeight * .25f)) {
                 return;
             }
-            TimeManager.Start(StandUp());
+            TimeManager.StartTask(StandUp());
         }
 
         public override float MoveSpeed { get { return Settings.WalkSpeed * Settings.SlowSpeedModifier; } }

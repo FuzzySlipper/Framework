@@ -21,7 +21,7 @@ namespace PixelComrades {
             MessageKit.removeObserver(Messages.PauseChanged, CheckPause);
         }
 
-        public void OnFixedSystemUpdate() {
+        public void OnFixedSystemUpdate(float dt) {
             if (_moverList == null) {
                 _moverList = EntityController.GetNodeList<RigidbodyMoverNode>();
             }
@@ -88,7 +88,7 @@ namespace PixelComrades {
             owner.Get<MoveTarget>(m => m.Clear());
         }
 
-        public void HandleGlobal(List<AddForceEvent> arg) {
+        public void HandleGlobal(ManagedArray<AddForceEvent> arg) {
             for (int i = 0; i < arg.Count; i++) {
                 arg[i].Rb.AddForce(arg[i].Force);
             }

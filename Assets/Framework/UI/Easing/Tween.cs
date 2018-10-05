@@ -208,7 +208,7 @@ namespace PixelComrades {
             resttime = originaltime;
             if (repeat == Tween.TweenRepeat.PingPong) { SwitchTargets(); }
             if (repeat == Tween.TweenRepeat.PingPong || repeat == Tween.TweenRepeat.Loop) {
-                TimeManager.Start(Animate());
+                TimeManager.StartTask(Animate());
             }
         }
     }

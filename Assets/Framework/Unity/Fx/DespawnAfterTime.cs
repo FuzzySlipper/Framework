@@ -12,7 +12,7 @@ namespace PixelComrades {
                 TimeManager.StartUnscaled(Despawn());
             }
             else {
-                TimeManager.Start(Despawn());
+                TimeManager.StartTask(Despawn());
             }
         }
 
