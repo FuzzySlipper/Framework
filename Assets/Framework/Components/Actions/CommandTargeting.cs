@@ -103,38 +103,37 @@ namespace PixelComrades {
             switch (targeting.Criteria) {
                 case TargetType.Enemy:
                     if (!World.Get<FactionSystem>().AreEnemies(owner, target.Target)) {
-                        owner.Find<StatusUpdateComponent>(s => s.Status = "Not an enemy");
+                        owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
                         return false;
                     }
                     break;
                 case TargetType.Friendly:
                     if (!World.Get<FactionSystem>().AreFriends(owner, target.Target)) {
-                        owner.Find<StatusUpdateComponent>(s => s.Status = "Not friendly");
+                        owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
                         return false;
                     }
                     break;
                 case TargetType.Self:
                     if (target.Target != null && target.Target.Id != targeting.Owner) {
-                        owner.Find<StatusUpdateComponent>(s => s.Status = "Self only");
+                        owner.PostAll(new StatusUpdate("Self only", Color.yellow));
                         return false;
                     }
                     break;
             }
             if (targeting.RequireLoS) {
                 if (target.Target != null && !World.Get<LineOfSightSystem>().CanSee(owner, target.Target)) {
-                    owner.Find<StatusUpdateComponent>(s => s.Status = "Can't see target");
+                    owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
                     return false;
                 }
                 if (target.Target == null && !World.Get<LineOfSightSystem>().CanSee(owner, target.GetPosition)) {
-                    owner.Find<StatusUpdateComponent>(s => s.Status = "Can't see target");
+                    owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
                     return false;
                 }
             }
             if (targeting.Range > 0.25f) {
                 var distance = DistanceSystem.GetDistance(owner, target.GetPosition);
                 if (distance > targeting.Range) {
-                    Debug.LogFormat("Distance: {0} out of range", distance);
-                    owner.Find<StatusUpdateComponent>(s => s.Status = string.Format("Distance: {0} out of range", distance));
+                    owner.PostAll(new StatusUpdate(distance + " distance out of range", Color.yellow));
                     return false;
                 }
             }
@@ -184,9 +183,9 @@ namespace PixelComrades {
     }
 
     public enum TargetType {
-        Any,
-        Enemy,
-        Friendly,
-        Self,
+        Any=0,
+        Enemy=1,
+        Friendly=2,
+        Self=3,
     }
 }

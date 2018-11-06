@@ -342,12 +342,20 @@ namespace PixelComrades {
             }
             return current;
         }
+
+        public static float LevelAddition(this float val, float amount) {
+            return val + (val * amount);
+        }
     }
 
     public static class IntExtension {
 
         public static float ToFloatPercentFromBase100(this int intVal) {
             return intVal * 0.01f;
+        }
+
+        public static int LevelAddition(this int intVal, float amount) {
+            return (int) (intVal + (intVal * amount));
         }
 
         public static string ToRomanNumeral(this int value) {
@@ -985,6 +993,10 @@ namespace PixelComrades {
 
         public static Point3 toPoint3(this Vector3 v3) {
             return new Point3(v3);
+        }
+
+        public static Point3 toPoint3ZeroY(this Vector3 v3) {
+            return new Point3(v3.x, 0, v3.z);
         }
 
         public static float ManualDot(Vector3 a, Vector3 b) {
@@ -2292,16 +2304,39 @@ namespace PixelComrades {
 
     public static class ParseUtilities {
 
+        private static List<string> _namespaces = new List<string>();
+
         public static System.Type ParseType(string typeName) {
             var type = System.Type.GetType(typeName, false, false);
             if (type == null) {
-                type = System.Type.GetType(string.Format("PixelComrades.{0}", typeName), false, false);
+                type = System.Type.GetType("PixelComrades." + typeName, false, false);
             }
             if (type == null) {
-                type = System.Type.GetType(string.Format("PixelComrades.{0}.{1}", Game.GameNamespace, typeName), false, false);
+                if (_namespaces.Count == 0) {
+                    CollectNamespaces();
+                }
+                for (int i = 0; i < _namespaces.Count; i++) {
+                    type = System.Type.GetType(_namespaces[i] + "." + typeName, false, false);
+                    if (type != null) {
+                        break;
+                    }
+                }
             }
             return type;
         }
+
+        private static void CollectNamespaces() {
+            _namespaces.Clear();
+            int i = 0;
+            while (i < 99) {
+                var nameSpaceString = GameOptions.Get("LoadedNamespace" + i, "");
+                if (string.IsNullOrEmpty(nameSpaceString)) {
+                    break;
+                }
+                _namespaces.Add(nameSpaceString);
+                i++;
+            }
+        } 
 
         public static int TryParseInt(this IList<string> lines, ref int parseIndex) {
             return lines.TryParse(ref parseIndex, 0);

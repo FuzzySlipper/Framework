@@ -27,6 +27,10 @@ namespace PixelComrades {
             //Minibuffer.Register(typeof(EcsDebug));
         }
 
+        public static void ImportGameData() {
+            GameData.Init();
+        }
+
         public static void Version() {
             Debug.LogFormat("Game Version: {0}", Game.Version);
         }

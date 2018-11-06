@@ -490,6 +490,22 @@ namespace PixelComrades {
             return null;
         }
 
+        public static float FindStatValue(this Entity entity, string statFullID) {
+            WhileLoopLimiter.ResetInstance();
+            var currentEntity = entity;
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                if (currentEntity == null) {
+                    return 0f;
+                }
+                var stat = currentEntity.Stats.Get(statFullID);
+                if (stat != null) {
+                    return stat.Value;
+                }
+                currentEntity = currentEntity.GetParent();
+            }
+            return 0f;
+        }
+
         public static bool FindStat<T>(this Entity entity, string statFullID, System.Action<T> del) where T : BaseStat {
             WhileLoopLimiter.ResetInstance();
             var currentEntity = entity;

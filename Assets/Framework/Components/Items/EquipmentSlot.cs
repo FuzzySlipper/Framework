@@ -4,27 +4,36 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class EquipmentSlot {
+    public interface IEquipmentHolder {
+        System.Action<Entity> OnItemChanged { get; set; }
+        string TargetSlot { get; }
+        string LastEquipStatus { get; }
+        Entity Item { get; }
+        bool AddItem(Entity item);
+    }
+
+    public class EquipmentSlot: IEquipmentHolder {
 
         public EquipmentSlots SlotOwner;
-        public Action<Entity> OnItemChanged;
+        public Action<Entity> OnItemChanged { get;set; }
 
-        private int _targetSlot;
+        private string _targetSlot;
         private Transform _equipTr;
 
-        public EquipmentSlot(int targetSlot, Transform equipTr) {
+        public EquipmentSlot(string targetSlot, string name, Transform equipTr) {
             _targetSlot = targetSlot;
             _equipTr = equipTr;
+            Name = name;
         }
 
         private Entity _item;
-        private string _lastEquipStatus = "";
+        protected string _lastEquipStatus = "";
         
         public Equipment CurrentEquipment { get; private set; }
         public Entity Item { get { return _item; } }
         public string LastEquipStatus { get { return _lastEquipStatus; } }
-        public int TargetSlot { get { return _targetSlot; } }
-        public string Name {get { return GameData.Enums.GetFakeEnum(EnumTypes.EquipSlotTypes).GetDescriptionAt(_targetSlot);} }
+        public string TargetSlot { get { return _targetSlot; } }
+        public string Name { get; }
         public Transform EquipTr { get => _equipTr; }
 
         public bool AddItem(Entity item) {
@@ -42,6 +51,7 @@ namespace PixelComrades {
 
         public virtual bool EquipItem(Entity item) {
             if (item == Item) {
+                _lastEquipStatus = "Already equipped";
                 return false;
             }
             var equip = item.Get<Equipment>();
@@ -79,6 +89,7 @@ namespace PixelComrades {
         }
 
         protected virtual void SetStats() {}
+        protected virtual void ClearStats(){}
 
         //public float RecoveryPenalty() {
         //    if (_item == null) {
@@ -91,7 +102,7 @@ namespace PixelComrades {
         //}
 
 
-        public virtual bool SlotIsCompatible(int slotType) {
+        public virtual bool SlotIsCompatible(string slotType) {
             return slotType == _targetSlot;
         }
         
@@ -106,6 +117,7 @@ namespace PixelComrades {
 
         private void ClearEquippedItem(bool isSwap) {
             if (_item != null) {
+                ClearStats();
                 _item.ClearParent(SlotOwner.Owner);
                 _item.Get<Equipment>().UnEquip();
                 _item.RemoveObserver(SlotOwner);
@@ -143,7 +155,7 @@ namespace PixelComrades {
         private BaseStat _targetStat;
         private float _amount;
 
-        public override string StatID { get { return _targetStat.ID; } }
+        public override string StatID { get { return _targetStat != null ? _targetStat.ID : ""; } }
 
         public BasicValueModHolder(float amount) {
             _amount = amount;
@@ -153,6 +165,7 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
+            _targetStat = target;
             _id = target.AddValueMod(_amount);
         }
 
@@ -170,7 +183,7 @@ namespace PixelComrades {
         private BaseStat _targetStat;
         private float _percent;
 
-        public override string StatID { get { return _targetStat.ID; } }
+        public override string StatID { get { return _targetStat != null ? _targetStat.ID : ""; } }
 
         public BasicPercentModHolder(float percent) {
             _percent = percent;
@@ -180,6 +193,7 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
+            _targetStat = target;
             _id = target.AddPercentMod(_percent);
         }
 
@@ -198,11 +212,17 @@ namespace PixelComrades {
         private BaseStat _sourceStat;
         private float _percent;
 
-        public override string StatID { get { return _sourceStat.ID; } }
+        public override string StatID { get { return _sourceStat != null ? _sourceStat.ID : ""; } }
 
         public DerivedStatModHolder(BaseStat source, float percent) {
             _sourceStat = source;
             _percent = percent;
+        }
+
+        public DerivedStatModHolder(BaseStat source, BaseStat target, float percent) {
+            _sourceStat = source;
+            _percent = percent;
+            Attach(target);
         }
 
         public override void Attach(BaseStat target) {

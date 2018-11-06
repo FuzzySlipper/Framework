@@ -22,6 +22,8 @@ namespace PixelComrades {
         private object _mValueControl;
         private int _mValueControlInt = int.MinValue;
 
+        public static FastString Instance = new FastString(64);
+
         public FastString(int initialCapacity = 32) {
             _mBuffer = new char[_mCharsCapacity = initialCapacity];
         }
@@ -33,6 +35,39 @@ namespace PixelComrades {
                 _mBuffer.CopyTo(newChars, 0);
                 _mBuffer = newChars;
             }
+        }
+
+        public void AppendNewLine() {
+            Append(System.Environment.NewLine);
+        }
+
+        public void AppendNewLine(string text) {
+            Append(text);
+            Append(System.Environment.NewLine);
+        }
+
+        public void AppendBoldLabelNewLine(string label, string value) {
+            AppendBoldLabel(label,value);
+            Append(System.Environment.NewLine);
+        }
+
+        public void AppendBoldLabelNewLine(string label, float value) {
+            AppendBoldLabel(label, value);
+            Append(System.Environment.NewLine);
+        }
+
+        public void AppendBoldLabel(string label, string value) {
+            Append("<size=125%><b>");
+            Append(label);
+            Append(":</b><size=100%> ");
+            Append(value);
+        }
+
+        public void AppendBoldLabel(string label, float value) {
+            Append("<size=125%><b>");
+            Append(label);
+            Append(":</b><size=100%> ");
+            Append(value.ToString("F0"));
         }
 
         ///<summary>Append a string without memory allocation</summary>

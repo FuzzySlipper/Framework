@@ -4,6 +4,44 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [System.Serializable]
+    public class LeveledInt {
+        public int BaseValue;
+        public int PerLevel;
+
+        public LeveledInt(int val, int lvl) {
+            BaseValue = val;
+            PerLevel = lvl;
+        }
+
+        public LeveledInt() {
+        }
+
+        public int Get(int level) {
+            return BaseValue + (PerLevel * level);
+        }
+
+        public static LeveledInt Parse(string input) {
+            if (input.Length < 3) {
+                return null;
+            }
+            var numbers = input.Split('+');
+            if (numbers.Length == 0) {
+                return null;
+            }
+            int baseVal;
+            if (!int.TryParse(numbers[0], out baseVal)) {
+                return null;
+            }
+            if (numbers.Length == 1) {
+                return new LeveledInt(baseVal, 0);
+            }
+            int perLevel;
+            int.TryParse(numbers[1], out perLevel);
+            return new LeveledInt(baseVal, perLevel);
+        }
+    }
+
+    [System.Serializable]
     public class LeveledFloat {
         public float BaseValue;
         public float PerLevel;

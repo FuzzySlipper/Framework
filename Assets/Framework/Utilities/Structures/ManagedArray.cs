@@ -117,7 +117,13 @@ namespace PixelComrades {
         }
 
         public bool Contains(T value) {
+            if (value == null) {
+                return false;
+            }
             for (int a = 0; a < Max; a++) {
+                if (_list[a] == null) {
+                    continue;
+                }
                 if (_list[a].Equals(value)) {
                     return true;
                 }
@@ -169,7 +175,7 @@ namespace PixelComrades {
         }
 
 
-        public delegate void RunDel<T>(T value);
+        public delegate void RunDel<TV>(T value) where TV : T;
     }
 
     public struct ComponentReference {

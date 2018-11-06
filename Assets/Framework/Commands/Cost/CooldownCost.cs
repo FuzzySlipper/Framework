@@ -7,6 +7,8 @@ namespace PixelComrades {
 
         private Timer _cooldown;
 
+        public float Length { get { return _cooldown.Length; } }
+
         public CooldownCost(float length) {
             _cooldown = new Timer(length, false);
         }
@@ -19,7 +21,7 @@ namespace PixelComrades {
             if (!_cooldown.IsActive) {
                 return true;
             }
-            entity.Get<StatusUpdateComponent>(e => e.Status = "Still Recovering");
+            entity.Post(new StatusUpdate("Still Recovering", Color.yellow));
             return false;
         }
     }

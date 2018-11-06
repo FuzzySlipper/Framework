@@ -12,7 +12,7 @@ namespace PixelComrades {
 
         public static bool AddToHotbar(Entity item) {
             for (int i = 0; i < main._slots.Length; i++) {
-                if (main._slots[i].GameData == null) {
+                if (main._slots[i].Data == null) {
                     main._slots[i].Set(item);
                     return true;
                 }
@@ -22,7 +22,7 @@ namespace PixelComrades {
 
         public static bool HotbarContains(Entity item) {
             for (int i = 0; i < main._slots.Length; i++) {
-                if (main._slots[i].GameData == item) {
+                if (main._slots[i].Data == item) {
                     return true;
                 }
             }
@@ -31,7 +31,7 @@ namespace PixelComrades {
 
         public static bool RemoveFromHotbar(Entity item) {
             for (int i = 0; i < main._slots.Length; i++) {
-                if (main._slots[i].GameData == item) {
+                if (main._slots[i].Data == item) {
                     main._slots[i].Clear();
                     return true;
                 }
@@ -99,7 +99,7 @@ namespace PixelComrades {
                 if (!_slots[i].Active) {
                     continue;
                 }
-                var item = _slots[i].GameData.Get<InventoryItem>();
+                var item = _slots[i].Data.Get<InventoryItem>();
                 if (item.Count < 1) {
                     _slots[i].Clear();
                 }
@@ -113,7 +113,7 @@ namespace PixelComrades {
                     continue;
                 }
                 var slot = _slots[s];
-                if (slot.Active && slot.GameData == null) {
+                if (slot.Active && slot.Data == null) {
                     slot.Clear();
                     continue;
                 }
@@ -122,11 +122,11 @@ namespace PixelComrades {
                         continue;
                     }
                     var otherSlot = _slots[i];
-                    if (otherSlot.Active && otherSlot.GameData == null) {
+                    if (otherSlot.Active && otherSlot.Data == null) {
                         otherSlot.Clear();
                         continue;
                     }
-                    if (!slot.GameData.Equals(otherSlot.GameData)) {
+                    if (!slot.Data.Equals(otherSlot.Data)) {
                         continue;
                     }
                     if (origin == otherSlot) {

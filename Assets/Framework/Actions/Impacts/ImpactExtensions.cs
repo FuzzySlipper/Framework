@@ -4,23 +4,15 @@ using System;
 
 namespace PixelComrades {
     
-    public enum ImpactTypes {
-        None,
-        Damage,
-        Heal,
-        LeachVital,
-        Special,
-    }
-
     public enum ImpactRadiusTypes {
         Single = 0,
-        Cone = 10,
-        Cross = 20,
-        Cross2 = 21,
-        Line = 22,
-        Radius1 = 30,
-        Radius2 = 31,
-        Party = 40,
+        Cone = 1,
+        Cross = 2,
+        Cross2 = 3,
+        Line = 4,
+        Radius1 = 5,
+        Radius2 = 6,
+        Party = 7,
     }
 
     public static class ImpactExtensions {

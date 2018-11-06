@@ -34,18 +34,26 @@ namespace PixelComrades {
                 for (int r = 0; r < sheet.Rows.Count; r++) {
                     JToken line = sheet.Rows[r];
                     var id = line[Id].ToString();
-                    var entry = new DataEntry(id, sheet, sheet.Columns.Count);
+                    var entry = new DataEntry(id, string.Format("{0}.{1}", sheet.Name, id), sheet.Columns.Count);
                     entry.Index = r;
                     for (int c = 0; c < sheet.Columns.Count; c++) {
                         var columnName = sheet.Columns[c].Name;
                         if (columnName == id) {
-                            entry.Cells[c] = new DataCell<string>(Id, entry, id);
+                            entry.Cells.SafeAdd(Id, new DataCell<string>(Id, entry, id));
+                            //entry.Cells[c] = new DataCell<string>(Id, entry, id);
                             continue;
                         }
                         if (columnName == EnumColumn) {
                             entry.Index = line[columnName].Value<int>();
                         }
-                        entry.Cells[c] = GetColumnData(entry, line[columnName], sheet.Columns[c]);
+                        if (line[columnName] == null) {
+                            continue;
+                        }
+                        //entry.Cells[c] = GetColumnData(entry, line[columnName], sheet.Columns[c]);
+                        var data = GetColumnData(entry, line[columnName], sheet.Columns[c]);
+                        if (data != null) {
+                            entry.Cells.SafeAdd(data.ID, data);
+                        }
                     }
                     list.Add(entry);
                 }
@@ -62,20 +70,48 @@ namespace PixelComrades {
                 var nestedSheet = _parser.Nested[s];
                 var targetSheet = _parser.GetSheetWithName(nestedSheet.NestedParent);
                 var column = targetSheet.GetColumn(nestedSheet.NestedColumn);
+                if (column == null) {
+                    Debug.Log(string.Format("No column for {0}", nestedSheet.Name));
+                    continue;
+                }
                 var entryList = _sheets[targetSheet.Name];
+                if (entryList == null) {
+                    Debug.Log(string.Format("No list for {0}", column.Name));
+                    continue;
+                }
                 for (int e = 0; e < entryList.Count; e++) {
                     var parentEntry = entryList[e];
+                    if (parentEntry == null) {
+                        Debug.Log(string.Format("No list for {0}", column.Name));
+                        continue;
+                    }
                     var list = parentEntry.Get(column.Name) as DataList;
                     if (list == null || nestedSheet.Columns.Count == 0) {
-                        Debug.Log(string.Format("No list for {0} at {1}", column.Name, parentEntry.ID));
+                        //Debug.Log(string.Format("No list for {0} at {1}", column.Name, parentEntry.ID));
                         continue;
                     }
                     for (int r = 0; r < list.TempData.Count; r++) {
                         JToken line = list.TempData[r];
-                        var entry = new DataEntry(string.Format("{0}.{1}", list.FullID, r), targetSheet, nestedSheet.Columns.Count);
+                        string id = r.ToString();
+                        if (line[Id] != null) {
+                            id = line[Id].ToString();
+                        }
+                        var entry = new DataEntry(id, string.Format("{0}.{1}", list.FullID, id), nestedSheet.Columns.Count);
                         for (int c = 0; c < nestedSheet.Columns.Count; c++) {
                             var columnName = nestedSheet.Columns[c].Name;
-                            entry.Cells[c] = GetColumnData(entry, line[columnName], nestedSheet.Columns[c]);
+                            if (columnName == id) {
+                                //entry.Cells[c] = new DataCell<string>(Id, entry, id);
+                                entry.Cells.SafeAdd(Id, new DataCell<string>(Id, entry, id));
+                                continue;
+                            }
+                            if (line[columnName] == null) {
+                                continue;
+                            }
+                            //entry.Cells[c] = GetColumnData(entry, line[columnName], nestedSheet.Columns[c]);
+                            var data = GetColumnData(entry, line[columnName], nestedSheet.Columns[c]);
+                            if (data != null) {
+                                entry.Cells.SafeAdd(data.ID, data);
+                            }
                         }
                         list.Value.Add(entry);
                     }
@@ -105,6 +141,18 @@ namespace PixelComrades {
         }
 
         private DataCell GetColumnData(DataEntry owner, JToken data, ColumnNode column) {
+            if (owner == null) {
+                Debug.LogErrorFormat("Column {0} at data {1} had null owner", column.Name, data.ToString());
+                return null;
+            }
+            if (column == null) {
+                Debug.LogErrorFormat("Owner {0} at data {1} had null column", owner.FullID, data.ToString());
+                return null;
+            }
+            if (data == null) {
+                Debug.LogErrorFormat("Owner {0} at column {1} had null data", owner.FullID, column.Name);
+                return null;
+            }
             DataCell cell = null;
             var typeNum = GetTypeNumFromCastleDBTypeString(column.TypeStr);
             switch (typeNum) {
@@ -157,7 +205,8 @@ namespace PixelComrades {
                     //5 = Enum
                     //10 = Flags Enum
                     var enumMembers = GetEnumValuesFromTypeString(column.TypeStr);
-                    cell = new DataCell<string>(column.Name, owner, enumMembers[data.Value<int>()]);
+                    var index = data.Value<int>();
+                    cell = new DataEnum(column.Name, owner, enumMembers[index], index);
                     break;
                 case "8": 
                     //List
@@ -309,12 +358,18 @@ namespace PixelComrades {
 
     public abstract class DataCell {
         public abstract System.Object Get { get; }
+        public abstract DataCell Clone();
         public string ID { get; }
         public string FullID { get; }
 
         protected DataCell(string id, DataEntry owner) {
             ID = id;
             FullID = string.Format("{0}.{1}", owner.ID, id);
+        }
+
+        protected DataCell(string fullID) {
+            ID = fullID.Split('.')[0];
+            FullID = fullID;
         }
     }
 
@@ -327,25 +382,64 @@ namespace PixelComrades {
             Value = value;
             Type = typeof(T);
         }
+
+        public DataCell(string fullID, T value) : base(fullID) {
+            Value = value;
+            Type = typeof(T);
+        }
+
+        public override DataCell Clone() {
+            return new DataCell<T>(ID, Value);
+        }
+    }
+
+    public class DataEnum : DataCell<string> {
+        public int EnumIndex { get; }
+        public override System.Object Get { get { return Value; } }
+
+        public DataEnum(string id, DataEntry owner, string value, int index) : base(id, owner, value) {
+            EnumIndex = index;
+        }
+
+        public DataEnum(string fullID, string value, int index) : base(fullID, value) {
+            EnumIndex = index;
+        }
+
+        public override DataCell Clone() {
+            return new DataEnum(ID, Value, EnumIndex);
+        }
     }
 
     public class DataList : DataCell<List<DataEntry>> {
         public List<JToken> TempData = new List<JToken>();
         public DataList(string id, DataEntry owner, List<DataEntry> value) : base(id, owner, value) {}
+        public DataList(string fullID, List<DataEntry> value) : base(fullID, value) {}
 
         public int Count { get { return Value.Count; } }
         public DataEntry this[int index] { get { return Value[index]; } }
 
 
-        public T FindData<T, TV>(string keyField, TV targetKey, string targetField) {
+        public T FindData<T>(string id, string targetField) {
             for (int i = 0; i < Value.Count; i++) {
-                if (Equals(Value[i].GetValue<TV>(keyField), targetKey)) {
+                if (Value[i].ID == id) {
                     return Value[i].GetValue<T>(targetField);
                 }
             }
             return default(T);
         }
 
+        public bool HasID(string id) {
+            for (int i = 0; i < Value.Count; i++) {
+                if (Value[i].ID == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public override DataCell Clone() {
+            return new DataList(ID, Value);
+        }
     }
 
     public class DataReference : DataCell {
@@ -378,27 +472,50 @@ namespace PixelComrades {
             TargetID = targetId;
             _db = db;
         }
+
+        public DataReference(string fullID, string targetSheet, string targetId, JsonDB db) : base(fullID) {
+            TargetSheet = targetSheet;
+            TargetID = targetId;
+            _db = db;
+        }
+
+        public override DataCell Clone() {
+            return new DataReference(ID, TargetSheet, TargetID, _db);
+        }
     }
 
     public class DataEntry {
-        public DataCell[] Cells;
-        public string ID { get; }
-        public string FullID { get; }
+        public Dictionary<string, DataCell> Cells = new Dictionary<string, DataCell>();
+        public string ID { get; private set; }
+        public string FullID { get; private set; }
         public int Index = -1;
 
-        public DataEntry(string id, SheetNode owner, int cnt) {
-            Cells = new DataCell[cnt];
+        public DataEntry Clone(string newId) {
+            var clone = new DataEntry();
+            var prefix = FullID.Split('.');
+            clone.ID = newId;
+            clone.FullID = string.Format("{0}.{1}", prefix.Length > 0 ? prefix[0] : "", newId);
+            clone.Index = Index;
+            //clone.Cells = new DataCell[Cells.Length];
+            foreach (var dataEntry in Cells) {
+                clone.Cells.Add(dataEntry.Key, dataEntry.Value.Clone());
+            }
+            //for (int i = 0; i < Cells.Length; i++) {
+            //    clone.Cells[i] = Cells[i].Clone();
+            //}
+            return clone;
+        }
+
+        private DataEntry(){}
+
+        public DataEntry(string id, string fullID, int cnt) {
+            //Cells = new DataCell[cnt];
             ID = id;
-            FullID = string.Format("{0}.{1}", owner.Name, id);
+            FullID = fullID;
         }
 
         public DataCell Get(string label) {
-            for (int i = 0; i < Cells.Length; i++) {
-                if (Cells[i].ID == label) {
-                    return Cells[i];
-                }
-            }
-            return null;
+            return Cells.TryGetValue(label, out var entry) ? entry : null;
         }
 
         public T Get<T>(string field) where T : DataCell {
@@ -407,6 +524,15 @@ namespace PixelComrades {
                 return null;
             }
             return (T) cell;
+        }
+
+        public void Replace<T>(string field, T value) where T : DataCell {
+            if (Cells.ContainsKey(field)) {
+                Cells[field] = value;
+            }
+            else {
+                Cells.Add(field, value);
+            }
         }
 
         public bool TryGet<T>(string field, out T value) where T : DataCell {
@@ -422,7 +548,7 @@ namespace PixelComrades {
         public T GetValue<T>(string field) {
             var cell = Get(field);
             if (cell == null) {
-                return default(T);
+                return FindChildValue<T>(field);
             }
             if (cell is DataCell<T> typeCell) {
                 return typeCell.Value;
@@ -440,6 +566,10 @@ namespace PixelComrades {
                 enumIndex = 0;
                 return false;
             }
+            if (cell is DataEnum dataEnum) {
+                enumIndex = dataEnum.EnumIndex;
+                return true;
+            }
             if (cell is DataReference refData) {
                 enumIndex = refData.Value.Index;
                 return true;
@@ -454,29 +584,89 @@ namespace PixelComrades {
         public T TryGetValue<T>(string field, T defaultValue) {
             var cell = Get(field);
             if (cell == null) {
-                return defaultValue;
+                return FindChildValue<T>(field, defaultValue);
             }
             if (cell is DataCell<T> typeCell) {
                 return typeCell.Value;
             }
+            if (typeof(T).IsEnum && cell is DataCell<string> stringCell) {
+                return ParseUtilities.TryParseEnum(stringCell.Value, defaultValue);
+            }
             if (cell.Get is T variable) {
                 return variable;
             }
-            return defaultValue;
+            return FindChildValue<T>(field, defaultValue);
+        }
+
+        public T FindChildValue<T>(string field, T defaultValue) {
+            var child = FindChild(field);
+            return child != null ? child.FindType<T>() : defaultValue;
+        }
+
+        public T FindChildValue<T>(string field) {
+            var child = FindChild(field);
+            return child != null ? child.FindType<T>() : default(T);
+        }
+
+        public DataEntry FindChild(string field) {
+            foreach (var dataCell in Cells) {
+            //for (int i = 0; i < Cells.Length; i++) {
+                if (dataCell.Value is DataList cell) {
+                    for (int c = 0; c < cell.Count; c++) {
+                        if (cell[c].ID == field) {
+                            return cell[c];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public T FindType<T>() {
+            foreach (var dataCell in Cells) {
+            //for (int i = 0; i < Cells.Length; i++) {
+                //var cell = Cells[i];
+                var cell = dataCell.Value;
+                if (cell is DataCell<T> typeCell) {
+                    return typeCell.Value;
+                }
+                if (cell.Get is T variable) {
+                    return variable;
+                }
+            }
+            return default(T);
+        }
+
+        public bool HasType<T>() {
+            foreach (var dataCell in Cells) {
+                //for (int i = 0; i < Cells.Length; i++) {
+                //var cell = Cells[i];
+                var cell = dataCell.Value;
+                if (cell is DataCell<T>) {
+                    return true;
+                }
+                if (cell.Get is T) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool TryGetValue<T>(string field, out T value) {
             var cell = Get(field);
-            if (cell == null) {
-                value = default(T);
-                return false;
+            if (cell != null) {
+                if (cell is DataCell<T> typeCell) {
+                    value = typeCell.Value;
+                    return value != null;
+                }
+                if (cell.Get is T variable) {
+                    value = variable;
+                    return true;
+                }
             }
-            if (cell is DataCell<T> typeCell) {
-                value = typeCell.Value;
-                return value != null;
-            }
-            if (cell.Get is T variable) {
-                value = variable;
+            var child = FindChild(field);
+            if (child != null && child.HasType<T>()) {
+                value = child.FindType<T>();
                 return true;
             }
             value = default(T);
@@ -506,6 +696,17 @@ namespace PixelComrades {
         public int Count { get { return _shortIDs.Length; } }
         public string this[int index] { get { return _ids[index]; } }
 
+        public string GetNameAt(int index) {
+            return _names[index];
+        }
+
+        public string GetNameAt(string text) {
+            if (_stringToIndex.TryGetValue(text.ToLower(), out var index)) {
+                return _names[index];
+            }
+            return text;
+        }
+
         public string GetDescriptionAt(int index) {
             return _descriptions[index];
         }
@@ -530,6 +731,10 @@ namespace PixelComrades {
                 return _shortIDs[index];
             }
             return "";
+        }
+
+        public int GetIndex(string key) {
+            return TryParse(key, out var index) ? index : 0;
         }
 
         public string GetID(string key) {
@@ -573,6 +778,28 @@ namespace PixelComrades {
             _descriptions[index] = description != null && !string.IsNullOrEmpty(description.ToString()) ? description.ToString(): _shortIDs[index];
             var value = line[JsonValue];
             _associatedValues[index] = value != null ? value.Value<int>() : index;
+            _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
+            _stringToIndex.SafeAdd(_names[index].ToLower(), index);
+            _stringToIndex.SafeAdd(_ids[index].ToLower(), index);
+        }
+
+        public void AddNode(int index, string id, string name, string description, int value) {
+            _shortIDs[index] = id;
+            _ids[index] = string.Format("{0}.{1}", TypeName, _shortIDs[index]);
+            _names[index] = name != null ? name.ToString() : _shortIDs[index];
+            _descriptions[index] = description != null && !string.IsNullOrEmpty(description) ? description.ToString() : _shortIDs[index];
+            _associatedValues[index] = value;
+            _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
+            _stringToIndex.SafeAdd(_names[index].ToLower(), index);
+            _stringToIndex.SafeAdd(_ids[index].ToLower(), index);
+        }
+
+        public void AddNode(int index, string id) {
+            _shortIDs[index] = id;
+            _ids[index] = string.Format("{0}.{1}", TypeName, _shortIDs[index]);
+            _names[index] = id;
+            _descriptions[index] = id;
+            _associatedValues[index] = 0;
             _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
             _stringToIndex.SafeAdd(_names[index].ToLower(), index);
             _stringToIndex.SafeAdd(_ids[index].ToLower(), index);

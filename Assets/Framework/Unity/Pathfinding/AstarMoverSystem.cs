@@ -1,7 +1,9 @@
-﻿using System;
+﻿//#define AStarPathfinding
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using PixelComrades.DungeonCrawler;
 #if AStarPathfinding
 using Pathfinding;
 using Pathfinding.RVO;
@@ -9,7 +11,7 @@ using Pathfinding.Util;
 
 namespace PixelComrades {
     [RequireComponent(typeof(Seeker))]
-    public class ActorPathMoverAstar : ActorPathMover {
+    public class ActorPathMoverAstar : EntityIdentifier, IOnCreate {
         
         [SerializeField] private float _endReachedDistance = 0.05F;
         [SerializeField] private float _maxSpeed = 1;
@@ -41,45 +43,52 @@ namespace PixelComrades {
         public bool CanWalkThroughAllies { get { return _canWalkThroughAllies; } }
         public PathfindingGridNode CurrentGraphNode { get; set; }
         private bool ShouldRecalculatePath { get { return !_errorTimer.IsActive && !_pathTimer.IsActive && !_waitingForPathCalculation; } }
-        public override bool IsMoving { get { return base.IsMoving && _interpolator.valid && _rvoController.velocity.sqrMagnitude > 0.1f; } }
-        public Vector3 SteeringTargetV3 { get { return _interpolator.valid ? _interpolator.position : Tr.position; } }
-        public float MaxSpeed { get { return Actor.Status.Contains(ActorStatus.Slowed) ? _maxSpeed * 0.25f : _maxSpeed; } }
-        public override Point3 SteeringTarget { get { return _interpolator.TargetGraphNode != null ? _interpolator.TargetGraphNode.position.toPoint3() : new Point3(SteeringTargetV3); } }
+        public bool IsMoving { get { return _interpolator.valid && _rvoController.velocity.sqrMagnitude > 0.1f; } }
+        public Vector3 SteeringTargetV3 { get { return _interpolator.valid ? _interpolator.position : transform.position; } }
+        public float MaxSpeed { get { return Entity.Tags.Contain(EntityTags.Slowed) ? _maxSpeed * 0.25f : _maxSpeed; } }
+        public Point3 SteeringTarget { get { return _interpolator.TargetGraphNode != null ? _interpolator.TargetGraphNode.position.toPoint3() : new Point3(SteeringTargetV3); } }
         public GraphNode SteeringTargetNode { get { return _interpolator.TargetGraphNode; } }
-        public override int MovePriority { get { return _interpolator.Priority; } }
+        public int MovePriority { get { return _interpolator.Priority; } }
+        public Vector3 MoveTarget { get; protected set; }
+        public bool TargetReached { get; protected set; }
+        public bool Wandering { get; protected set; }
+        public Transform Tr { get; protected set; }
+        public Vector3 LocalCenter { get; protected set; }
 
-        public override void OnCreate(WorldEntity entity) {
-            base.OnCreate(entity);
+        public void OnCreate(PrefabEntity entity) {
             _interpolator = new CooperativePathInterpolator(this);
             _seeker = GetComponent<Seeker>();
             _rvoController = GetComponent<RVOController>();
             _traversal = new NpcMovementManager.TraversalProvider(this);
-            if (GameOptions.DebugPathfinding) {
+            Tr = transform;
+            var colliderComponent = GetComponent<Collider>();
+            if (colliderComponent != null) {
+                LocalCenter = new Vector3(0, colliderComponent.bounds.size.y/2, 0);
+            }
+            else {
+                LocalCenter = Vector3.up;
+            }
+            if (GameOptions.Get("DebugPathfinding", false)) {
                 _debugRenderer = gameObject.AddComponent<LineRenderer>();
-                _debugRenderer.material = GameOptions.DebugPathfindingMat;
                 _debugRenderer.widthMultiplier = 0.3f;
             }
         }
 
-        public override void Stop() {
-            base.Stop();
+        public void Stop() {
             if (_debugRenderer != null) {
                 _debugRenderer.positionCount = 0;
             }
         }
 
-        protected override void Init() {
+        protected void Init() {
             CurrentGraphNode = null;
-            base.Init();
         }
 
-        public override void OnPoolSpawned() {
-            base.OnPoolSpawned();
+        public void OnPoolSpawned() {
             _seeker.pathCallback += OnPathRequestComplete;
         }
 
-        public override void OnPoolDespawned() {
-            base.OnPoolDespawned();
+        public void OnPoolDespawned() {
             _seeker.pathCallback -= OnPathRequestComplete;
             if (_path != null) {
                 _path.Release(this);
@@ -87,8 +96,7 @@ namespace PixelComrades {
             _path = null;
         }
 
-        public override void UpdateMovement() {
-            base.UpdateMovement();
+        public void UpdateMovement() {
             if (ShouldRecalculatePath) {
                 SearchPath();
             }
@@ -103,16 +111,15 @@ namespace PixelComrades {
 
         
 
-        public override void ActorDied() {
-            base.ActorDied();
+        public void ActorDied() {
             if (CurrentGraphNode != null) {
-                CurrentGraphNode.CurrentActor = null;
+                CurrentGraphNode.Entity = null;
             }
             CurrentGraphNode = null;
         }
 
-        public override void SetMoveTarget(Vector3 moveTarget) {
-            base.SetMoveTarget(moveTarget);
+        public void SetMoveTarget(Vector3 moveTarget) {
+            Wandering = false;
             if (moveTarget != MoveTarget) {
                 if (!_errorTimer.IsActive) {
                     SearchPath();
@@ -140,7 +147,6 @@ namespace PixelComrades {
                 Stop();
                 return;
             }
-            IsMoving = true;
             if (_path != null) {
                 _path.Release(this);
             }
@@ -177,18 +183,18 @@ namespace PixelComrades {
             }
         }
 
-        public override void SetWander() {
-            if (_stuckNode != null && _stuckNode == CurrentGraphNode) {
+        public void SetWander() {
+            if (Wandering || (_stuckNode != null && _stuckNode == CurrentGraphNode)) {
                 return;
             }
-            base.SetWander();
+            Wandering = true;
             _waitingForPathCalculation = true;
             var rp = RandomPath.Construct(Tr.position, 7000);
             rp.traversalProvider = _traversal;
             _seeker.StartPath(rp);
         }
 
-        public override bool CanReach(Vector3 target) {
+        public bool CanReach(Vector3 target) {
             return PathUtilities.IsPathPossible(CurrentGraphNode, AstarPath.active.GetNearest(target, NNConstraint.Default).node);
         }
 
@@ -360,8 +366,7 @@ namespace PixelComrades {
             Move(currentPosition, deltaPosition);
         }
 
-        protected override void MovementCompleted() {
-            base.MovementCompleted();
+        protected void MovementCompleted() {
             if (_debugRenderer != null) {
                 _debugRenderer.positionCount = 0;
             }
@@ -371,7 +376,7 @@ namespace PixelComrades {
             RaycastHit hit;
             float elevation;
             _movementPlane.ToPlane(position, out elevation);
-            var rayLength = Actor.LocalCenter.y + MathEx.Max(0, lastElevation - elevation);
+            var rayLength = LocalCenter.y + MathEx.Max(0, lastElevation - elevation);
             var rayOffset = _movementPlane.ToWorld(Vector2.zero, rayLength);
 
             if (Physics.Raycast(position + rayOffset, -rayOffset, out hit, rayLength, LayerMasks.Environment, QueryTriggerInteraction.Ignore)) {
@@ -418,7 +423,7 @@ namespace PixelComrades {
             //_seeker.StartPath(Tr.position, MoveTarget);
         }
 
-        public override void Teleport(Vector3 newPosition, bool clearPath = true) {
+        public void Teleport(Vector3 newPosition, bool clearPath = true) {
             _interpolator.SetPath(null);
             if (_rvoController != null) {
                 _rvoController.Move(Vector3.zero);
@@ -440,7 +445,7 @@ namespace PixelComrades {
                 return;
             }
             Gizmos.color = GizmoColorRaycast;
-            Gizmos.DrawLine(transform.position, transform.position + transform.up * Actor.LocalCenter.y);
+            Gizmos.DrawLine(transform.position, transform.position + transform.up * LocalCenter.y);
             Gizmos.DrawLine(transform.position - transform.right * 0.1f, transform.position + transform.right * 0.1f);
             Gizmos.DrawLine(transform.position - transform.forward * 0.1f, transform.position + transform.forward * 0.1f);
             Draw.Gizmos.CircleXZ(MoveTarget, 0.2f, Color.blue);

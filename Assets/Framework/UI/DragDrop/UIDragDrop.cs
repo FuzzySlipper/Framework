@@ -32,7 +32,7 @@ namespace PixelComrades {
         public int Index { get { return _listIndex; } set { _listIndex = value; } }
         public bool Active { get { return _dragImage.enabled; } }
 
-        public Entity GameData { get; protected set; }
+        public Entity Data { get; protected set; }
         public abstract void OnDrop(PointerEventData eventData);
         public abstract void Clear();
 
@@ -62,7 +62,7 @@ namespace PixelComrades {
         }
 
         public virtual void OnBeginDrag(PointerEventData eventData) {
-            if (GameData == null) {
+            if (Data == null) {
                 return;
             }
             StartDrag();
@@ -81,22 +81,22 @@ namespace PixelComrades {
                 if (UIDragDropHandler.Active && UIDragDropHandler.Ready) {
                     OnDrop(null);
                 }
-                else if (GameData != null) {
+                else if (Data != null && UIDragDropHandler.CanDrag) {
                     StartDrag();
                 }
             }
-            else if (GameData != null && eventData.button == PointerEventData.InputButton.Right) {
+            else if (Data != null && eventData.button == PointerEventData.InputButton.Right) {
                 //GameData.TryUse(null, transform.position, false);
             }
         }
 
         protected virtual void DisplayHoverData() {
-            Game.DisplayData(_backgroundImage, GameData);
+            Game.DisplayData(_backgroundImage, Data);
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
             HoverStatus(true);
-            if (GameData == null) {
+            if (Data == null) {
                 return;
             }
             if (_animator != null) {
@@ -122,8 +122,8 @@ namespace PixelComrades {
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected() {
-            if (GameData != null) {
-                UnityEditor.Handles.Label(transform.position, GameData.Get<LabelComponent>()?.Text);
+            if (Data != null) {
+                UnityEditor.Handles.Label(transform.position, Data.Get<LabelComponent>()?.Text);
             }
         }
 #endif

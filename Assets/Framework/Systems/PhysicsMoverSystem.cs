@@ -10,7 +10,6 @@ namespace PixelComrades {
         private bool _frozen = false;
         private List<RigidbodyMoverNode> _moverList;
         private ManagedArray<RigidbodyComponent> _rbList;
-        private ManagedArray<RigidbodyComponent>.RunDel<RigidbodyComponent> _checkPauseDel;
 
         public PhysicsMoverSystem() {
             MessageKit.addObserver(Messages.PauseChanged, CheckPause);

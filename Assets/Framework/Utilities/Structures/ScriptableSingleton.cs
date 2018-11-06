@@ -4,42 +4,42 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+namespace PixelComrades {
+    public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
 
-public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
+        private const string FullDirectory = UnityDirs.EditorFolder + UnityDirs.System;
 
-    private const string FullDirectory = "Assets/GameData/Resources/Systems/";
-    private const string LoadDirectory = "Systems/";
-
-    private static T _main;
-    private static object _lock = new object();
-    public static T Main {
-        get {
-            if (_main != null) {
-                return _main;
-            }
-            lock (_lock) {
-                if (_main == null) {
-                    _main = Resources.Load<T>(string.Format("{0}{1}", LoadDirectory, typeof(T).Name));
+        private static T _main;
+        private static object _lock = new object();
+        public static T Main {
+            get {
+                if (_main != null) {
+                    return _main;
+                }
+                lock (_lock) {
                     if (_main == null) {
-                        _main = CreateInstance<T>();
+                        _main = Resources.Load<T>(string.Format("{0}{1}", UnityDirs.System, typeof(T).Name));
+                        if (_main == null) {
+                            _main = CreateInstance<T>();
 #if UNITY_EDITOR
-                        var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(FullDirectory + typeof(T).Name + ".asset");
-                        AssetDatabase.CreateAsset(_main, assetPathAndName);
-                        AssetDatabase.SaveAssets();
-                        AssetDatabase.Refresh();
+                            var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(FullDirectory + typeof(T).Name + ".asset");
+                            AssetDatabase.CreateAsset(_main, assetPathAndName);
+                            AssetDatabase.SaveAssets();
+                            AssetDatabase.Refresh();
 #endif
-                        if (_main is ICreationListener creationListener) {
-                            creationListener.OnCreate();
+                            if (_main is ICreationListener creationListener) {
+                                creationListener.OnCreate();
+                            }
                         }
                     }
+                    return _main;
                 }
-                return _main;
             }
+            protected set { _main = value; }
         }
-        protected set { _main = value; }
     }
-}
 
-public interface ICreationListener {
-    void OnCreate();
+    public interface ICreationListener {
+        void OnCreate();
+    }
 }

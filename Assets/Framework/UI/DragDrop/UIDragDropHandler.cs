@@ -25,6 +25,7 @@ namespace PixelComrades {
         public static float TimeStart { get; private set; }
         public static float TimeActive { get { return TimeManager.TimeUnscaled - TimeStart; } }
         public static bool Ready { get { return TimeActive > MinActive; } }
+        public static bool CanDrag { get; set; } = true;
 
         void Update() {
             if (!Active) {
@@ -38,7 +39,7 @@ namespace PixelComrades {
         private IEnumerator CheckForOrphan(int checkId) {
             yield return 0.1f;
             if (Active && _currentId == checkId) {
-                Debug.Log("timeout activated");
+                //Debug.Log("timeout activated");
                 AudioPool.PlayClip(StringConst.AudioDefaultItemReturn, transform.position, 0, 0.5f);
                 Return();
             }
@@ -118,7 +119,7 @@ namespace PixelComrades {
             //    Mathf.Clamp(size.x, main._minSizeDrag, 999), Mathf.Clamp(size.y, main._minSizeDrag, 999));
             main._dragDropSprite.enabled = true;
         }
-        
+
         public static void DisableDrag() {
             UITooltip.CanActivate = true;
             main._dragDropSprite.enabled = false;

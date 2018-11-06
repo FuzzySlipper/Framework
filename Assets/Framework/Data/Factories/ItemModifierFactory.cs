@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public static class ItemModifierFactory  {
         
-        public static void AddModifiers(int modGroup, int level, Entity entity) {
+        public static void AddModifiers(string modGroup, int level, Entity entity) {
             var prefix = GetModifier(modGroup, level, true);
             if (prefix != null) {
                 entity.Add(new ItemModifierPrefix(prefix));
@@ -18,8 +18,8 @@ namespace PixelComrades {
             }
         }
 
-        private static Dictionary<int, ShuffleBag<DataEntry>> _prefixBag = new Dictionary<int, ShuffleBag<DataEntry>>();
-        private static Dictionary<int, ShuffleBag<DataEntry>> _suffixBag = new Dictionary<int, ShuffleBag<DataEntry>>();
+        private static Dictionary<string, ShuffleBag<DataEntry>> _prefixBag = new Dictionary<string, ShuffleBag<DataEntry>>();
+        private static Dictionary<string, ShuffleBag<DataEntry>> _suffixBag = new Dictionary<string, ShuffleBag<DataEntry>>();
         
         private static void Init() {
             GameData.AddInit(Init);
@@ -27,7 +27,7 @@ namespace PixelComrades {
             _suffixBag.Clear();
             var modifierList = GameData.GetSheet(DatabaseSheets.ItemModifiers);
             foreach (var loadedDataEntry in modifierList) {
-                if (!loadedDataEntry.Value.TryGetEnum(DatabaseFields.ModifierGroup, out var modGroup)) {
+                if (!loadedDataEntry.Value.TryGetValue(DatabaseFields.ModifierGroup, out string modGroup)) {
                     continue;
                 }
                 var isPrefix = loadedDataEntry.Value.GetValue<bool>(DatabaseFields.IsPrefix);
@@ -70,7 +70,7 @@ namespace PixelComrades {
         }
 
 
-        private static DataEntry GetModifier(int modGroup, int level, bool isPrefix) {
+        private static DataEntry GetModifier(string modGroup, int level, bool isPrefix) {
             var baseChance = GameOptions.Get(RpgSettings.PercentBaseRarityChance, 1f);
             var chance = baseChance + (baseChance * GameOptions.Get(RpgSettings.PercentRarityPerLevelMod, 1f) * level);
             if (!Game.DiceRollSuccess(chance)) {

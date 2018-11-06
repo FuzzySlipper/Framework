@@ -10,7 +10,7 @@ namespace PixelComrades {
                 return;
             }
             var hitEntity = EntityController.GetEntity(MonoBehaviourToEntity.GetEntityId(collision.collider));
-            var entity = EntityController.GetEntity(Entity);
+            var entity = EntityController.GetEntity(EntityID);
             if (hitEntity == null || hitEntity == entity) {
                 return;
             }

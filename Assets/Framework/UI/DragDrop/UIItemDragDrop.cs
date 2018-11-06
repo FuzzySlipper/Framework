@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, IReceive<StatusUpdate> {
+    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, IReceive<StatusUpdate>, IReceive<EquipmentChanged> {
 
         [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
         [SerializeField] private TextMeshProUGUI _amount = null;
@@ -16,12 +16,10 @@ namespace PixelComrades {
         [SerializeField] private bool _postStatusUpdates = true;
         [SerializeField] protected bool PlayAudio = true;
 
-        private Entity _item;
         private bool _animatingCooldown = false;
         private UnscaledTimer _statusTimer = new UnscaledTimer(0.25f);
         private float _minMainText = 3;
         public InventoryItem InventoryItem { get; protected set; }
-        public Entity Item { get { return _item; } set { _item = value; } }
         
         public override void OnCreate(PrefabEntity entity) {
             base.OnCreate(entity);
@@ -41,7 +39,7 @@ namespace PixelComrades {
             if (PlayAudio) {
                 AudioPool.PlayClip(StringConst.AudioDefaultItemClick, transform.position, 0, AudioVolume);
             }
-            if (_item != null) {
+            if (Data != null) {
                 TrySwap();
             }
             else {
@@ -49,23 +47,44 @@ namespace PixelComrades {
             }
         }
 
+        public override void OnPointerClick(PointerEventData eventData) {
+            //if (Game.InCombat) {
+            //    UIFloatingText.Spawn("Can't adjust items during combat", transform as RectTransform, Color.yellow, UIFloatingText.Orietation.Center);
+            //    return;
+            //}
+            if (eventData.button == PointerEventData.InputButton.Left) {
+                if (UIDragDropHandler.Active) {
+                    OnDrop(null);
+                }
+                else if (Data != null) {
+                    StartDrag();
+                }
+            }
+            else if (eventData.button == PointerEventData.InputButton.Right && Data != null) {
+                Data.Get<UsableComponent>()?.TrySecondary(this);
+            }
+            //else if (Item != null && (eventData.button == PointerEventData.InputButton.Right || !_isPrimary)) {
+            //    Item.TryUse(null, RectTransform.position, false);
+            //}
+        }
+
         protected override void StartDrag() {
             base.StartDrag();
             if (PlayAudio) {
                 AudioPool.PlayClip(StringConst.AudioDefaultItemClick, transform.position, 0, AudioVolume);
             }
-            if (_item.Get<InventoryItem>()?.Inventory?.GetEntity().HasComponent<PlayerComponent>() ?? false) {
-                UIDragDropHandler.SetItem(_item, StopDrag, StopDrag, Clear);
+            if (Data.Get<InventoryItem>()?.Inventory?.GetEntity().HasComponent<PlayerComponent>() ?? false) {
+                UIDragDropHandler.SetItem(Data, StopDrag, StopDrag, Clear);
             }
             else {
-                UIDragDropHandler.SetItem(_item, TryAddPlayer, StopDrag, Clear);
+                UIDragDropHandler.SetItem(Data, TryAddPlayer, StopDrag, Clear);
             }
             DisableSlotDetails();
         }
 
         private void TryAddPlayer() {
             UIDragDropHandler.ClearData();
-            if (Player.MainInventory.TryAdd(_item)) {
+            if (Player.MainInventory.TryAdd(Data)) {
                 Clear();
             }
         }
@@ -93,7 +112,7 @@ namespace PixelComrades {
                 UIDragDropHandler.Take();
                 return;
             }
-            Entity oldItem = _item;
+            Entity oldItem = Data;
             UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Index = Index);
             if (Player.MainInventory.TryAdd(UIDragDropHandler.CurrentData)) {
                 UIDragDropHandler.Take();
@@ -112,14 +131,14 @@ namespace PixelComrades {
             CleanUpCurrentItem();
             DisableSlotDetails();
             _label.fontSizeMin = _minMainText;
-            _item = null;
+            Data = null;
 
         }
 
         protected override void DisplayHoverData() {
             base.DisplayHoverData();
-            if (_item != null) {
-                _item.Get<TooltipComponent>()?.Tooltip();
+            if (Data != null) {
+                Data.Get<TooltipComponent>()?.Tooltip();
             }
         }
 
@@ -129,18 +148,18 @@ namespace PixelComrades {
                 DisableSlotDetails();
                 return;
             }
-            _item = item;
-            InventoryItem = _item.Get<InventoryItem>();
+            Data = item;
+            InventoryItem = Data.Get<InventoryItem>();
             SetSprite(item.Get<IconComponent>());
             //if (_durabilitySlider != null) {
-            //    _durabilitySlider.value = _item.Durability.CurrentPercent;
-            //    _item.Durability.OnStatChanged += UpdateDurability;
+            //    _durabilitySlider.value = Item.Durability.CurrentPercent;
+            //    Item.Durability.OnStatChanged += UpdateDurability;
             //}
             if (_cooldownImage != null) {
-                _item.AddObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
+                Data.AddObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
-            _item.AddObserver(this);
-            CheckContent(_item);
+            Data.AddObserver(this);
+            CheckContent(Data);
         }
 
         private void DisableSlotDetails() {
@@ -157,21 +176,17 @@ namespace PixelComrades {
         }
 
         public void CleanUpCurrentItem() {
-            if (_item == null) {
+            if (Data == null) {
                 return;
             }
             if (_cooldownImage != null) {
-                _item.RemoveObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
+                Data.RemoveObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
-            _item.RemoveObserver(this);
-            //if (_durabilitySlider != null && _item != null) {
-            //    _item.Durability.OnStatChanged -= UpdateDurability;
+            Data.RemoveObserver(this);
+            //if (_durabilitySlider != null && Item != null) {
+            //    Item.Durability.OnStatChanged -= UpdateDurability;
             //}
-            _item = null;
-        }
-
-        private void ClearItem(Entity item) {
-            Clear();
+            Data = null;
         }
 
         protected void StatusMessages(Entity item, string message) {
@@ -191,15 +206,15 @@ namespace PixelComrades {
         }
 
         private void RefreshItem() {
-            if (_item == null) {
+            if (Data == null) {
                 DisableSlotDetails();
                 return;
             }
             //if (_amount != null) {
-            //    _amount.text = _item.IconAmount;
+            //    _amount.text = Item.IconAmount;
             //}
             if (_label != null) {
-                _label.text = _item.Get<LabelComponent>()?.Text;
+                _label.text = Data.Get<LabelComponent>()?.Text;
             }
             if (_cooldownImage != null) {
                 CheckCooldown();
@@ -210,22 +225,22 @@ namespace PixelComrades {
             if (_animatingCooldown || _cooldownImage == null) {
                 return;
             }
-            if (_item.Get<CooldownComponent>().Cooldown?.Percent > 1.15f) {
+            if (Data.Get<CooldownComponent>().Cooldown?.Percent > 1.15f) {
                 _cooldownImage.fillAmount = 1;
                 return;
             }
-            if (System.Math.Abs(_cooldownImage.fillAmount - _item.Get<CooldownComponent>().Cooldown?.Percent ?? 0) > 0.1f) {
+            if (System.Math.Abs(_cooldownImage.fillAmount - Data.Get<CooldownComponent>().Cooldown?.Percent ?? 0) > 0.1f) {
                 TimeManager.StartUnscaled(UpdateCooldown());
             }
         }
 
         IEnumerator UpdateCooldown() {
-            var coolDown = _item.Get<CooldownComponent>().Cooldown;
+            var coolDown = Data.Get<CooldownComponent>().Cooldown;
             if (coolDown == null) {
                 yield break;
             }
             _animatingCooldown = true;
-            while (_item != null) {
+            while (Data != null) {
                 if (System.Math.Abs(_cooldownImage.fillAmount - coolDown.Percent) < 0.1f) {
                     _cooldownImage.fillAmount = Mathf.Clamp(coolDown.Percent, 0, 1);
                     break;
@@ -234,7 +249,7 @@ namespace PixelComrades {
                 _cooldownImage.fillAmount = Mathf.Clamp(fillAmt, 0, 1);
                 yield return null;
             }
-            if (_item != null) {
+            if (Data != null) {
                 _cooldownImage.fillAmount = Mathf.Clamp(coolDown.Percent, 0, 1);
             }
             _animatingCooldown = false;
@@ -250,8 +265,12 @@ namespace PixelComrades {
 
         public void Handle(StatusUpdate arg) {
             if (_postStatusUpdates) {
-                StatusMessages(_item, arg.Update);
+                StatusMessages(Data, arg.Update);
             }
+        }
+
+        public void Handle(EquipmentChanged arg) {
+            RefreshItem();
         }
     }
 }

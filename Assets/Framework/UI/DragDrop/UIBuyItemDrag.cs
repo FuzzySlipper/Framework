@@ -33,7 +33,7 @@ namespace PixelComrades {
         }
 
         private void TryBuy() {
-            if (Item == null) {
+            if (Data == null) {
                 return;
             }
             if (Player.MainInventory.IsFull) {
@@ -49,11 +49,11 @@ namespace PixelComrades {
         }
 
         private void CheckBuy(int index) {
-            if (index > 0 || Item == null) {
+            if (index > 0 || Data == null) {
                 return;
             }
             var sellPrice = InventoryItem.TotalPrice();
-            if (Player.MainInventory.TryAdd(Item)) {
+            if (Player.MainInventory.TryAdd(Data)) {
                 StatusMessages(null, string.Format("Bought for {0} {1}", sellPrice, GameLabels.Currency));
                 Clear();
             }

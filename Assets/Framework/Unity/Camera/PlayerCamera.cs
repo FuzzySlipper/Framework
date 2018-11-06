@@ -35,6 +35,7 @@ namespace PixelComrades {
             _cam = GetComponent<Camera>();
             Game.SpriteCamera = _cam;
             Listener = GetComponent<AudioListener>();
+            WorldControlMonitor.SetCamera(Player.Cam);
         }
     }
 }

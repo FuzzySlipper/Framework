@@ -123,6 +123,7 @@ namespace PixelComrades {
         public static CachedBool ReadyNotice = new CachedBool("ReadyNotice");
         public static CachedBool UseCulling = new CachedBool("UseCulling");
         public static CachedBool DebugMode = new CachedBool("DebugMode");
+        public static CachedBool LoadSceneDestructive = new CachedBool("LoadSceneDestructive");
 
         private const string MouseLookLabel = "MouseLook";
         public static bool MouseLook {
@@ -372,6 +373,31 @@ namespace PixelComrades {
 
             public override int GetHashCode() {
                 return (!string.IsNullOrEmpty(Value) ? Value.GetHashCode() : Key.GetHashCode());
+            }
+        }
+
+        public class Cached<T> : CachedString {
+
+            private Func<string, T> _parseDel;
+            private T _value;
+            private bool _parsed;
+
+            public Cached(string key, Func<string, T> parseDel) : base(key) {
+                _parseDel = parseDel;
+            }
+
+            public T ParsedValue {
+                get {
+                    if (_parsed) {
+                        return _value;
+                    }
+                    if (string.IsNullOrEmpty(Value)) {
+                        return default(T);
+                    }
+                    _value = _parseDel(Value);
+                    _parsed = true;
+                    return _value;
+                }
             }
         }
     }

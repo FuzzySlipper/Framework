@@ -30,12 +30,12 @@ namespace PixelComrades {
 
         [SerializeField] protected string _label = "";
         [Range(0, 100), SerializeField] protected float _baseValue = 0;
+        [SerializeField] protected string _id;
 
         public float MaxBaseValue = 9999;
 
         public event Action<BaseStat> OnStatChanged;
         public event Action<BaseStat> OnStatReset;
-        private string _id;
 
         private List<StatValueMod> _valueMods = new List<StatValueMod>();
         private List<StatValueMod> _percentMods = new List<StatValueMod>();
@@ -69,7 +69,7 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-            return string.Format("{0}: {1}", Label, Value);
+            return string.Format("{0}: {1:F0}", Label, Value);
         }
 
         public virtual string ToLabelString() {

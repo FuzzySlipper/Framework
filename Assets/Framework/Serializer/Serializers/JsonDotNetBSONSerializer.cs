@@ -5,6 +5,7 @@ using Newtonsoft.Json.Bson;
 
 namespace PixelComrades {
     public class JsonDotNetBSONSerializer : ISerializer {
+#pragma warning disable 618
         public string Serialize(object obj) {
             MemoryStream ms = new MemoryStream();
             using (var writer = new BsonWriter(ms)) {
@@ -22,5 +23,6 @@ namespace PixelComrades {
                 return serializer.Deserialize<T>(reader);
             }
         }
+#pragma warning restore 618
     }
 }

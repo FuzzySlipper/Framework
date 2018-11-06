@@ -62,16 +62,20 @@ namespace PixelComrades {
             return _dict.ContainsKey(id);
         }
 
-        public BaseStat GetOrAdd(string id) {
+        public BaseStat GetOrAdd(string id, string label = "") {
             if (_dict.TryGetValue(id, out var stat)) {
                 return stat;
             }
-            string label = id;
             var value = 0f;
             var fakeEnum = GameData.Enums.GetEnumIndex(id, out var index);
             if (fakeEnum != null) {
-                label = fakeEnum.GetDescriptionAt(index);
+                if (string.IsNullOrEmpty(label)) {
+                    label = fakeEnum.GetNameAt(index);
+                }
                 value = fakeEnum.GetAssociatedValue(index);
+            }
+            if (string.IsNullOrEmpty(label)) {
+                label = id;
             }
             stat = new BaseStat(label, id, value);
             Add(stat);

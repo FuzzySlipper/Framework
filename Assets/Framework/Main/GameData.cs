@@ -35,8 +35,7 @@ namespace PixelComrades {
             foreach (var file in files) {
                 var db = new JsonDB(File.ReadAllText(file.FullName));
                 foreach (var dbSheet in db.Sheets) {
-                    Dictionary<string, DataEntry> sheet;
-                    if (!_sheets.TryGetValue(dbSheet.Key, out sheet)) {
+                    if (!_sheets.TryGetValue(dbSheet.Key, out var sheet)) {
                         sheet = new Dictionary<string, DataEntry>();
                         _sheets.Add(dbSheet.Key, sheet);
                     }
@@ -51,6 +50,9 @@ namespace PixelComrades {
         }
 
         public static DataEntry GetData(string sheetName, string entryID) {
+            if (_sheets.Count == 0) {
+                Init();
+            }
             if (!_sheets.TryGetValue(sheetName, out var sheet)) {
                 return null;
             }
@@ -58,10 +60,16 @@ namespace PixelComrades {
         }
 
         public static DataEntry GetData(string fullEntryID) {
+            if (_sheets.Count == 0) {
+                Init();
+            }
             return _entriesByFullID.TryGetValue(fullEntryID, out var entry) ? entry : null;
         }
 
         public static Dictionary<string, DataEntry> GetSheet(string sheetName) {
+            if (_sheets.Count == 0) {
+                Init();
+            }
             return _sheets.TryGetValue(sheetName, out var list) ? list : null;
         }
 

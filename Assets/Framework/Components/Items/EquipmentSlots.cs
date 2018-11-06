@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class EquipmentSlots : GenericContainer<EquipmentSlot>,  IReceive<ContainerStatusChanged> {
         public EquipmentSlots(IList<EquipmentSlot> values) : base(values) {}
 
-        public EquipmentSlot GetSlot(int slotType) {
+        public EquipmentSlot GetSlot(string slotType) {
             for (int i = 0; i < List.Count; i++) {
                 if (List[i].SlotIsCompatible(slotType)) {
                     return List[i];
@@ -15,7 +15,7 @@ namespace PixelComrades {
             return null;
         }
 
-        public EquipmentSlot GetSlotExact(int slotType) {
+        public EquipmentSlot GetSlotExact(string slotType) {
             for (int i = 0; i < List.Count; i++) {
                 if (List[i].TargetSlot == slotType) {
                     return List[i];

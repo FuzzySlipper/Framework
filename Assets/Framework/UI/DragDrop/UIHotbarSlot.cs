@@ -28,7 +28,7 @@ namespace PixelComrades {
         }
 
         public void Set(Entity data) {
-            GameData = data;
+            Data = data;
             ////var refData =  data as HotbarReference;
             //if (refData != null) {
             //    refData.Slot.Clear();
@@ -37,14 +37,14 @@ namespace PixelComrades {
             //else {
             //    _refData = new HotbarReference(data, this);
             //}
-            if (GameData != null) {
-                SetSprite(GameData.Get<IconComponent>());
+            if (Data != null) {
+                SetSprite(Data.Get<IconComponent>());
                 UIHotBar.main.CheckForDuplicates(this);
             }
         }
 
         public override void Clear() {
-            GameData = null;
+            Data = null;
            SetSpriteStatus(false);
         }
 
@@ -53,7 +53,7 @@ namespace PixelComrades {
                 OnDrop(null);
                 return;
             }
-            if (GameData == null) {
+            if (Data == null) {
                 return;
             }
             if (eventData.button == PointerEventData.InputButton.Right) {
@@ -65,26 +65,26 @@ namespace PixelComrades {
         }
 
         public void UseSlot() {
-            if (GameData == null) {
+            if (Data == null) {
                 return;
             }
-            if (!GameData.Get<UsableComponent>().TryUse(this)) {
-                UIFloatingText.InventoryMessage(GameData.Get<StatusUpdateComponent>(), RectTransform);
+            if (!Data.Get<UsableComponent>().TryUse(this)) {
+                UIFloatingText.InventoryMessage(Data.Get<StatusUpdateComponent>(), RectTransform);
             }
         }
 
         public void UseSlotTarget() {
-            if (GameData == null) {
+            if (Data == null) {
                 return;
             }
-            if (!GameData.Get<Command>()?.TryStart(UICenterTarget.CurrentCharacter?.Entity ?? null) ?? false) {
-                UIFloatingText.InventoryMessage(GameData.Get<StatusUpdateComponent>(), RectTransform);
+            if (!Data.Get<Command>()?.TryStart(UICenterTarget.CurrentCharacter?.Entity ?? null) ?? false) {
+                UIFloatingText.InventoryMessage(Data.Get<StatusUpdateComponent>(), RectTransform);
             }
         }
 
         protected override void StartDrag() {
             base.StartDrag();
-            UIDragDropHandler.Set(GameData, StopDrag, StopDrag, Clear);
+            UIDragDropHandler.Set(Data, StopDrag, StopDrag, Clear);
         }
 
         private void StopDrag() {

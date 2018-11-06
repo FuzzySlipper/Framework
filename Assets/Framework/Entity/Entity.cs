@@ -91,6 +91,16 @@ namespace PixelComrades {
             World.Enqueue(msg);
         }
 
+        public void PostAll<T>(T msg) where T : struct, IEntityMessage {
+            _eventHub.Post<T>(msg);
+            World.Enqueue(msg);
+            var parent = this.GetParent();
+            while (parent != null) {
+                parent._eventHub.Post(msg);
+                parent = parent.GetParent();
+            }
+        }
+
         public void AddObserver<T>(IReceive<T> handler) {
             _eventHub.AddObserver(handler);
         }

@@ -16,7 +16,7 @@ namespace PixelComrades {
             var atkStats = GameData.Enums[Stats.AttackStats];
             if (atkStats != null) {
                 for (int i = 0; i < atkStats.Length; i++) {
-                    owner.Stats.Add(new BaseStat(atkStats.IDs[i], 0));
+                    owner.Stats.Add(new BaseStat(atkStats.Names[i], atkStats.IDs[i], 0));
                 }
             }
         }
@@ -30,7 +30,7 @@ namespace PixelComrades {
         public static void SetupDefenseStats(Entity owner) {
             var defend = owner.Add(new DefendDamageWithStats());
             for (int i = 0; i < GameData.DamageTypes.Count; i++) {
-                var typeDef = new BaseStat(string.Format("{0} Defense", GameData.DamageTypes.GetDescriptionAt(i)), GameData.DamageTypes.GetID(i), 0);
+                var typeDef = new BaseStat(string.Format("{0} Defense", GameData.DamageTypes.GetNameAt(i)), GameData.DamageTypes.GetID(i), 0);
                 owner.Stats.Add(typeDef);
                 defend.AddStat(GameData.DamageTypes.GetID(i), typeDef.ID, typeDef);
             }
@@ -70,6 +70,7 @@ namespace PixelComrades {
                 if (string.IsNullOrEmpty(statName)) {
                     continue;
                 }
+                var label = statEntry.TryGetValue("Label", statName);
                 var amount = statEntry.GetValue<int>(DatabaseFields.Amount);
                 var multiplier = statEntry.GetValue<float>(DatabaseFields.Multiplier);
                 var addToEquip = statEntry.GetValue<bool>(DatabaseFields.AddToEquipList);
@@ -77,12 +78,12 @@ namespace PixelComrades {
                     equipment.AddStat(statName);
                 }
                 if (Math.Abs(multiplier) < Comparison || Math.Abs(multiplier - 1) < Comparison) {
-                    entity.Stats.GetOrAdd(statName).AddToBase(amount);
+                    entity.Stats.GetOrAdd(statName, label).AddToBase(amount);
                     continue;
                 }
                 var stat = entity.Stats.Get(statName);
                 string id = "";
-                string label = "";
+                label = "";
                 float adjustedAmount = amount;
                 RangeStat rangeStat;
                 if (stat != null) {
@@ -100,7 +101,7 @@ namespace PixelComrades {
                     var fakeEnum = GameData.Enums.GetEnumIndex(statName, out var index);
                     if (fakeEnum != null) {
                         id = fakeEnum.GetID(index);
-                        label = fakeEnum.GetDescriptionAt(index);
+                        label = fakeEnum.GetNameAt(index);
                     }
                     else {
                         id = label = statName;
@@ -108,6 +109,21 @@ namespace PixelComrades {
                 }
                 rangeStat = new RangeStat(label, id, adjustedAmount, adjustedAmount * multiplier);
                 entity.Stats.Add(rangeStat);
+            }
+        }
+
+        public static void AddStatList(Entity entity, DataList stats, float multi) {
+            if (stats == null) {
+                return;
+            }
+            for (int i = 0; i < stats.Count; i++) {
+                var statEntry = stats[i];
+                var statName = statEntry.GetValue<string>(DatabaseFields.Stat);
+                if (string.IsNullOrEmpty(statName)) {
+                    continue;
+                }
+                var amount = statEntry.GetValue<int>(DatabaseFields.Amount);
+                entity.Stats.GetOrAdd(statName).AddToBase(amount + (amount * multi));
             }
         }
     }

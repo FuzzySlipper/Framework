@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class InventoryItem : IComponent {
+    public class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -33,11 +33,29 @@ namespace PixelComrades {
             }
             Count++;
             entity.Destroy();
+            var descr = this.Get<DataDescriptionComponent>();
+            if (descr != null) {
+                descr.Text = "";
+                this.GetEntity().Post(new DataDescriptionAdded(descr));
+            }
             return true;
         }
 
         public int TotalPrice() {
             return Price * Count;
+        }
+
+        public void Handle(DataDescriptionAdded arg) {
+            FastString.Instance.Clear();
+            FastString.Instance.AppendBoldLabelNewLine("Price", TotalPrice());
+            if (Count > 1) {
+                FastString.Instance.AppendBoldLabelNewLine("Count", Count);
+            }
+            if (!Identified) {
+                FastString.Instance.AppendNewLine("Unidentified");
+            }
+            FastString.Instance.AppendBoldLabelNewLine("Rarity", GameData.Enums[EnumTypes.ItemRarity].GetNameAt(Rarity));
+            arg.Data.Text += FastString.Instance.ToString();
         }
     }
 }

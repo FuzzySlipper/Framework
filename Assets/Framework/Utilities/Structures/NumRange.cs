@@ -120,7 +120,7 @@ namespace PixelComrades {
         public IntRange() {
         }
 
-        public int ConstrainValue(int value) {
+        public int Clamp(int value) {
             return Mathf.Clamp(value, Min, Max);
         }
 
@@ -142,6 +142,28 @@ namespace PixelComrades {
 
         public override string ToString() {
             return string.Format("{0}-{1}", Min, Max);
+        }
+
+        public static IntRange Parse(string input) {
+            if (input.Length < 3) {
+                return null;
+            }
+            var numbers = input.Split('-');
+            if (numbers.Length == 0) {
+                return null;
+            }
+            int min;
+            if (!int.TryParse(numbers[0], out min)) {
+                return null;
+            }
+            if (numbers.Length == 1) {
+                return new IntRange(min, min);
+            }
+            int max;
+            if (!int.TryParse(numbers[1], out max)) {
+                max = min;
+            }
+            return new IntRange(min, max);
         }
     }
 

@@ -23,4 +23,12 @@ namespace PixelComrades {
         }
         public DataDescriptionComponent(){}
     }
+
+    public struct DataDescriptionAdded : IEntityMessage {
+        public DataDescriptionComponent Data;
+
+        public DataDescriptionAdded(DataDescriptionComponent data) {
+            Data = data;
+        }
+    }
 }

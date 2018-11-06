@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace PixelComrades {
     public class UIFloatingText : MonoBehaviour {
 
-        private static MsgChecker _msgChecker = new MsgChecker(20, 1.5f);
+        private static MsgChecker _msgChecker = new MsgChecker(20, 0.2f);
 
         public static void Spawn(string text, float duration, RectTransform start, Color startColor) {
             Spawn(text, duration, start, start.position + new Vector3(0, 50, 0), startColor);

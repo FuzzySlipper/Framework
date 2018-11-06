@@ -42,11 +42,7 @@ namespace PixelComrades {
     public static partial class EnumTypes {
         public const string Vitals = "Vitals";
         public const string Attributes = "Attributes";
-        public const string DamageTypes = "DamageTypes";
         public const string ItemRarity = "ItemRarity";
-        public const string EquipSlotTypes = "EquipSlotTypes";
-        public const string ModifierGroups = "ModifierGroups";
-        public const string ItemTypes = "ItemTypes";
     }
     
     public enum PlayerPronouns {
@@ -84,13 +80,4 @@ namespace PixelComrades {
         Top = 8,
         Bottom = 9,
     }
-
-    public enum ActionDistance {
-        Short = 0,
-        Extended = 1,
-        Medium = 2,
-        Far = 3,
-        Infinite = 4,
-    }
-
 }

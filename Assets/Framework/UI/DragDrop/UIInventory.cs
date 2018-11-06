@@ -16,24 +16,24 @@ namespace PixelComrades {
 
         protected Transform Grid { get { return _grid; } }
 
-        void Update() {
-            if (Active) {
-                RefreshInventory();
-            }
-        }
+        //void Update() {
+        //    if (Active) {
+        //        RefreshInventory();
+        //    }
+        //}
         
-        public override void SetStatus(bool status) {
-            base.SetStatus(status);
-            if (status == Active) {
-                return;
-            }
-            if (status) {
-                Game.CursorUnlock(name);
-            }
-            else {
-                Game.RemoveCursorUnlock(name);
-            }
-        }
+        //public override void SetStatus(bool status) {
+        //    base.SetStatus(status);
+        //    if (status == Active) {
+        //        return;
+        //    }
+        //    if (status) {
+        //        Game.CursorUnlock(name);
+        //    }
+        //    else {
+        //        Game.RemoveCursorUnlock(name);
+        //    }
+        //}
 
         public void SetInventory(ItemInventory inventory, string title) {
             ClearOld();
@@ -41,13 +41,18 @@ namespace PixelComrades {
             if (_titleText != null) {
                 _titleText.text = title;
             }
-            _slots = new UIItemDragDrop[_inventory.Limit < 0 ? _inventory.Count * 2 : _inventory.Limit];
+            if (_inventory == null) {
+                return;
+            }
+            //_slots = new UIItemDragDrop[_inventory.Limit < 0 ? _inventory.Count : _inventory.Limit];
+            _slots = new UIItemDragDrop[_inventory.Count];
             for (int i = 0; i < _slots.Length; i++) {
+                if (_inventory[i] == null) {
+                    continue;
+                }
                 _slots[i] = SpawnPrefab();
                 _slots[i].Index = i;
-                if (_inventory[i] != null) {
-                    _slots[i].SetItem(_inventory[i]);
-                }
+                _slots[i].SetItem(_inventory[i]);
             }
             _inventory.OnRefreshItemList += RefreshInventory;
         }
@@ -72,9 +77,12 @@ namespace PixelComrades {
             _inventory.OnRefreshItemList -= RefreshInventory;
         }
 
-        private void ClearInventory() {
+        public void ClearInventory() {
             if (_slots != null) {
                 for (int i = 0; i < _slots.Length; i++) {
+                    if (_slots[i] == null) {
+                        continue;
+                    }
                     ItemPool.Despawn(_slots[i].gameObject);
                 }
                 _slots = null;
@@ -83,7 +91,7 @@ namespace PixelComrades {
 
         protected void RefreshInventory() {
             for (int i = 0; i < _slots.Length; i++) {
-                if (_slots[i].Item != _inventory[i]) {
+                if (_slots[i].Data != _inventory[i]) {
                     SetItemStatus(i);
                 }
             }

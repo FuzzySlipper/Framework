@@ -6,10 +6,12 @@ using System.Text;
 namespace PixelComrades {
     public static class ItemFactory  {
 
-        private static Dictionary<int, ShuffleBag<DataEntry>> _maxRarityBags = new Dictionary<int, ShuffleBag<DataEntry>>();
-        private static Dictionary<int, ShuffleBag<DataEntry>> _specificRarityBags = new Dictionary<int, ShuffleBag<DataEntry>>();
-        private static Dictionary<string, DataEntry> _items = new Dictionary<string, DataEntry>();
-        private static Dictionary<string, DataEntry> _itemsFullID = new Dictionary<string, DataEntry>();
+        private static Dictionary<string, List<ItemConfig>> _itemsByType = new Dictionary<string, List<ItemConfig>>();
+        private static Dictionary<int, ShuffleBag<ItemConfig>> _maxRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
+        private static Dictionary<int, ShuffleBag<ItemConfig>> _specificRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
+        private static Dictionary<string, ItemConfig> _items = new Dictionary<string, ItemConfig>();
+        private static Dictionary<string, ItemConfig> _itemsFullID = new Dictionary<string, ItemConfig>();
+        private static Dictionary<string, List<ItemConfig>> _outfits = new Dictionary<string, List<ItemConfig>>();
 
         private static void Init() {
             GameData.AddInit(Init);
@@ -24,17 +26,63 @@ namespace PixelComrades {
                 }
                 foreach (var loadedDataEntry in sheet) {
                     var item = loadedDataEntry.Value;
-                    _items.SafeAdd(item.ID, item);
-                    _itemsFullID.SafeAdd(item.FullID, item);
-                    if (!item.TryGetEnum(StatTypes.ItemRarity, out var bagIndex)) {
+                    var outfitList = item.Get<DataList>("OutfitTypes");
+                    if (outfitList != null && outfitList.Count > 0) {
+                        CreateOutfit(outfitList, item);
                         continue;
                     }
-                    var chance = (int) item.GetValue<float>(DatabaseFields.Chance) * 100;
-                    AddToShuffleBag(_specificRarityBags, item, chance, bagIndex);
-                    for (int i = 0; i <= bagIndex; i++) {
-                        AddToShuffleBag(_maxRarityBags, item, chance, bagIndex);
-                    }
+                    AddItem(new ItemConfig(item));
                 }
+            }
+        }
+
+        private static void CreateOutfit(DataList outfitList, DataEntry originalData) {
+            var outfitID = originalData.ID;
+            var list = new List<ItemConfig>();
+            var originName = originalData.TryGetValue(DatabaseFields.Name, originalData.ID);
+            for (int i = 0; i < outfitList.Count; i++) {
+                var line = outfitList[i];
+                var slot = line.TryGetValue(DatabaseFields.EquipmentSlot, "Body");
+                var weight = line.TryGetValue(DatabaseFields.Weight, 0f);
+                var name = line.TryGetValue(DatabaseFields.Name, originalData.ID);
+                var iconName  = string.Format("{0}_{1}", originalData.GetValue<string>(DatabaseFields.Icon), slot);
+                var newData = originalData.Clone(string.Format("{0}_{1}", originName, slot));
+                newData.Replace(DatabaseFields.EquipmentSlot, new DataCell<string>(DatabaseFields.EquipmentSlot, newData, slot));
+                newData.Replace(DatabaseFields.Icon, new DataCell<string>(DatabaseFields.Icon, newData, iconName));
+                newData.Replace(DatabaseFields.Name, new DataCell<string>(DatabaseFields.Name, newData, string.Format("{0} {1}", originName, name)));
+                newData.Replace(DatabaseFields.Price, new DataCell<int>(DatabaseFields.Price, newData, (int) (originalData.TryGetValue(DatabaseFields.Price, 1) * weight)));
+                newData.Replace(DatabaseFields.Weight, new DataCell<int>(DatabaseFields.Weight, newData, (int) (originalData.TryGetValue(DatabaseFields.Weight, 1) * weight)));
+                var stats = newData.Get<DataList>(DatabaseFields.Stats);
+                for (int s = 0; s < stats.Count; s++) {
+                    int amount = (int) (stats[s].TryGetValue(DatabaseFields.Amount, 0) * weight);
+                    float multi = stats[s].TryGetValue(DatabaseFields.Multiplier, 0f) * weight;
+                    stats[s].Replace(DatabaseFields.Amount, new DataCell<int>(DatabaseFields.Amount, stats[s], amount));
+                    stats[s].Replace(DatabaseFields.Multiplier, new DataCell<float>(DatabaseFields.Multiplier, stats[s], multi));
+                }
+                var config = new ItemConfig(newData);
+                AddItem(config);
+                list.Add(config);
+            }
+            _outfits.SafeAdd(outfitID, list);
+        }
+
+
+        public static void AddItem(ItemConfig item) {
+            var itemTypeData = item.ItemType;
+            if (itemTypeData != null) {
+                if (!_itemsByType.TryGetValue(itemTypeData, out var list)) {
+                    list = new List<ItemConfig>();
+                    _itemsByType.Add(itemTypeData, list);
+                }
+                list.Add(item);
+            }
+            _items.SafeAdd(item.ID, item);
+            _itemsFullID.SafeAdd(item.FullID, item);
+            var bagIndex = item.Rarity;
+            var chance = ((GameData.Enums[EnumTypes.ItemRarity].Count + 1) - bagIndex) * 100;
+            AddToShuffleBag(_specificRarityBags, item, chance, bagIndex);
+            for (int i = 0; i <= bagIndex; i++) {
+                AddToShuffleBag(_maxRarityBags, item, chance, bagIndex);
             }
         }
 
@@ -44,6 +92,43 @@ namespace PixelComrades {
                 return null;
             }
             return CreateItem(data, level);
+        }
+
+        public static ItemConfig GetData(string itemID) {
+            return FindItem(itemID);
+        }
+
+        private static List<ItemConfig> GetOutfitList(string outfit) {
+            if (_outfits.TryGetValue(outfit, out var list)) {
+                return list;
+            }
+            var split = outfit.Split('.');
+            if (split.Length > 1 && _outfits.TryGetValue(split[1], out list)) {
+                return list;
+            }
+            if (_outfits.TryGetValue("Equipment." + outfit, out list)) {
+                return list;
+            }
+            if (_outfits.TryGetValue("Item." + outfit, out list)) {
+                return list;
+            }
+            return null;
+        }
+
+        public static void EquipOutfit(Entity entity, string outfit) {
+            var equip = entity.Get<EquipmentSlots>();
+            var list = GetOutfitList(outfit);
+            if (equip == null || list == null) {
+                return;
+            }
+            for (int i = 0; i < list.Count; i++) {
+                var item = CreateItem(list[i],1);
+                if (item != null) {
+                    if (!equip.TryEquip(item)) {
+                        Player.MainInventory.Add(item);
+                    }
+                }
+            }
         }
 
         public static Entity RandomItem(int rarity, bool isMaxRare = true) {
@@ -63,7 +148,7 @@ namespace PixelComrades {
             return Mathf.Clamp(Game.Random.Next(max - range, max + range), 2, 99);
         }
 
-        public static DataEntry RandomTemplate(int rarity, bool isMaxRare = true) {
+        public static ItemConfig RandomTemplate(int rarity, bool isMaxRare = true) {
             if (_items.Count == 0) {
                 Init();
             }
@@ -74,29 +159,26 @@ namespace PixelComrades {
             return null;
         }
 
-        private static Entity CreateItem(DataEntry data, int level) {
+        public static Entity CreateItem(ItemConfig data, int level) {
             var entity = Entity.New(data.ID);
             entity.Add(new TypeId(data.ID));
-            var icon = data.GetValue<string>(DatabaseFields.Icon);
-            if (!string.IsNullOrEmpty(icon)) {
-                entity.Add(new IconComponent(ItemPool.LoadAsset<Sprite>(UnityDirs.Icons, icon)));
+            if (!string.IsNullOrEmpty(data.Icon)) {
+                entity.Add(new IconComponent(ItemPool.LoadAsset<Sprite>(UnityDirs.ItemIcons, data.Icon)));
             }
             else {
                 entity.Add(new IconComponent(SpriteDatabase.Item));
             }
             entity.Add(new EntityLevelComponent(level));
-            var itemTypeData = data.Get<DataReference>(DatabaseFields.ItemType);
-            if (itemTypeData?.Value != null) {
-                World.Get<DataFactory>().AddComponentList(entity, data, itemTypeData.Value.Get(DatabaseFields.Components) as DataList);
+            if (data.TypeComponents != null) {
+                World.Get<DataFactory>().AddComponentList(entity, data.Data, data.TypeComponents);
             }
-            World.Get<DataFactory>().AddComponentList(entity, data, data.Get(DatabaseFields.Components) as DataList);
-
-            if (data.TryGetEnum(DatabaseFields.ModifierGroup, out var modGroup)) {
-                ItemModifierFactory.AddModifiers(modGroup, level, entity);
+            if (data.Components != null) {
+                World.Get<DataFactory>().AddComponentList(entity, data.Data, data.Components);
             }
+            ItemModifierFactory.AddModifiers(data.ModifierGroup, level, entity);
             StringBuilder sbName = new StringBuilder();
             StringBuilder sbDescr = new StringBuilder();
-            sbDescr.Append(data.TryGetValue(DatabaseFields.Description, data.ID));
+            sbDescr.Append(data.Description);
             var prefix = entity.Get<ItemModifierPrefix>();
             var suffix = entity.Get<ItemModifierSuffix>();
             if (prefix != null) {
@@ -112,7 +194,7 @@ namespace PixelComrades {
                 }
             }
 
-            sbName.Append(data.TryGetValue(DatabaseFields.Name, data.ID));
+            sbName.Append(data.Name);
             if (suffix != null) {
                 var suffixLabel = suffix.Data.TryGetValue(DatabaseFields.Name, "");
                 if (!string.IsNullOrEmpty(suffixLabel)) {
@@ -127,15 +209,17 @@ namespace PixelComrades {
             }
             entity.Add(new LabelComponent(sbName.ToString()));
             entity.Add(new DescriptionComponent(sbDescr.ToString()));
+            var dataDescr = entity.Add(new DataDescriptionComponent());
+            entity.Post(new DataDescriptionAdded(dataDescr));
             return entity;
         }
 
-        private static ShuffleBag<DataEntry> GetRarity(int rarity, bool isMaxRare) {
+        private static ShuffleBag<ItemConfig> GetRarity(int rarity, bool isMaxRare) {
             int currentRarity = (int) rarity;
             var rarityCollection = isMaxRare ? _maxRarityBags : _specificRarityBags;
             while (true) {
-                if (rarityCollection[currentRarity].Count > 0) {
-                    return rarityCollection[currentRarity];
+                if (rarityCollection.TryGetValue(currentRarity, out var bag) && bag.Count > 0) {
+                    return bag;
                 }
                 currentRarity -= 1;
                 if (currentRarity < 0) {
@@ -144,15 +228,15 @@ namespace PixelComrades {
             }
         }
 
-        private static void AddToShuffleBag(Dictionary<int, ShuffleBag<DataEntry>> dict, DataEntry item, int chance, int bagIndex) {
+        private static void AddToShuffleBag(Dictionary<int, ShuffleBag<ItemConfig>> dict, ItemConfig item, int chance, int bagIndex) {
             if (!dict.TryGetValue(bagIndex, out var bag)) {
-                bag = new ShuffleBag<DataEntry>();
+                bag = new ShuffleBag<ItemConfig>();
                 dict.Add(bagIndex, bag);
             }
             bag.Add(item, chance);
         }
 
-        private static DataEntry FindItem(string itemID) {
+        private static ItemConfig FindItem(string itemID) {
             if (_items.Count == 0) {
                 Init();
             }
@@ -160,6 +244,39 @@ namespace PixelComrades {
                 return value;
             }
             return _itemsFullID.TryGetValue(itemID, out value) ? value : null;
+        }
+    }
+
+    public class ItemConfig {
+
+        public DataEntry Data { get;}
+        public string Name { get; }
+        public string ID { get; }
+        public string FullID { get; }
+        public string ItemType { get; }
+        public string Icon { get; }
+        public string ModifierGroup { get; }
+        public string Description { get; }
+        public int Rarity { get; }
+        public DataList TypeComponents { get; }
+        public DataList Components { get; }
+
+        public ItemConfig(DataEntry data) {
+            Data = data;
+            ID = data.ID;
+            FullID = data.FullID;
+            var itemType = data.Get<DataReference>(DatabaseFields.ItemType);
+            ItemType = itemType?.Value.GetValue<string>(DatabaseFields.Name) ?? "Item";
+            var prefix = itemType?.Value.TryGetValue("Prefix", "I_");
+            Icon = prefix + data.GetValue<string>(DatabaseFields.Icon);
+            TypeComponents = itemType?.Value.Get(DatabaseFields.Components) as DataList;
+            Components = data.Get(DatabaseFields.Components) as DataList;
+            ModifierGroup = data.GetValue<string>(DatabaseFields.ModifierGroup);
+            StringBuilder sbDescr = new StringBuilder();
+            sbDescr.Append(data.TryGetValue(DatabaseFields.Description, data.ID));
+            Name = data.TryGetValue(DatabaseFields.Name, data.ID);
+            Description = data.TryGetValue(DatabaseFields.Description, "");
+            Rarity = data.GetEnum(DatabaseFields.Rarity, 0);
         }
     }
 }

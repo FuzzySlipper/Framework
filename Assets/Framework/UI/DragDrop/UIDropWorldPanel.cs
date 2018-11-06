@@ -47,7 +47,7 @@ namespace PixelComrades {
             if (Physics.Raycast(mouseRay, out hit, _dropDistance, LayerMasks.DropPanel)) {
                 var use = hit.transform.GetComponent<EntityIdentifier>();
                 if (use != null) {
-                    var interaction = EntityController.GetEntity(use.Entity).Get<ItemInteraction>();
+                    var interaction = EntityController.GetEntity(use.EntityID).Get<ItemInteraction>();
                     if (interaction != null && interaction.Interaction(item)) {
                         UIDragDropHandler.Take();
                         return;

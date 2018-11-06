@@ -24,7 +24,7 @@ namespace PixelComrades {
                 if (_tempIdentifiers[i] == null) {
                     continue;
                 }
-                _tempIdentifiers[i].Entity = entId;
+                _tempIdentifiers[i].EntityID = entId;
             }
             go.GetComponentsInChildren(_tempColliders);
             for (int i = 0; i < _tempColliders.Count; i++) {

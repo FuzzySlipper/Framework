@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace PixelComrades {
-    public class Equipment : IComponent{
+    public class Equipment : IComponent, IReceive<DataDescriptionAdded> {
         private int _owner = -1;
         public int Owner {
             get { return _owner; }
@@ -25,9 +25,9 @@ namespace PixelComrades {
 
         public bool Equipped { get { return _equip != null; } }
         public EquipmentSlot EquipmentSlot { get { return _equip; } }
-        public int EquipmentSlotType { get;}
+        public string EquipmentSlotType { get; set; }
 
-        public Equipment(int equip) {
+        public Equipment(string equip) {
             EquipmentSlotType = equip;
         }
 
@@ -91,6 +91,16 @@ namespace PixelComrades {
             }
             _equip.RemoveItemAddToOwnInventory();
             return true;
+        }
+
+        public void Handle(DataDescriptionAdded arg) {
+            var entity = this.GetEntity();
+            FastString.Instance.Clear();
+            for (int i = 0; i < _statsToEquip.Count; i++) {
+                FastString.Instance.AppendNewLine(entity.Stats.Get(_statsToEquip[i]).ToLabelString());
+            }
+            FastString.Instance.AppendBoldLabelNewLine("Equipment Slot", GameData.EquipmentSlotTypes.GetNameAt(EquipmentSlotType));
+            arg.Data.Text += FastString.Instance.ToString();
         }
     }
 }

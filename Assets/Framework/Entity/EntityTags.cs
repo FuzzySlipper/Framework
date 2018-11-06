@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public static class EntityTags {
+    public static partial class EntityTags {
         public const int Moving = 0;
         public const int PerformingCommand = 1;
         public const int InTransition = 2;
@@ -12,15 +12,13 @@ namespace PixelComrades {
         public const int NewCharacter = 7;
 
         public const int RotateToMoveTarget = 10;
-        
-        public const int CheckingCollision = 20;
-        public const int CanUnityCollide = 21;
+        public const int CheckingCollision = 11;
+        public const int CanUnityCollide = 12;
+        public const int InStealth = 13;
+        public const int IsDead = 14;
+        public const int Unscaled = 15;
+        public const int Slowed = 16;
 
-        public const int InStealth = 30;
-        public const int IsDead = 31;
-
-        public const int Unscaled = 50;
-
-        public const int MAXLIMIT = 51;
+        public const int MAXLIMIT = 41;
     }
 }

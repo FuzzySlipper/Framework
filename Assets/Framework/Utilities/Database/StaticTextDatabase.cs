@@ -3,18 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class StaticTextDatabase : ScriptableObject {
-
-        private static StaticTextDatabase _main;
-
-        public static StaticTextDatabase Main {
-            get {
-                if (_main == null) {
-                    _main = Resources.Load<StaticTextDatabase>("StaticTextDatabase");
-                }
-                return _main;
-            }
-        }
+    public class StaticTextDatabase : ScriptableSingleton<StaticTextDatabase> {
 
         public string CustomSearchPath = "GameData\\Text\\";
 

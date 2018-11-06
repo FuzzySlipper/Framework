@@ -1,9 +1,9 @@
+#define AStarPathfinding
 using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-//#define AStarPathfinding
 
 namespace PixelComrades {
 

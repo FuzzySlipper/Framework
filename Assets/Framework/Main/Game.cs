@@ -9,7 +9,6 @@ namespace PixelComrades {
 
         public static float Version { get; set; }
         public static string Title { get; set; }
-        public static string GameNamespace { get; set; }
         public static bool InTown { get; set; } = false;
         public static int MapCellSize { get; set; } = 3;
 

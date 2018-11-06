@@ -34,9 +34,11 @@ namespace PixelComrades {
 
     public static partial class UnityDirs {
         public const string EditorFolder = "Assets/GameData/Resources/";
-        public const string System = "System/";
+        public const string System = "Systems/";
         public const string ActionFx = "ActionFx/";
         public const string Icons = "Icons/";
+        public const string ItemIcons = "Icons/Items/";
+        public const string AbilityIcons = "Icons/Abilities/";
         public const string Projectiles = "Projectiles/";
         public const string Items = "Items/";
         public const string UI = "UI/";
@@ -104,6 +106,8 @@ namespace PixelComrades {
         public const string Value = "Value";
         public const string ID = "id";
         public const string Timeout = "Timeout";
+        public const string CritChance = "CritChance";
+        public const string CritMulti = "CritMulti";
     }
 
     public partial class AnimationIds : GenericEnum<AnimationIds, string> {

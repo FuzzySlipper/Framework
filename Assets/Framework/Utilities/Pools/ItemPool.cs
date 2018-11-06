@@ -116,23 +116,27 @@ namespace PixelComrades {
 
         public static T LoadAsset<T>(string dir, string file) where T : UnityEngine.Object {
             if (string.IsNullOrEmpty(file)) {
+                if (!string.IsNullOrEmpty(dir)) {
+                    Debug.LogFormat("Attempted to load empty file at {0}", dir);
+                }
                 return default(T);
             }
             _stringBuilder.Clear();
 #if UNITY_EDITOR
             //var path = string.Format("{0}{1}.{2}", UnityDirs.EditorFolder, location, AssetTypeExtensions.GetExtensionFromType<T>());
             //return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
-            _stringBuilder.Append(UnityDirs.EditorFolder);
+            if (!Application.isPlaying) {
+                _stringBuilder.Append(UnityDirs.EditorFolder);
+                _stringBuilder.Append(dir);
+                _stringBuilder.Append(file);
+                _stringBuilder.Append(".");
+                _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());
+                return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(_stringBuilder.ToString());
+            }
+#endif
             _stringBuilder.Append(dir);
             _stringBuilder.Append(file);
-            _stringBuilder.Append(".");
-            _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(_stringBuilder.ToString());
-#else
-            _stringBuilder.Append(dir);        
-            _stringBuilder.Append(file);
             return Resources.Load<T>(_stringBuilder.ToString());
-#endif
         }
 
         public static PrefabEntity Spawn(string itemName, bool isSceneObject = false, bool isCulled = true) {

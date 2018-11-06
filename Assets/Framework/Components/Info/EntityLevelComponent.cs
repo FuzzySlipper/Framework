@@ -7,6 +7,8 @@ namespace PixelComrades {
         public int Owner { get; set; }
         public int Level;
 
+        public EntityLevelComponent(){}
+
         public EntityLevelComponent(int level) {
             Level = level;
         }

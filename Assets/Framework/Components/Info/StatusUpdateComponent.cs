@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class StatusUpdateComponent : IComponent {
+    public class StatusUpdateComponent : IComponent, IReceive<StatusUpdate> {
 
         public string Status;
         public int Owner { get; set; }
@@ -12,6 +12,10 @@ namespace PixelComrades {
 
         public static implicit operator string(StatusUpdateComponent comp) {
             return comp?.Status;
+        }
+
+        public void Handle(StatusUpdate arg) {
+            Status = arg.Update;
         }
     }
 
@@ -22,6 +26,11 @@ namespace PixelComrades {
         public StatusUpdate(string update, Color color) {
             Update = update;
             Color = color;
+        }
+
+        public StatusUpdate(string update) {
+            Update = update;
+            Color = Color.green;
         }
     }
 }

@@ -6,7 +6,6 @@ namespace PixelComrades {
     public class RangeStat : BaseStat {
 
         private float _max;
-        public float UpperRange { get { return Value + _max; } }
 
         public RangeStat(string label,FloatRange range) : base(label, range.Min) {
             _max = (range.Max - range.Min);
@@ -16,7 +15,9 @@ namespace PixelComrades {
             _max = rangeMax - rangeMin;
         }
 
+        public float UpperRange { get { return base.Value + _max; } }
         public override float Value { get { return Game.Random.NextFloat(base.Value, base.Value + _max); } }
+        public float Min { get { return base.Value; } }
 
         public void SetValue(float rangeMin, float rangeMax) {
             ChangeBase(rangeMin);
@@ -36,13 +37,11 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-            var baseVal = BaseValue + ModTotal;
-            return string.Format("{0}: {1:F0}-{2:F0}", Label, baseVal, baseVal + _max);
+            return string.Format("{0}: {1:F0}-{2:F0}", Label, base.Value, base.Value + _max);
         }
 
         public override string ToLabelString() {
-            var baseVal = BaseValue + ModTotal;
-            return Label.ToBoldLabel(string.Format("{0:F0}-{1:F0}", baseVal, baseVal + _max));
+            return Label.ToBoldLabel(string.Format("{0:F0}-{1:F0}", base.Value, base.Value + _max));
         }
     }
 }

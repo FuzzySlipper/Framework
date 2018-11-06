@@ -116,12 +116,12 @@ public static class EnumHelper {
 
     public static bool TryParse<T>(string valueToParse, out T returnValue) {
         returnValue = default(T);
-        if (typeof(T) == typeof(string)) {
+        var type = typeof(T);
+        if (type == typeof(string)) {
             return false;
         }
-        int intEnumValue;
-        if (Int32.TryParse(valueToParse, out intEnumValue)) {
-            if (Enum.IsDefined(typeof(T), intEnumValue)) {
+        if (Int32.TryParse(valueToParse, out var intEnumValue)) {
+            if (Enum.IsDefined(type, intEnumValue)) {
                 returnValue = (T) (object) intEnumValue;
                 return true;
             }
@@ -130,7 +130,7 @@ public static class EnumHelper {
         if (names == null) {
             return false;
         }
-        var fullName = string.Format("{0}.{1}", (typeof(T).Name), valueToParse);
+        var fullName = type.Name + "." + valueToParse;
         foreach (var name in names) {
             if (valueToParse.CompareCaseInsensitive(name.Value)) {
                 returnValue = (T) (object) name.Key;
