@@ -18,7 +18,7 @@ namespace PixelComrades {
                 Owner.DefaultPostAdvance(this);
                 return;
             }
-            var tr = spawnEntity.Get<TransformComponent>().Tr;
+            var tr = spawnEntity.Tr;
             Vector3 target;
             if (Owner.Target != null) {
                 target = Owner.CurrentData == CollisionResult.Miss ? CollisionExtensions.MissPosition(Owner.Target) : Owner.Target.GetPosition;
@@ -37,7 +37,7 @@ namespace PixelComrades {
 
         public void Handle(MoveComplete arg) {
             var target = EntityController.GetEntity(arg.Target);
-            Owner.PostAdvance(arg.Target, arg.MoveTarget, target.GetRotation(), StateEvent);
+            Owner.PostAdvance(target, arg.MoveTarget, target.GetRotation(), StateEvent);
             target.Destroy();
         }
     }

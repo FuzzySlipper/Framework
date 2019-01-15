@@ -205,6 +205,9 @@ public class ValueHolder<T> where T : struct {
     }
 
     public string Debug() {
+        if (_keys.Count == 0) {
+            return DefaultValue.ToString();
+        }
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         for (int i = 0; i < _keys.Count; i++) {
             sb.Append(_keys[i]);

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace PixelComrades {
     public class UIRadialMenu : MonoBehaviour {
+#pragma warning disable 649
         [Tooltip("How long do all the layers take to transition on to the screen by default")] [SerializeField] private float _transitionLength = 1.0f;
         [Tooltip("Does the user have to drag to an element and then click or can they click simply click on an element to proceed")] [SerializeField] private bool _dragAndTouch = true;
         [Tooltip("How big will elements scale when selected")] [SerializeField] private float _elementGrowthFactor = 1.5f;
@@ -37,7 +38,7 @@ namespace PixelComrades {
         //[SerializeField] private Image _cursorIcon = null;
         //[SerializeField] private RectTransform _cursorIconHolder = null;
         [SerializeField] private Vector2 _positionLimit = Vector2.zero;
-
+#pragma warning restore 649
         private string _defaultText;
         private State _state = State.Disabled;
         private UnscaledTimer _clickTimer = new UnscaledTimer(0.1f);

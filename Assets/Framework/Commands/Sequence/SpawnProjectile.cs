@@ -23,11 +23,11 @@ namespace PixelComrades {
                 var rb = spawnEntity.Get<RigidbodyComponent>();
                 if (rb != null && rb.Rb) {
                     rb.velocity = entity.Find<RigidbodyComponent>().velocity;
-                    rb.AddForce(spawnEntity.Get<TransformComponent>().forward * spawnEntity.Get<MoveSpeed>());
+                    rb.AddForce(spawnEntity.Tr.forward * spawnEntity.Get<MoveSpeed>());
                 }
             }
             else {
-                var mvTarget = actionTarget.TargetTr == null ? new MoveTarget(actionTarget.TargetTr.Tr.c.Tr) : new MoveTarget(actionTarget.GetPosition);
+                var mvTarget = actionTarget.TargetTr == null ? new MoveTarget(actionTarget.TargetTr.Entity.Tr) : new MoveTarget(actionTarget.GetPosition);
                 spawnEntity.Add(mvTarget);
             }
             Owner.DefaultPostAdvance(this);

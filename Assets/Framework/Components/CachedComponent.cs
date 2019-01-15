@@ -4,8 +4,18 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    
-    public class CachedComponent<T> : IDisposable where T: IComponent {
+
+    public abstract class CachedComponent : IDisposable {
+
+        public abstract void Clear();
+        public abstract void Set(Entity owner, Dictionary<Type, ComponentReference> list);
+
+        public void Dispose() {
+            Clear();
+        }
+    }
+
+    public class CachedComponent<T> : CachedComponent where T: IComponent {
         private int _index = -1;
         private ManagedArray<T> _array;
         private Entity _entity;
@@ -56,7 +66,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Set(Entity owner, Dictionary<Type, ComponentReference> list) {
+        public override void Set(Entity owner, Dictionary<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
             if (list.TryGetValue(type, out var cref)) {
@@ -65,15 +75,11 @@ namespace PixelComrades {
             }
         }
 
-        public void Clear() {
+        public override void Clear() {
             _array = null;
             _index = -1;
         }
-
-        public void Dispose() {
-            Clear();
-        }
-
+        
         public static implicit operator T(CachedComponent<T> reference) {
             return reference.c;
         }

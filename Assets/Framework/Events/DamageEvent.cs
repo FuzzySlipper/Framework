@@ -54,16 +54,4 @@ namespace PixelComrades {
             Target = target;
         }
     }
-
-    public struct FloatingTextMessage : IEntityMessage {
-        public string Message;
-        public Color Color;
-        public Entity Target;
-
-        public FloatingTextMessage(string message, Color color, Entity target) {
-            Message = message;
-            Color = color;
-            Target = target;
-        }
-    }
 }

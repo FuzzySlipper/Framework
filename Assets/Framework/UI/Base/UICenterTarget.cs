@@ -8,7 +8,7 @@ namespace PixelComrades {
     public class UICenterTarget : MonoBehaviour, IReceive<ModifiersChanged>, IReceive<DeathEvent> {
 
         [SerializeField] private TextMeshProUGUI _textHolder = null;
-        [SerializeField] private UIHealthBarStatic _health = null;
+        [SerializeField] private UIHealthBarStatic[] _vitals = new UIHealthBarStatic[2];
         [SerializeField] private Image _sliderBackground = null;
         [SerializeField] private float _textSpeed = 0.075f;
         //[SerializeField] private float _actorDistance = 35f;
@@ -146,7 +146,9 @@ namespace PixelComrades {
             if (_character != null) {
                 _character.Entity.AddObserver(_main);
             }
-            _main._health.SetNewTarget(_character);
+            for (int i = 0; i < _main._vitals.Length; i++) {
+                _main._vitals[i].SetNewTarget(_character);
+            }
             _main.CheckMods();
             _visible.Entity.AddObserver(_main);
         }
@@ -194,7 +196,9 @@ namespace PixelComrades {
                 _character.Entity.RemoveObserver(this);
             }
             ClearModList();
-            _health.RemoveActor();
+            for (int i = 0; i < _main._vitals.Length; i++) {
+                _main._vitals[i].RemoveActor();
+            }
             _sliderBackground.enabled = false;
             _visible.Entity.RemoveObserver(_main);
             _visible = null;

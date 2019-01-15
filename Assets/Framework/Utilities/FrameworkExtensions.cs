@@ -15,20 +15,6 @@ namespace PixelComrades {
             return array;
         }
 
-        public static T[] AddOrPopulate<T>(this T[] array, T val) {
-            var length = array.Length;
-            for (var i = 0; i < length; i++) {
-                if (array[i] != null) {
-                    continue;
-                }
-                array[i] = val;
-                return array;
-            }
-            array = array.Increase(10);
-            array[length] = val;
-            return array;
-        }
-
         public static Vector3 AppendZ(this Transform obj, float zVal = 0.0f) {
             return new Vector3(obj.position.x, obj.position.y, zVal);
         }

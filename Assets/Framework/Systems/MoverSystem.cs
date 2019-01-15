@@ -72,7 +72,7 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
-            var tr = entity.Get<TransformComponent>().Tr;
+            var tr = entity.Tr;
             if (tr == null) {
                 return;
             }
@@ -92,9 +92,9 @@ namespace PixelComrades {
                 return;
             }
             mover.ElapsedTime += TimeManager.DeltaTime;
-            mover.Transform.Tr.Translate(0, (mover.MoveVector.y - (mover.Speed * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
+            mover.Entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Speed * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
             if (mover.ElapsedTime > mover.Duration) {
-                FinishMove(entity, mover.Transform.Tr.position);
+                FinishMove(entity, mover.Entity.Tr.position);
             }
         }
 
@@ -131,7 +131,7 @@ namespace PixelComrades {
         }
 
         private void CalculateFlight(ArcMover mover, Vector3 target) {
-            float targetDistance = Vector3.Distance(mover.Transform.Tr.position, target);
+            float targetDistance = Vector3.Distance(mover.Entity.Tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
             float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / mover.Speed);
             mover.MoveVector.z = Mathf.Sqrt(projectileVelocity) * Mathf.Cos(mover.Angle * Mathf.Deg2Rad);
@@ -139,7 +139,7 @@ namespace PixelComrades {
             // Calculate flight time.
             mover.Duration = targetDistance / mover.MoveVector.z;
             // Rotate projectile to face the target.
-            mover.Transform.Tr.rotation = Quaternion.LookRotation(target - mover.Transform.Tr.position);
+            mover.Entity.Tr.rotation = Quaternion.LookRotation(target - mover.Entity.Tr.position);
             mover.ElapsedTime = 0;
         }
     }
@@ -159,7 +159,7 @@ namespace PixelComrades {
 
         public StartMoveEvent(Entity origin, VisibleNode follow) {
             MoveTarget = follow.position;
-            Follow = follow.Tr.c;
+            Follow = follow.Entity.Tr;
             Origin = origin;
         }
     }

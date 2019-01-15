@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Sirenix.Utilities;
+using Priority_Queue;
 
 namespace PixelComrades {
     public enum TurnBasedState {
@@ -17,27 +17,16 @@ namespace PixelComrades {
 
     public static class TurnBased {
 
-        public const float RecoveryStepPerSecond = 30;
-        public const float RecoveryNeededToEndTurn = 90;
-
-        public const float DefaultRecovery = 135;
-        public const float MinBaseRecovery = 68;
-
-        public static StaticNoticeMsg MsgTurn = new StaticNoticeMsg("{0} {1}");
-        
+        public const float RecoveryNeededToEndTurn = 100;
         public static int TurnNumber { get { return World.Get<TurnBasedSystem>().TurnCounter; } }
-
-        public static class Events {
-            public const int GlobalTurnStarted = 0;
-            public const int GlobalTurnEnded = 1;
-        }
+        
     }
 
     public interface ITurnBasedUnit {
         int Owner { get; set; }
         float Speed { get; }
         void TurnUpdate(float turnEnergy);
-        bool TurnReady();
+        bool TryStartTurn();
     }
 
     public struct StartTurnEvent : IEntityMessage{}
@@ -45,21 +34,64 @@ namespace PixelComrades {
 
     public class TurnBasedSystem : SystemBase, IMainSystemUpdate {
 
+        private class TurnNode : IComparable<TurnNode>, IComparable {
+
+            public ITurnBasedUnit Value;
+            public float Priority;
+            public void Clear() {
+                Value = null;
+                Priority = 999;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is TurnNode node && node.Value == Value;
+            }
+
+            public bool Equals(TurnNode node) {
+                return node.Value == Value;
+            }
+
+            public override int GetHashCode() {
+                if (Value != null) {
+                    return Value.GetHashCode();
+                }
+                return Priority.GetHashCode();
+            }
+
+            public int CompareTo(object obj) {
+                return obj is TurnNode pn ? CompareTo(pn) : -1;
+            }
+
+            public int CompareTo(TurnNode other) {
+                return Priority.CompareTo(other.Priority);
+            }
+        }
+
+        private class NodeSorter : Comparer<TurnNode> {
+            public override int Compare(TurnNode x, TurnNode y) {
+                if (x == null || y == null) {
+                    return 0;
+                }
+                return -1 * x.Priority.CompareTo(y.Priority);
+            }
+        }
         
-        private static List<ITurnBasedUnit> _active = new List<ITurnBasedUnit>();
+        private static List<TurnNode> _active = new List<TurnNode>();
         private static List<ITurnBasedUnit> _queueActivate = new List<ITurnBasedUnit>();
         private static TurnBasedState _turnState = TurnBasedState.Inactive;
+        private static GameOptions.CachedFloat _turnRecoveryAmount = new GameOptions.CachedFloat("TurnRecoverAmount");
+        private static GenericPool<TurnNode> _nodePool = new GenericPool<TurnNode>(50, t => t.Clear());
 
         private float _turnLengthCounter = 0;
         private ITurnBasedUnit _current;
+        private NodeSorter _nodeSorter = new NodeSorter();
 
         public static TurnBasedState TurnState {  get { return _turnState; } }
         public int TurnCounter { get; private set; }
-        public List<ITurnBasedUnit> Active { get { return _active; } }
-        private float TurnRecoverAmount { get { return 1 * TimeManager.DeltaTime; } }
+        private float TurnRecoverAmount { get { return _turnRecoveryAmount.Value * TimeManager.DeltaTime; } }
 
         public static void Add(ITurnBasedUnit unit) {
-            if (!_queueActivate.Contains(unit) && !_active.Contains(unit)) {
+            if (!_queueActivate.Contains(unit) && GetNode(unit) == null) {
                 _queueActivate.Add(unit);
             }
         }
@@ -72,9 +104,22 @@ namespace PixelComrades {
             if (_queueActivate.Contains(unit)) {
                 _queueActivate.Remove(unit);
             }
-            else if (_active.Contains(unit)) {
-                _active.Remove(unit);
+            else {
+                var node = GetNode(unit);
+                if (node != null) {
+                    _active.Remove(node);
+                    _nodePool.Store(node);
+                }
             }
+        }
+
+        private static TurnNode GetNode(ITurnBasedUnit unit) {
+            for (int i = 0; i < _active.Count; i++) {
+                if (_active[i].Value == unit) {
+                    return _active[i];
+                }
+            }
+            return null;
         }
 
         public void OnSystemUpdate(float dt) {
@@ -99,28 +144,35 @@ namespace PixelComrades {
 
         private void PrepareTurn() {
             for (int i = 0; i < _queueActivate.Count; i++) {
-                _active.Add(_queueActivate[i]);
+                var node = _nodePool.New();
+                node.Value = _queueActivate[i];
+                _active.Add(node);
             }
             _queueActivate.Clear();
+            for (int i = 0; i < _active.Count; i++) {
+                _active[i].Priority = _active[i].Value.Speed;
+            }
         }
 
         private void TurnUpdate() {
             if (TurnCancel()) {
                 return;
             }
-            _active.BubbleSort((i, i1) => i.Speed < i1.Speed);
+            _active.Sort(_nodeSorter);
+            //_active.BubbleSort((i, i1) => i.Priority < i1.Priority);
             for (int i = 0; i < _active.Count; i++) {
                 if (TurnCancel()) {
                     return;
                 }
-                if (_active[i] == null) {
+                if (_active[i] == null || _active[i].Value == null) {
                     continue;
                 }
-                _active[i].TurnUpdate(TurnRecoverAmount);
-                if (_active[i].TurnReady()) {
-                    EntityController.GetEntity(_active[i].Owner).Post(EntitySignals.TurnReady);
+                _active[i].Value.TurnUpdate(TurnRecoverAmount);
+                //need to check it is the first activation
+                if (_active[i].Value.TryStartTurn()) {
+                    EntityController.GetEntity(_active[i].Value.Owner).Post(EntitySignals.TurnReady);
                     if (GameOptions.TurnBased) {
-                        _current = _active[i];
+                        _current = _active[i].Value;
                         break;
                     }
                 }
@@ -141,7 +193,7 @@ namespace PixelComrades {
                 return true;
             }
             if (_current != null) {
-                if (_current.TurnReady()) {
+                if (_current.TryStartTurn()) {
                     _turnState = TurnBasedState.Performing;
                     return true;
                 }
@@ -153,19 +205,5 @@ namespace PixelComrades {
             }
             return false;
         }
-
-        private static int CompareActorsBySpeed(ITurnBasedUnit a, ITurnBasedUnit b) {
-            if (a.Speed < b.Speed) {
-                return 1;
-            }
-
-            if (a.Speed > b.Speed) {
-                return -1;
-            }
-
-            return 0;
-        }
-
     }
-
 }

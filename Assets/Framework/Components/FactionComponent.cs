@@ -10,5 +10,9 @@ namespace PixelComrades {
         public FactionComponent(int faction) : this() {
             Faction = faction;
         }
+
+        public static implicit operator int(FactionComponent reference) {
+            return reference.Faction;
+        }
     }
 }

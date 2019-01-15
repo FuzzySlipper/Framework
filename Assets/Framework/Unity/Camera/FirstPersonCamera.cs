@@ -49,7 +49,7 @@ namespace PixelComrades {
             _rotationX += LookInput.x;
             _rotationY += LookInput.y;
             if (UICenterTarget.LockedActor != null) {
-                var targetPos = UICenterTarget.LockedActor.Tr.c.Tr.position;// + UICenterTarget.LockedActor.LocalCenter;
+                var targetPos = UICenterTarget.LockedActor.Entity.Tr.position;// + UICenterTarget.LockedActor.LocalCenter;
                 var targetScreen = Player.Cam.WorldToViewportPoint(targetPos);
                 var targetDir = (targetScreen - _center);
                 _rotationX += (targetDir.x * _zTargetSpeed);

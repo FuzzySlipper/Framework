@@ -39,10 +39,6 @@ namespace PixelComrades {
         private List<ICommandElement> _list = new List<ICommandElement>();
         private ICommandElement Current => _current < _list.Count ? _list[_current] : null;
         
-        public override bool CanStart() {
-            return true;
-        }
-
         public override bool CanBeReplacedBy(Command otherCommand) {
             return Current == null;
         }
@@ -79,17 +75,17 @@ namespace PixelComrades {
 
         public void DefaultPostAdvance(ICommandElement element) {
             if (element.StateEvent != ActionStateEvents.None) {
-                Post(Target?.Target?.Id ?? Owner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), element.StateEvent);
+                Post(Target?.Target ?? EntityOwner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), element.StateEvent);
             }
             Advance();
         }
 
-        public void PostAdvance(int target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+        public void PostAdvance(Entity target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
             Post(target, position, rotation, state);
             Advance();
         }
 
-        public void Post(int target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+        public void Post(Entity target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
             if (state == ActionStateEvents.None) {
                 return;
             }

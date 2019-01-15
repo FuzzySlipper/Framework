@@ -28,7 +28,7 @@ namespace PixelComrades {
             if (entity == null || !entity.Tags.Contain(EntityTags.CheckingCollision)) {
                 return;
             }
-            var tr = entity.Get<TransformComponent>().Tr;
+            var tr = entity.Tr;
             if (tr == null) {
                 return;
             }

@@ -145,10 +145,9 @@ namespace PixelComrades {
 
         void OnApplicationQuit() {
             IsQuitting = true;
-        }
-
-        public void OnDestroy() {
-            IsQuitting = true;
+            if (World.Instance != null) {
+                World.Instance.DisposeSystems();
+            }
         }
 
         void Update() {

@@ -21,7 +21,7 @@ namespace PixelComrades {
             if (!_cooldown.IsActive) {
                 return true;
             }
-            entity.Post(new StatusUpdate("Still Recovering", Color.yellow));
+            entity.PostAll(new StatusUpdate("Still Recovering", Color.yellow));
             return false;
         }
     }

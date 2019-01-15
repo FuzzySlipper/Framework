@@ -44,7 +44,7 @@ namespace PixelComrades {
                 Rb = rb.Rb;
             }
             if (Rb == null) {
-                RotateTr = owner.Get<TransformComponent>().Tr;
+                RotateTr = owner.Tr;
             }
         }
     }

@@ -9,7 +9,6 @@ namespace PixelComrades {
         public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
         public CachedComponent<MoveSpeed> MoveSpeed = new CachedComponent<MoveSpeed>();
         public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
-        public CachedComponent<TransformComponent> Tr = new CachedComponent<TransformComponent>();
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<VelocityMover> Mover = new CachedComponent<VelocityMover>();
 
@@ -24,7 +23,6 @@ namespace PixelComrades {
             Rb.Set(entity, list);
             MoveSpeed.Set(entity, list);
             RotationSpeed.Set(entity, list);
-            Tr.Set(entity, list);
             Target.Set(entity, list);
             Mover.Set(entity, list);
         }
@@ -33,7 +31,6 @@ namespace PixelComrades {
             Rb.Dispose();
             MoveSpeed.Dispose();
             RotationSpeed.Dispose();
-            Tr.Dispose();
             Target.Dispose();
             Mover.Dispose();
         }
@@ -42,7 +39,6 @@ namespace PixelComrades {
             return new System.Type[] {
                 typeof(RigidbodyComponent),
                 typeof(MoveSpeed),
-                typeof(TransformComponent),
                 typeof(VelocityMover),
                 typeof(MoveTarget),
             };

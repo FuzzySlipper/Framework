@@ -14,18 +14,20 @@ namespace PixelComrades {
             get { return _neighbors[(int)index]; }
             set { _neighbors[(int)index] = value; }
         }
-
+        public Entity Occupied;
         public int Length { get { return _neighbors.Length; } }
         public BaseCell[] Neighbors { get { return _neighbors; } }
         public bool Walkable { get; protected set; }
         public Point3 WorldPosition { get; protected set; }
-        public virtual Vector3 WorldBottomV3 { get { return WorldPosition.GenericGridToWorld(Game.MapCellSize) - new Vector3(0, Game.MapCellSize * 0.5f, 0); } }
+        public abstract Vector3 WorldPositionV3 { get; }
+        public abstract Vector3 WorldBottomV3 { get; }
+        
         public bool Explored { get; set; }
         public bool IsVisible { get; set; }
         
 
-        public bool HasActor() {
-            return false;
+        public bool IsOccupied() {
+            return Occupied != null;
         }
 
         public bool CanExit(Directions dir) {

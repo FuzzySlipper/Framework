@@ -21,6 +21,7 @@ namespace PixelComrades {
 
         public FloatRange() {}
 
+        public float MidPoint { get { return (Min + Max) / 2; } }
 
         public float Clamp(float input) {
             return Mathf.Clamp(input, Min, Max);
@@ -244,12 +245,27 @@ namespace PixelComrades {
             Range[2] = new IntRange(zMin, zMax);
         }
 
+        public PointRange(int min, int max) {
+            Range[0] = new IntRange(min, max);
+            Range[1] = new IntRange(min, max);
+            Range[2] = new IntRange(min, max);
+        }
+
         public Point3 Get() {
             return Get(Game.Random);
         }
 
         public Point3 Get(System.Random random) {
             return new Point3(Range[0].Get(random), Range[1].Get(random), Range[2].Get(random));
+        }
+
+        public bool InRange(Point3 pos) {
+            for (int i = 0; i < Range.Length; i++) {
+                if (!Range[i].WithinRange(pos[i])) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
     [Serializable] public class RandomBool : RangeBase {

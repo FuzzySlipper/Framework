@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PixelComrades {
     public class World : Singleton<World> {
@@ -27,7 +28,7 @@ namespace PixelComrades {
         //private static Queue<Type> _msgTypesAwaitingProcess = new Queue<Type>();
         private static List<Type>[] _typeEvents = new []{ new List<Type>(), new List<Type>()};
         private static int _typeListIdx = 0;
-        private static UnscaledTimer _periodicTimer = new UnscaledTimer(0.75f);
+        private static UnscaledTimer _periodicTimer = new UnscaledTimer(1);
         private static List<Type> TypeList { get { return _typeEvents[_typeListIdx]; } }
         private static Dictionary<Type, TypedMessageQueue> _msgLists = new Dictionary<Type, TypedMessageQueue>();
         private static SortByPriorityClass _typeSorter = new SortByPriorityClass();
@@ -40,7 +41,6 @@ namespace PixelComrades {
             }
             NodeFilter<VisibleNode>.New(VisibleNode.GetTypes());
             NodeFilter<CharacterNode>.New(CharacterNode.GetTypes());
-            Get<ActionFxSystem>();
             Get<AnimatorSystem>();
             Get<CameraSystem>();
             Get<CollisionCheckSystem>();
@@ -101,6 +101,14 @@ namespace PixelComrades {
                 }
             }
             return null;
+        }
+
+        public void DisposeSystems() {
+            var systems = _systems.Values.ToArray();
+            for (var i = 0; i < systems.Length; i++) {
+                var system = systems[i];
+                system.Dispose();
+            }
         }
 
         public void ClearSessionData() {

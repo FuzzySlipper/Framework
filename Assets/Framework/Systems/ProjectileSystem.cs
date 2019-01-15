@@ -18,7 +18,6 @@ namespace PixelComrades {
 
         public void Store(Entity entity) {
             MonoBehaviourToEntity.Unregister(entity);
-            entity.Remove<TransformComponent>();
             entity.Remove<RigidbodyComponent>();
             entity.Get<ModelComponent>().Model = null;
             if (_poolDict.TryGetValue(entity.Get<TypeId>().Id, out var stack)) {
@@ -45,7 +44,7 @@ namespace PixelComrades {
             if (spawn == null) {
                 return entity;
             }
-            entity.Add(new TransformComponent(spawn.Transform));
+            entity.Tr = spawn.Transform;
             entity.Add(new RigidbodyComponent(spawn.GetComponent<Rigidbody>()));
             entity.Get<ModelComponent>().Model = spawn.GetComponent<IModelComponent>();
             MonoBehaviourToEntity.RegisterToEntity(spawn.gameObject, entity);

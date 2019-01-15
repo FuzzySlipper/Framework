@@ -11,7 +11,19 @@ namespace PixelComrades {
         public abstract Sprite Icon { get; }
         public abstract bool TryComplete();
 
+        protected Command() {
+            Owner = -1;
+        }
+
         [SerializeField] private int _owner = -1;
+        public Entity EntityOwner { get; private set; }
+        public Entity Parent { get; private set; }
+        public CommandsContainer Container { get; set; }
+        private List<ICommandCost> _costs = new List<ICommandCost>();
+        protected float TimeStart { get; private set; }
+
+        public float TimeActive { get { return TimeManager.TimeUnscaled - TimeStart; } }
+        public List<ICommandCost> Costs { get => _costs; }
         public int Owner {
             get { return _owner; }
             set {
@@ -25,15 +37,6 @@ namespace PixelComrades {
                 EntityOwner = this.GetEntity();
             }
         }
-        public Entity EntityOwner { get; private set; }
-        public Entity Parent { get; private set; }
-        public CommandsContainer Container { get; set; }
-        protected Command() {Owner = -1;}
-        private List<ICommandCost> _costs = new List<ICommandCost>();
-        protected float TimeStart { get; private set; }
-
-        public float TimeActive { get { return TimeManager.TimeUnscaled - TimeStart; } }
-        public List<ICommandCost> Costs { get => _costs; }
 
         public virtual bool CanBeReplacedBy(Command otherCommand) {
             return true;
@@ -45,6 +48,9 @@ namespace PixelComrades {
         }
 
         public virtual bool CanStart() {
+            if (EntityOwner == null) {
+                return false;
+            }
             for (int i = 0; i < Costs.Count; i++) {
                 if (!Costs[i].CanAct(EntityOwner)) {
                     return false;
@@ -92,23 +98,23 @@ namespace PixelComrades {
             }
         }
 
-        public virtual bool TryStart() {
+        public virtual bool TryStart(bool postUpdates = true) {
             var target = EntityOwner.GetSelfOrParent<CommandTarget>();
             if (target != null) {
                 var targeting = EntityOwner.GetSelfOrParent<CommandTargeting>();
-                if (!targeting.SatisfiesCondition(target)) {
+                if (!targeting.SatisfiesCondition(target, postUpdates)) {
                     return false;
                 }
             }
             return World.Get<CommandSystem>().TryAddCommand(this);
         }
 
-        public virtual bool TryStart(Entity target) {
+        public virtual bool TryStart(Entity target, bool postUpdates = true) {
             var cmdTarget = EntityOwner.GetSelfOrParent<CommandTarget>();
             if (cmdTarget != null) {
                 cmdTarget.Target = target;
                 var targeting = EntityOwner.GetSelfOrParent<CommandTargeting>();
-                if (!targeting.SatisfiesCondition(cmdTarget)) {
+                if (!targeting.SatisfiesCondition(cmdTarget, postUpdates)) {
                     return false;
                 }
             }

@@ -46,7 +46,7 @@ namespace PixelComrades {
             _objectType = AssetType.Scene;
             ScanObject();
             CheckCreate();
-            Register(true, false);
+            Register(false, false);
             RegisterInterfaces(true);
         }
 
@@ -108,16 +108,16 @@ namespace PixelComrades {
             _isSceneObject = newStatus;
             if (!_isSceneObject) {
                 ItemPool.SceneObjects.Remove(this);
-                World.Get<CullingManager>().Remove(this);
+                World.Get<CullingSystem>().Remove(this);
             }
             else {
                 ItemPool.SceneObjects.Add(this);
-                World.Get<CullingManager>().Add(this);
+                World.Get<CullingSystem>().Add(this);
             }
         }
 
         public virtual void Register(bool isSceneObject, bool isCulled) {
-            if (!Application.isPlaying || !Pooled) {
+            if (!Application.isPlaying) {
                 return;
             }
             _pooled = false;
@@ -135,7 +135,7 @@ namespace PixelComrades {
             }
             _isCulled = isCulled;
             if (isCulled) {
-                World.Get<CullingManager>().Add(this);
+                World.Get<CullingSystem>().Add(this);
             }
         }
 
@@ -148,7 +148,7 @@ namespace PixelComrades {
                 ItemPool.SceneObjects.Remove(this);
             }
             if (_isCulled) {
-                World.Get<CullingManager>().Remove(this);
+                World.Get<CullingSystem>().Remove(this);
             }
             _isSceneObject = false;
             if (_poolListeners != null) {

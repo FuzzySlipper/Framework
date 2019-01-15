@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class SensorCellsComponent : IComponent {
-        public int Owner { get; set; }
+    public class SensorCellsComponent : ComponentBase {
         public System.Action OnUpdate;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public int MaxHearDistance { get; private set; }
@@ -24,7 +23,7 @@ namespace PixelComrades {
             //watch.Stop();
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
             var start = this.Get<GridPosition>().Position;
-            var fwd = this.Get<TransformComponent>().Tr.ForwardDirection2D();
+            var fwd = Entity?.Tr.ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
                 var maxRowDistance = dir == fwd ? MaxVisionDistance : MaxHearDistance;

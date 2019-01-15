@@ -157,7 +157,7 @@ namespace PixelComrades {
             _cancelTarget = "";
         }
 
-        private void CheckDebugInput() {
+        protected virtual void CheckDebugInput() {
             if (!Game.Debug) {
                 return;
             }

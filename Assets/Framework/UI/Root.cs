@@ -17,7 +17,7 @@ namespace PixelComrades {
             if (canvas == null) {
                 return;
             }
-            _canvases.SafeAdd(root, canvas);
+            _canvases.AddOrUpdate(root, canvas);
         }
 
         public static Canvas Get(this UIRoot root) {

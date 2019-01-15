@@ -12,6 +12,8 @@ namespace PixelComrades {
         private static Dictionary<int, Dictionary<Type, ComponentReference>> _entityComponents = new Dictionary<int, Dictionary<Type, ComponentReference>>();
         private static Dictionary<Type, List<NodeFilter>> _filtersToCheck = new Dictionary<Type, List<NodeFilter>>();
         private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
+        private static System.Type[] _tempRemoveList = new Type[100];
+
         public static ManagedArray<Entity> EntitiesArray { get => _entities; }
 
         public static void RegisterNodeFilter(NodeFilter filter, System.Type handleType) {
@@ -55,6 +57,9 @@ namespace PixelComrades {
         //}
 
         public static ComponentReference? GetComponentReference(this Entity entity, Type type) {
+            if (entity == null) {
+                return null;
+            }
             if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
                 return null;
             }
@@ -62,19 +67,14 @@ namespace PixelComrades {
         }
 
         public static bool HasComponent<T>(this Entity entity) {
+            if (entity == null) {
+                return false;
+            }
             var type = typeof(T);
             if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
                 return false;
             }
             return entityList.ContainsKey(type);
-        }
-
-        public static bool HasDerivedComponent<T>(this Entity entity) {
-            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
-                return false;
-            }
-            var type = typeof(T);
-            return entityList.ContainsDerivedType(type);
         }
 
         public static Entity GetEntity(this IComponent component) {
@@ -100,8 +100,10 @@ namespace PixelComrades {
             if (!_entityComponents.TryGetValue(entity, out var componentList)) {
                 return;
             }
-            foreach (var componentReference in componentList) {
-                Remove(entity, componentReference.Value, componentReference.Key);
+            componentList.Keys.CopyTo(_tempRemoveList, 0);
+            var limit = componentList.Count;
+            for (int i = 0; i < limit; i++) {
+                entity.Remove(_tempRemoveList[i]);
             }
             componentList.Clear();
             _entityComponents.Remove(entity.Id);
@@ -124,11 +126,14 @@ namespace PixelComrades {
             }
             if (entityComponents.TryGetValue(type, out var cref)) {
                 var index = cref.Index;
-                if (((ManagedArray<T>) componentList)[index] is IReceive receiveOld) {
+                if (!type.IsValueType && ((ManagedArray<T>) componentList)[index] is IReceive receiveOld) {
                     entity.RemoveObserver(receiveOld);
                 }
                 entityComponents[type] = new ComponentReference(index, componentList);
                 ((ManagedArray<T>) componentList)[index] = newComponent;
+                if (type.IsValueType) {
+                    return newComponent;
+                }
             }
             else {
                 var index = ((ManagedArray<T>) componentList).Add(newComponent);
@@ -154,7 +159,7 @@ namespace PixelComrades {
             if (entity == null) {
                 return false;
             }
-            if (entity.HasComponent<T>() || entity.HasDerivedComponent<T>()) {
+            if (entity.HasComponent<T>()) {
                 return entity.Get<T>(del);
             }
             var parent = entity.GetParent();
@@ -168,9 +173,9 @@ namespace PixelComrades {
                 if (parentList != null && parentList.ContainsKey(type)) {
                     return parent.Get<T>(del);
                 }
-                if (parentList != null && parentList.ContainsDerivedType(type)) {
-                    return parent.GetDerived<T>(del);
-                }
+                //if (parentList != null && parentList.ContainsDerivedType(type)) {
+                //    return parent.GetDerived<T>(del);
+                //}
                 parent = parent.GetParent();
             }
             return false;
@@ -187,13 +192,13 @@ namespace PixelComrades {
                 if (checkEntity == null) {
                     break;
                 }
-                _entityComponents.TryGetValue(checkEntity.Id, out var parentList);
-                if (parentList != null && parentList.ContainsKey(type)) {
+                _entityComponents.TryGetValue(checkEntity.Id, out var componentList);
+                if (componentList != null && componentList.ContainsKey(type)) {
                     return checkEntity.Get<T>();
                 }
-                if (parentList != null && parentList.ContainsDerivedType(type)) {
-                    return checkEntity.GetDerived<T>();
-                }
+                //if (componentList != null && componentList.ContainsDerivedType(type)) {
+                //    return checkEntity.GetDerived<T>();
+                //}
                 checkEntity = checkEntity.GetParent();
             }
             return default(T);
@@ -214,13 +219,13 @@ namespace PixelComrades {
             if (entityList.ContainsKey(type)) {
                 return entity.Get<T>();
             }
-            if (entityList.ContainsDerivedType(type)) {
-                return entity.GetDerived<T>();
-            }
             return parent.Get<T>();
         }
 
         public static T Get<T>(this IComponent component) where T : IComponent {
+            if (component == null) {
+                return default(T);
+            }
             return GetEntity(component.Owner).Get<T>();
         }
 
@@ -254,42 +259,7 @@ namespace PixelComrades {
                 return default(T);
             }
             var type = typeof(T);
-            if (entityList.TryGetValue(type, out var cref)) {
-                return ((ManagedArray<T>) cref.Array)[cref.Index];
-            }
-            return entity.GetDerived<T>();
-        }
-
-        public static T GetDerived<T>(this Entity entity) where T : IComponent {
-            if (entity == null) {
-                return default(T);
-            }
-            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
-                return default(T);
-            }
-            var type = typeof(T);
-            foreach (var cref in entityList) {
-                if (type.IsAssignableFrom(cref.Key)) {
-                    return (T) cref.Value.Get();
-                }
-            }
-            return default(T);
-        }
-
-        public static bool GetDerived<T>(this Entity entity, Action<T> del) where T : IComponent {
-            if (entity == null) {
-                return false;
-            }
-            if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
-                return false;
-            }
-            var type = typeof(T);
-            foreach (var cref in entityList) {
-                if (type.IsAssignableFrom(cref.Key)) {
-                    del((T) cref.Value.Get());
-                }
-            }
-            return false;
+            return entityList.TryGetValue(type, out var cref) ? ((ManagedArray<T>) cref.Array)[cref.Index] : default(T);
         }
 
         public static T GetOrAdd<T>(this Entity entity) where T : IComponent, new() {
@@ -434,7 +404,18 @@ namespace PixelComrades {
             if (entity == null) {
                 return Vector3.zero;
             }
-            return entity.Find<PositionComponent>()?.Position ?? Vector3.zero;
+            var checkEntity = entity;
+            while (checkEntity != null) {
+                var pc = checkEntity.Get<PositionComponent>();
+                if (pc != null) {
+                    return pc.Position;
+                }
+                if (checkEntity.Tr != null) {
+                    return checkEntity.Tr.position;
+                }
+                checkEntity = checkEntity.GetParent();
+            }
+            return Vector3.zero;
         }
 
         public static Quaternion GetRotation(this Entity entity) {

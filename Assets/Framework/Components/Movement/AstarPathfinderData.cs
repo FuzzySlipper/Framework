@@ -9,12 +9,14 @@ using Pathfinding.Cooperative;
 using Pathfinding;
 
 namespace PixelComrades {
-    public class AstarPathfinderData : IComponent, IDisposable, IReceive<SetTarget> {
+    public class AstarPathfinderData : IComponent, IDisposable, IReceive<SetMoveTarget> {
         public int Owner { get;set; }
         public Seeker Seeker { get; }
         public CooperativeContext.Agent Agent { get; private set; }
         public Point3 CurrentTarget = Point3.max;
         public float LastRepath = float.NegativeInfinity;
+        public Point3 LastPosition;
+        public int UpdatesImmobile;
 
         public AstarPathfinderData(Seeker seeker) {
             Seeker = seeker;
@@ -32,8 +34,9 @@ namespace PixelComrades {
             Agent = null;
         }
 
-        public void Handle(SetTarget arg) {
-            CurrentTarget = arg.Target.WorldToGenericGrid(AstarMoverSystem.GoalAccuracy);
+        public void Handle(SetMoveTarget arg) {
+            //CurrentTarget = arg.Target.WorldToGenericGridYZero(AstarMoverSystem.GoalAccuracy);
+            
         }
     }
 }

@@ -15,14 +15,14 @@ namespace PixelComrades {
         }
 
         public const int SegmentCount = 30; //How many parts does the tentacle have
-
+#pragma warning disable 649
         [SerializeField] private bool _alive = true;
         [SerializeField] private float _length = 3;
         [SerializeField] private Material _material;
         [SerializeField] private float _speed = 2.5f;
         [SerializeField] private TailMode _tailMode = TailMode.Wiggle;
         [SerializeField] private TailType _tailtype = TailType.Thin;
-
+#pragma warning restore 649
         //private float _angle;
         private Mesh _mesh = null;
         private float _offset = 0;

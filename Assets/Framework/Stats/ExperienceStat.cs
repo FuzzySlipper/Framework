@@ -9,8 +9,8 @@ namespace PixelComrades {
 
         public event Action OnLevelUp;
 
-        private const int ExtraAdd = 3;
-        private const float Multiplier = 15f;
+        private static GameOptions.CachedFloat _extraAdd = new GameOptions.CachedFloat("ExtraXpOffset");
+        private static GameOptions.CachedFloat _multiplier = new GameOptions.CachedFloat("XpLevelMultiplier");
 
         public ExperienceStat() {
             SetNextXp();
@@ -49,10 +49,10 @@ namespace PixelComrades {
 
         private void SetNextXp() {
             _lastLevelXp = _nextLevelXp;
-            _nextLevelXp = _level * (_level + ExtraAdd) * Multiplier;
+            _nextLevelXp = _level * (_level + _extraAdd) * _multiplier;
         }
 
-        public void ForceAdvaceLevel() {
+        public void ForceAdvanceLevel() {
             _experience.ChangeValue(_nextLevelXp);
             _level++;
             SetNextXp();

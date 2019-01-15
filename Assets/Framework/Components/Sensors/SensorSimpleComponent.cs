@@ -3,22 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class SensorSimpleComponent : IComponent {
+    public class SensorSimpleComponent : IComponent, IReceive<DamageEvent> {
         
-        private int _maxTurnsToRememberSeenUnit = 5;
-        private int _maxTurnsToRememberHeardUnit = 3;
-
-        public int MaxHearDistance { get; private set; }
-        public int MaxVisionDistance { get; private set; }
-        public int MaxTurnsNpcVisible = 12;
+        public int MaxUpdatesNoContact = 50;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
-        public List<Entity> TempList = new List<Entity>();
         public int Owner { get; set; }
         public int Faction;
 
-        public SensorSimpleComponent(int faction, int maxHearDistance = 12, int maxVisionDistance = 5) {
-            MaxHearDistance = maxHearDistance;
-            MaxVisionDistance = maxVisionDistance;
+        public SensorSimpleComponent(int faction) {
             Faction = faction;
         }
         
@@ -64,43 +56,22 @@ namespace PixelComrades {
             WatchTargets.RemoveAt(index);
         }
 
-        //private Mesh _coneMesh;
         public void UpdateWatchTargets() {
             for (int i = WatchTargets.Count - 1; i >= 0; i--) {
-                if (WatchTargets[i].Target == null) {
+                if (WatchTargets[i].Target == null || WatchTargets[i].Target.Stats.HealthStat?.Current < 0) {
                     RemoveWatch(WatchTargets[i]);
                     continue;
                 }
-                var cell = World.Get<MapSystem>().GetCell(WatchTargets[i].LastSensedPos);
-                if (cell == null) {
-                    continue;
-                }
-                if (cell.IsVisible) {
-                    WatchTargets[i].Seen = true;
-                    WatchTargets[i].LastSensedTurnCount = 0;
-                }
-                else {
-                    WatchTargets[i].LastSensedTurnCount++;
-                    if (WatchTargets[i].LastSensedTurnCount > MaxTurnsNpcVisible) {
-                        RemoveWatch(WatchTargets[i]);
-                    }
-                }
-            }
-            for (int i = WatchTargets.Count - 1; i >= 0; i--) {
-                var watchTarget = WatchTargets[i];
-                if (watchTarget.Target == null || watchTarget.Target.Stats.HealthStat?.Current < 0) {
-                    RemoveWatchTarget(i);
-                    continue;
-                }
-                watchTarget.LastSensedTurnCount++;
-                if (watchTarget.Seen && watchTarget.LastSensedTurnCount > _maxTurnsToRememberSeenUnit) {
-                    RemoveWatchTarget(i);
-                }
-                else if (!watchTarget.Seen && watchTarget.LastSensedTurnCount > _maxTurnsToRememberHeardUnit) {
-                    RemoveWatchTarget(i);
+                WatchTargets[i].LastSensedTurnCount++;
+                if (WatchTargets[i].LastSensedTurnCount > MaxUpdatesNoContact) {
+                    RemoveWatch(WatchTargets[i]);
                 }
             }
             WatchTargets.Sort(this.GetEntity().Get<GridPosition>());
+        }
+
+        public void Handle(DamageEvent arg) {
+            AddWatch(arg.Origin, true);
         }
     }
 }

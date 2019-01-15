@@ -22,7 +22,12 @@ namespace PixelComrades {
 
         public void SetRandomIndex() {
             CurrentIndex = Clips.RandomIndex();
+            Start = TimeManager.TimeUnscaled;
         }
+
         public AnimationClip CurrentClip { get { return Clips[CurrentIndex]; } }
+        public float Start { get; private set; }
+        public float Length { get { return CurrentClip != null ? CurrentClip.length : 1; } }
+        public float Remaining { get { return (Start + Length) - TimeManager.TimeUnscaled; } }
     }
 }

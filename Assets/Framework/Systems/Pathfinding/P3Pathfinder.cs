@@ -1,223 +1,382 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Priority_Queue;
 
 namespace PixelComrades {
-    public class P3Pathfinder : Pathfinder<P3Pathfinder.P3Node, Point3> {
 
-        private static GenericPool<P3Node> _nodePool = new GenericPool<P3Node>(100, node => node.Clear());
+    public class AstarP3Pathfinder : IPathfinder {
 
-        private Point3[] _surrounding;
-        private Point3[] _curroundSurrounding;
-        public Func<Point3, Point3, bool> WalkableDel;
+        public static int TravelAxis { get; private set; } = 1;
+        public static int OverrideY = 0;
+
+        private static Point3[] _positions = new[] {
+            new Point3(0, 1, 0), new Point3(1, 0, 0),
+            new Point3(0, -1, 0), new Point3(-1, 0, 0)
+        };
+        private static Point3[] _diagonalPositions = new[] {
+            new Point3(1, 1, 0), new Point3(1, -1, 0),
+            new Point3(-1, -1, 0), new Point3(-1, 1, 0)
+        };
+        private static int[,] _diagonalDirections = new int[4,2] {
+            {0, 1}, {1, 2},
+            {2, 3}, {3, 0}
+        };
+
+        private const int MaxPathCheck = 5500;
+
+        private FastPriorityQueue<P3Node> _openSet = new FastPriorityQueue<P3Node>(MaxPathCheck);
+        private Dictionary<Point3, P3Node> _keyedDict = new Dictionary<Point3, P3Node>(MaxPathCheck);
+        private HashSet<Point3> _closedSet = new HashSet<Point3>();
+        private Point3 _start;
+        private Point3 _end;
+        private WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(MaxPathCheck);
+        private bool[] _validPos = new bool[4];
+        private GenericPool<P3Node> _nodePool = new GenericPool<P3Node>(2500, node => node.Clear());
+        private IPathfindingGrid _grid;
+        private PathfindingRequest _request;
+        private List<Point3> _neighbors = new List<Point3>();
+
+        //Not thread safe either
+        public Dictionary<Point3, P3Node> KeyedDict { get => _keyedDict; }
         
+        /// <summary>
+        /// Not thread safe
+        /// </summary>
+        /// <param name="axis"></param>
+        public static void SetAxis(int axis) {
+            TravelAxis = axis;
+            _positions[0] = _positions[2] = Point3.zero;
+            _positions[0][axis] = 1;
+            _positions[2][axis] = -1;
+            for (int i = 0; i < _diagonalPositions.Length; i++) {
+                _diagonalPositions[i] = _positions[_diagonalDirections[i, 0]] + _positions[_diagonalDirections[i, 1]];
+            }
+        }
 
-        protected override P3Node AddNode(Point3 pos) {
+        public void Clear() {
+            foreach (var p3Node in _keyedDict) {
+                _nodePool.Store(p3Node.Value);
+            }
+            _openSet.Clear();
+            _closedSet.Clear();
+            _keyedDict.Clear();
+            _grid = null;
+        }
+
+        public PathfindingResult Run(PathfindingRequest request) {
+            Clear();
+            _grid = request.Grid;
+            _request = request;
+            _start = request.Start;
+            _end = request.End;
+            _start.y = _end.y = OverrideY;
+            if (_grid == null) {
+                return PathfindingResult.ErrorInternal;
+            }
+            if (!_grid.IsWalkable(_start, request.IsOversized)) {
+                return PathfindingResult.ErrorStartNotWalkable;
+            }
+            if (!_grid.IsWalkable(_end, request.IsOversized)) {
+                if (!FindClosestWalkable(out var newEnd)) {
+                    return PathfindingResult.ErrorEndOutOfBounds;
+                }
+                _end = newEnd;
+            }
+            if (request.Start == request.End) {
+                return PathfindingResult.ErrorStartIsEnd;
+            }
+            return FindPath();
+        }
+
+        public PathfindingResult FindPath() {
+            var startNode = CreateWalkableNode(_start);
+            startNode.StartCost = 0;
+            _openSet.Enqueue(startNode, startNode.TotalCost);
+            _loopLimiter.Reset(MaxPathCheck);
+            while (_loopLimiter.Advance()) {
+                if (_openSet.Count == 0) {
+                    break;
+                }
+                var centerNode = _openSet.Dequeue();
+                if (centerNode.Value == _end) {
+                    return ConstructFinalPath(centerNode);
+                }
+                _closedSet.Add(centerNode.Value);
+                GetSurrounding(centerNode);
+                for (int i = 0; i < _neighbors.Count; i++) {
+                    var neighborPos = _neighbors[i];
+                    if (_closedSet.Contains(neighborPos)) {
+                        continue;
+                    }
+                    _keyedDict.TryGetValue(neighborPos, out var neighbor);
+                    if (neighbor == null) {
+                        if (_grid.IsWalkable(neighborPos, _request.IsOversized)) {
+                            neighbor = CreateWalkableNode(neighborPos);
+                        }
+                        else {
+                            _closedSet.Add(neighborPos);
+                        }
+                    }
+                    if (neighborPos == _end) {
+                        if (neighbor == null) {
+                            return ConstructFinalPath(centerNode);
+                        }
+                        neighbor.Parent = centerNode;
+                        return ConstructFinalPath(neighbor);
+                    }
+                    if (neighbor == null) {
+                        continue;
+                    }
+                    var newStartCost = centerNode.StartCost + neighbor.Cost; // neighbor.GetTravelCost(centerNode);
+                    if (newStartCost < neighbor.StartCost) {
+                        neighbor.Parent = centerNode;
+                        neighbor.StartCost = newStartCost;
+                        if (_openSet.Contains(neighbor)) {
+                            _openSet.UpdatePriority(neighbor, neighbor.TotalCost);
+                        }
+                        else {
+                            _openSet.Enqueue(neighbor, neighbor.TotalCost);
+                        }
+                    }
+                }
+            }
+            return PathfindingResult.ErrorPathNotFound;
+        }
+
+        private PathfindingResult ConstructFinalPath(P3Node endNode) {
+            if (endNode == null) {
+                return PathfindingResult.ErrorPathNotFound;
+            }
+            if (_grid.IsValidDestination(endNode.Value)) {
+                PathTrace(endNode);
+                return PathfindingResult.Successful;
+            }
+            if (endNode.Parent != null && _grid.IsValidDestination(endNode.Parent.Value)) {
+                PathTrace(endNode.Parent);
+                return PathfindingResult.Redirected;
+            }
+            var originalEnd = endNode;
+            var endPos = endNode.Value;
+            endNode = null;
+            for (int i = 0; i < SpiralPoints.Length; i++) {
+                var pos = endPos + SpiralPoints[i];
+                if (!_keyedDict.TryGetValue(pos, out var newNode)) {
+                    continue;
+                }
+                if (!_grid.IsValidDestination(newNode.Value) || newNode.Value == endPos) {
+                    continue;
+                }
+                if (endNode == null) {
+                    endNode = newNode;
+                    continue;
+                }
+                if (newNode.TotalCost < endNode.TotalCost) {
+                    endNode = newNode;
+                }
+            }
+            if (endNode != null) {
+                PathTrace(endNode);
+                return PathfindingResult.Redirected;
+            }
+            for (int i = 0; i < DirectionsExtensions.DiagonalLength; i++) {
+                var pos = endPos + ((DirectionsEight) i).ToP3();
+                if (!_keyedDict.TryGetValue(pos, out var node)) {
+                    continue;
+                }
+                if (!_openSet.Contains(node)) {
+                    _openSet.Enqueue(node, node.TotalCost);
+                }
+            }
+            if (!_openSet.Contains(originalEnd)) {
+                _openSet.Enqueue(originalEnd, originalEnd.TotalCost);
+            }
+            _loopLimiter.Reset(150);
+            while (_loopLimiter.Advance()) {
+                if (_openSet.Count == 0) {
+                    break;
+                }
+                var centerNode = _openSet.Dequeue();
+                if (endNode == null && _grid.IsValidDestination(centerNode.Value)) {
+                    endNode = centerNode;
+                }
+                if (endNode != null && centerNode.TotalCost < endNode.TotalCost) {
+                    endNode = centerNode;
+                }
+                if (endNode != null && endNode.Value.IsNeighbor(endPos)) {
+                    break;
+                }
+                GetSurrounding(centerNode);
+                for (int i = 0; i < _neighbors.Count; i++) {
+                    var neighborPos = _neighbors[i];
+                    _keyedDict.TryGetValue(neighborPos, out var neighbor);
+                    if (neighbor == null && _grid.IsWalkable(neighborPos, _request.IsOversized)) {
+                        neighbor = CreateWalkableNode(neighborPos);
+                    }
+                    if (neighbor == null) {
+                        continue;
+                    }
+                    var newStartCost = centerNode.StartCost + neighbor.Cost;// neighbor.GetTravelCost(centerNode);
+                    if (newStartCost < neighbor.StartCost) {
+                        neighbor.Parent = centerNode;
+                        neighbor.StartCost = newStartCost;
+                        if (_openSet.Contains(neighbor)) {
+                            _openSet.UpdatePriority(neighbor, neighbor.TotalCost);
+                        }
+                        else {
+                            _openSet.Enqueue(neighbor, neighbor.TotalCost);
+                        }
+                    }
+                }
+            }
+            if (endNode == null) {
+                return PathfindingResult.ErrorPathNotFound;
+            }
+            PathTrace(endNode);
+            return PathfindingResult.Redirected;
+        }
+
+
+        protected P3Node CreateWalkableNode(Point3 pos) {
             var newNode = _nodePool.New();
-            newNode.Set(pos, End);
-            AllNodes.Add(newNode);
+            newNode.Set(pos, _end, _start,_grid.GetTraversalCost(pos));
+            _keyedDict.Add(pos, newNode);
             return newNode;
         }
 
-        protected override bool CheckWalkable(Point3 pos, Point3 neighborPos) {
-            return WalkableDel(pos, neighborPos);
-        }
-
-        protected override IList<Point3> GetSurrounding(PathNode<Point3> centerNode) {
-            for (int i = 0; i < _curroundSurrounding.Length; i++) {
-                _curroundSurrounding[i] = centerNode.Value + _surrounding[i];
+        public void PathTrace(P3Node endNode) {
+            if (_request.Path == null) {
+                _request.Path = new List<Point3>(25);
             }
-            return _curroundSurrounding;
-        }
-
-        public void SetConfig(Pathfinding.Config config) {
-            switch (config) {
-                case Pathfinding.Config.Cardinal:
-                    _surrounding = _surrounding4Way;
-                    break;
-                case Pathfinding.Config.Diagonal:
-                    _surrounding = _surrounding16Way;
-                    break;
-                case Pathfinding.Config.Vertical:
-                    _surrounding = _surrounding6Way;
-                    break;
-            }
-            _curroundSurrounding = new Point3[_surrounding.Length];
-        }
-
-        public override void Clear() {
-            base.Clear();
-            for (int i = 0; i < AllNodes.Count; i++) {
-                _nodePool.Store(AllNodes[i] as P3Node);
-            }
-        }
-
-        public override List<Point3> GetPathTrace(P3Node endNode) {
-            var finalPath = new List<Point3>();
-            P3Node currentTrace = endNode;
+            _request.Path.Clear();
+            var currentTrace = endNode;
             while (currentTrace != null) {
-                finalPath.Add(currentTrace.Value);
-                if (currentTrace.Value == Start) {
+                var pos = currentTrace.Value;
+                _request.Path.Add(pos);
+                if (pos == _start) {
                     break;
                 }
-                //if (currentTrace.Parent != null && !currentTrace.Parent.Pos.IsNeighbor(currentTrace.Pos)) {
-                //    Debug.LogFormat("at pos {0} had parent at {1} that was not a neighbor",
-                //        currentTrace.Pos, currentTrace.Parent.Pos);
-                //}
-                currentTrace = currentTrace.Parent as P3Node;
+                currentTrace = currentTrace.Parent;
             }
-            finalPath.Reverse();
-            if (finalPath[0] != Start) {
-                finalPath.Insert(0, Start);
+            if (_request.Path[_request.Path.Count-1] != _start) {
+                _request.Path.Add(_start);
             }
-            return finalPath;
+            _request.Path.Reverse();
         }
-
-        public static bool MapCellWalkable(Point3 currentPos, Point3 nextPos) {
-            var cell = World.Get<MapSystem>().GetCell(nextPos);
-            var current = World.Get<MapSystem>().GetCell(currentPos);
-            if (cell == null || current == null) {
+        
+        protected bool CanAdd(Point3 pos) {
+            if (_closedSet.Contains(pos) || !_grid.IsWalkable(pos, _request.IsOversized)) {
                 return false;
             }
-            if (!cell.Walkable) {
-                return false;
-            }
-            return current.CanReach(cell);
-        }
-
-        public static bool MapCellWalkableUnitFree(Point3 currentPos, Point3 nextPos) {
-            var cell = World.Get<MapSystem>().GetCell(nextPos);
-            var current = World.Get<MapSystem>().GetCell(currentPos);
-            if (cell == null || current == null) {
-                return false;
-            }
-            if (!cell.Walkable || cell.HasActor()) {
-                return false;
-            }
-            return current.CanReach(cell);
-        }
-
-        public static bool AnyCell(Point3 currentPos, Point3 nextPos) {
             return true;
         }
 
-        public static bool MapCellExists(Point3 currentPos, Point3 nextPos) {
-            return World.Get<MapSystem>().LevelPositionIsFree(nextPos);
+        private Point3[] _spiralPoints;
+        private Point3[] SpiralPoints {
+            get {
+                if (_spiralPoints == null) {
+                    _spiralPoints = new Point3[50];
+                    for (int i = 0; i < _spiralPoints.Length; i++) {
+                        _spiralPoints[i] = GridExtension.GridSpiralP3(i);
+                    }
+                }
+                return _spiralPoints;
+            }
         }
 
-        private static Point3[] _surrounding6Way = {
-            new Point3(1, 0, 0), new Point3(-1, 0, 0),
-            new Point3(0, 1, 0), new Point3(0, -1, 0),
-            new Point3(0, 0, 1), new Point3(0, 0, -1),
-        };
+        private bool FindClosestWalkable(out Point3 pos) {
+            for (int i = 0; i < SpiralPoints.Length; i++) {
+                pos = _end + SpiralPoints[i];
+                if (_grid.IsWalkable(pos, _request.IsOversized)) {
+                    return true;
+                }
+            }
+            pos = _end;
+            return false;
+        }
 
-        private static Point3[] _surrounding4Way = {
-            new Point3(1, 0, 0), new Point3(-1, 0, 0),
-            new Point3(0, 0, 1), new Point3(0, 0, -1),
-        };
+        private void GetSurrounding(P3Node centerNode) {
+            _neighbors.Clear();
+            for (int i = 0; i < _positions.Length; i++) {
+                var pos = centerNode.Value + _positions[i];
+                _validPos[i] = CanAdd(pos);
+                if (_validPos[i]) {
+                   _neighbors.Add(pos);
+                }
+            }
+            for (int i = 0; i < _diagonalPositions.Length; i++) {
+                if (_validPos[_diagonalDirections[i, 0]] && _validPos[_diagonalDirections[i, 1]]) {
+                    var pos = centerNode.Value + _diagonalPositions[i];
+                    if (CanAdd(pos)) {
+                        _neighbors.Add(pos);
+                    }
+                }
+            }
+        }
 
-        private static Point3[] _surrounding16Way = {
-            //Top slice (Y=1)
-            new Point3(-1, 1, 1), new Point3(0, 1, 1), new Point3(1, 1, 1), new Point3(-1, 1, 0), new Point3(0, 1, 0),
-            new Point3(1, 1, 0), new Point3(-1, 1, -1), new Point3(0, 1, -1), new Point3(1, 1, -1),
-            //Middle slice (Y=0)
-            new Point3(-1, 0, 1), new Point3(0, 0, 1), new Point3(1, 0, 1), new Point3(-1, 0, 0), new Point3(1, 0, 0),
-            new Point3(-1, 0, -1), new Point3(0, 0, -1), new Point3(1, 0, -1), //(0,0,0) is self
-            //Bottom slice (Y=-1)
-            new Point3(-1, -1, 1), new Point3(0, -1, 1), new Point3(1, -1, 1), new Point3(-1, -1, 0), new Point3(0, -1, 0),
-            new Point3(1, -1, 0), new Point3(-1, -1, -1), new Point3(0, -1, -1), new Point3(1, -1, -1)
-        };
+        public class P3Node : FastPriorityQueueNode, IComparable<P3Node>, IComparable {
+            //private const float DiagonalCost = 1.41421356237f;
+            //public static float OnAxisDiscount = 0.5f;
+            //public static float MagnitudeAdjustment = 1.1f;
+            public static float SimpleEndCostMulti = 1.5f;
 
-        public class P3Node : PathNode<Point3>, IComparable<P3Node>, IComparable {
+            public float StartCost = float.MaxValue; //G
+            public float EndCost = float.MaxValue; // H
+            public Point3 Value { get; protected set; }
+            public float Cost = 0;
+            public P3Node Parent = null;
 
-            private const float OffAxisCost = 0.5f;
-        
-            public override void Clear() {
-                base.Clear();
+            public float TotalCost { get { return StartCost + EndCost; } } //F
+            public bool Pooled { get; private set; }
+
+            public void Clear() {
+                StartCost = float.MaxValue;
+                EndCost = float.MaxValue;
+                Cost = 0;
+                Parent = null;
+                Value = default(Point3);
                 Value = Point3.zero;
+                Pooled = true;
             }
 
-            public override void Set(Point3 pos, Point3 end) {
+            public void Set(Point3 pos, Point3 end, Point3 start, float cost) {
+                Pooled = false;
+                Cost = cost;
                 Value = pos;
-                EndCost = DistanceCost(end);
+                //EndCost = Abs(Value.x - end.x) + Abs(Value.y - end.y) + Abs(Value.z - end.z); //Manhattan
+                EndCost = Math.Max(Abs(Value.x - end.x), Abs(Value[TravelAxis] - end[TravelAxis]));
+                EndCost *= SimpleEndCostMulti;
+                //var dx = Abs(Value.x - end.x);
+                //var dy = Abs(Value[TravelAxis] - end[TravelAxis]);
+                //var dx2 = Abs(Value.x - start.x);
+                //var dy2 = Abs(Value[TravelAxis] - start[TravelAxis]);
+                //EndCost -= Abs(dx * dy2 - dx2 * dy) * EndCostMulti;
                 Parent = null;
             }
 
-            //public override float GetTravelCost(int travelAxis, float amt, PathNode nodeParent) {
-            //    var parent = (P3Node) nodeParent;
-
-            //    return base.GetTravelCost(travelAxis, amt, parent);
+            //public float GetTravelCost(P3Node neighbor) {
+            //    float baseCost = Cost;
+            //    if (neighbor.Parent != null) {
+            //        var travelDir = Value - neighbor.Value;
+            //        var prevDir = neighbor.Value - neighbor.Parent.Value;
+            //        if (travelDir == prevDir && travelDir.sqrMagnitude < MagnitudeAdjustment) {
+            //            baseCost -= OnAxisDiscount;
+            //        }
+            //    }
+            //    return baseCost;
             //}
 
-            public override float GetCostToStart() {
-                if (Parent == null) {
-                    return -1;
+            private static int Abs(int x) {
+                if (x < 0) {
+                    return -x;
                 }
-                float amt = 0;
-                var travelAxis = GetTravelAxis();
-                if (travelAxis < 0) {
-                    return -1;
-                }
-                var currentTrace = this;
-                while (currentTrace != null) {
-                    if (currentTrace.Parent == null) {
-                        break;
-                    }
-                    if (currentTrace.Value[travelAxis] == currentTrace.NodeParent.Value[travelAxis]) {
-                        amt += OffAxisCost * 0.25f;
-                    }
-                    else {
-                        break;
-                    }
-                    currentTrace = currentTrace.NodeParent as P3Node;
-                }
-                return amt;
+                return x;
             }
-
-            public override int DistanceCost(Point3 other) {
-                return (System.Math.Abs(Value.x - other.x) + System.Math.Abs(Value.y - other.y) +
-                        System.Math.Abs(Value.z - other.z));
-            }
-
-            public override float GetTravelCost(PathNode<Point3> center, Point3 start, Point3 end) {
-                var centerNode = center as P3Node;
-                if (centerNode != null) {
-                    var travelAxis = centerNode.GetTravelAxis();
-                    var travelCost = centerNode.GetCostToStart();
-                    if (travelAxis >= 0 && travelCost >= 0) {
-                        if (Value[travelAxis] == centerNode.Value[travelAxis]) {
-                            return 0;
-                        }
-                        return travelCost;
-                        //return GetTravelCost(travelAxis, travelCost, centerNode);
-                    }
-                }
-                var dx1 = Value.x - end.x;
-                var dz1 = Value.z - end.z;
-                var dx2 = start.x - end.x;
-                var dz2 = start.z - end.z;
-                var cross = System.Math.Abs(dx1 * dz2 - dx2 * dz1);
-                return (cross * (OffAxisCost));
-            }
-
-            public int GetTravelAxis() {
-                if (Parent == null) {
-                    return -1;
-                }
-                if (Value[0] == NodeParent.Value[0]) {
-                    return 0;
-                }
-                if (Value[2] == NodeParent.Value[2]) {
-                    return 2;
-                }
-                return -1;
-            }
-
-
+            
             public override bool Equals(object obj) {
-                var node = obj as P3Node;
-                return node != null && node.Value == Value;
+                return obj is P3Node node && node.Value == Value;
             }
 
             public bool Equals(P3Node node) {
@@ -229,14 +388,36 @@ namespace PixelComrades {
             }
 
             public int CompareTo(object obj) {
-                var pn = obj as P3Node;
-                return pn != null ? CompareTo(pn) : -1;
+                return obj is P3Node pn ? CompareTo(pn) : -1;
             }
 
             public int CompareTo(P3Node other) {
                 return TotalCost.CompareTo(other.TotalCost);
             }
         }
+   
+        //private static Point3[] _surrounding6Way = {
+        //    new Point3(1, 0, 0), new Point3(-1, 0, 0),
+        //    new Point3(0, 1, 0), new Point3(0, -1, 0),
+        //    new Point3(0, 0, 1), new Point3(0, 0, -1),
+        //};
+
+        //private static Point3[] _surrounding4Way = {
+        //    new Point3(1, 0, 0), new Point3(-1, 0, 0),
+        //    new Point3(0, 0, 1), new Point3(0, 0, -1),
+        //};
+
+        //private static Point3[] _surrounding16Way = {
+        //    //Top slice (Y=1)
+        //    new Point3(-1, 1, 1), new Point3(0, 1, 1), new Point3(1, 1, 1), new Point3(-1, 1, 0), new Point3(0, 1, 0),
+        //    new Point3(1, 1, 0), new Point3(-1, 1, -1), new Point3(0, 1, -1), new Point3(1, 1, -1),
+        //    //Middle slice (Y=0)
+        //    new Point3(-1, 0, 1), new Point3(0, 0, 1), new Point3(1, 0, 1), new Point3(-1, 0, 0), new Point3(1, 0, 0),
+        //    new Point3(-1, 0, -1), new Point3(0, 0, -1), new Point3(1, 0, -1), //(0,0,0) is self
+        //    //Bottom slice (Y=-1)
+        //    new Point3(-1, -1, 1), new Point3(0, -1, 1), new Point3(1, -1, 1), new Point3(-1, -1, 0), new Point3(0, -1, 0),
+        //    new Point3(1, -1, 0), new Point3(-1, -1, -1), new Point3(0, -1, -1), new Point3(1, -1, -1)
+        //};
         //      public bool Linecast (Point3 from, Point3 to, List<PathNode> trace) {
 		//	// Find the closest nodes to the start and end on the part of the segment which is on the graph
 		//	if (!_checkWalkable(from, from)) {

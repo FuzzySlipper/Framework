@@ -7,6 +7,7 @@ namespace PixelComrades {
         public const string TagPlayer = "Player";
         public const string TagEnemy = "Enemy";
         public const string TagEnvironment = "Environment";
+        public const string TagFloor = "Floor";
         public const string TagLight = "Light";
         public const string TagInteractive = "Interactive";
         public const string TagDummy = "Dummy";
@@ -42,6 +43,7 @@ namespace PixelComrades {
         public const string Projectiles = "Projectiles/";
         public const string Items = "Items/";
         public const string UI = "UI/";
+        public const string Materials = "Materials/";
     }
 
     public static partial class Stats {
@@ -82,7 +84,7 @@ namespace PixelComrades {
         public const string MinLevel = "MinLevel";
         public const string ItemType = "ItemType";
         public const string Weight = "Weight";
-        public const string ActionFX = "ActionFX";
+        public const string ActionFx = "ActionFx";
         public const string DamageType = "DamageType";
         public const string EquipmentSlot = "EquipmentSlot";
         public const string Equipment = "Equipment";

@@ -41,11 +41,11 @@ namespace PixelComrades {
         }
 
         public void Add(System.Type type, IDataFactory factory) {
-            _factories.SafeAdd(type, factory);
+            _factories.AddOrUpdate(type, factory);
         }
 
         public void Add(string type, IDataFactory factory) {
-            _customFactories.SafeAdd(type, factory);
+            _customFactories.AddOrUpdate(type, factory);
         }
 
         public void Remove(System.Type type) {

@@ -19,6 +19,6 @@ namespace PixelComrades {
         public const int Unscaled = 15;
         public const int Slowed = 16;
 
-        public const int MAXLIMIT = 41;
+        public const int MAX_TAGS_LIMIT = 41;
     }
 }

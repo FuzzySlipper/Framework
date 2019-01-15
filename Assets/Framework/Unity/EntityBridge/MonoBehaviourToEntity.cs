@@ -39,7 +39,7 @@ namespace PixelComrades {
         }
 
         public static void Unregister(Entity entity) {
-            var tr = entity.Get<TransformComponent>().Tr;
+            var tr = entity.Tr;
             if (tr == null) {
                 return;
             }

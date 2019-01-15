@@ -7,14 +7,14 @@ namespace PixelComrades {
         public static void GenerateHitLocDir(Entity origin, Entity target, out Vector3 hitPnt, out Vector3 dir) {
             var collider = target.Get<ColliderComponent>();
             hitPnt = target.GetPosition();
-            if (collider.Collider != null) {
+            if (collider != null && collider.Collider != null) {
                 hitPnt += new Vector3(0, collider.Collider.bounds.size.y * 0.5f, 0);
             }
             dir = (hitPnt - origin.GetPosition()).normalized;
             if (target == origin) {
                 hitPnt += dir * 1;
             }
-            else if (collider.Collider != null) {
+            else if (collider != null && collider.Collider != null) {
                 //dir = hitPnt - Owner.Tr.position;
                 //dir = dir.normalized;
                 //hitPnt += (Owner.WorldCenter - hitPnt).normalized * targetActor.Collider.bounds.size.z * 0.5f;

@@ -7,7 +7,12 @@ namespace PixelComrades {
     public class DistanceSystem : SystemBase {
 
         public static float GetDistance(Entity source, Entity target) {
-            return Vector3.Distance(source.GetPosition(), target.GetPosition());
+            //return Vector3.Distance(source.GetPosition(), target.GetPosition());
+            var pos1 = source.GetPosition();
+            var pos2 = target.GetPosition();
+            pos1.y = 0;
+            pos2.y = 0;
+            return Vector3.Distance(pos1, pos2);
         }
 
         public static float GetDistance(Entity source, Vector3 target) {

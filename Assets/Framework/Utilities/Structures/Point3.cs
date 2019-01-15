@@ -114,13 +114,17 @@ namespace PixelComrades {
 
         public int GetHashCode(Point3 p) {
             unchecked {
-                return (p.x.GetHashCode() * 397) ^ p.z.GetHashCode() ^ p.y.GetHashCode();
+                //return (p.x.GetHashCode() * 397) ^ p.z.GetHashCode() ^ p.y.GetHashCode();
+                //return (x * 397) ^ z ^ y;
+                return (((x * 251 + y) * 251 + z) * 251);
             }
         }
 
         public override int GetHashCode() {
             unchecked {
-                return (x.GetHashCode() * 397) ^ z.GetHashCode() ^ y.GetHashCode();
+                //return (x.GetHashCode() * 397) ^ z.GetHashCode() ^ y.GetHashCode();
+                //return (x * 397) ^ z ^ y;
+                return (((x * 251 + y) * 251 + z) * 251);
             }
         }
 

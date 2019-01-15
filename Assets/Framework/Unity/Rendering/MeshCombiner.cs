@@ -78,7 +78,7 @@ namespace PixelComrades {
                 foreach (var combine in sectorMeshCombines) {
                     var created =BuildCombineList(combine.Value, target, deleteOriginal, combine.Key.ToString());
                     for (int i = 0; i < created.Count; i++) {
-                        World.Get<CullingManager>().Add(combine.Key, created[i]);
+                        World.Get<CullingSystem>().Add(combine.Key, created[i]);
                     }
                 }
             }

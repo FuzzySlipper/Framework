@@ -39,7 +39,7 @@ namespace PixelComrades {
                     for (int c = 0; c < sheet.Columns.Count; c++) {
                         var columnName = sheet.Columns[c].Name;
                         if (columnName == id) {
-                            entry.Cells.SafeAdd(Id, new DataCell<string>(Id, entry, id));
+                            entry.Cells.AddOrUpdate(Id, new DataCell<string>(Id, entry, id));
                             //entry.Cells[c] = new DataCell<string>(Id, entry, id);
                             continue;
                         }
@@ -52,7 +52,7 @@ namespace PixelComrades {
                         //entry.Cells[c] = GetColumnData(entry, line[columnName], sheet.Columns[c]);
                         var data = GetColumnData(entry, line[columnName], sheet.Columns[c]);
                         if (data != null) {
-                            entry.Cells.SafeAdd(data.ID, data);
+                            entry.Cells.AddOrUpdate(data.ID, data);
                         }
                     }
                     list.Add(entry);
@@ -101,7 +101,7 @@ namespace PixelComrades {
                             var columnName = nestedSheet.Columns[c].Name;
                             if (columnName == id) {
                                 //entry.Cells[c] = new DataCell<string>(Id, entry, id);
-                                entry.Cells.SafeAdd(Id, new DataCell<string>(Id, entry, id));
+                                entry.Cells.AddOrUpdate(Id, new DataCell<string>(Id, entry, id));
                                 continue;
                             }
                             if (line[columnName] == null) {
@@ -110,7 +110,7 @@ namespace PixelComrades {
                             //entry.Cells[c] = GetColumnData(entry, line[columnName], nestedSheet.Columns[c]);
                             var data = GetColumnData(entry, line[columnName], nestedSheet.Columns[c]);
                             if (data != null) {
-                                entry.Cells.SafeAdd(data.ID, data);
+                                entry.Cells.AddOrUpdate(data.ID, data);
                             }
                         }
                         list.Value.Add(entry);
@@ -778,9 +778,9 @@ namespace PixelComrades {
             _descriptions[index] = description != null && !string.IsNullOrEmpty(description.ToString()) ? description.ToString(): _shortIDs[index];
             var value = line[JsonValue];
             _associatedValues[index] = value != null ? value.Value<int>() : index;
-            _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_names[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_ids[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_shortIDs[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_names[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_ids[index].ToLower(), index);
         }
 
         public void AddNode(int index, string id, string name, string description, int value) {
@@ -789,9 +789,9 @@ namespace PixelComrades {
             _names[index] = name != null ? name.ToString() : _shortIDs[index];
             _descriptions[index] = description != null && !string.IsNullOrEmpty(description) ? description.ToString() : _shortIDs[index];
             _associatedValues[index] = value;
-            _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_names[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_ids[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_shortIDs[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_names[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_ids[index].ToLower(), index);
         }
 
         public void AddNode(int index, string id) {
@@ -800,9 +800,9 @@ namespace PixelComrades {
             _names[index] = id;
             _descriptions[index] = id;
             _associatedValues[index] = 0;
-            _stringToIndex.SafeAdd(_shortIDs[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_names[index].ToLower(), index);
-            _stringToIndex.SafeAdd(_ids[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_shortIDs[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_names[index].ToLower(), index);
+            _stringToIndex.AddOrUpdate(_ids[index].ToLower(), index);
         }
 
         private void SetupArrays(int cnt) {

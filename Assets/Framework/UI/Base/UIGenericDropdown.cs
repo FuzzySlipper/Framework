@@ -11,7 +11,6 @@ namespace PixelComrades {
         [SerializeField] private TextMeshProUGUI _text = null;
 
         public System.Action<int> OnValueChanged;
-        public int Index { get; set; }
         public Dropdown Dropdown { get { return _dropdown; } }
 
         void Awake() {
@@ -30,6 +29,13 @@ namespace PixelComrades {
         }
 
         public void ValueChanged(int index) {
+            if (OnValueChanged != null) {
+                TimeManager.StartUnscaled(WaitForClick(index));
+            }
+        }
+
+        private IEnumerator WaitForClick(int index) {
+            yield return null;
             if (OnValueChanged != null) {
                 OnValueChanged(index);
             }

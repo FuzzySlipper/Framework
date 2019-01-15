@@ -75,7 +75,7 @@ namespace PixelComrades {
             var dir = moveTarget - rb.position;
             rb.AddForce(dir.normalized * mover.Mover.c.CurrentSpeed * dt);
             var targetRotation = Quaternion.LookRotation(dir);
-            rb.MoveRotation(Quaternion.RotateTowards(mover.Tr.c.rotation, targetRotation, mover.RotationSpeed.c.Speed * dt));
+            rb.MoveRotation(Quaternion.RotateTowards(mover.Entity.Tr.rotation, targetRotation, mover.RotationSpeed.c.Speed * dt));
             if (Vector3.Distance(moveTarget, rb.position) < ReachedDestination) {
                 FinishMove(mover.Entity, moveTarget);
             }

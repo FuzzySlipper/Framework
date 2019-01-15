@@ -264,7 +264,7 @@ namespace PixelComrades {
         }
 
         public void Handle(StatusUpdate arg) {
-            if (_postStatusUpdates) {
+            if (_postStatusUpdates && gameObject.activeInHierarchy) {
                 StatusMessages(Data, arg.Update);
             }
         }

@@ -12,7 +12,7 @@ namespace PixelComrades {
         public FakeEnum this[string index] { get { return _enums.TryGetValue(index, out var fakeEnum) ? fakeEnum : null; } }
 
         public void Add(string name, FakeEnum fakeEnum) {
-            _enums.SafeAdd(name, fakeEnum);
+            _enums.AddOrUpdate(name, fakeEnum);
         }
 
         public bool TryGetEnumIndex(string fullName, out int index) {

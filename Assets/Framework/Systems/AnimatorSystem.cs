@@ -30,7 +30,7 @@ namespace PixelComrades {
                     data.Event = null;
                 }
             }
-            if (data.Animator.IsAnimationComplete()) {
+            if (data.Animator.IsAnimationComplete() && !data.GetEntity().IsDead()) {
                 data.Animator.PlayAnimation(data.GetEntity().Tags.Contain(EntityTags.Moving) ? AnimatorClips.Move : AnimatorClips.Idle);
             }
         }

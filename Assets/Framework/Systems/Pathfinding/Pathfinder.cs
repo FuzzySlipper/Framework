@@ -3,25 +3,35 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using Priority_Queue;
 
 namespace PixelComrades {
+
+    public interface IPathfinder {
+        PathfindingResult Run(PathfindingRequest request);
+    }
 
     public abstract class AbstractPathfinder {
 
         public virtual void Clear(){}
 
-        public abstract class PathNode {
+        public abstract class PathNode : FastPriorityQueueNode {
             public float StartCost = float.MaxValue; //G
             public float EndCost = float.MaxValue; // H
 
             public float TotalCost { get { return StartCost + EndCost; } } //F
 
-            public abstract PathNode Parent { get; set; }
-
             //public virtual float GetTravelCost(int travelAxis, float amt, PathNode parent) {
             //    return amt;
             //}
+
+
+        }
+
+        public abstract class PathNode<TV> : PathNode {
+
+            public TV Value { get; protected set; }
+            public PathNode<TV> Parent = null;
 
             public virtual float GetCostToStart() {
                 if (Parent == null) {
@@ -44,52 +54,40 @@ namespace PixelComrades {
                 StartCost = float.MaxValue;
                 EndCost = float.MaxValue;
                 Parent = null;
-            }
-
-        }
-
-        public abstract class PathNode<TV> : PathNode {
-
-            public TV Value { get; protected set; }
-            public PathNode<TV> NodeParent = null;
-
-            public override PathNode Parent { get { return NodeParent; } set { NodeParent = value as PathNode<TV>; } }
-
-            public override void Clear() {
-                base.Clear();
                 Value = default(TV);
             }
 
             public abstract void Set(TV pos, TV end);
-            public abstract int DistanceCost(TV other);
-            public abstract float GetTravelCost(PathNode<TV> center, TV start, TV end);
+            public abstract float EndDistanceCost(TV other);
+            public virtual float GetTravelCost(PathNode<TV> neighbor) {
+                return 0;
+            }
         }
     }
 
     public abstract class Pathfinder<T, TV> : AbstractPathfinder where T : AbstractPathfinder.PathNode<TV> {
         
         private const int MaxPathCheck = 5500;
-        private const float Accuracy = 0.0001f;
-        
-        protected List<T> OpenSet = new List<T>();
-        protected List<T> AllNodes = new List<T>();
+
+        protected FastPriorityQueue<T> OpenSet = new FastPriorityQueue<T>(MaxPathCheck);
+        protected Dictionary<TV,T> KeyedDict = new Dictionary<TV, T>(MaxPathCheck);
         protected HashSet<TV> ClosedSet = new HashSet<TV>();
         
         public TV Start;
         public TV End;
 
-        private WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(MaxPathCheck);
+        protected WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(MaxPathCheck);
 
-        protected abstract T AddNode(TV key);
+        protected abstract T CreateNode(TV key);
         protected abstract bool CheckWalkable(TV pos, TV neighborPos);
         protected abstract IList<TV> GetSurrounding(PathNode<TV> centerNode);
 
-        public abstract List<TV> GetPathTrace(T endNode);
+        public abstract List<TV> GetPathTrace(T endNode, List<TV> existing);
 
         public virtual T FindPath() {
-            var startNode = AddNode(Start);
+            var startNode = CreateNode(Start);
             startNode.StartCost = 0;
-            OpenSet.Add(startNode);
+            OpenSet.Enqueue(startNode, startNode.TotalCost);
             _loopLimiter.Reset();
             while (_loopLimiter.Advance()) {
                 if (OpenSet.Count == 0) {
@@ -100,7 +98,7 @@ namespace PixelComrades {
                     return centerNode;
                 }
                 ClosedSet.Add(centerNode.Value);
-                OpenSet.Remove(centerNode);
+                //OpenSet.Remove(centerNode);
                 var surrounding = GetSurrounding(centerNode);
                 for (int i = 0; i < surrounding.Count; i++) {
                     var neighborPos = surrounding[i];
@@ -113,8 +111,7 @@ namespace PixelComrades {
                     var neighbor = Get(neighborPos);
                     if (neighbor == null) {
                         if (CheckWalkable(centerNode.Value, neighborPos)) {
-                            neighbor = AddNode(neighborPos);
-                            OpenSet.Add(neighbor);
+                            neighbor = CreateNode(neighborPos);
                         }
                         else {
                             ClosedSet.Add(neighborPos);
@@ -130,11 +127,16 @@ namespace PixelComrades {
                     if (neighbor == null) {
                         continue;
                     }
-                    var newStartCost = centerNode.StartCost + neighbor.DistanceCost(centerNode.Value);
-                    newStartCost += neighbor.GetTravelCost(centerNode, Start, End);
+                    var newStartCost = centerNode.StartCost + neighbor.GetTravelCost(centerNode);
                     if (newStartCost < neighbor.StartCost) {
                         neighbor.Parent = centerNode;
                         neighbor.StartCost = newStartCost;
+                        if (OpenSet.Contains(neighbor)) {
+                            OpenSet.UpdatePriority(neighbor, neighbor.TotalCost);
+                        }
+                        else {
+                            OpenSet.Enqueue(neighbor, neighbor.TotalCost);
+                        }
                     }
                 }
             }
@@ -143,42 +145,44 @@ namespace PixelComrades {
         
         public override void Clear() {
             OpenSet.Clear();
-            AllNodes.Clear();
             ClosedSet.Clear();
+            KeyedDict.Clear();
         }
 
         protected virtual T GetLowest() {
-            var lowest = OpenSet[0];
-            for (int i = 1; i < OpenSet.Count; i++) {
-                if (OpenSet[i].TotalCost < lowest.TotalCost) {
-                    lowest = OpenSet[i];
-                    continue;
-                }
-                var totalDiff = Math.Abs(OpenSet[i].TotalCost - lowest.TotalCost);
-                if (totalDiff > Accuracy) {
-                    continue;
-                }
-                var endDiff = Math.Abs(OpenSet[i].EndCost - lowest.EndCost);
-                if (endDiff > Accuracy) {
-                    if (OpenSet[i].EndCost < lowest.EndCost) {
-                        lowest = OpenSet[i];
-                    }
-                    continue;
-                }
-                if (OpenSet[i].GetTravelCost(null, Start, End) < lowest.GetTravelCost(null, Start, End)) {
-                    lowest = OpenSet[i];
-                }
-            }
-            return lowest;
+            return OpenSet.Dequeue();
+            //var lowest = OpenSet[0];
+            //for (int i = 1; i < OpenSet.Count; i++) {
+            //    if (OpenSet[i].TotalCost < lowest.TotalCost) {
+            //        lowest = OpenSet[i];
+            //        continue;
+            //    }
+            //    var totalDiff = Math.Abs(OpenSet[i].TotalCost - lowest.TotalCost);
+            //    if (totalDiff > Accuracy) {
+            //        continue;
+            //    }
+            //    var endDiff = Math.Abs(OpenSet[i].EndCost - lowest.EndCost);
+            //    if (endDiff > Accuracy) {
+            //        if (OpenSet[i].EndCost < lowest.EndCost) {
+            //            lowest = OpenSet[i];
+            //        }
+            //        continue;
+            //    }
+            //    if (OpenSet[i].GetTravelCost(null, Start, End) < lowest.GetTravelCost(null, Start, End)) {
+            //        lowest = OpenSet[i];
+            //    }
+            //}
+            //return lowest;
         }
 
-        private T Get(TV pos) {
-            for (int i = 0; i < OpenSet.Count; i++) {
-                if (OpenSet[i].Value.Equals(pos)) {
-                    return OpenSet[i];
-                }
-            }
-            return null;
+        protected T Get(TV pos) {
+            //for (int i = 0; i < OpenSet.Count; i++) {
+            //    if (OpenSet[i].Value.Equals(pos)) {
+            //        return OpenSet[i];
+            //    }
+            //}
+            //return null;
+            return KeyedDict.TryGetValue(pos, out var node) ? node : null;
         }
 
         protected static float CrossMagnitude(Vector2 a, Vector2 b) {
@@ -188,7 +192,5 @@ namespace PixelComrades {
         protected static float CrossMagnitude(Point3 a, Point3 b) {
             return a.x * b.y - b.x * a.y;
         }
-
-        
     }
 }

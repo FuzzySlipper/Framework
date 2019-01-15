@@ -13,7 +13,6 @@ namespace PixelComrades {
         public ActionImpacts(IList<IActionImpact> values) : base(values) {}
 
         public void ProcessAction(CollisionEvent collisionEvent, ActionStateEvent stateEvent, Entity target) {
-            
             var owner = this.GetEntity();
             for (int i = 0; i < Count; i++) {
                 this[i].ProcessAction(collisionEvent, stateEvent, owner, target);

@@ -15,7 +15,7 @@ namespace PixelComrades {
             }
             if (Game.DiceRollSuccess(_chance)) {
                 target.Post(new DeathEvent(owner, target));
-                target.Post(new FloatingTextMessage("Lethal Hit!", Color.red, target));
+                target.Post(new CombatStatusUpdate("Lethal Hit!", Color.red));
             }
         }
     }

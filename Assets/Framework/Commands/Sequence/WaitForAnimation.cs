@@ -20,7 +20,7 @@ namespace PixelComrades {
         }
 
         public void Start(Entity entity) {
-            var anim = entity.Get<AnimatorData>();
+            var anim = entity.Find<AnimatorData>();
             if (anim != null) {
                 var target = anim.GetEntity();
                 target.AddObserver(this);

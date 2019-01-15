@@ -16,7 +16,7 @@ namespace PixelComrades {
             var dir = target.GetPosition() - sourcePos;
             var ray = new Ray(sourcePos, dir.normalized);
             var rayLimit = Physics.RaycastNonAlloc(ray, _rayHits, dir.magnitude, UnitCheckMask);
-            return HasIntersections(rayLimit, source.Id, target.Id);
+            return CanSeeTarget(rayLimit, source, target);
         }
 
         public bool CanSee(Entity source, Vector3 target) {
@@ -24,7 +24,7 @@ namespace PixelComrades {
             var dir = target - sourcePos;
             var ray = new Ray(sourcePos, dir.normalized);
             var rayLimit = Physics.RaycastNonAlloc(ray, _rayHits, dir.magnitude, CollisionCheck);
-            return HasIntersections(rayLimit, source.Id, -1);
+            return CanSeeTarget(rayLimit, source, null);
         }
 
         public bool CanSeeOrHear(Entity source, Entity target, out bool canHear) {
@@ -39,14 +39,14 @@ namespace PixelComrades {
                     canHear = false;
                     continue;
                 }
-                var entId = MonoBehaviourToEntity.GetEntityId(_rayHits[i].collider);
-                if (entId < 0) {
+                var entity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                if (entity == null) {
                     continue;
                 }
-                if (entId == source.Id) {
+                if (entity == source) {
                     continue;
                 }
-                if (entId == target.Id) {
+                if (entity == target) {
                     return true;
                 }
             }
@@ -65,14 +65,14 @@ namespace PixelComrades {
                 if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment)) {
                     return null;
                 }
-                var entId = MonoBehaviourToEntity.GetEntityId(_rayHits[i].collider);
-                if (entId < 0) {
+                var entity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                if (entity == null) {
                     continue;
                 }
-                if (entId == source.Id) {
+                if (entity == source) {
                     continue;
                 }
-                var target = EntityController.GetEntity(entId);
+                var target = EntityController.GetEntity(entity);
                 if (targeting == TargetType.Enemy && !World.Get<FactionSystem>().AreEnemies(source, target)) {
                     continue;
                 }
@@ -107,27 +107,28 @@ namespace PixelComrades {
         //    return null;
         //}
 
-        private bool HasIntersections(int rayLimit, int sourceId, int targetId) {
+        private bool CanSeeTarget(int rayLimit, Entity source, Entity target) {
             _rayHits.SortByDistanceAsc(rayLimit);
             for (int i = 0; i < rayLimit; i++) {
                 if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment)) {
                     return false;
                 }
-                var entId = MonoBehaviourToEntity.GetEntityId(_rayHits[i].collider);
-                if (entId < 0) {
+                var colliderEntity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                if (colliderEntity == null || colliderEntity == source) {
                     continue;
                 }
-                if (entId == sourceId) {
-                    continue;
+                if (colliderEntity == target) {
+                    return true;
                 }
-                return entId == targetId;
+                if (World.Get<FactionSystem>().AreEnemies(colliderEntity, source)) {
+                    return false;
+                }
             }
             return true;
         }
 
         public bool IsTargetVisible(Entity owner, Vector3 source, Entity unit, Vector3 forward, float maxVision) {
-            var tr = owner.Get<TransformComponent>().Tr;
-            var targetTr = unit.Get<TransformComponent>().Tr;
+            var targetTr = unit.Tr;
             var targetDir = (targetTr.position - source);
             var targetDistance = targetDir.sqrMagnitude;
             var maxSquared = maxVision * maxVision;

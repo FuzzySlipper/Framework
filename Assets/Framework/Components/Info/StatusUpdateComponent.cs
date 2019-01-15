@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [Priority(Priority.Highest)]
     public class StatusUpdateComponent : IComponent, IReceive<StatusUpdate> {
 
         public string Status;
@@ -29,6 +30,21 @@ namespace PixelComrades {
         }
 
         public StatusUpdate(string update) {
+            Update = update;
+            Color = Color.green;
+        }
+    }
+
+    public struct CombatStatusUpdate : IEntityMessage {
+        public string Update;
+        public Color Color;
+
+        public CombatStatusUpdate(string update, Color color) {
+            Update = update;
+            Color = color;
+        }
+
+        public CombatStatusUpdate(string update) {
             Update = update;
             Color = Color.green;
         }

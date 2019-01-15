@@ -12,6 +12,7 @@ namespace PixelComrades {
         public VitalStat(string label, string id, float baseValue) : base(label, id, baseValue) {}
 
         private float _current;
+        private bool _canRecover = true;
 
         public float Current {
             get { return _current; }
@@ -28,19 +29,32 @@ namespace PixelComrades {
         public float CurrentPercent { get { return Current > 0 ? Current / Value : 0; } }
 
         public bool IsMax { get { return Current >= Value; } }
+        public bool CanRecover => _canRecover;
 
         private BaseStat _recover = new BaseStat("RecoverRate", RecoverMinimum);
-
         public BaseStat Recovery { get { return _recover; } }
 
         public void DoRecover(float mod = 1) {
             if (_current < Value) {
-                Current += (_recover.Value) * mod;
+                _current += _recover?.Value * mod ?? mod;
+                StatChanged();
             }
         }
 
-        public void SetOverloadMulti(float overload) {
-            _current = Value * overload;
+        public void ClearRecovery(bool canRecover) {
+            _recover = null;
+            _canRecover = canRecover;
+        }
+
+        public void SetCurrentFromStat(BaseStat stat) {
+            Current = stat.Value;
+        }
+
+        public void AddValueMultiToCurrent(float overload) {
+            if (!_canRecover) {
+                return;
+            }
+            _current += Value * overload;
             StatChanged();
         }
 
@@ -54,7 +68,6 @@ namespace PixelComrades {
 
         public override string ToString() {
             return string.Format("{0}: {1}/{2}", Label, Current, Value);
-
         }
 
         public override string ToLabelString() {
@@ -63,6 +76,9 @@ namespace PixelComrades {
         }
 
         public void SetMax() {
+            if (!_canRecover) {
+                return;
+            }
             Current = Value;
         }
 

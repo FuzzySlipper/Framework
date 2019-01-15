@@ -4,23 +4,21 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public abstract class PlayerController : MonoBehaviour, ISystemUpdate {
-
         
         [SerializeField] private Transform _actorPivot = null;
-        
 
         private IntValueHolder _currency = new IntValueHolder();
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
         private bool _isMoving = false;
-        protected Entity ControllerEntity;
 
+        public Entity Entity { get; protected set; }
         public ValueHolder<bool> MoveEnabledHolder { get { return _moveEnabled; } }
         public Transform Tr { get; private set; }
         public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
         public Transform ActorPivot { get { return _actorPivot; } }
         public virtual bool Unscaled { get { return false; } }
         public virtual bool Slowed { get; protected set; }
-        public bool CanMove {
+        public virtual bool CanMove {
             get {
                 return _moveEnabled.Value;
             }
@@ -31,11 +29,16 @@ namespace PixelComrades {
             Tr = transform;
             Player.Currency = _currency;
             MessageKit.addObserver(Messages.LoadingFinished, EnablePlayer);
-            ControllerEntity = Entity.New("PlayerController");
-            ControllerEntity.Add(new LabelComponent("PlayerController"));
-            ControllerEntity.Add(new TransformComponent(Tr));
+            Entity = Entity.New("PlayerController");
+            Entity.Add(new LabelComponent("PlayerController"));
+            Entity.Tr = Tr;
         }
-        public virtual void OnSystemUpdate(float dt) {}
+
+        public virtual void OnSystemUpdate(float dt) {
+            if (!Game.GameActive) {
+                return;
+            }
+        }
 
         public virtual void NewGame() {
             _currency.ChangeValue(100);

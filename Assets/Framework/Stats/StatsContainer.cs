@@ -114,6 +114,9 @@ namespace PixelComrades {
             else if (_vitals.TryGetValue(GameData.Vitals.GetID(msg.TargetVital), out vital)) {
                 vital.Current -= msg.Amount;
             }
+            if (msg.Amount > 0) {
+                Owner.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.red));
+            }
         }
 
         public void Handle(HealEvent msg) {
@@ -122,6 +125,9 @@ namespace PixelComrades {
             }
             else if (_vitals.TryGetValue(GameData.Vitals.GetID(msg.TargetVital), out vital)) {
                 vital.Current += msg.Amount;
+            }
+            if (msg.Amount > 0) {
+                Owner.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.green));
             }
         }
 

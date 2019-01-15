@@ -45,7 +45,7 @@ namespace PixelComrades {
         }
 
         public static float Get(string id, float defaultValue) {
-            if (_dictString.Count == 0) {
+            if (_dictFloat.Count == 0) {
                 Init();
             }
             if (_dictFloat.TryGetValue(id, out var value)) {
@@ -54,11 +54,12 @@ namespace PixelComrades {
             if (_dictInt.TryGetValue(id, out var intValue)) {
                 return (float) intValue;
             }
+            Debug.Log(id);
             return defaultValue;
         }
 
         public static int Get(string id, int defaultValue) {
-            if (_dictString.Count == 0) {
+            if (_dictInt.Count == 0) {
                 Init();
             }
             if (_dictInt.TryGetValue(id, out var intValue)) {
@@ -67,30 +68,31 @@ namespace PixelComrades {
             if (_dictFloat.TryGetValue(id, out var fValue)) {
                 return (int) fValue;
             }
+            Debug.Log(id);
             return defaultValue;
         }
 
         public static bool Get(string id, bool defaultValue) {
-            if (_dictString.Count == 0) {
+            if (_dictBool.Count == 0) {
                 Init();
             }
             return _dictBool.TryGetValue(id, out var value) ? value : defaultValue;
         }
 
         public static void Set(string id, string value) {
-            _dictString.SafeAdd(id, value);
+            _dictString.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, int value) {
-            _dictInt.SafeAdd(id, value);
+            _dictInt.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, float value) {
-            _dictFloat.SafeAdd(id, value);
+            _dictFloat.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, bool value) {
-            _dictBool.SafeAdd(id, value);
+            _dictBool.AddOrUpdate(id, value);
         }
 
         public static float GetDefenseAmount(float damage, float stat) {
@@ -161,6 +163,9 @@ namespace PixelComrades {
 
             public static void Reset() {
                 for (int i = 0; i < _cached.Count; i++) {
+                    if (_cached[i] == null) {
+                        continue;
+                    }
                     _cached[i].ValueSet = false;
                 }
             }
@@ -243,22 +248,22 @@ namespace PixelComrades {
                 }
             }
 
-            private const float _tolerance = 0.0001f;
+            private const float Tolerance = 0.0001f;
 
             public static implicit operator float(CachedFloat cached) {
                 return cached.Value;
             }
 
             public static bool operator ==(CachedFloat cached, float value) {
-                return cached != null && Math.Abs(cached.Value - value) < _tolerance;
+                return cached != null && Math.Abs(cached.Value - value) < Tolerance;
             }
 
             public static bool operator !=(CachedFloat cached, float value) {
-                return cached != null && Math.Abs(cached.Value - value) > _tolerance;
+                return cached != null && Math.Abs(cached.Value - value) > Tolerance;
             }
 
             protected bool Equals(CachedFloat other) {
-                return other != null && Math.Abs(Value - other.Value) < _tolerance;
+                return other != null && Math.Abs(Value - other.Value) < Tolerance;
             }
 
             public override bool Equals(object obj) {

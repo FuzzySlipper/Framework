@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine.UI;
 using Random = System.Random;
 #if UNITY_EDITOR
@@ -84,6 +85,11 @@ namespace PixelComrades {
     }
 
     public static class RandomExtensions {
+
+        public static float NextFloat(this Random random) {
+            return random.NextFloat(0, 1);
+        }
+
         public static float NextFloat(this Random random, double minValue, double maxValue) {
             return (float) (random.NextDouble() * (maxValue - minValue) + minValue);
         }
@@ -578,7 +584,7 @@ namespace PixelComrades {
             return true;
         }
 
-        public static void SafeAdd<T, TV>(this Dictionary<T, TV> dict, T key, TV val) {
+        public static void AddOrUpdate<T, TV>(this Dictionary<T, TV> dict, T key, TV val) {
             if (dict.ContainsKey(key)) {
                 dict[key] = val;
             }
@@ -840,7 +846,17 @@ namespace PixelComrades {
         }
 
         private static WhileLoopLimiter _deleteLimiter = new WhileLoopLimiter(15000);
+        
         public static void DeleteChildren(this Transform tr) {
+//#if UNITY_EDITOR
+//            if (Application.isPlaying) {
+//                TimeManager.StartUnscaled(SlowDelete(tr));
+//                return;
+//            }
+//#else
+//            TimeManager.StartUnscaled(SlowDelete(tr));
+//            return;
+//#endif
             int i = 0;
             _deleteLimiter.Reset();
             while (tr.childCount > 0) {
@@ -853,25 +869,52 @@ namespace PixelComrades {
                     break;
                 }
 #if UNITY_EDITOR
-                if (Application.isPlaying) {
-                    UnityEngine.Object.Destroy(child.gameObject);
-                }
-                else {
-                    UnityEngine.Object.DestroyImmediate(child.gameObject);
-                }
-#else
-            UnityEngine.Object.Destroy(child.gameObject);
+            UnityEngine.Object.DestroyImmediate(child.gameObject);
 #endif
             }
         }
 
+        private static IEnumerator SlowDelete(Transform tr) {
+            int i = 0;
+            var breakLimit = 0;
+            _deleteLimiter.Reset();
+            while (tr.childCount > 0) {
+                if (tr.childCount >= i) {
+                    i = 0;
+                }
+                var child = tr.GetChild(i);
+                i++;
+                breakLimit++;
+                if (!_deleteLimiter.Advance()) {
+                    break;
+                }
+                UnityEngine.Object.Destroy(child.gameObject);
+                if (breakLimit > 200) {
+                    breakLimit = 0;
+                    yield return null;
+                }
+            }
+
+        }
+
         public static void DespawnChildren(this Transform tr) {
-            foreach (Transform child in tr) {
+            _deleteLimiter.Reset();
+            while (tr.childCount > 0) {
+                var child = tr.GetChild(0);
+                if (child.SafeIsUnityNull() || child == null) {
+                    continue;
+                }
+                if (!_deleteLimiter.Advance()) {
+                    break;
+                }
                 ItemPool.Despawn(child.gameObject);
             }
         }
 
         public static Quaternion GetLookAtRotation(this Transform me, Transform target) {
+            if (me == null || target == null) {
+                return Quaternion.identity;
+            }
             var targetPos = target.position;
             targetPos.y = me.position.y;
             Vector3 relativePos = targetPos - me.position;
@@ -999,6 +1042,10 @@ namespace PixelComrades {
             return new Point3(v3.x, 0, v3.z);
         }
 
+        public static float AbsMax(this Vector3 v3) {
+            return Mathf.Max(Mathf.Abs(v3.y), Mathf.Abs(v3.x), Mathf.Abs(v3.z));
+        }
+
         public static float ManualDot(Vector3 a, Vector3 b) {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
@@ -1086,6 +1133,12 @@ namespace PixelComrades {
             return new Point3(
                 (int) Math.Round((double) position.x / gridSize),
                 (int) Math.Round((double) position.y / gridSize),
+                (int) Math.Round((double) position.z / gridSize));
+        }
+
+        public static Point3 WorldToGenericGridYZero(this Vector3 position, float gridSize) {
+            return new Point3(
+                (int) Math.Round((double) position.x / gridSize), 0,
                 (int) Math.Round((double) position.z / gridSize));
         }
 
@@ -1223,84 +1276,58 @@ namespace PixelComrades {
             Directions.Forward, Directions.Right, Directions.Back, Directions.Left, Directions.Up, Directions.Down,
         };
 
+        public static DirectionsEight[] ShuffledDiagonalArray = new DirectionsEight[] {
+            DirectionsEight.Front, DirectionsEight.FrontRight, DirectionsEight.Right,DirectionsEight.RearRight,
+            DirectionsEight.Rear, DirectionsEight.RearLeft, DirectionsEight.Left, DirectionsEight.FrontLeft
+        };
+
         public static Directions[] ShuffledArray2D = new Directions[] {
             Directions.Forward, Directions.Right, Directions.Back, Directions.Left
         };
 
+        private static Directions[][] _diagonalCheckDirs = new Directions[4][] {
+            new[] {Directions.Left, Directions.Forward},
+            new[] {Directions.Right, Directions.Forward},
+            new[] {Directions.Right, Directions.Back},
+            new[] {Directions.Left, Directions.Back},
+        };
+
         public static Directions[] GetDiagonalCheckDirs(Directions dir) {
-            switch (dir) {
-                default:
-                case Directions.Forward:
-                    return new Directions[] {
-                        Directions.Left, Directions.Forward
-                    };
-                case Directions.Right:
-                    return new Directions[] {
-                        Directions.Right, Directions.Forward
-                    };
-                case Directions.Back:
-                    return new Directions[] {
-                        Directions.Right, Directions.Back
-                    };
-                case Directions.Left:
-                    return new Directions[] {
-                        Directions.Left, Directions.Back
-                    };
-            }
+            return _diagonalCheckDirs[(int) dir];
         }
+
+        private static Directions[] _leftRight = new Directions[] {
+            Directions.Left, Directions.Right
+        };
+        private static Directions[] _forwardBack = new Directions[] {
+            Directions.Forward, Directions.Back
+        };
 
         public static Directions[] Adjacent(this Directions dir) {
             switch (dir) {
                 default:
                 case Directions.Forward:
                 case Directions.Back:
-                    return new Directions[] {
-                        Directions.Left, Directions.Right
-                    };
+                    return _leftRight;
                 case Directions.Right:
                 case Directions.Left:
-                    return new Directions[] {
-                        Directions.Forward, Directions.Back
-                    };
+                    return _forwardBack;
             }
         }
 
+        private static DirectionsEight[][] _adjacent = new DirectionsEight[8][] {
+            new [] {DirectionsEight.FrontLeft, DirectionsEight.FrontRight},
+            new [] {DirectionsEight.Front, DirectionsEight.Right},
+            new [] {DirectionsEight.FrontRight, DirectionsEight.RearRight},
+            new [] {DirectionsEight.Right, DirectionsEight.Rear},
+            new [] {DirectionsEight.RearRight, DirectionsEight.RearLeft},
+            new [] {DirectionsEight.Rear, DirectionsEight.Left},
+            new [] {DirectionsEight.FrontLeft, DirectionsEight.RearLeft},
+            new [] {DirectionsEight.Front, DirectionsEight.Left},
+        };
+
         public static DirectionsEight[] Adjacent(this DirectionsEight dir) {
-            switch (dir) {
-                default:
-                case DirectionsEight.Front:
-                    return new DirectionsEight[] {
-                        DirectionsEight.FrontLeft, DirectionsEight.FrontRight,
-                    };
-                case DirectionsEight.FrontRight:
-                    return new DirectionsEight[] {
-                        DirectionsEight.Front, DirectionsEight.Right,
-                    };
-                case DirectionsEight.Right:
-                    return new DirectionsEight[] {
-                        DirectionsEight.FrontRight, DirectionsEight.RearRight,
-                    };
-                case DirectionsEight.RearRight:
-                    return new DirectionsEight[] {
-                        DirectionsEight.Right, DirectionsEight.Rear,
-                    };
-                case DirectionsEight.Rear:
-                    return new DirectionsEight[] {
-                        DirectionsEight.RearRight, DirectionsEight.RearLeft,
-                    };
-                case DirectionsEight.RearLeft:
-                    return new DirectionsEight[] {
-                        DirectionsEight.Rear, DirectionsEight.Left,
-                    };
-                case DirectionsEight.Left:
-                    return new DirectionsEight[] {
-                        DirectionsEight.FrontLeft, DirectionsEight.RearLeft,
-                    };
-                case DirectionsEight.FrontLeft:
-                    return new DirectionsEight[] {
-                        DirectionsEight.Front, DirectionsEight.Left,
-                    };
-            }
+            return _adjacent[(int) dir];
         }
 
         public static bool IsAdjacent(this DirectionsEight dir, DirectionsEight compare) {
@@ -1502,6 +1529,24 @@ namespace PixelComrades {
             return Vector3.forward;
         }
 
+        public static Vector3 ToV3XY(this Directions dir) {
+            switch (dir) {
+                case Directions.Forward:
+                    return Vector2.up;
+                case Directions.Right:
+                    return Vector2.right;
+                case Directions.Back:
+                    return Vector2.down;
+                case Directions.Left:
+                    return Vector2.left;
+                case Directions.Up:
+                    return Vector2.up;
+                case Directions.Down:
+                    return Vector2.down;
+            }
+            return Vector3.forward;
+        }
+
         public static float ToSimpleAngle(this Directions dir) {
             switch (dir) {
                 case Directions.Forward:
@@ -1563,6 +1608,14 @@ namespace PixelComrades {
                 }
             }
             return DirectionsEight.Front;
+        }
+
+        public static int RotateRight(this Directions d, int rotation) {
+            return MathEx.WrapAround(((int) d - rotation), Length2D);
+        }
+
+        public static int RotateLeft(this Directions d, int rotation) {
+            return MathEx.WrapAround(((int) d + rotation), Length2D);
         }
 
         public static int Length = 6;
@@ -1724,7 +1777,38 @@ namespace PixelComrades {
     }
 
     public static class RaycastHitExtensions {
+
+        public class RaycastSorter : Comparer<RaycastHit> {
+
+            private bool _descending;
+
+            public RaycastSorter(bool descending) {
+                _descending = descending;
+            }
+
+            public override int Compare(RaycastHit x, RaycastHit y) {
+                if (x.collider == null && y.collider == null) {
+                    return 0;
+                }
+                if (x.collider == null) {
+                    return 1;
+                }
+                if (y.collider == null) {
+                    return -1;
+                }
+                if (_descending) {
+                    return -1 * x.distance.CompareTo(y.distance);
+                }
+                return x.distance.CompareTo(y.distance);
+            }
+        }
+
+        private static RaycastSorter _descending = new RaycastSorter(true);
+        private static RaycastSorter _ascending = new RaycastSorter(false);
+
         public static void SortByDistanceDesc(this RaycastHit[] rayHits, int hitLimit) {
+            //The lazy bubble sort is actually faster
+            //System.Array.Sort(rayHits, _descending);
             for (int write = 0; write < hitLimit; write++) {
                 for (int sort = 0; sort < hitLimit - 1; sort++) {
                     if (rayHits[sort].distance < rayHits[sort + 1].distance) {
@@ -1737,6 +1821,7 @@ namespace PixelComrades {
         }
 
         public static void SortByDistanceAsc(this RaycastHit[] rayHits, int hitLimit) {
+            //System.Array.Sort(rayHits, _ascending);
             for (int write = 0; write < hitLimit; write++) {
                 for (int sort = 0; sort < hitLimit - 1; sort++) {
                     if (rayHits[sort].distance > rayHits[sort + 1].distance) {
@@ -2022,6 +2107,10 @@ namespace PixelComrades {
             return val > max ? min : val;
         }
 
+        public static int WrapAround(int input, int max) {
+            return (input % max + max) % max;
+        }
+
 
         public static double RoundDown(double value) {
             value = System.Math.Floor(value);
@@ -2171,6 +2260,15 @@ namespace PixelComrades {
                 }
             }
             return false;
+        }
+
+        public static void Fill<T>(this T[] array, T[] values) {
+            if (array.Length < values.Length) {
+                System.Array.Resize(ref array, values.Length);
+            }
+            for (int i = 0; i < values.Length; i++) {
+                array[i] = values[i];
+            }
         }
 
         public static bool Contains<T>(this IList<T> array1, T item) {
@@ -2611,11 +2709,11 @@ namespace PixelComrades {
         }
 
         public static int TryParse(string data, int defaultValue) {
-            int value;
-            if (int.TryParse(data, out value)) {
-                return value;
-            }
-            return defaultValue;
+            return int.TryParse(data, out var value) ? value : defaultValue;
+        }
+
+        public static float TryParse(string data, float defaultValue) {
+            return float.TryParse(data, out var value) ? value : defaultValue;
         }
 
         public static T TryParseEnum<T>(string data, T defaultValue) {
@@ -2736,6 +2834,72 @@ namespace PixelComrades {
                     return StaticTextDatabase.RandomPlayerFemaleName();
             }
             return Game.CoinFlip() ? StaticTextDatabase.RandomPlayerMaleName() : StaticTextDatabase.RandomPlayerFemaleName();
+        }
+    }
+
+    public static class GridExtension {
+        public static Vector3 GridPositionPlace(this Point3 gridPos) {
+            RaycastHit hit;
+            var ray = new Ray(gridPos.CellToWorldV3(), Vector3.down);
+            if (Physics.Raycast(ray, out hit, Game.MapCellSize * 5, LayerMasks.Floor)) {
+                return hit.point;
+            }
+            return ray.origin;
+        }
+
+
+        public static Vector3 CellToWorldV3(this Point3 p) {
+            return Game.GridToWorld(p);
+        }
+
+        public static Point3 ToCellGridP3(this Vector3 p) {
+            return Game.WorldToGrid(p);
+        }
+
+        public static Point3 ToCellGridP3ZeroY(this Vector3 p) {
+            return Game.WorldToGrid(new Vector3(p.x, 0, p.z));
+        }
+        /*
+        [16][15][14][13][12]
+        [17][ 4][ 3][ 2][11]
+        [18][ 5][ 0][ 1][10]
+        [19][ 6][ 7][ 8][ 9]
+        [20][21][22][23][24]
+        */
+        public static Vector3 GridSpiral(int n) {
+            float k = Mathf.Ceil((Mathf.Sqrt(n) - 1.0f) / 2.0f);
+            float t = 2.0f * k;
+            float m = (t + 1f) * (t + 1f);
+            if (n >= m - t) {
+                return new Vector3(k -(m - n), 0f, -k);
+            }
+            m = m - t;
+            if (n >= m - t) {
+                return new Vector3(-k, 0f, -k + (m - n));
+            }
+            m = m - t;
+            if (n >= m - t) {
+                return new Vector3(-k + (m - n), 0f, k);
+            }
+            return new Vector3(k, 0f, k -(m - n - t));
+        }
+
+        public static Point3 GridSpiralP3(int n) {
+            float k = Mathf.Ceil((Mathf.Sqrt(n) - 1.0f) / 2.0f);
+            float t = 2.0f * k;
+            float m = (t + 1f) * (t + 1f);
+            if (n >= m - t) {
+                return new Point3(k - (m - n), 0f, -k);
+            }
+            m = m - t;
+            if (n >= m - t) {
+                return new Point3(-k, 0f, -k + (m - n));
+            }
+            m = m - t;
+            if (n >= m - t) {
+                return new Point3(-k + (m - n), 0f, k);
+            }
+            return new Point3(k, 0f, k - (m - n - t));
         }
     }
 

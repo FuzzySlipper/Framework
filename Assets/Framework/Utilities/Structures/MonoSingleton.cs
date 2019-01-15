@@ -4,6 +4,7 @@ using UnityEngine;
 public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour {
     private static T _main;
     private static object _lock = new object();
+    protected static bool IsSingletonNull { get { return _main == null; } }
     public static T main {
         get {
             if (_main != null) {

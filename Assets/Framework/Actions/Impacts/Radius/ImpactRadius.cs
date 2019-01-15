@@ -16,7 +16,7 @@ namespace PixelComrades {
             if (arg.State == ActionStateEvents.Start) {
                 Triggered = false;
             }
-            else if (arg.State == ActionStateEvents.AppliedImpact && !Triggered) {
+            else if (arg.State == ActionStateEvents.Impact && !Triggered) {
                 Triggered = true;
                 World.Get<RadiusSystem>().HandleRadius(EntityController.GetEntity(arg.Origin), EntityController.GetEntity(arg.Focus), Radius);
             }

@@ -18,7 +18,7 @@ namespace PixelComrades {
             if (tr == null) {
                 return;
             }
-            _anchors.SafeAdd(root, tr);
+            _anchors.AddOrUpdate(root, tr);
         }
 
         public static RectTransform Get(this UIAnchor root) {

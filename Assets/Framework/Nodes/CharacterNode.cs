@@ -15,39 +15,30 @@ namespace PixelComrades {
         public CachedComponent<CommandsContainer> Commands = new CachedComponent<CommandsContainer>();
         public CachedComponent<EquipmentSlots> Slots = new CachedComponent<EquipmentSlots>();
 
-        public StatsContainer Stats { get { return Entity.Stats; } }
+        public StatsContainer Stats => Entity.Stats;
+        public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
-        public CharacterNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
-            Register(entity, list);
-        }
+        public virtual List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            Label, Dead, Modifiers, Status, Position, Faction, Commands, Slots
+        };
 
-        public CharacterNode(){}
-
-        public virtual void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
             Entity = entity;
-            Label.Set(entity, list);
-            Dead.Set(entity, list);
-            Modifiers.Set(entity, list);
-            Status.Set(entity, list);
-            Position.Set(entity, list);
-            Faction.Set(entity, list);
-            Commands.Set(entity, list);
-            Slots.Set(entity, list);
+            var components = GatherComponents;
+            for (int i = 0; i < components.Count; i++) {
+                components[i].Set(entity, list);
+            }
         }
 
         public VitalStat GetVital(int vital) {
             return Entity.Stats.GetVital(GameData.Vitals.GetID(vital));
         }
 
-        public virtual void Dispose() {
-            Label.Dispose();
-            Dead.Dispose();
-            Modifiers.Dispose();
-            Status.Dispose();
-            Position.Dispose();
-            Faction.Dispose();
-            Commands.Dispose();
-            Slots.Dispose();
+        public void Dispose() {
+            var components = GatherComponents;
+            for (int i = 0; i < components.Count; i++) {
+                components[i].Dispose();
+            }
         }
 
         public static System.Type[] GetTypes() {
@@ -60,12 +51,6 @@ namespace PixelComrades {
                 typeof(FactionComponent),
                 typeof(CommandsContainer),
             };
-        }
-    }
-
-    public static class CharacterNodeExtensions {
-        public static bool IsDead(this CharacterNode node) {
-            return node.Entity.Tags.Contain(EntityTags.IsDead);
         }
     }
 }

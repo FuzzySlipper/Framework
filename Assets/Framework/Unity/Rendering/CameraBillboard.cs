@@ -7,6 +7,8 @@ namespace PixelComrades {
         [SerializeField] private bool _backwards = false;
         [SerializeField] private BillboardMode _billboard = BillboardMode.NoYAxis;
 
+        public bool Backwards { get => _backwards; set => _backwards = value; }
+
         void Update() {
             _billboard.Apply(transform, _backwards);
             //var lookPos = transform.position + Player.Camera.transform.rotation * Vector3.forward;

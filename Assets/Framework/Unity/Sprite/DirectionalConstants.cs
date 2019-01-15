@@ -63,16 +63,16 @@ namespace PixelComrades {
                     return GetFacing(_dirRangesEight, spriteFacingAngle, margin, out inMargin);
                 case SpriteFacing.Fourway:
                 default:
-                    return GetFacing(_dirRangesFour, spriteFacingAngle, margin, out inMargin);
+                    return GetFacing(DirRangesFour, spriteFacingAngle, margin, out inMargin);
             }
         }
 
-        private static DirectionsEight GetFacing(DirRange[] dirRangesEight, float spriteFacingAngle, float margin, out bool inMargin) {
+        private static DirectionsEight GetFacing(DirRange[] dirRanges, float spriteFacingAngle, float margin, out bool inMargin) {
             inMargin = false;
-            for (int i = 0; i < dirRangesEight.Length; i++) {
-                if (dirRangesEight[i].IsInRange(spriteFacingAngle)) {
-                    inMargin = dirRangesEight[i].IsInMargin(margin, spriteFacingAngle);
-                    return dirRangesEight[i].Dir;
+            for (int i = 0; i < dirRanges.Length; i++) {
+                if (dirRanges[i].IsInRange(spriteFacingAngle)) {
+                    inMargin = dirRanges[i].IsInMargin(margin, spriteFacingAngle);
+                    return dirRanges[i].Dir;
                 }
             }
             return DirectionsEight.Front;
@@ -91,7 +91,7 @@ namespace PixelComrades {
             //new DirRange(DirectionsEight.Bottom, -999, 0),
         };
 
-        private static DirRange[] _dirRangesFour = new DirRange[] {
+        public static DirRange[] DirRangesFour = new DirRange[] {
             new DirRange(DirectionsEight.Front, -FourwayForwardLimit, FourwayForwardLimit),
             new DirRange(DirectionsEight.Right, FourwayForwardLimit, FourwayRearLimit),
             new DirRange(DirectionsEight.Left, -FourwayRearLimit, -FourwayForwardLimit),
@@ -193,7 +193,7 @@ namespace PixelComrades {
             camera.transform.position += new Vector3(0, heightOffset, 0);
         }
 
-        private class DirRange : FloatRange {
+        public class DirRange : FloatRange {
             public DirectionsEight Dir;
 
             public DirRange(DirectionsEight dir, float min, float max) {
@@ -203,7 +203,7 @@ namespace PixelComrades {
             }
         }
 
-        private class RearDirRange : DirRange {
+        public class RearDirRange : DirRange {
             public RearDirRange(float min, float max) : base(DirectionsEight.Rear, min, max) {
                 Min = min;
                 Max = max;

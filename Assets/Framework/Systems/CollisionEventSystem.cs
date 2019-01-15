@@ -20,9 +20,14 @@ namespace PixelComrades {
                 if (msg.Hit <= 0) {
                     continue;
                 }
-                msg.Target.Post(new ActionStateEvent(msg.Origin.Id, msg.Target.Id, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Collision));
-                var actionStateEvent = new ActionStateEvent(msg.Origin.Id, msg.Target.Id, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.AppliedImpact);
-                msg.Origin.Find<ActionImpacts>(c => c.ProcessAction(msg, actionStateEvent, msg.Target));
+                var actionStateEvent = new ActionStateEvent(msg.Origin, msg.Target, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Impact);
+                var impacts = msg.Origin.Find<ActionImpacts>();
+                if (impacts == null) {
+                    Debug.LogFormat("{0} had no impacts", msg.Origin.Name);
+                }
+                else {
+                    impacts.ProcessAction(msg, actionStateEvent, msg.Target);
+                }
                 msg.Origin.Post(actionStateEvent);
             }
         }

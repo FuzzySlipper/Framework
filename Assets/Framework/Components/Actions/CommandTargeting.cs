@@ -92,7 +92,7 @@ namespace PixelComrades {
     }
 
     public static class CommandTargetingExtensions {
-        public static bool SatisfiesCondition(this CommandTargeting targeting, CommandTarget target) {
+        public static bool SatisfiesCondition(this CommandTargeting targeting, CommandTarget target, bool postUpdates = true) {
             if (targeting.Criteria == TargetType.Any && targeting.Range <= 0) {
                 return true;
             }
@@ -103,37 +103,49 @@ namespace PixelComrades {
             switch (targeting.Criteria) {
                 case TargetType.Enemy:
                     if (!World.Get<FactionSystem>().AreEnemies(owner, target.Target)) {
-                        owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
+                        }
                         return false;
                     }
                     break;
                 case TargetType.Friendly:
                     if (!World.Get<FactionSystem>().AreFriends(owner, target.Target)) {
-                        owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
+                        }
                         return false;
                     }
                     break;
                 case TargetType.Self:
                     if (target.Target != null && target.Target.Id != targeting.Owner) {
-                        owner.PostAll(new StatusUpdate("Self only", Color.yellow));
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Self only", Color.yellow));
+                        }
                         return false;
                     }
                     break;
             }
             if (targeting.RequireLoS) {
                 if (target.Target != null && !World.Get<LineOfSightSystem>().CanSee(owner, target.Target)) {
-                    owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                    if (postUpdates) {
+                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                    }
                     return false;
                 }
                 if (target.Target == null && !World.Get<LineOfSightSystem>().CanSee(owner, target.GetPosition)) {
-                    owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                    if (postUpdates) {
+                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                    }
                     return false;
                 }
             }
             if (targeting.Range > 0.25f) {
                 var distance = DistanceSystem.GetDistance(owner, target.GetPosition);
                 if (distance > targeting.Range) {
-                    owner.PostAll(new StatusUpdate(distance + " distance out of range", Color.yellow));
+                    if (postUpdates) {
+                        owner.PostAll(new StatusUpdate(distance + " distance out of range", Color.yellow));
+                    }
                     return false;
                 }
             }
@@ -174,7 +186,8 @@ namespace PixelComrades {
                 }
             }
             if (targeting.Range > 0.25f) {
-                return DistanceSystem.GetDistance(owner, target) >= targeting.Range;
+                var dist = DistanceSystem.GetDistance(owner, target);
+                return  dist <= targeting.Range;
             }
             return true;
         }
@@ -187,5 +200,17 @@ namespace PixelComrades {
         Enemy=1,
         Friendly=2,
         Self=3,
+    }
+
+    public enum AdvancedTargeting {
+        Self,
+        Enemy,
+        EnemyStrong,
+        EnemyWeak,
+        EnemyHurt,
+        Friendly,
+        FriendlyStrong,
+        FriendlyWeak,
+        FriendlyHurt,
     }
 }

@@ -4,26 +4,22 @@ using UnityEngine;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class PositionComponent : IComponent {
-        [SerializeField] public Float3 _position;
-        [SerializeField] private int _owner = -1;
-        private CachedComponent<TransformComponent> _cached;
+    public class PositionComponent : ComponentBase {
 
-        public int Owner {
-            get { return _owner; }
-            set {
-                if (_owner == value) {
-                    return;
-                }
-                _owner = value;
-                if (_owner < 0) {
-                    return;
-                }
-                _cached = new CachedComponent<TransformComponent>(this.GetEntity());
+        [SerializeField] private Float3 _position;
+
+        private CachedComponent<ColliderComponent> _collider;
+        private Transform Tr { get { return Entity.Tr; } }
+        
+        protected override void SetEntity(Entity entity) {
+            base.SetEntity(entity);
+            if (entity != null) {
+                _collider = new CachedComponent<ColliderComponent>(entity);
             }
         }
 
-        public Vector3 Position { get { return _cached.c.Tr != null ? _cached.c.Tr.position : _position.toVector3(); } }
+        public Vector3 Position { get { return (Tr != null ? Tr.position : _position.toVector3()) + (_collider?.c?.LocalCenter ?? Vector3.zero); } }
+        public Float3 PositionF3 { get { return Tr != null ? new Float3(Tr.position) : _position; }}
 
         public PositionComponent(Float3 value) {
             _position = value;
@@ -32,7 +28,7 @@ namespace PixelComrades {
         public PositionComponent(){}
 
         public static implicit operator Float3(PositionComponent reference) {
-            return reference._position;
+            return reference.PositionF3;
         }
 
         public static implicit operator Vector3(PositionComponent reference) {

@@ -211,13 +211,13 @@ namespace PixelComrades {
         //    return false;
         //}
 
-        public static bool ContainsDerivedType(this Dictionary<Type, ComponentReference> compList, System.Type type) {
-            foreach (var cref in compList) {
-                if (type.IsAssignableFrom(cref.Key)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        //public static bool ContainsDerivedType(this Dictionary<Type, ComponentReference> compList, System.Type type) {
+        //    foreach (var cref in compList) {
+        //        if (type.IsAssignableFrom(cref.Key)) {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
     }
 }

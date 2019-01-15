@@ -3,44 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class PathfindMoverNode : INode {
-        public Entity Entity { get; private set; }
+    public class PathfindMoverNode : BaseNode {
 
-        public CachedComponent<AstarPathfinderData> Pathfinder = new CachedComponent<AstarPathfinderData>();
+        public CachedComponent<SimplePathfindingAgent> Pathfinder = new CachedComponent<SimplePathfindingAgent>();
         public CachedComponent<MoveSpeed> MoveSpeed = new CachedComponent<MoveSpeed>();
         public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
-        public CachedComponent<TransformComponent> Tr = new CachedComponent<TransformComponent>();
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
+        public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
+        
 
-        public PathfindMoverNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
-            Register(entity, list);
-        }
-
-        public PathfindMoverNode() {
-        }
-
-        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
-            Entity = entity;
-            Pathfinder.Set(entity, list);
-            MoveSpeed.Set(entity, list);
-            RotationSpeed.Set(entity, list);
-            Tr.Set(entity, list);
-            Target.Set(entity, list);
-        }
-
-        public void Dispose() {
-            Pathfinder.Dispose();
-            MoveSpeed.Dispose();
-            RotationSpeed.Dispose();
-            Tr.Dispose();
-            Target.Dispose();
-        }
-
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            Pathfinder, MoveSpeed, RotationSpeed, Target, Debugging
+        };
+        
         public static System.Type[] GetTypes() {
             return new System.Type[] {
-                typeof(AstarPathfinderData), 
+                typeof(SimplePathfindingAgent), 
                 typeof(MoveTarget),
             };
         }
+
+        public float GetMoveSpeed { get { return MoveSpeed.c?.Speed ?? 1; } }
     }
 }

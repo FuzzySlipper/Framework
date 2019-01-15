@@ -20,15 +20,15 @@ namespace PixelComrades {
 
         public int Count { get { return CurrentList.Count; } }
 
-        public void Add(T newVal) {
+        public virtual void Add(T newVal) {
             CurrentList.Add(newVal);
         }
 
-        public void Remove(T newVal) {
+        public virtual void Remove(T newVal) {
             CurrentList.Remove(newVal);
         }
 
-        public void RemoveAt(int index) {
+        public virtual void RemoveAt(int index) {
             CurrentList.Remove(index);
         }
 
@@ -42,7 +42,7 @@ namespace PixelComrades {
             CurrentList.Replace(PreviousList);
         }
 
-        public void Clear() {
+        public virtual void Clear() {
             CurrentList.Clear();
             PreviousList.Clear();
         }

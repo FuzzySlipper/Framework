@@ -16,7 +16,7 @@ namespace PixelComrades {
 
         public void Start(Entity entity) {
             var charging = entity.Find<ActionTimer>();
-            var transform = entity.Find<TransformComponent>().Tr;
+            var transform = entity.Tr;
             if (transform == null || charging == null) {
                 Owner.DefaultPostAdvance(this);
                 return;

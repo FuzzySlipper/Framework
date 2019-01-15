@@ -26,8 +26,9 @@ namespace PixelComrades {
                 if (_owner == value) {
                     return;
                 }
+                var oldOwner = value;
                 _owner = value;
-                OwnerChanged();
+                OwnerChanged(oldOwner);
             }
         }
 
@@ -54,6 +55,13 @@ namespace PixelComrades {
             }
         }
 
-        protected virtual void OwnerChanged() {}
+        protected virtual void OwnerChanged(int old) {
+            for (int i = 0; i < List.Count; i++) {
+                var item = List[i] as IComponent;
+                if (item?.Owner == old) {
+                    item.Owner = _owner;
+                }
+            }
+        }
     }
 }

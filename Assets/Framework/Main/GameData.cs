@@ -8,7 +8,7 @@ using System.Linq;
 namespace PixelComrades {
     public static partial class GameData {
 
-        private static string[] _fileExtensions = new []{".cdb", ".json"};
+        private static HashSet<string> _fileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".cdb", ".json" };
         private static string _mainJsonPath = Application.streamingAssetsPath + "/GameData";
         private static Enums _enums = new Enums();
         private static Dictionary<string, Dictionary<string, DataEntry>> _sheets = new Dictionary<string, Dictionary<string, DataEntry>>();
@@ -30,8 +30,7 @@ namespace PixelComrades {
             _sheets.Clear();
             _entriesByFullID.Clear();
             _enums = new Enums();
-            var allowedExtensions = new HashSet<string>(_fileExtensions, StringComparer.OrdinalIgnoreCase);
-            var files = new DirectoryInfo(_mainJsonPath).EnumerateFiles().Where(f => allowedExtensions.Contains(f.Extension));
+            var files = new DirectoryInfo(_mainJsonPath).EnumerateFiles().Where(f => _fileExtensions.Contains(f.Extension));
             foreach (var file in files) {
                 var db = new JsonDB(File.ReadAllText(file.FullName));
                 foreach (var dbSheet in db.Sheets) {
@@ -41,8 +40,8 @@ namespace PixelComrades {
                     }
                     for (int i = 0; i < dbSheet.Value.Count; i++) {
                         var entry = dbSheet.Value[i];
-                        sheet.SafeAdd(entry.ID, entry);
-                        _entriesByFullID.SafeAdd(entry.FullID, entry);
+                        sheet.AddOrUpdate(entry.ID, entry);
+                        _entriesByFullID.AddOrUpdate(entry.FullID, entry);
                     }
                 }
             }

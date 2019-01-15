@@ -10,6 +10,7 @@ namespace PixelComrades {
 
         public int Id { get; private set;}
         public string Name;
+        public Transform Tr;
         public TagsComponent Tags;
         public StatsContainer Stats;
         public int ParentId = -1;
@@ -28,6 +29,7 @@ namespace PixelComrades {
             var entity = _pool.New();
             entity.Id = EntityController.AddEntityToMainList(entity);
             entity.Name = name;
+            entity._eventHub.AddObserver(entity.Stats);
             return entity;
         }
 
@@ -67,6 +69,7 @@ namespace PixelComrades {
             Id = -1;
             Name = "Destroyed";
             ClearParent();
+            Tr = null;
             _eventHub.Clear();
             Tags.Clear();
             Stats.Clear();

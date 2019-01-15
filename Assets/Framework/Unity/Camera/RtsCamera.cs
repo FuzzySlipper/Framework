@@ -53,7 +53,6 @@ namespace PixelComrades {
         private float _currTilt; // actual tilt
         private float _initialDistance;
         private float _tilt; // Desired tilt (degrees)
-        private Vector3 _initialLookAt;
         private float _initialRotation;
         private float _initialTilt;
         private bool _lastDebugCamera;
@@ -74,7 +73,7 @@ namespace PixelComrades {
             _currTilt = transform.rotation.eulerAngles.x;
             _currRotation = transform.rotation.eulerAngles.y;
             _distance = _distanceRange.Clamp(_distance);
-            _initialLookAt = _lookAt;
+            _lookAt = transform.position;
             _initialDistance = _currDistance = _distance;
             _initialRotation = _rotation = _currRotation;
             _initialTilt = _tilt = _currTilt;
@@ -160,10 +159,6 @@ namespace PixelComrades {
         ///     initial values.
         /// </param>
         public void ResetToInitialValues(bool includePosition, bool snap = false) {
-            if (includePosition) {
-                _lookAt = _initialLookAt;
-            }
-
             _distance = _initialDistance;
             _rotation = _initialRotation;
             _tilt = _initialTilt;

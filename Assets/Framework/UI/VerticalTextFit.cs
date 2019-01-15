@@ -18,12 +18,10 @@ namespace PixelComrades {
         protected override void OnTransformParentChanged() {
             UpdateSize();
         }
-
+#if UNITY_EDITOR
         protected override void OnValidate() {
             UpdateSize();
         }
-
-#if UNITY_EDITOR
         private void Update() {
             if (!EditorApplication.isPlaying) {
                 UpdateSize();

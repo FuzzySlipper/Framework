@@ -19,9 +19,9 @@ namespace PixelComrades {
             entity.Add(new RotationComponent());
             entity.Add(new EquipmentSlots(null));
             entity.Add(new CommandsContainer(null));
+            entity.Add(new CommandTarget());
             entity.Add(new FactionComponent(faction));
             entity.Add(new PronounComponent(PlayerPronouns.They));
-            //entity.Get<EntityCollection<BaseStat>>("Attributes")[Attributes.Agility].AddDerivedStat(0.2f, new BaseStat.DerivedGeneric(100, f => entity.Get<MoveSpeed>().Speed = f, null, "Speed"));
             return entity;
         }
     }

@@ -10,7 +10,7 @@ namespace PixelComrades {
 
         public int Owner { get { return _entity.Id; } set { } }
 
-        private int[] _tags = new int[EntityTags.MAXLIMIT];
+        private int[] _tags = new int[EntityTags.MAX_TAGS_LIMIT];
 
         public void Dispose() {
             _tags = null;
@@ -20,6 +20,14 @@ namespace PixelComrades {
         public void Clear() {
             for (int i = 0; i < _tags.Length; i++) {
                 _tags[i] = 0;
+            }
+        }
+
+        public void DebugActive() {
+            for (int i = 0; i < _tags.Length; i++) {
+                if (_tags[i] > 0) {
+                    Debug.LogFormat("{0}:{1}",i, _tags[i]);
+                }
             }
         }
 

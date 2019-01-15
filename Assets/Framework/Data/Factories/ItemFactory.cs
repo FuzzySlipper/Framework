@@ -63,7 +63,7 @@ namespace PixelComrades {
                 AddItem(config);
                 list.Add(config);
             }
-            _outfits.SafeAdd(outfitID, list);
+            _outfits.AddOrUpdate(outfitID, list);
         }
 
 
@@ -76,8 +76,8 @@ namespace PixelComrades {
                 }
                 list.Add(item);
             }
-            _items.SafeAdd(item.ID, item);
-            _itemsFullID.SafeAdd(item.FullID, item);
+            _items.AddOrUpdate(item.ID, item);
+            _itemsFullID.AddOrUpdate(item.FullID, item);
             var bagIndex = item.Rarity;
             var chance = ((GameData.Enums[EnumTypes.ItemRarity].Count + 1) - bagIndex) * 100;
             AddToShuffleBag(_specificRarityBags, item, chance, bagIndex);

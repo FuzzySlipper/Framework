@@ -15,7 +15,7 @@ namespace PixelComrades {
             var maxTime = TimeManager.Time + _maxTime;
             var minTime = TimeManager.Time + _minTime;
             while (true) {
-                if (TimeManager.Time > maxTime || actionEvent.Origin >= 0 && actionEvent.GetOrigin().IsDead()) {
+                if (TimeManager.Time > maxTime || actionEvent.Origin != null && actionEvent.Origin.IsDead()) {
                     break;
                 }
                 if (TimeManager.Time > minTime && actionEvent.State != ActionStateEvents.Activate) {
@@ -31,8 +31,8 @@ namespace PixelComrades {
         }
 
         public void OnActionSpawn(ActionStateEvent actionEvent) {
-            if (_parentAnimTr) {
-                var parentTr = actionEvent.GetOrigin().GetSelfOrParent<AnimTr>().Tr;
+            if (_parentAnimTr && actionEvent.Origin != null) {
+                var parentTr = actionEvent.Origin.GetSelfOrParent<AnimTr>().Tr;
                 if (parentTr != null) {
                     transform.SetParent(parentTr);
                 }

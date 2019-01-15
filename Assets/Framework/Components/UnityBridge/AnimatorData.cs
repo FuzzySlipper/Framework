@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [System.Serializable]
-    public class AnimatorData : IComponent {
+    [System.Serializable, Priority(Priority.Lowest)]
+    public class AnimatorData : IComponent, IReceive<DamageEvent>, IReceive<DeathEvent> {
         public IAnimator Animator;
         public AnimatorEvent? Event;
         public int Owner { get; set; }
@@ -18,6 +18,18 @@ namespace PixelComrades {
         public void Dispose() {
             Animator = null;
         }
+
+        public void Handle(DamageEvent arg) {
+            if (arg.Amount > 0 && Animator != null) {
+                Animator.PlayAnimation(AnimatorClips.GetHit);
+            }
+        }
+
+        public void Handle(DeathEvent arg) {
+            if (Animator != null) {
+                Animator.PlayAnimation(AnimatorClips.Death);
+            }
+        }
     }
 
     public interface IAnimator {
@@ -25,7 +37,11 @@ namespace PixelComrades {
         bool IsAnimationComplete(string clip);
         bool IsAnimationEventComplete(string clip);
         string CurrentAnimation { get; }
+        float CurrentAnimationLength { get; }
+        float CurrentAnimationRemaining { get; }
         void PlayAnimation(string clip);
+        void ClipEventTriggered();
+        void ClipFinished();
     }
 
     [Priority(Priority.Normal)]

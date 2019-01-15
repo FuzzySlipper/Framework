@@ -9,7 +9,10 @@ namespace PixelComrades {
         public override void Add(Command item) {
             base.Add(item);
             item.Container = this;
-            if (item.Owner != Owner) {
+            if (item.Owner < 0) {
+                item.Owner = Owner;
+            }
+            else if (item.Owner != Owner) {
                 var entity = item.GetEntity();
                 if (entity.ParentId < 0) {
                     entity.ParentId = Owner;

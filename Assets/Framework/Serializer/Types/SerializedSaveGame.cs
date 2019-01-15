@@ -10,8 +10,6 @@ namespace PixelComrades {
         [SerializeField] private string _name;
         [SerializeField] private string _riftLocation;
         [SerializeField] private int _riftLevel;
-        [SerializeField] private float _encounterRate;
-        [SerializeField] private int _encounterSteps;
         [SerializeField] private SerializedPlayerData _playerData;
         [SerializeField] private List<SerializedGenericData> _mapData = new List<SerializedGenericData>();
         [SerializeField] private SerializedTransform _playerPosition;
@@ -19,8 +17,6 @@ namespace PixelComrades {
         //[SerializeField] private List<SerializedGameObject> _level;
         public List<SerializedGenericData> MapData { get { return _mapData; } }
         public SerializedTransform PlayerPosition { get { return _playerPosition; } }
-        public float EncounterRate { get { return _encounterRate; } }
-        public int EncounterSteps { get { return _encounterSteps; } }
 
         public SerializedSaveGame() {}
 
@@ -29,8 +25,6 @@ namespace PixelComrades {
             _playerData = (SerializedPlayerData) info.GetValue("PlayerData", typeof(SerializedPlayerData));
             _riftLocation = (string) info.GetValue("RiftLocation", typeof(string));
             _riftLevel = (int) info.GetValue("RiftLevel", typeof(int));
-            _encounterSteps = (int) info.GetValue("EncounterSteps", typeof(int));
-            _encounterRate = (float) info.GetValue("EncounterRate", typeof(float));
             _playerPosition = (SerializedTransform) info.GetValue("PlayerPosition", typeof(SerializedTransform));
             _mapData = (List<SerializedGenericData>) info.GetValue("MapData", typeof(List<SerializedGenericData>));
             //_activePooled = (List<SerializedGameObject>)info.GetValue("ActivePooled", typeof(List<SerializedGameObject>));
@@ -43,8 +37,6 @@ namespace PixelComrades {
             info.AddValue("PlayerData", _playerData, typeof(SerializedPlayerData));
             info.AddValue("RiftLocation", _riftLocation, typeof(string));
             info.AddValue("RiftLevel", _riftLevel, typeof(int));
-            info.AddValue("EncounterSteps", _encounterSteps, typeof(int));
-            info.AddValue("EncounterRate", _encounterRate, typeof(float));
             info.AddValue("PlayerPosition", _playerPosition, typeof(SerializedTransform));
             info.AddValue("MapData", _mapData, typeof(List<SerializedGenericData>));
             //info.AddValue("ActivePooled", _activePooled, typeof(List<SerializedGameObject>));
@@ -73,8 +65,8 @@ namespace PixelComrades {
             //        }
             //    }
             //}
-            //if (GlobalLevelController.Loaded != null) {
-            //    GlobalLevelController.Loaded.SaveData(ref _mapData);
+            //if (GlobalLevelController.Builder != null) {
+            //    GlobalLevelController.Builder.SaveData(ref _mapData);
             //}
             //_riftLocation =  RiftTown.Current != null ? RiftTown.Current.DisplayName : RiftTown.Last.DisplayName;
             //Serializer.ResetGlobalSerializationIndex();

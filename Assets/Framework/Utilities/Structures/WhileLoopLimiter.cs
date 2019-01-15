@@ -36,6 +36,12 @@ public class WhileLoopLimiter {
         _active = true;
     }
 
+    public void Reset(int limit) {
+        _limit = limit;
+        _count = 0;
+        _active = true;
+    }
+
     public void Cancel() {
         _count = _limit + 1;
         _active = false;

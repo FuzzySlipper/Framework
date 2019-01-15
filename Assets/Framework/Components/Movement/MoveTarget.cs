@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class MoveTarget : IComponent, IReceive<SetTarget> {
+    public class MoveTarget : IComponent, IReceive<SetMoveTarget> {
         public int Owner { get; set; }
 
         public Vector3? TargetV3;
         public Transform TargetTr;
+        public System.Action OnComplete;
 
         public Vector3 GetTargetPosition {
             get {
@@ -30,13 +31,18 @@ namespace PixelComrades {
             TargetV3 = null;
         }
 
+        public void Complete() {
+            OnComplete.SafeInvoke();
+            Clear();
+        }
+
         public MoveTarget() {
             TargetTr = null;
             TargetV3 = null;
         }
 
         public MoveTarget(Entity target) {
-            var tr = target.Get<TransformComponent>().Tr;
+            var tr = target.Tr;
             if (tr != null) {
                 TargetTr = tr;
             }
@@ -53,19 +59,22 @@ namespace PixelComrades {
             TargetTr = tr;
         }
 
-        public void Handle(SetTarget arg) {
+        public void Handle(SetMoveTarget arg) {
             TargetV3 = arg.V3;
             TargetTr = arg.Tr;
+            OnComplete = arg.OnComplete;
         }
     }
 
-    public struct SetTarget : IEntityMessage {
+    public struct SetMoveTarget : IEntityMessage {
         public Transform Tr;
         public Vector3? V3;
+        public System.Action OnComplete;
 
-        public SetTarget(Transform tr, Vector3? v3) {
+        public SetMoveTarget(Transform tr, Vector3? v3, System.Action del) {
             Tr = tr;
             V3 = v3;
+            OnComplete = del;
         }
 
         public Vector3 Target { get { return Tr != null ? Tr.position : V3 ?? Vector3.zero; } }

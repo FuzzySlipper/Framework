@@ -140,6 +140,7 @@ namespace PixelComrades {
                 }
             }
         }
+
         public void UpdateDerivedStat(string id, float percent) {
             for (int i = 0; i < _derivedStats.Count; i++) {
                 if (_derivedStats[i].Id == id) {
@@ -148,6 +149,7 @@ namespace PixelComrades {
                 }
             }
         }
+
         public void ClearDerivedStats() {
             for (int i = 0; i < _derivedStats.Count; i++) {
                 _derivedStats[i].Remove();

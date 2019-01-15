@@ -39,6 +39,15 @@ namespace PixelComrades {
             TimeManager.StartUnscaled(RunTimerTest(1));
         }
 
+        public static void DebugStatus(int entity) {
+            DebugStatus(EntityController.GetEntity(entity));
+        }
+
+        public static void DebugStatus(Entity entity) {
+            var status = entity.Get<StatusUpdateComponent>();
+            Debug.Log(status?.Status ?? "No Status Component");
+        }
+
         public static void DebugVelocity(Entity entity) {
             var rb = entity.Get<RigidbodyComponent>().Rb;
             if (rb != null) {
@@ -74,18 +83,15 @@ namespace PixelComrades {
         public static void FlyCam() {
             PixelComrades.FlyCam.main.ToggleActive();
         }
-
         
         public static void Screenshot() {
             ScreenCapture.CaptureScreenshot(
                 string.Format( "Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png", Game.Title, System.DateTime.Now));
         }
-
         
         public static void FPS() {
             UIFrameCounter.main.Toggle();
         }
-
         
         public static void FixMouse() {
             if (GameOptions.MouseLook && !Game.CursorUnlocked) {
@@ -95,7 +101,6 @@ namespace PixelComrades {
                 Cursor.lockState = CursorLockMode.None;
             }
         }
-
         
         public static void DebugMouseLock() {
             Debug.LogFormat("MouseUnlocked {0}", Game.CursorUnlockedHolder.Debug());
@@ -275,6 +280,5 @@ namespace PixelComrades {
                 Debug.Log(json);
             }
         }
-
     }
 }
