@@ -6,7 +6,9 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+#if USE_LUA
 using XLua;
+#endif
 
 namespace PixelComrades {
 
@@ -48,7 +50,9 @@ namespace PixelComrades {
         private int _commandIndex;
         private bool _navigating;
         private List<Entry> _historyList = new List<Entry>();
+#if USE_LUA
         private LuaEnv _lua;
+#endif
         private bool _opened;
 
         public event Action<string> OnCommandEnter;
@@ -65,10 +69,12 @@ namespace PixelComrades {
             _historyText.color = _commandInputColor;
             _commandInputBackgroundImage.color = _commandInputBackgroundColor;
             _historyBackgroundImage.color = _historyBackgroundColor;
+#if USE_LUA
             _lua = new LuaEnv();
             _lua.DoString("ec = CS.PixelComrades.EntityController");
             _lua.DoString("GameData = CS.PixelComrades.GameData");
             _lua.DoString("px = CS.PixelComrades");
+#endif
             Application.logMessageReceived += InterceptDebugLog;
         }
 
@@ -204,7 +210,9 @@ namespace PixelComrades {
             command.Command = text;
             _historyList.Add(command);
             _pendingOutput = true;
+#if USE_LUA
             _lua.DoString(text);
+#endif
             OnCommandEnter?.Invoke(text);
             UpdateHistoryText();
             //command.Output = .ToString();

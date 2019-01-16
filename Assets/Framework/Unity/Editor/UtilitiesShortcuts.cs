@@ -326,8 +326,7 @@ public static class UtilitiesShortcuts
     {
         ApplyOrthoRotation(Quaternion.Euler(90, 0, 0));
     }
- 
- 
+    
     [MenuItem("Utilities/Cam Bottom")]
     static void BottomCamera()
     {

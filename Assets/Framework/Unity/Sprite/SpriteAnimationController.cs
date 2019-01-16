@@ -5,9 +5,13 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class SpriteAnimationController {
 
+        public SpriteAnimationController(bool unscaled = true) {
+            _frameTimer = new Timer(0, unscaled);
+        }
+
         private int _currentFrameIndex = 0;
         private bool _playing = false;
-        private UnscaledTimer _frameTimer = new UnscaledTimer();
+        private Timer _frameTimer;
         private SpriteAnimation _animation = null;
 
         private AnimationFrame CurrentFrame { get { return _animation != null ? _animation.GetFrame(_currentFrameIndex) : null; } }
@@ -23,7 +27,7 @@ namespace PixelComrades {
                 return;
             }
             _playing = true;
-            _frameTimer.StartTimer();
+            //_frameTimer.StartTimer();
         }
 
         public bool CheckFrameUpdate() {

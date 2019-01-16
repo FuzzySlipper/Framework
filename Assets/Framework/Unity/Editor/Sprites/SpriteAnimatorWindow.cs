@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -353,7 +354,7 @@ namespace PixelComrades {
 
             var spriteRect = new Rect(Vector2.zero, spriteRectOriginal.size*scale);
             spriteRect.center = rect.center + offset;
-
+            //Rect clickRect;
             if (clipToRect) {
                 // If the sprite doesn't fit in the rect, it needs to be cropped, and have it's uv's scaled to compensate (This is way more complicated than it should be!)
                 var croppedRectOffset = new Vector2(MathEx.Max(spriteRect.xMin, rect.xMin),
@@ -369,12 +370,25 @@ namespace PixelComrades {
 
                 // Draw the texture
                 GUI.DrawTextureWithTexCoords(croppedRect, sprite.texture, texCoords, true);
+                //clickRect = croppedRect;
             }
             else {
                 // Draw the texture
                 GUI.DrawTextureWithTexCoords(spriteRect, sprite.texture, texCoords, true);
+                //clickRect = spriteRect;
             }
+            
+            //GUI.DrawTexture(Texture2D.whiteTexture);
+            //if (Event.current.isMouse && Event.current.button == 0 && Event.current.OnMouseDown(clickRect, 0, false)) {
+            //if (Event.current.OnMouseDown(clickRect, 0, false)) {
+            //    var mousePos = GUIUtility.ScreenToGUIPoint(Event.current.mousePosition);
+            //    //var guiPos = GUIUtility.ScreenToGUIRect(clickRect);
+            //    var pos = new Vector2(mousePos.x - clickRect.x, mousePos.y - clickRect.y);
+            //    Debug.LogFormat("{0} {1} {2} {3} {4}", mousePos, clickRect.position, clickRect.center, pos, new Vector2(pos.x / spriteRectOriginal.width, pos.y / spriteRectOriginal.height));
+            //}
         }
+
+        public Vector2 EventPosition = Vector2.zero;
 
         private void LayoutPreview(Rect rect) {
             //
@@ -918,8 +932,7 @@ namespace PixelComrades {
         }
 
         [MenuItem("Tools/Sprite Animator Window")] public static void ShowWindow() {
-            //Show existing window instance. If one doesn't exist, make one.
-            GetWindow(typeof(SpriteAnimatorWindow), false, "Power Anim");
+            GetWindow(typeof(SpriteAnimatorWindow), false, "Sprite Animator");
         }
     }
 
