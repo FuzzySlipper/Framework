@@ -32,6 +32,7 @@ namespace PixelComrades {
             Entity = Entity.New("PlayerController");
             Entity.Add(new LabelComponent("PlayerController"));
             Entity.Tr = Tr;
+            Player.MainEntity = Entity;
         }
 
         public virtual void OnSystemUpdate(float dt) {

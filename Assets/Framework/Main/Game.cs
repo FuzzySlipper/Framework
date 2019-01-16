@@ -212,5 +212,34 @@ namespace PixelComrades {
             return go.transform;
         }
 
+
+        public static Point3 WorldToGrid(Vector3 position) {
+            //we are XZ locked so don't allow Y position to change 
+            return new Point3(
+                (int) Math.Round((double) position.x / MapCellSize),
+                (int) Math.Round((double) position.y / MapCellSize),
+                (int) Math.Round((double) position.z / MapCellSize));
+        }
+
+        public static Point3 LocalGridRotated(Point3 pos, Transform tr) {
+            var calcPosV3 = Quaternion.AngleAxis(tr.rotation.eulerAngles.y, Vector3.up) * pos.toVector3();
+            return new Point3(
+                (int) Math.Round(calcPosV3.x),
+                (int) Math.Round(calcPosV3.y),
+                (int) Math.Round(calcPosV3.z));
+        }
+
+        public static Point3 LocalGridRotated(Point3 pos, float angle) {
+            var calcPosV3 = Quaternion.AngleAxis(angle, Vector3.up) * pos.toVector3();
+            return new Point3(
+                (int) Math.Round(calcPosV3.x),
+                (int) Math.Round(calcPosV3.y),
+                (int) Math.Round(calcPosV3.z));
+        }
+
+        public static Vector3 GridToWorld(Point3 position) {
+            return new Vector3(position.x * MapCellSize, position.y * MapCellSize, position.z * MapCellSize);
+        }
+
     }
 }

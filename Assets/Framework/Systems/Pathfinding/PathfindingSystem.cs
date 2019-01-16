@@ -169,7 +169,7 @@ namespace PixelComrades {
         }
 
         public void UpdatePlayerPosition(Vector3 position) {
-            _pathfindingGrid.SetPlayerPosition(position.toPoint3ZeroY(), Player.Controller.Entity, _playerWalkableRadius, _playerOccupyRadius);
+            _pathfindingGrid.SetPlayerPosition(position.toPoint3ZeroY(), Player.MainEntity, _playerWalkableRadius, _playerOccupyRadius);
         }
     }
 }

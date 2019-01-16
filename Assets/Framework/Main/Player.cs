@@ -23,6 +23,7 @@ namespace PixelComrades {
         public static PlayerSaveData Data { get { return _playerSaveData; } set { _playerSaveData = value; } }
         public static ItemInventory MainInventory { get; set; }
         public static Rigidbody Rb { get; set; }
+        public static Entity MainEntity { get; set; }
         public static Entity[] Entities { get; set; }
 
         public static int HighestCurrentLevel {

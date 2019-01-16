@@ -13,7 +13,6 @@ namespace PixelComrades {
         [SerializeField] private Vector3 _offset = new Vector3(0, 0.25f, 0);
         [SerializeField] private Camera _cam = null;
         [SerializeField] private bool _onlyOnInput = true;
-        [SerializeField] private AstarPathfinderTesting _testing = null;
 
         private RaycastHit[] _hits = new RaycastHit[10];
         private Ray _mouseRay;

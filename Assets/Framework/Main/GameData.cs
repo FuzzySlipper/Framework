@@ -18,6 +18,7 @@ namespace PixelComrades {
         public static FakeEnum Vitals { get { return _enums[StatTypes.Vitals]; } }
         public static FakeEnum Attributes { get { return _enums[StatTypes.Attributes]; } }
         public static FakeEnum DamageTypes { get { return _enums[StatTypes.DamageTypes]; } }
+        public static FakeEnum EquipmentSlotTypes { get { return _enums[EnumTypes.EquipmentSlotType]; } }
 
         private static System.Action _onInit;
 

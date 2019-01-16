@@ -126,17 +126,5 @@ namespace PixelComrades {
                 entity.Stats.GetOrAdd(statName).AddToBase(amount + (amount * multi));
             }
         }
-
-        public static void AddCombatRating(Entity entity) {
-            var combatPower = new BaseStat(Stats.CombatRating, "Combat Rating", 0);
-            entity.Stats.Add(combatPower);
-            var atkStats = GameData.Enums[Stats.AttackStats];
-            for (int i = 0; i < atkStats.Length; i++) {
-                entity.Stats.Get(atkStats.IDs[i]).AddDerivedStat(1, combatPower);
-            }
-            for (int i = 0; i < GameData.Attributes.Count; i++) {
-                entity.Stats.Get(GameData.Attributes[i]).AddDerivedStat(1, combatPower);
-            }
-        }
     }
 }

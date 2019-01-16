@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades.DungeonCrawler;
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
@@ -14,15 +13,6 @@ namespace PixelComrades {
         private GameOptions.CachedInt _defaultCost = new GameOptions.CachedInt("PathfindGridDefaultCost");
         //private GameOptions.CachedFloat _occupiedCost = new GameOptions.CachedFloat("PathfindGridOccupiedCost");
         private GameOptions.CachedInt _playerCost = new GameOptions.CachedInt("PathfindGridPlayerCost");
-
-        [Button]
-        public void CheckMemory() {
-            GlobalLevelController.SetupCells();
-            long startBytes = System.GC.GetTotalMemory(true);
-            GlobalLevelController.SetupPathfinding();
-            long stopBytes = System.GC.GetTotalMemory(true);
-            Debug.LogFormat("Memory size is {0} on a {1} sized grid", ((long) (stopBytes - startBytes)), World.Get<PathfindingSystem>().Grid.CellsCount);
-        }
 
         [Button]
         public void Clear() {
