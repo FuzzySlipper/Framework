@@ -226,3 +226,61 @@ public class ValueHolder<T> where T : struct {
         return _keys.Count == 0 ? "" : _keys.LastElement();
     }
 }
+
+[Serializable]
+public class FloatHolder {
+    private System.Action _del;
+    private float _value;
+    public float Value {
+        get {
+            return _value;
+        }
+        set {
+            if (Math.Abs(value - _value) < 0.001f) {
+                return;
+            }
+            _value = value;
+            _del();
+        }
+    }
+    public FloatHolder(Action del, float value = 0) {
+        _del = del;
+        _value = value;
+    }
+
+    public void SetNoDel(float val) {
+        _value = val;
+    }
+
+    public static implicit operator float(FloatHolder reference) {
+        return reference.Value;
+    }
+}
+
+[Serializable]
+public class IntHolder {
+    private System.Action _del;
+    private int _value;
+    public int Value {
+        get { return _value; }
+        set {
+            if (value == _value) {
+                return;
+            }
+            _value = value;
+            _del();
+        }
+    }
+    public IntHolder(Action del, int value = 0) {
+        _del = del;
+        _value = value;
+    }
+
+    public void SetNoDel(int val) {
+        _value = val;
+    }
+
+    public static implicit operator int(IntHolder reference) {
+        return reference.Value;
+    }
+}

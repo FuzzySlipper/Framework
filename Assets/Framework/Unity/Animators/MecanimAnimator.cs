@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class MecanimAnimator : TargetAnimator {
+    public class MecanimAnimator : TargetAnimator, IPoolEvents {
 
         [SerializeField] private Animator _animator = null;
         [SerializeField] private string _trigger = "Trigger";
 
+        private bool _triggered;
+        private int _state;
         public override float Length {
             get {
                 var clips = _animator.GetCurrentAnimatorClipInfo(0);
@@ -26,6 +28,35 @@ namespace PixelComrades {
             if (_animator != null) {
                 _animator.SetTrigger(_trigger);
             }
+            _triggered = true;
+        }
+
+        public override void PlayFrame(float normalized) {
+            if (!_triggered) {
+                if (_animator != null) {
+                    _animator.SetTrigger(_trigger);
+                }
+                _triggered = true;
+                TimeManager.StartUnscaled(PauseForTrigger(normalized));
+                return;
+            }
+            if (_state < 0) {
+                _state = _animator.GetCurrentAnimatorStateInfo(0).shortNameHash;
+            }
+            _animator.Play(_state, -1, normalized);
+            _animator.speed = 0;
+        }
+
+        private IEnumerator PauseForTrigger(float normalized) {
+            yield return null;
+            PlayFrame(normalized);
+        }
+
+        public void OnPoolSpawned() {
+            _triggered = false;
+        }
+
+        public void OnPoolDespawned() {
         }
     }
 }

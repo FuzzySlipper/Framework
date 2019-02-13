@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using Sirenix.OdinInspector;
+
 namespace PixelComrades {
     public class FlyCam : MonoSingleton<FlyCam> {
 
@@ -18,7 +20,7 @@ namespace PixelComrades {
 
         public bool IsActive { get { return _isActive; } }
 
-
+        [Button]
 	    public void ToggleActive() {
             SetIsActive(!IsActive);
 	    }

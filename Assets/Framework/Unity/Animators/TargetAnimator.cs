@@ -12,6 +12,7 @@ namespace PixelComrades {
         public override string ToString() { return string.IsNullOrEmpty(_description) ? base.ToString() : _description; }
 
         public abstract void Play();
+        public abstract void PlayFrame(float normalized);
         public abstract float Length { get; }
         public abstract bool IsPlaying { get; }
 

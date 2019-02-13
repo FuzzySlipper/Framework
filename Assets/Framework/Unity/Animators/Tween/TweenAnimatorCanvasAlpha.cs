@@ -22,6 +22,10 @@ namespace PixelComrades {
             _tweener.Restart(_canvasGroup.alpha, _targets[_index], _durations[_index], _easing[_index], UnScaled);
         }
 
+        public override void PlayFrame(float normalized) {
+            _canvasGroup.alpha = _tweener.Get(normalized);
+        }
+
         public override void UpdateTween() {
             _canvasGroup.alpha = _tweener.Get();
             if (!_adjustInteractive) {

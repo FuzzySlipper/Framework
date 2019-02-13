@@ -132,7 +132,6 @@ namespace PixelComrades {
 
             xOffset += width + 5;
             width = 50;
-
             // Frame length (in samples)
             EditorGUI.LabelField(new Rect(xOffset, 2, width, rect.height - 3), "Length");
 
@@ -150,10 +149,10 @@ namespace PixelComrades {
             xOffset += width;
 
             // Function Name
-            width = 125;
-            frame.DefaultEventTrigger = GUI.Toggle(new Rect(xOffset, 0, width, rect.height), frame.DefaultEventTrigger,
-                "Default Event Trigger", Styles.TIMELINE_EVENT_TOGGLE);
-            xOffset += width;
+            //width = 125;
+            //frame.DefaultEventTrigger = GUI.Toggle(new Rect(xOffset, 0, width, rect.height), frame.DefaultEventTrigger,
+            //    "Default Event Trigger", Styles.TIMELINE_EVENT_TOGGLE);
+            //xOffset += width;
 
             width = 80;
             frame.Event =
@@ -173,6 +172,17 @@ namespace PixelComrades {
                 return;
             }
 
+            width = 50;
+            // Frame length (in samples)
+            EditorGUI.LabelField(new Rect(xOffset, 2, width, rect.height - 3), "Position");
+            xOffset += width + 5;
+
+            width = 150;
+            frame.EventPosition.x = EditorGUI.Slider(new Rect(xOffset, 2, width, rect.height - 3), frame.EventPosition.x, -1, 1);
+            xOffset += width + 5;
+            frame.EventPosition.y = EditorGUI.Slider(new Rect(xOffset, 2, width, rect.height - 3), frame.EventPosition.y, -1, 1);
+            xOffset += width + 5;
+
             width = 70;
             GUI.Label(new Rect(xOffset, 0, width, rect.height), "Event Name:", EditorStyles.miniLabel);
             xOffset += width;
@@ -183,45 +193,52 @@ namespace PixelComrades {
             frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
                 frame.EventName, EditorStyles.miniTextField);
             xOffset += width + 5;
-            
-            
-            switch (frame.Event) {
-                case AnimationFrame.EventType.Int: {
-                    width = 60;
-                    frame.EventDataInt = EditorGUI.IntField(new Rect(xOffset, 2, width, rect.height - 3),
-                        frame.EventDataInt, EditorStyles.miniTextField);
-                    //xOffset += width + 5;
-                }
-                    break;
 
-                case AnimationFrame.EventType.Float: {
-                    width = 60;
-                    frame.EventDataFloat = EditorGUI.FloatField(new Rect(xOffset, 2, width, rect.height - 3),
-                        frame.EventDataFloat, EditorStyles.miniTextField);
-                    //xOffset += width + 5;
+            width = 60;
+            frame.EventDataString = EditorGUI.TextField(
+                new Rect(xOffset, 2, width, rect.height),
+                frame.EventDataString, EditorStyles.miniTextField);
+            xOffset += width + 5;
 
-                }
-                    break;
+            frame.EventDataFloat = EditorGUI.FloatField(
+                new Rect(xOffset, 2, width, rect.height - 3),
+                frame.EventDataFloat, EditorStyles.miniTextField);
+            xOffset += width + 5;
 
-                case AnimationFrame.EventType.String: {
-                    //xOffset += width + 5;
-                    width = 60;
-                    frame.EventDataString = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height),
-                        frame.EventDataString, EditorStyles.miniTextField);
-                }
-                    break;
+            width = 150;
+            frame.EventDataObject = EditorGUI.ObjectField(
+                new Rect(xOffset, 2, width, rect.height - 3), frame.EventDataObject, typeof(Object),
+                false);
 
-                case AnimationFrame.EventType.Gameobject: {
-                    //xOffset += width + 5;
-                    width = 150;
-                    frame.EventDataGameObject = (GameObject) EditorGUI.ObjectField(
-                        new Rect(xOffset, 2, width, rect.height - 3), frame.EventDataGameObject, typeof(GameObject),
-                        false);
-                }
-                    break;
-                default:
-                    break;
-            }
+            //switch (frame.Event) {
+            //    //case AnimationFrame.EventType.Int: {
+            //    //    width = 60;
+            //    //    frame.EventDataInt = EditorGUI.IntField(n);
+            //    //    //xOffset += width + 5;
+            //    //}
+            //    //    break;
+
+            //    case AnimationFrame.EventType.Float: {
+                    
+            //        //xOffset += width + 5;
+
+            //    }
+            //        break;
+
+            //    case AnimationFrame.EventType.String: {
+            //        //xOffset += width + 5;
+                    
+            //    }
+            //        break;
+
+            //    case AnimationFrame.EventType.Object: {
+            //        //xOffset += width + 5;
+                   
+            //    }
+            //        break;
+            //    default:
+            //        break;
+            //}
             
             //width = 105;
             //xOffset -= width;
@@ -344,8 +361,7 @@ namespace PixelComrades {
             // Calc some metadata about each event (start/end position on timeline, etc). This is stored in a temporary array, parallel to events
             int eventCount = 0;
             for (int i = 0; i < _frames.Count; i++) {
-                if (_frames[i].DefaultEventTrigger == true ||
-                    _frames[i].Event != AnimationFrame.EventType.None) {
+                if (_frames[i].Event != AnimationFrame.EventType.None) {
                     eventCount++;
                 }
             }
@@ -354,8 +370,7 @@ namespace PixelComrades {
             // First loop over and calculate start/end positions of events
             for (var i = 0; i < _frames.Count; ++i) {
                 var frame = _frames[i];
-                if (!_frames[i].DefaultEventTrigger ||
-                    _frames[i].Event == AnimationFrame.EventType.None) {
+                if (_frames[i].Event == AnimationFrame.EventType.None) {
                     continue;
                 }
                 var eventData = new AnimEventLayoutData();

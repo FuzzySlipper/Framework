@@ -14,6 +14,7 @@ namespace PixelComrades {
         [SerializeField] private float _moveOffset = 1;
         [SerializeField] private float _positionMarginMultiplier = 1.5f;
         [SerializeField] private bool _debug = false;
+        [SerializeField] private Transform _target = null;
 
         private float _minX, _minY, _maxX, _maxY;
         private WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(150);
@@ -52,7 +53,8 @@ namespace PixelComrades {
             if (_camera == null) {
                 _camera = GetComponent<Camera>();
             }
-            var objectToView = transform.parent.transform;
+            Game.SpriteCamera = _camera;
+            var objectToView = _target;
             if (objectToView == null) {
                 return;
             }
@@ -79,7 +81,8 @@ namespace PixelComrades {
             if (_camera == null) {
                 _camera = GetComponent<Camera>();
             }
-            var objectToView = transform.parent.transform;
+            Game.SpriteCamera = _camera;
+            var objectToView = _target;
             if (objectToView == null) {
                 return;
             }

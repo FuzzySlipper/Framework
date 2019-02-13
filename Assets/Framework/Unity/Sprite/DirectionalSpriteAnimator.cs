@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     public class DirectionalSpriteAnimator : MonoBehaviour, IOnCreate, IPoolEvents {
@@ -8,8 +9,9 @@ namespace PixelComrades {
         [SerializeField] private BillboardMode _billboard = BillboardMode.CamFwd;
         [SerializeField] private bool _backwards = false;
         [SerializeField] private SpriteFacing _facing = SpriteFacing.Fourway;
-        [SerializeField] private DirectionalAnimation _sprite = null;
+        [SerializeField] private DirectionalAnimation _animation = null;
         [SerializeField] private SpriteRenderer _renderer = null;
+        [SerializeField] private bool _unscaled = true;
 
         private DirectionsEight _orientation = DirectionsEight.Top;
         private SpriteAnimationController _spriteAnimator = new SpriteAnimationController();
@@ -18,15 +20,22 @@ namespace PixelComrades {
         public void OnCreate(PrefabEntity entity) {
             MaterialPropertyBlock materialBlock = new MaterialPropertyBlock();
             _renderer.GetPropertyBlock(materialBlock);
-            _renderer.sprite = _sprite.GetSpriteFrame(0);
-            materialBlock.SetTexture("_BumpMap", _sprite.NormalMap);
+            _renderer.sprite = _animation.GetSpriteFrame(0);
+            materialBlock.SetTexture("_BumpMap", _animation.NormalMap);
             materialBlock.SetTexture("_MainTex", _renderer.sprite.texture);
             _renderer.SetPropertyBlock(materialBlock);
         }
 
-        public void OnPoolSpawned() {
-            _spriteAnimator.ResetAnimation(_sprite);
+        public void Play() {
+            if (_spriteAnimator == null) {
+                _spriteAnimator = new SpriteAnimationController(_unscaled);
+            }
+            _spriteAnimator.ResetAnimation(_animation);
             UpdateSpriteFrame();
+        }
+
+        public void OnPoolSpawned() {
+            Play();
         }
 
         public void OnPoolDespawned() {}
@@ -47,8 +56,7 @@ namespace PixelComrades {
                 UpdateSpriteFrame();
             }
             _billboard.Apply(transform, _backwards);
-            bool inMargin;
-            var orientation = SpriteFacingControl.GetCameraSide(_facing, transform, transform.parent, 5, out inMargin);
+            var orientation = SpriteFacingControl.GetCameraSide(_facing, transform, transform.parent != null ? transform.parent : transform, 5, out var inMargin);
             if (_orientation == orientation || (inMargin && (orientation.IsAdjacent(_orientation)))) {
                 return;
             }
@@ -58,15 +66,67 @@ namespace PixelComrades {
 
         private void UpdateSpriteFrame() {
             var facing = _orientation;
-            if (_facing == SpriteFacing.EightwayFlipped) {
+            if (_facing.RequiresFlipping()) {
                 facing = _orientation.GetFlippedSide();
                 _renderer.flipX = _orientation.IsFlipped();
             }
-            var sprite = _sprite.GetSpriteFrame(facing, _spriteAnimator.FrameIndex);
+            var sprite = _animation.GetSpriteFrame(facing, _spriteAnimator.FrameIndex);
             if (sprite != null) {
                 _renderer.sprite = sprite;
             }
         }
+#if UNITY_EDITOR
+        [Button]
+        public void TestAnimation() {
+            _spriteAnimator = new SpriteAnimationController(true);
+            TimeManager.StartUnscaled(TestAnimationRunner());
+        }
+
+        private bool _looping;
+
+        [Button]
+        public void TestLoopAnimation() {
+            _spriteAnimator = new SpriteAnimationController(true);
+            _looping = true;
+            TimeManager.StartUnscaled(TestAnimationRunner());
+        }
+
+        [Button]
+        public void StopLoop() {
+            _looping = false;
+        }
+
+        private IEnumerator TestAnimationRunner() {
+            _spriteAnimator.ResetAnimation(_animation);
+            UpdateSpriteFrame();
+            int noCam = 0;
+            while (_spriteAnimator.Active) {
+                if (Camera.current == null) {
+                    yield return null;
+                    noCam++;
+                    if (noCam > 500) {
+                        break;
+                    }
+                    continue;
+                }
+                Game.SpriteCamera = Camera.current;
+                noCam = 0;
+                var orientation = SpriteFacingControl.GetCameraSide(_facing, transform, transform, 5, out var inMargin);
+                _billboard.Apply(transform, _backwards);
+                if (_spriteAnimator.CheckFrameUpdate()) {
+                    UpdateSpriteFrame();
+                }
+                else if (_orientation != orientation && (!inMargin || (!orientation.IsAdjacent(_orientation)))) {
+                    _orientation = orientation;
+                    UpdateSpriteFrame();
+                }
+                if (!_spriteAnimator.Active && _looping) {
+                    _spriteAnimator.ResetAnimation(_animation);
+                }
+                yield return null;
+            }
+        }
+#endif
     }
 }
 

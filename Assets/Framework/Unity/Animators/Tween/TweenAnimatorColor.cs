@@ -24,6 +24,15 @@ namespace PixelComrades {
             _tweener.Restart(originColor, _targets[_index], _durations[_index], _easing[_index], UnScaled);
         }
 
+        public override void PlayFrame(float normalized) {
+            if (_uiColorTarget != null) {
+                _uiColorTarget.color = _tweener.Get(normalized);
+            }
+            if (_colorTarget != null) {
+                _colorTarget.material.color = _tweener.Get(normalized);
+            }
+        }
+
         public override void UpdateTween() {
             if (_uiColorTarget != null) {
                 _uiColorTarget.color = _tweener.Get();

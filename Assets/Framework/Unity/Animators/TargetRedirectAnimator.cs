@@ -37,5 +37,11 @@ namespace PixelComrades {
                 _targetAnimators[i].Play();
             }
         }
+
+        public override void PlayFrame(float normalized) {
+            for (int i = 0; i < _targetAnimators.Length; i++) {
+                _targetAnimators[i].PlayFrame(normalized);
+            }
+        }
     }
 }

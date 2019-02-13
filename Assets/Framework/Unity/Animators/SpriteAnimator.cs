@@ -9,6 +9,8 @@ namespace PixelComrades {
         [SerializeField] private SpriteAnimation _animation = null;
         [SerializeField] private SpriteRenderer _renderer = null;
         [SerializeField] private bool _unscaled = true;
+        [SerializeField] private bool _backwards = false;
+        [SerializeField] private BillboardMode _billboard = BillboardMode.CamFwd;
 
         private SpriteAnimationController _spriteAnimator;
         private bool _active = true;
@@ -25,12 +27,16 @@ namespace PixelComrades {
             _spriteAnimator = new SpriteAnimationController(_unscaled);
         }
 
-        public void OnPoolSpawned() {
+        public void Play() {
             if (_spriteAnimator == null) {
                 _spriteAnimator = new SpriteAnimationController(_unscaled);
             }
             _spriteAnimator.ResetAnimation(_animation);
             UpdateSpriteFrame();
+        }
+
+        public void OnPoolSpawned() {
+            Play();
         }
 
         public void OnPoolDespawned() { }
@@ -47,25 +53,9 @@ namespace PixelComrades {
             if (!_active) {
                 return;
             }
+            _billboard.Apply(transform, _backwards);
             if (_spriteAnimator.CheckFrameUpdate()) {
                 UpdateSpriteFrame();
-            }
-        }
-
-        [Button]
-        public void TestAnimation() {
-            _spriteAnimator = new SpriteAnimationController(true);
-            TimeManager.StartUnscaled(TestAnimationRunner());
-        }
-
-        private IEnumerator TestAnimationRunner() {
-            _spriteAnimator.ResetAnimation(_animation);
-            UpdateSpriteFrame();
-            while (_spriteAnimator.Active) {
-                if (_spriteAnimator.CheckFrameUpdate()) {
-                    UpdateSpriteFrame();
-                }
-                yield return null;
             }
         }
 
@@ -75,5 +65,58 @@ namespace PixelComrades {
                 _renderer.sprite = sprite;
             }
         }
+
+#if UNITY_EDITOR
+        [Button]
+        public void TestAnimation() {
+            _spriteAnimator = new SpriteAnimationController(true);
+            TimeManager.StartUnscaled(TestAnimationRunner());
+        }
+
+        private bool _looping;
+        //private Task _loop;
+        [Button]
+        public void TestLoopAnimation() {
+            _spriteAnimator = new SpriteAnimationController(true);
+            _looping = true;
+            TimeManager.StartUnscaled(TestAnimationRunner());
+            //_loop = TimeManager.StartUnscaled(TestAnimationRunner());
+        }
+
+        [Button]
+        public void StopLoop() {
+            _looping = false;
+            //if (_loop != null) {
+            //    TimeManager.Cancel(_loop);
+            //    _loop = null;
+            //}
+        }
+
+        private IEnumerator TestAnimationRunner() {
+            _spriteAnimator.ResetAnimation(_animation);
+            UpdateSpriteFrame();
+            int noCam = 0;
+            while (_spriteAnimator.Active) {
+                if (Camera.current == null) {
+                    yield return null;
+                    noCam++;
+                    if (noCam > 500) {
+                        break;
+                    }
+                    continue;
+                }
+                Game.SpriteCamera = Camera.current;
+                noCam = 0;
+                _billboard.Apply(transform, _backwards);
+                if (_spriteAnimator.CheckFrameUpdate()) {
+                    UpdateSpriteFrame();
+                }
+                if (!_spriteAnimator.Active && _looping) {
+                    _spriteAnimator.ResetAnimation(_animation);
+                }
+                yield return null;
+            }
+        }
+#endif
     }
 }

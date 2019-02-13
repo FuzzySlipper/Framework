@@ -76,23 +76,33 @@ namespace PixelComrades {
             _task = null;
         }
 
+        public override void PlayFrame(float normalized) {
+            if (_matBlocks == null) {
+                SetMatBlocks();
+            }
+            for (int i = 0; i < _matBlocks.Length; i++) {
+                _matBlocks[i].SetFloat(_shaderFeature, Mathf.Lerp(_originValues[i], Target, normalized));
+                _renderers[i].SetPropertyBlock(_matBlocks[i]);
+            }
+        }
+
         private IEnumerator PlayAnimation() {
             var startTime = TimeManager.Time;
-            var startValues = new float[_renderers.Length];
+            var _startValues = new float[_renderers.Length];
             for (int i = 0; i < _renderers.Length; i++) {
-                startValues[i] = _matBlocks[i].GetFloat(_shaderFeature);
+                _startValues[i] = _matBlocks[i].GetFloat(_shaderFeature);
                 _renderers[i].shadowCastingMode = _shadowCastingModes[_index];
             }
             while (TimeManager.Time < startTime + _length) {
                 var percent = (TimeManager.Time - startTime) / _length;
                 for (int i = 0; i < _matBlocks.Length; i++) {
-                    _matBlocks[i].SetFloat(_shaderFeature, Mathf.Lerp(startValues[i], Target, percent));
+                    _matBlocks[i].SetFloat(_shaderFeature, Mathf.Lerp(_startValues[i], Target, percent));
                     _renderers[i].SetPropertyBlock(_matBlocks[i]);
                 }
                 yield return null;
             }
             for (int i = 0; i < _matBlocks.Length; i++) {
-                _matBlocks[i].SetFloat(_shaderFeature, Mathf.Lerp(startValues[i], Target, 1));
+                _matBlocks[i].SetFloat(_shaderFeature, Mathf.Lerp(_startValues[i], Target, 1));
                 _renderers[i].SetPropertyBlock(_matBlocks[i]);
             }
         }

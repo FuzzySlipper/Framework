@@ -18,7 +18,7 @@ namespace PixelComrades {
         private float _animTime;
 
         // When true, the anim plays automatically when animation is selected. Set to false when users manually stops an animation
-        [SerializeField] private bool _autoPlay = true;
+        [SerializeField] private bool _autoPlay = false;
 
         [SerializeField] private SpriteAnimation _clip;
 
@@ -55,6 +55,26 @@ namespace PixelComrades {
         // Used to clear selection when hit play (avoids selection references being broken)
         private bool _wasPlaying;
 
+        private Texture2D _eventTexture = null;
+
+        public Texture2D EventTexture {
+            get {
+                if (_eventTexture == null) {
+                    var size = 50;
+                    var border = 10;
+                    _eventTexture = new Texture2D(size, size, TextureFormat.ARGB32, false);
+                    for (int x = 0; x < size; x++) {
+                        for (int y = 0; y < size; y++) {
+                            bool isBorder = x < border || y < border || x > size - border || y > size - border;
+                            _eventTexture.SetPixel(x,y, isBorder ? Color.white : Color.clear);
+                        }
+                    }
+                    _eventTexture.Apply();
+                }
+                return _eventTexture;
+            }
+        }
+
         public SpriteAnimatorWindow() {
             EditorApplication.update += Update;
             Undo.undoRedoPerformed += OnUndoRedo;
@@ -78,14 +98,12 @@ namespace PixelComrades {
             public Sprite Sprite;
             public float Time;
 
-            public bool DefaultEventTrigger = false;
-
             public AnimationFrame.EventType Event = AnimationFrame.EventType.None;
             public string EventName;
-            public int EventDataInt;
+            public Vector2 EventPosition;
             public float EventDataFloat;
             public string EventDataString;
-            public GameObject EventDataGameObject;
+            public Object EventDataObject;
             public float EndTime { get { return Time + RealLength; } }
         }
 
@@ -157,14 +175,14 @@ namespace PixelComrades {
             _clip.Frames = new AnimationFrame[_frames.Count];
             for (int i = 0; i < _frames.Count; i++) {
                 _clip.Frames[i] = new AnimationFrame() {
-                    DefaultEventTrigger = _frames[i].DefaultEventTrigger,
                     Length = _frames[i].LengthMulti,
                     SpriteIndex = i,
+                    Event = _frames[i].Event,
                     EventName = _frames[i].EventName,
-                    EventDataInt = _frames[i].EventDataInt,
+                    EventPosition = _frames[i].EventPosition,
                     EventDataFloat = _frames[i].EventDataFloat,
                     EventDataString = _frames[i].EventDataString,
-                    EventDataGameObject = _frames[i].EventDataGameObject,
+                    EventDataObject = _frames[i].EventDataObject,
                 };
             }
             _clip.LastModified = System.DateTime.Now.ToString("G");
@@ -321,6 +339,15 @@ namespace PixelComrades {
             return frame != null ? frame.Sprite : null;
         }
 
+        private bool HasValidEvent(float time) {
+            var frame = GetFrameAtTime(time);
+            return frame.Event != AnimationFrame.EventType.None;
+        }
+
+        private Vector2 GetEventPosition(float time) {
+            return GetFrameAtTime(time).EventPosition;
+        }
+
         /// Add frames at a specific position
         private void InsertFrames(Sprite[] sprites, int atPos) {
             var frameLength = GetFrameTime();
@@ -345,8 +372,7 @@ namespace PixelComrades {
             ApplyChanges();
         }
 
-        private void LayoutFrameSprite(Rect rect, Sprite sprite, float scale, Vector2 offset, bool useTextureRect,
-            bool clipToRect) {
+        private void LayoutFrameSprite(Rect rect, Sprite sprite, float scale, Vector2 offset, bool useTextureRect, bool clipToRect) {
             var spriteRectOriginal = useTextureRect ? sprite.textureRect : sprite.rect;
             var texCoords = new Rect(spriteRectOriginal.x/sprite.texture.width,
                 spriteRectOriginal.y/sprite.texture.height, spriteRectOriginal.width/sprite.texture.width,
@@ -371,6 +397,12 @@ namespace PixelComrades {
                 // Draw the texture
                 GUI.DrawTextureWithTexCoords(croppedRect, sprite.texture, texCoords, true);
                 //clickRect = croppedRect;
+                if (HasValidEvent(_animTime)) {
+                    var rectSize = 25;
+                    var eventPos = GetEventPosition(_animTime);
+                    var eventRect = new Rect(croppedRect.center + new Vector2(eventPos.x * (croppedRect.width/2)- rectSize, eventPos.y * (croppedRect.height/2)- rectSize), Vector2.one * rectSize);
+                    GUI.DrawTexture(eventRect, EventTexture);
+                }
             }
             else {
                 // Draw the texture
@@ -387,8 +419,6 @@ namespace PixelComrades {
             //    Debug.LogFormat("{0} {1} {2} {3} {4}", mousePos, clickRect.position, clickRect.center, pos, new Vector2(pos.x / spriteRectOriginal.width, pos.y / spriteRectOriginal.height));
             //}
         }
-
-        public Vector2 EventPosition = Vector2.zero;
 
         private void LayoutPreview(Rect rect) {
             //
@@ -565,14 +595,14 @@ namespace PixelComrades {
             for (int i = 0; i < _clip.Frames.Length; i++) {
                 _frames.Add(new AnimFrame() {
                     Sprite = _clip.GetSpriteFrame(i),
-                    DefaultEventTrigger = _clip.Frames[i].DefaultEventTrigger,
+                    Event = _clip.Frames[i].Event,
                     LengthMulti = _clip.Frames[i].Length,
                     RealLength = MathEx.Max(GetFrameTime(), SnapTimeToFrameRate(_clip.Frames[i].Length)),
                     EventName = _clip.Frames[i].EventName,
-                    EventDataInt = _clip.Frames[i].EventDataInt,
+                    EventPosition = _clip.Frames[i].EventPosition,
                     EventDataFloat = _clip.Frames[i].EventDataFloat,
                     EventDataString = _clip.Frames[i].EventDataString,
-                    EventDataGameObject = _clip.Frames[i].EventDataGameObject,
+                    EventDataObject = _clip.Frames[i].EventDataObject,
                 });
                 _frames.LastElement().Time = time;
                 time += _clip.FrameTime*_frames.LastElement().RealLength;

@@ -43,6 +43,7 @@ namespace PixelComrades {
         public const string Vitals = "Vitals";
         public const string Attributes = "Attributes";
         public const string ItemRarity = "ItemRarity";
+        public const string EquipmentSlotType = "EquipmentSlotType";
     }
     
     public enum PlayerPronouns {

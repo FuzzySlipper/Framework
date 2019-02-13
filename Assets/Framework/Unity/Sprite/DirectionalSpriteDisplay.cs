@@ -94,7 +94,7 @@ namespace PixelComrades {
             }
             _orientation = orientation;
             var facing = orientation;
-            if (_facing == SpriteFacing.EightwayFlipped) {
+            if (_facing.RequiresFlipping()) {
                 facing = _orientation.GetFlippedSide();
                 _renderer.flipX = _orientation.IsFlipped();
             }

@@ -40,6 +40,13 @@ namespace PixelComrades {
             return _easeFunc(start, end, _percent);
         }
 
+        protected float GetEase(float start, float end, float percent) {
+            if (_easeFunc == null) {
+                _easeFunc = Easing.Function(_easeType);
+            }
+            return _easeFunc(start, end, percent);
+        }
+
         public void Cancel() {
             Initialized = false;
         }
@@ -116,6 +123,16 @@ namespace PixelComrades {
                 GetEase(_startValue.z, _endValue.z)
             );
         }
+
+
+        public Vector3 Get(float percent) {
+            return new Vector3(
+                GetEase(_startValue.x, _endValue.x, percent),
+                GetEase(_startValue.y, _endValue.y, percent),
+                GetEase(_startValue.z, _endValue.z, percent)
+            );
+        }
+
     }
 
     [System.Serializable] 
@@ -170,6 +187,10 @@ namespace PixelComrades {
         public float Get() {
             return GetEase(_startValue, _endValue);
         }
+
+        public float Get(float percent) {
+            return GetEase(_startValue, _endValue, percent);
+        }
     }
 
     [System.Serializable] public class TweenQuaternion : Tweener {
@@ -222,6 +243,10 @@ namespace PixelComrades {
 
         public Quaternion Get() {
             return Quaternion.Lerp(_startValue, _endValue, GetEase(0, 1));
+        }
+
+        public Quaternion Get(float percent) {
+            return Quaternion.Lerp(_startValue, _endValue, GetEase(0, 1, percent));
         }
     }
 
@@ -280,6 +305,10 @@ namespace PixelComrades {
                 GetEase(_startValue.b, _endValue.b),
                 GetEase(_startValue.a, _endValue.a)
             );
+        }
+
+        public Color Get(float percent) {
+            return Color.Lerp(_startValue, _endValue, GetEase(0, 1, percent));
         }
     }
 }
