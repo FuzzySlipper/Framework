@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using GameObject = UnityEngine.GameObject;
 
 namespace PixelComrades
 {
@@ -208,6 +209,16 @@ namespace PixelComrades
 		}
 		return names;
 	}
+
+    public static class EditorSave {
+
+        public static void SetDirty(UnityEngine.Object obj) {
+            EditorUtility.SetDirty(obj);
+            if (obj is GameObject go) {
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(go.scene);
+            }
+        }
+    }
 }
 #endif
 
