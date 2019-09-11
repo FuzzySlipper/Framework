@@ -7,7 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class ExperienceStat : ISerializable {
 
-        public event Action OnLevelUp;
+        public event System.Action OnLevelUp;
 
         private static GameOptions.CachedFloat _extraAdd = new GameOptions.CachedFloat("ExtraXpOffset");
         private static GameOptions.CachedFloat _multiplier = new GameOptions.CachedFloat("XpLevelMultiplier");

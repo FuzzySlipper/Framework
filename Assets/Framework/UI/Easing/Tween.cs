@@ -20,7 +20,7 @@ namespace PixelComrades {
             c
         }
 
-        public const Action doNothing = null;
+        public const System.Action doNothing = null;
         private Action<float> valSet;
         private Action<Color> valSetC;
         private Action<Vector2> valSetv2;
@@ -30,7 +30,7 @@ namespace PixelComrades {
         public Color fromC, toC;
         public Vector2 fromV2, toV2;
         public Vector3 fromV3, toV3;
-        public Action OnComplete;
+        public System.Action OnComplete;
         public TweenRepeat repeat = TweenRepeat.Once;
         public Func<float> time;
         public TweenType type = TweenType.f;
@@ -48,7 +48,7 @@ namespace PixelComrades {
         /// <param name="OnComplete">On complete.</param>
         public Tween(Action<float> valueSetter, float from, float to, float length,
             EasingTypes easeType = EasingTypes.Linear, bool unscaled = false, TweenRepeat repeat = TweenRepeat.Once,
-            Action OnComplete = doNothing) {
+            System.Action OnComplete = doNothing) {
             valSet = valueSetter;
             this.from = from;
             this.to = to;
@@ -73,7 +73,7 @@ namespace PixelComrades {
         /// <param name="OnComplete">On complete.</param>
         public Tween(Action<Vector2> valueSetter, Vector2 from, Vector2 to, float length,
             EasingTypes easeType = EasingTypes.Linear, bool unscaled = false, TweenRepeat repeat = TweenRepeat.Once,
-            Action OnComplete = doNothing) {
+            System.Action OnComplete = doNothing) {
             valSetv2 = valueSetter;
             fromV2 = from;
             toV2 = to;
@@ -98,7 +98,7 @@ namespace PixelComrades {
         /// <param name="OnComplete">On complete.</param>
         public Tween(Action<Vector3> valueSetter, Vector3 from, Vector3 to, float length,
             EasingTypes easeType = EasingTypes.Linear, bool unscaled = false, TweenRepeat repeat = TweenRepeat.Once,
-            Action OnComplete = doNothing) {
+            System.Action OnComplete = doNothing) {
             valSetv3 = valueSetter;
             fromV3 = from;
             toV3 = to;
@@ -123,7 +123,7 @@ namespace PixelComrades {
         /// <param name="OnComplete">On complete.</param>
         public Tween(Action<Color> valueSetter, Color from, Color to, float length,
             EasingTypes easeType = EasingTypes.Linear, bool unscaled = false, TweenRepeat repeat = TweenRepeat.Once,
-            Action OnComplete = doNothing) {
+            System.Action OnComplete = doNothing) {
             valSetC = valueSetter;
             fromC = from;
             toC = to;
@@ -162,7 +162,7 @@ namespace PixelComrades {
         }
 
         public static Func<float> timeFunc(bool unscaled) {
-            return unscaled ? (() => Time.unscaledDeltaTime) : (Func<float>) (() => Time.deltaTime);
+            return unscaled ? (() => TimeManager.DeltaUnscaled) : (Func<float>) (() => TimeManager.DeltaTime);
         }
 
         public Task Play() {
@@ -171,7 +171,7 @@ namespace PixelComrades {
 
         private IEnumerator Animate() {
             //store the easeCall in this Action depending on Tweentype
-            Action easeCall;
+            System.Action easeCall;
             switch (type) {
                 case Tween.TweenType.delay:
                     yield return originaltime;

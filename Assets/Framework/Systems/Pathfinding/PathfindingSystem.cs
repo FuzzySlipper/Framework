@@ -5,6 +5,8 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class PathfindingSystem : SystemBase, IMainSystemUpdate {
 
+        public static bool UseSimple = false;
+
         private GameOptions.CachedInt _playerWalkableRadius = new GameOptions.CachedInt("PathfindPlayerWalkableRadius");
         private GameOptions.CachedInt _playerOccupyRadius = new GameOptions.CachedInt("PathfindPlayerOccupiedRadius");
         private GameOptions.CachedInt _threadCount = new GameOptions.CachedInt("PathfindThreadCount");
@@ -18,6 +20,7 @@ namespace PixelComrades {
         private List<PathReturn> _toReturn = new List<PathReturn>();
         private IPathfinder _nonThreadedPathfinder;
         private IPathfindingGrid _pathfindingGrid;
+        private IPathfindingSource _pathfindingSource;
 
         public PathfindingThread[] Threads { get => _threads; }
         public int PendingCount { get; private set; }
@@ -25,8 +28,13 @@ namespace PixelComrades {
         public IPathfindingGrid Grid { get => _pathfindingGrid; }
 
         public PathfindingSystem() {
+            if (!UseSimple) {
+                _pathfindingSource = new AstarPathfinderSystemGrid();
+                return;
+            }
             AstarP3Pathfinder.SetAxis(2);
             _pathfindingGrid = new SimpleThreadSafeGrid();
+            _pathfindingSource = _pathfindingGrid;
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 _nonThreadedPathfinder = new AstarP3Pathfinder();
@@ -48,7 +56,7 @@ namespace PixelComrades {
             }
         }
 
-        public void OnSystemUpdate(float dt) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
             if (!Game.GameActive) {
                 return;
             }
@@ -147,29 +155,32 @@ namespace PixelComrades {
             }
         }
 
-        public void DestroyGrid() {
-            _pathfindingGrid = new SimpleThreadSafeGrid();
-            _pathfindingGrid.ClearAll();
+        public void Clear() {
+            _pathfindingSource.ClearAll();
         }
 
-        public Vector3 FindWander(Vector3 currentV3Pos, int wanderRadius) {
-            var currentPos = currentV3Pos.toPoint3();
-            Point3 returnPos = Point3.zero;
-            WhileLoopLimiter.ResetInstance();
-            while (WhileLoopLimiter.InstanceAdvance()) {
-                var position = currentPos + (UnityEngine.Random.insideUnitSphere * wanderRadius).toPoint3();
-                position.y = 0;
-                if (!_pathfindingGrid.IsWalkable(position, false) || position == currentPos) {
-                    continue;
-                }
-                returnPos = position;
-                break;
-            }
-            return returnPos.toVector3();
+        public Vector3 FindOpenPosition(Vector3 currentV3Pos, int wanderRadius) {
+            return _pathfindingSource.FindOpenPosition(currentV3Pos, wanderRadius);
         }
 
         public void UpdatePlayerPosition(Vector3 position) {
-            _pathfindingGrid.SetPlayerPosition(position.toPoint3ZeroY(), Player.MainEntity, _playerWalkableRadius, _playerOccupyRadius);
+            _pathfindingSource.SetPlayerPosition(position.toPoint3ZeroY(), Player.MainEntity, _playerWalkableRadius, _playerOccupyRadius);
+        }
+
+        public bool IsWalkable(Vector3 pos, bool isOversized) {
+            return _pathfindingSource.IsWalkable(pos, isOversized);
+        }
+
+        public void SetWalkable(Bounds bounds, bool status) {
+            _pathfindingSource.SetWalkable(bounds, status);
+        }
+
+        public void Scan() {
+            _pathfindingSource.Scan();
+        }
+
+        public void SetCellSize(float size) {
+            _pathfindingSource.SetCellSize(size);
         }
     }
 }

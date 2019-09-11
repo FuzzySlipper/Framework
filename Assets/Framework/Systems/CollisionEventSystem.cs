@@ -8,28 +8,68 @@ namespace PixelComrades {
 
         public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
 
-        public void HandleGlobal(ManagedArray<CollisionEvent> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                var msg = arg[i];
-                if (msg.Hit < 0) {
-                    msg.Hit = 10;
-                    for (int h = 0; h < Handlers.Count; h++) {
-                        msg.Hit = MathEx.Min(Handlers[h].CheckHit(msg), msg.Hit);
-                    }
+        public void HandleGlobal(CollisionEvent msg) {
+            if (msg.Hit < 0) {
+                msg.Hit = 10;
+                for (int h = 0; h < Handlers.Count; h++) {
+                    msg.Hit = MathEx.Min(Handlers[h].CheckHit(msg), msg.Hit);
                 }
-                if (msg.Hit <= 0) {
-                    continue;
-                }
-                var actionStateEvent = new ActionStateEvent(msg.Origin, msg.Target, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Impact);
-                var impacts = msg.Origin.Find<ActionImpacts>();
-                if (impacts == null) {
-                    Debug.LogFormat("{0} had no impacts", msg.Origin.Name);
-                }
-                else {
-                    impacts.ProcessAction(msg, actionStateEvent, msg.Target);
-                }
-                msg.Origin.Post(actionStateEvent);
             }
+            if (msg.Hit <= 0) {
+                return;
+            }
+            var actionStateEvent = new ActionStateEvent(msg.Origin, msg.Target, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Impact);
+            if (msg.Impacts == null) {
+                Debug.LogFormat("{0} had no impacts {1}", msg.Origin.Name, System.Environment.StackTrace);
+            }
+            else {
+                for (int j = 0; j < msg.Impacts.Count; j++) {
+                    msg.Impacts[j].ProcessImpact(msg, actionStateEvent);
+                }
+            }
+            msg.Origin.Post(actionStateEvent);
+        }
+    }
+
+    [Priority(Priority.Higher)]
+    public struct EnvironmentCollisionEvent : IEntityMessage {
+        public Entity EntityHit;
+        public Vector3 HitPoint;
+        public Vector3 HitNormal;
+
+        public EnvironmentCollisionEvent(Entity entityHit, Vector3 hitPoint, Vector3 hitNormal) {
+            EntityHit = entityHit;
+            HitPoint = hitPoint;
+            HitNormal = hitNormal;
+        }
+    }
+
+    [Priority(Priority.Higher)]
+    public struct PerformedCollisionEvent : IEntityMessage {
+
+        public Entity Origin;
+        public Entity Target;
+        public Vector3 HitPoint;
+        public Vector3 HitNormal;
+        public int Hit;
+        public List<IActionImpact> Impacts;
+
+        public PerformedCollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts, int hit = -1) {
+            Impacts = impacts;
+            Origin = origin;
+            Target = target;
+            HitPoint = hitPoint;
+            HitNormal = hitNormal;
+            Hit = hit;
+        }
+
+        public PerformedCollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
+            Impacts = impacts?.Impacts;
+            Origin = origin;
+            Target = target;
+            HitPoint = hitPoint;
+            HitNormal = hitNormal;
+            Hit = hit;
         }
     }
 
@@ -41,8 +81,19 @@ namespace PixelComrades {
         public Vector3 HitPoint;
         public Vector3 HitNormal;
         public int Hit;
+        public List<IActionImpact> Impacts;
 
-        public CollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, int hit = -1) {
+        public CollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts,  int hit = -1) {
+            Impacts = impacts;
+            Origin = origin;
+            Target = target;
+            HitPoint = hitPoint;
+            HitNormal = hitNormal;
+            Hit = hit;
+        }
+
+        public CollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
+            Impacts = impacts?.Impacts;
             Origin = origin;
             Target = target;
             HitPoint = hitPoint;

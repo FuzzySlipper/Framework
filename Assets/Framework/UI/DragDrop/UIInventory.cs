@@ -35,6 +35,8 @@ namespace PixelComrades {
         //    }
         //}
 
+        
+
         public void SetInventory(ItemInventory inventory, string title) {
             ClearOld();
             _inventory = inventory;
@@ -45,16 +47,15 @@ namespace PixelComrades {
                 return;
             }
             //_slots = new UIItemDragDrop[_inventory.Limit < 0 ? _inventory.Count : _inventory.Limit];
-            _slots = new UIItemDragDrop[_inventory.Count];
+            ClearSlots();
+            _slots = new UIItemDragDrop[_inventory.Max];
             for (int i = 0; i < _slots.Length; i++) {
-                if (_inventory[i] == null) {
-                    continue;
-                }
                 _slots[i] = SpawnPrefab();
                 _slots[i].Index = i;
                 _slots[i].SetItem(_inventory[i]);
             }
             _inventory.OnRefreshItemList += RefreshInventory;
+            RefreshInventory();
         }
 
         protected virtual UIItemDragDrop SpawnPrefab() {
@@ -70,23 +71,27 @@ namespace PixelComrades {
         }
 
         private void ClearOld() {
-            ClearInventory();
-            if (_inventory == null) {
-                return;
+            if (_inventory != null) {
+                _inventory.OnRefreshItemList -= RefreshInventory;
             }
-            _inventory.OnRefreshItemList -= RefreshInventory;
         }
 
-        public void ClearInventory() {
-            if (_slots != null) {
-                for (int i = 0; i < _slots.Length; i++) {
-                    if (_slots[i] == null) {
-                        continue;
-                    }
-                    ItemPool.Despawn(_slots[i].gameObject);
-                }
-                _slots = null;
+        private void ClearSlots() {
+            if (_slots == null) {
+                return;
             }
+            for (int i = 0; i < _slots.Length; i++) {
+                if (_slots[i] == null) {
+                    continue;
+                }
+                ItemPool.Despawn(_slots[i].gameObject);
+            }
+            _slots = null;
+        }
+
+        public void Clear() {
+            ClearOld();
+            ClearSlots();
         }
 
         protected void RefreshInventory() {

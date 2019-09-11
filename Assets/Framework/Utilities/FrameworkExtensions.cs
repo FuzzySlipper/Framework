@@ -8,7 +8,7 @@ namespace PixelComrades {
     public static partial class FrameworkExtensions {
         private static Random _r = new Random();
 
-        public static T[] Add<T>(this T[] array, T val) {
+        public static T[] AddToArray<T>(this T[] array, T val) {
             var length = array.Length;
             array = array.Increase(1);
             array[length] = val;

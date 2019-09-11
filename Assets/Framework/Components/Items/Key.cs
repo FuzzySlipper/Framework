@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public struct Key : IComponent {
-        public int Owner { get; set; }
         public string KeyId { get; }
 
         public Key(string keyId) : this() {
@@ -17,6 +17,14 @@ namespace PixelComrades {
 
         public bool TryUse(KeyHole hole) {
             return hole.UnlockKey(KeyId);
+        }
+
+        public Key(SerializationInfo info, StreamingContext context) {
+            KeyId = info.GetValue(nameof(KeyId), "");
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(KeyId), KeyId);
         }
     }
 }

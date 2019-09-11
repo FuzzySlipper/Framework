@@ -1,27 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
 
     public interface IActionImpact {
-        void ProcessAction(CollisionEvent collisionEvent, ActionStateEvent stateEvent, Entity owner, Entity target);
+        float Power { get; }
+        void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent);
     }
 
-    public class ActionImpacts : GenericContainer<IActionImpact> {
+    public class ActionImpacts : IComponent {
+        public List<IActionImpact> Impacts;
 
-        public ActionImpacts(IList<IActionImpact> values) : base(values) {}
-
-        public void ProcessAction(CollisionEvent collisionEvent, ActionStateEvent stateEvent, Entity target) {
-            var owner = this.GetEntity();
-            for (int i = 0; i < Count; i++) {
-                this[i].ProcessAction(collisionEvent, stateEvent, owner, target);
-            }
+        public ActionImpacts(List<IActionImpact> values) : base() {
+            Impacts = values;
         }
-        public ActionImpacts(){}
-
-        public ActionImpacts Clone() {
-            return new ActionImpacts(List.ToArray());
+        
+        public ActionImpacts(SerializationInfo info, StreamingContext context) {
+            Impacts = info.GetValue(nameof(Impacts), Impacts);
+        }
+        
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Impacts), Impacts);
         }
     }
 }

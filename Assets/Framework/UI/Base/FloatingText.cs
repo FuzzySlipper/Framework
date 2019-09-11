@@ -18,12 +18,12 @@ namespace PixelComrades {
 
         public static void Message(string message, Vector3 start, Color color) {
             var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextStandard", start, Quaternion.identity, true, false);
-            spawn.StartText(message, 4f, start + DefaultEnd, color);
+            spawn.StartText(message, 1.5f, start + DefaultEnd, color);
         }
 
         public static void Message(string message, Vector3 start) {
             var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextStandard", start, Quaternion.identity, true, false);
-            spawn.StartText(message, 4f, start + DefaultEnd);
+            spawn.StartText(message, 1.5f, start + DefaultEnd);
         }
 
         public static void Spawn(string text, float duration, Vector3 start, Vector3 end) {
@@ -55,7 +55,7 @@ namespace PixelComrades {
                 transform.position = _moveTween.Get();
                 transform.LookAt(transform.position + Player.Cam.transform.rotation * Vector3.forward,
                     Player.Cam.transform.rotation * Vector3.up);
-                _text.fontSize = Vector3.Distance(transform.position, Player.Cam.transform.position) * 0.35f;
+                //_text.fontSize = Vector3.Distance(transform.position, Player.Cam.transform.position) * 0.35f;
                 yield return null;
             }
             ItemPool.Despawn(gameObject);

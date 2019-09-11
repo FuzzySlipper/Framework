@@ -64,6 +64,8 @@ public class UICursor : MonoSingleton<UICursor> {
             return;
         }
         //Cursor.SetCursor(newCursor, GetSize(newCursor), CursorMode.Auto);
+        _cursorSprite.enabled = false;
         _cursorSprite.sprite = newCursor;
+        _cursorSprite.enabled = true;
     }
 }

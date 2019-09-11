@@ -10,7 +10,8 @@ namespace PixelComrades {
 
         public int Owner { get { return _entity.Id; } set { } }
 
-        private int[] _tags = new int[EntityTags.MAX_TAGS_LIMIT];
+        private int[] _tags = new int[EntityTags.MaxTagsLimit];
+        public int[] Tags { get => _tags; }
 
         public void Dispose() {
             _tags = null;
@@ -26,7 +27,7 @@ namespace PixelComrades {
         public void DebugActive() {
             for (int i = 0; i < _tags.Length; i++) {
                 if (_tags[i] > 0) {
-                    Debug.LogFormat("{0}:{1}",i, _tags[i]);
+                    Debug.LogFormat("{0}:{1}",i, EntityTags.GetNameAt(i));
                 }
             }
         }
@@ -38,12 +39,25 @@ namespace PixelComrades {
             }
             _entity.Post(EntitySignals.TagsChanged);
         }
+
+        public void Set(int id, int value) {
+            _tags[id] = value;
+            _entity.Post(EntitySignals.TagsChanged);
+        }
+
         /// <summary>
         /// id must be from EntityTags
         /// </summary>
         /// <param name="id"></param>
         public void Add(int id) {
+            bool wasZero = _tags[id] == 0;
             _tags[id]++;
+            if (!wasZero) {
+                return;
+            }
+#if DEBUG
+            DebugLog.Add(_entity.DebugId + " tag added " + EntityTags.GetNameAt(id));
+#endif
             _entity.Post(EntitySignals.TagsChanged);
         }
 
@@ -102,7 +116,14 @@ namespace PixelComrades {
         }
 
         public void Remove(int id) {
+            bool wasZero = _tags[id] == 0;
             _tags[id] = Math.Max(_tags[id] - 1, 0);
+            if (wasZero || _tags[id] > 0) {
+                return;
+            }
+#if DEBUG
+            DebugLog.Add(_entity.DebugId + " tag removed " + EntityTags.GetNameAt(id));
+#endif
             _entity.Post(EntitySignals.TagsChanged);
         }
 
@@ -125,5 +146,9 @@ namespace PixelComrades {
         public TagsComponent(Entity owner) {
             _entity = owner;
         }
+
+        public bool IsConfused { get { return Contain(EntityTags.IsConfused); } }
+        public bool IsSlowed { get { return Contain(EntityTags.IsSlowed); } }
+        public bool IsStunned { get { return Contain(EntityTags.IsStunned); } }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityEditor;
@@ -15,10 +16,10 @@ namespace PixelComrades {
     public class DebugConsole : MonoBehaviour {
 
         [Header("References")]
-        [SerializeField] private InputField _commandInput;
-        [SerializeField] private Text _historyText;
-        [SerializeField] private Image _commandInputBackgroundImage;
-        [SerializeField] private Image _historyBackgroundImage;
+        [SerializeField] private InputField _commandInput = null;
+        [SerializeField] private Text _historyText = null;
+        [SerializeField] private Image _commandInputBackgroundImage = null;
+        [SerializeField] private Image _historyBackgroundImage = null;
         [Header("Config")]
         [SerializeField] private KeyCode _closedWindowKey = KeyCode.Escape;
         [SerializeField] private KeyCode _smallWindowKey = KeyCode.F1;
@@ -28,7 +29,7 @@ namespace PixelComrades {
         [SerializeField] private float _outputLogTextSize = 0.8f;
         [SerializeField] private float _caretColorLerpSpeed = 5;
         [SerializeField] private float _closedWindowPosition = 1f;
-        [SerializeField] private float _fullWindowPosition;
+        [SerializeField] private float _fullWindowPosition = 0;
         [SerializeField] private int _caretWidth = 10;
         [SerializeField] private char _navigationIndicator = '>';
         [Header("Colors")]
@@ -44,6 +45,7 @@ namespace PixelComrades {
         [SerializeField] private Color _commandHistoryColor = new Color(1f, 1f, 1f, 200f / 255f);
         [SerializeField] private Color _commandInputBackgroundColor = new Color(0f, 0f, 0f, 200f / 255f);
 
+        private static Dictionary<string, System.Func<string[], string>> _commands = new Dictionary<string, System.Func<string[], string>>();
         private Color _targetCaretColor;
         private RectTransform _tf;
         private float _targetPosition;
@@ -56,8 +58,17 @@ namespace PixelComrades {
         private bool _opened;
 
         public event Action<string> OnCommandEnter;
-        public event Action OnConsoleClosed;
-        public event Action OnConsoleOpened;
+        public event System.Action OnConsoleClosed;
+        public event System.Action OnConsoleOpened;
+
+
+        public static void RegisterCommand(string text, Func<string[], string> cmd) {
+            _commands.AddOrUpdate(text, cmd);
+        }
+
+        public static void RemoveCommand(string text) {
+            _commands.Remove(text);
+        }
 
         void Start() {
             _targetPosition = _closedWindowPosition;
@@ -100,7 +111,7 @@ namespace PixelComrades {
             float sinLerp = (Mathf.Sin(Time.time * _caretColorLerpSpeed) + 1) / 2;
             _targetCaretColor = Color.Lerp(_secondaryCaretColor, _tertiaryCaretColor, sinLerp);
             if (!_navigating) {
-                _commandInput.caretColor = Color.Lerp(_commandInput.caretColor, _targetCaretColor, _caretColorLerpSpeed * Time.deltaTime);
+                _commandInput.caretColor = Color.Lerp(_commandInput.caretColor, _targetCaretColor, _caretColorLerpSpeed * TimeManager.DeltaUnscaled);
             }
         }
 
@@ -209,6 +220,21 @@ namespace PixelComrades {
             var command = new Entry();
             command.Command = text;
             _historyList.Add(command);
+#if DEBUG
+            if (text.ToLower() == "write log" || text.ToLower() == "writelog") {
+                StreamWriter writer = new StreamWriter(string.Format("{0}/Log-{1:MM-dd-yy hh-mm-ss}.txt", Application.persistentDataPath, System.DateTime.Now), true);
+                writer.Write(DebugLog.Current);
+                command.Output = "Wrote Log";
+                return;
+            }
+#endif
+            var cmdSplit = text.Split(' ');
+            if (cmdSplit.Length > 0 && _commands.TryGetValue(cmdSplit[0], out var del)) {
+                command.Output = del(cmdSplit.RemoveAt(0));
+                OnCommandEnter?.Invoke(text);
+                UpdateHistoryText();
+                return;
+            }
             _pendingOutput = true;
 #if USE_LUA
             _lua.DoString(text);
@@ -373,23 +399,25 @@ namespace PixelComrades {
             return type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         }
 
+        private StringBuilder _builder = new StringBuilder();
+
         private void UpdateHistoryText() {
-            var builder = new StringBuilder();
+            _builder.Clear();
             for (int i = 0; i < _historyList.Count; i++) {
                 var entry = _historyList[i];
-                builder.Append("\n");
+                _builder.Append("\n");
                 if (i == _commandIndex) {
-                    builder.Append("<color=\"#" + ColorUtility.ToHtmlStringRGBA(_navigationIndicatorColor) + "\">" + _navigationIndicator + "</color>");
+                    _builder.Append("<color=\"#" + ColorUtility.ToHtmlStringRGBA(_navigationIndicatorColor) + "\">" + _navigationIndicator + "</color>");
                 }
                 else {
-                    builder.Append(" ");
+                    _builder.Append(" ");
                 }
-                builder.Append("<color=\"#" + ColorUtility.ToHtmlStringRGBA(_commandHistoryColor) + "\">" + entry.Command + "</color>");
+                _builder.Append("<color=\"#" + ColorUtility.ToHtmlStringRGBA(_commandHistoryColor) + "\">" + entry.Command + "</color>");
                 if (!string.IsNullOrEmpty(entry.Output)) {
-                    builder.Append(entry.Output);
+                    _builder.Append(entry.Output);
                 }
             }
-            _historyText.text = builder.ToString();
+            _historyText.text = _builder.ToString();
         }
 
         public class Entry {

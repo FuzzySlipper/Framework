@@ -55,7 +55,7 @@ namespace PixelComrades {
             //_assignedIndex = index;
             _label = menuAction.Description;
             if (menuAction.Icon != null) {
-                _icon.sprite = menuAction.Icon;
+                _icon.overrideSprite = menuAction.Icon;
                 _textLabel.gameObject.SetActive(false);
                 _icon.gameObject.SetActive(true);
             }

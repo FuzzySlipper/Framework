@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
@@ -14,18 +15,19 @@ namespace PixelComrades {
         public const int Loading = 3;
         public const int LoadingFinished = 4;
         public const int LevelClear = 5;
-        public const int NewLevelControllerLoaded = 6;
         public const int LevelLoadingFinished = 7;
         public const int LevelChanged = 8;
         
         public const int PlayerNewGame = 10;
         public const int PlayerDead = 11;
         public const int PlayerDamaged = 12;
+        public const int PlayerViewRotated = 13;
         public const int SelectedActorChanged = 14;
         public const int PlayerMoving = 15;
         public const int PlayerRotated = 16;
         public const int PlayerReachedDestination = 17;
         public const int PlayerCharactersChanged = 18;
+        public const int PlayerTeleported = 19;
 
         public const int SwitchToggle = 25;
         public const int Locked = 26;
@@ -38,6 +40,10 @@ namespace PixelComrades {
         public const int QuestEventsChanged = 33;
         public const int CombatStarted = 34;
         public const int CombatEnded = 35;
+        //public const int MapMoved = 36;
+        //public const int MapScrolled = 37;
+        //public const int MapRotated = 37;
+
 
         public const int GlobalDataChanged = 40;
         public const int TurnBasedChanged = 41;
@@ -46,8 +52,8 @@ namespace PixelComrades {
         public const int CameraFocusChanged = 44;
         public const int MenuClosed = 45;
         public const int MessageLog = 46;
-        public const int ModifiersUpdated = 47;
         public const int OptionsChanged = 48;
+        public const int GraphicOptionsChanged = 49;
     }
 
     public enum DialogueMsg {
@@ -56,13 +62,33 @@ namespace PixelComrades {
         Merchant = 3,
     }
 
-    public static class MessageKit {
-        private static Dictionary<int, List<Action>> _messageTable = new Dictionary<int, List<Action>>();
+    public class MessageEventReceiver<T> : IComponent, IReceive<T> where T : IEntityMessage {
 
-        public static void addObserver(int messageType, Action handler) {
-            List<Action> list = null;
+        private int _messageKitMessage;
+        public MessageEventReceiver(int messageKitMessage) {
+            _messageKitMessage = messageKitMessage;
+        }
+
+        public void Handle(T arg) {
+            MessageKit.post(_messageKitMessage);
+        }
+
+        public MessageEventReceiver(SerializationInfo info, StreamingContext context) {
+            _messageKitMessage = info.GetValue(nameof(_messageKitMessage), _messageKitMessage);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_messageKitMessage), _messageKitMessage);
+        }
+    }
+
+    public static class MessageKit {
+        private static Dictionary<int, List<System.Action>> _messageTable = new Dictionary<int, List<System.Action>>();
+
+        public static void addObserver(int messageType, System.Action handler) {
+            List<System.Action> list = null;
             if (!_messageTable.TryGetValue(messageType, out list)) {
-                list = new List<Action>();
+                list = new List<System.Action>();
                 _messageTable.Add(messageType, list);
             }
 
@@ -72,8 +98,8 @@ namespace PixelComrades {
         }
 
 
-        public static void removeObserver(int messageType, Action handler) {
-            List<Action> list = null;
+        public static void removeObserver(int messageType, System.Action handler) {
+            List<System.Action> list = null;
             if (_messageTable.TryGetValue(messageType, out list)) {
                 if (list.Contains(handler)) {
                     list.Remove(handler);
@@ -83,7 +109,7 @@ namespace PixelComrades {
 
 
         public static void post(int messageType) {
-            List<Action> list = null;
+            List<System.Action> list = null;
             if (_messageTable.TryGetValue(messageType, out list)) {
                 for (var i = list.Count - 1; i >= 0; i--) {
                     list[i]();
@@ -204,7 +230,7 @@ namespace PixelComrades {
     }
 
     public class MessageKitLocal {
-        private Dictionary<int, List<Action>> _messageTable = new Dictionary<int, List<Action>>();
+        private Dictionary<int, List<System.Action>> _messageTable = new Dictionary<int, List<System.Action>>();
         private List<ISignalReceiver> _genericReceivers = new List<ISignalReceiver>();
 
         public void addObserver(ISignalReceiver generic) {
@@ -215,9 +241,9 @@ namespace PixelComrades {
             _genericReceivers.Remove(generic);
         }
 
-        public void addObserver(int messageType, Action handler) {
+        public void addObserver(int messageType, System.Action handler) {
             if (!_messageTable.TryGetValue(messageType, out var list)) {
-                list = new List<Action>();
+                list = new List<System.Action>();
                 _messageTable.Add(messageType, list);
             }
 
@@ -227,7 +253,7 @@ namespace PixelComrades {
         }
 
 
-        public void removeObserver(int messageType, Action handler) {
+        public void removeObserver(int messageType, System.Action handler) {
             if (_messageTable.TryGetValue(messageType, out var list)) {
                 //if (list.Contains(handler)) {
                 list.Remove(handler);

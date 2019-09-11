@@ -82,7 +82,7 @@ namespace PixelComrades {
         ///<returns>
         ///  Name of any method with any number of parameters either void or with a return value
         ///</returns>
-        public static string Method(Expression<Action> expression) {
+        public static string Method(Expression<System.Action> expression) {
             if (expression == null) {
                 return "Error";
             }

@@ -20,6 +20,9 @@ namespace PixelComrades {
                 _commands.Remove(otherCmd);
             }
             cmd.StartCommand();
+#if DEBUG
+            DebugLog.Add(cmd.EntityOwner.DebugId + " started command " + cmd.GetType());
+#endif
             _commands.Add(cmd);
             return true;
         }
@@ -42,7 +45,7 @@ namespace PixelComrades {
             return null;
         }
 
-        public void OnSystemUpdate(float dt) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
             _commands.Swap();
             for (int i = 0; i < _commands.PreviousList.Count; i++) {
                 if (_commands.PreviousList[i] == null) {

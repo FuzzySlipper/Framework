@@ -15,12 +15,12 @@ namespace PixelComrades {
         [SerializeField] private float _tiltDampening = 0.75f; // How "smooth" should the camera tilts be?  Note: Smaller numbers are smoother
         [SerializeField] private float _zoomDampening = 0.75f; // How "smooth" should the camera zooms be?  Note: Smaller numbers are smoother
         [Header("Visibility")]
-        [SerializeField] private bool _showDebugCameraTarget; // If set, "small green sphere" will be shown indicating camera target position (even when Following)
+        [SerializeField] private bool _showDebugCameraTarget = false; // If set, "small green sphere" will be shown indicating camera target position (even when Following)
         [SerializeField] private float _cameraRadius = 1f;
-        [SerializeField] private bool _targetVisbilityViaPhysics; // If set, camera will raycast from target out in order to avoid objects being between target and camera
-        [SerializeField] private LayerMask _targetVisibilityIgnoreLayerMask; // Layer mask to ignore when raycasting to determine camera visbility
-        [SerializeField] private bool _terrainHeightViaPhysics; // If set, camera will automatically raycast against terrain (using TerrainPhysicsLayerMask) to determine height 
-        [SerializeField] private LayerMask _terrainPhysicsLayerMask; // Layer mask indicating which layers the camera should ray cast against for height detection
+        [SerializeField] private bool _targetVisbilityViaPhysics = false; // If set, camera will raycast from target out in order to avoid objects being between target and camera
+        [SerializeField] private LayerMask _targetVisibilityIgnoreLayerMask = 0; // Layer mask to ignore when raycasting to determine camera visbility
+        [SerializeField] private bool _terrainHeightViaPhysics = false; // If set, camera will automatically raycast against terrain (using TerrainPhysicsLayerMask) to determine height 
+        [SerializeField] private LayerMask _terrainPhysicsLayerMask = 0; // Layer mask indicating which layers the camera should ray cast against for height detection
         [Header("Follow")]
         [SerializeField] private bool _followBehind = false; // If set, keyboard and mouse rotation will be disabled when Following a target
         [SerializeField] private float _followRotationOffset = 0; // Offset (degrees from zero) when forcing follow behind target
@@ -123,10 +123,10 @@ namespace PixelComrades {
             //    Mathf.Clamp(LookAt.y, MinBounds.y, MaxBounds.y), Mathf.Clamp(LookAt.z, MinBounds.z, MaxBounds.z));
             
             if (_smoothing) {
-                _currRotation = Mathf.LerpAngle(_currRotation, _rotation, Time.deltaTime * _rotationDampening);
-                _currDistance = Mathf.Lerp(_currDistance, _distance, Time.deltaTime * _zoomDampening);
-                _currTilt = Mathf.LerpAngle(_currTilt, _tilt, Time.deltaTime * _tiltDampening);
-                _target.transform.position = Vector3.Lerp(_target.transform.position, _lookAt, Time.deltaTime * _moveDampening);
+                _currRotation = Mathf.LerpAngle(_currRotation, _rotation, TimeManager.DeltaUnscaled * _rotationDampening);
+                _currDistance = Mathf.Lerp(_currDistance, _distance, TimeManager.DeltaUnscaled * _zoomDampening);
+                _currTilt = Mathf.LerpAngle(_currTilt, _tilt, TimeManager.DeltaUnscaled * _tiltDampening);
+                _target.transform.position = Vector3.Lerp(_target.transform.position, _lookAt, TimeManager.DeltaUnscaled * _moveDampening);
             }
             else {
                 _currRotation = _rotation;
@@ -324,19 +324,45 @@ namespace PixelComrades {
             _currRotation = _rotation = 180f + (sign * angle) + _followRotationOffset;
         }
 
+        public void UpdateInput(Vector2 move, float scroll, bool rotate) {
+            _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
+            if (rotate) {
+                float tilt = move.y;
+                _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
+
+                float rot = move.x;
+                _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
+            }
+            else if (_moveCamera) {
+                float speed = _moveSpeed;
+                if (Input.GetKey(_fastMoveKeyCode1)) {
+                    speed = _fastMoveSpeed;
+                }
+                float h = move.x;
+                if (Mathf.Abs(h) > 0.001f) {
+                    AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
+                }
+
+                float v = move.y;
+                if (Mathf.Abs(v) > 0.001f) {
+                    AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
+                }
+            }
+        }
+
         public void UpdateInput() {
             if (Input.GetKey(_breakFollowKey)) {
                 EndFollow();
             }
             float scroll = Input.GetAxisRaw(_zoomInputAxis);
 
-            _distance -= scroll * _zoomSpeed * Time.deltaTime;
+            _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
             if (Input.GetMouseButton(_mouseOrbitButton)) {
                 float tilt = Input.GetAxisRaw(_tiltInputAxis);
-                _tilt -= tilt * _tiltSpeed * Time.deltaTime;
+                _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
 
                 float rot = Input.GetAxisRaw(_rotateInputAxis);
-                _rotation += rot * _rotateSpeed * Time.deltaTime;
+                _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
             }
             if (!_moveCamera) {
                 return;
@@ -348,12 +374,12 @@ namespace PixelComrades {
 
             float h = Input.GetAxisRaw(_horizontalInputAxis);
             if (Mathf.Abs(h) > 0.001f) {
-                AddToPosition(h * speed * Time.deltaTime, 0, 0);
+                AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
             }
 
             float v = Input.GetAxisRaw(_verticalInputAxis);
             if (Mathf.Abs(v) > 0.001f) {
-                AddToPosition(0, 0, v * speed * Time.deltaTime);
+                AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
             }
         }
 

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     
     [Priority(Priority.Highest)]
     public class BlockDamage : IComponent, IReceiveRef<DamageEvent> {
-
-        public int Owner { get; set; }
 
         public List<Func<DamageEvent, bool>> Dels = new List<Func<DamageEvent, bool>>();
 
@@ -21,6 +20,12 @@ namespace PixelComrades {
                     break;
                 }
             }
+        }
+
+        public BlockDamage(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
 
     }

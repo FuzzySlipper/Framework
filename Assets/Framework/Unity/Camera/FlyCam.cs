@@ -9,15 +9,23 @@ namespace PixelComrades {
         [SerializeField] private float _normalMoveSpeed = 10;
         [SerializeField] private float _slowMoveFactor = 0.25f;
 	    [SerializeField] private float _fastMoveFactor = 3;
- 
+        [SerializeField] private bool _autoStart = false;
+
+        private bool _isActive = false;
 	    private float _rotationX = 0.0f;
 	    private float _rotationY = 0.0f;
         private Vector3 _oldPos;
         private Quaternion _oldRot;
-        private bool _isActive = false;
+        
 
         public bool IsActive { get { return _isActive; } }
 
+
+        void Awake() {
+            if (_autoStart) {
+                ToggleActive();
+            }
+        }
 
 	    public void ToggleActive() {
             SetIsActive(!IsActive);

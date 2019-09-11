@@ -29,14 +29,6 @@ namespace PixelComrades {
 
         public void Set(Entity data) {
             Data = data;
-            ////var refData =  data as HotbarReference;
-            //if (refData != null) {
-            //    refData.Slot.Clear();
-            //    _refData = refData;
-            //}
-            //else {
-            //    _refData = new HotbarReference(data, this);
-            //}
             if (Data != null) {
                 SetSprite(Data.Get<IconComponent>());
                 UIHotBar.main.CheckForDuplicates(this);
@@ -74,12 +66,12 @@ namespace PixelComrades {
         }
 
         public void UseSlotTarget() {
-            if (Data == null) {
-                return;
-            }
-            if (!Data.Get<Command>()?.TryStart(UICenterTarget.CurrentCharacter?.Entity ?? null) ?? false) {
-                UIFloatingText.InventoryMessage(Data.Get<StatusUpdateComponent>(), RectTransform);
-            }
+            //if (Data == null) {
+            //    return;
+            //}
+            //if (!Data.Get<ActionUsable>()?.Sequence.TryStart(UICenterTarget.CurrentCharacter?.Entity ?? null) ?? false) {
+            //    UIFloatingText.InventoryMessage(Data.Get<StatusUpdateComponent>(), RectTransform);
+            //}
         }
 
         protected override void StartDrag() {

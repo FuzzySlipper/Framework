@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using TMPro;
@@ -9,9 +10,14 @@ namespace PixelComrades {
         [SerializeField] private TextMeshProUGUI _text = null;
         [SerializeField] private Slider _slider = null;
 
-        private ExperienceStat _stat;
+        [NonSerialized] private ExperienceStat _stat = null;
 
         void OnDisable() {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                return;
+            }
+#endif
             Clear();
         }
 

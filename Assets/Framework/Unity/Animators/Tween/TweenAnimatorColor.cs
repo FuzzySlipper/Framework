@@ -7,8 +7,8 @@ namespace PixelComrades {
         [SerializeField] private Color[] _targets = new Color[0];
         [SerializeField] private EasingTypes[] _easing = new EasingTypes[0];
         [SerializeField] private float[] _durations = new float[0];
-        [SerializeField] private Renderer _colorTarget;
-        [SerializeField] private Image _uiColorTarget;
+        [SerializeField] private Renderer _colorTarget = null;
+        [SerializeField] private Image _uiColorTarget = null;
 
         private int _index = -1;
         private TweenColor _tweener = new TweenColor();
@@ -22,6 +22,15 @@ namespace PixelComrades {
             }
             var originColor = _uiColorTarget != null ? _uiColorTarget.color : _colorTarget.material.color;
             _tweener.Restart(originColor, _targets[_index], _durations[_index], _easing[_index], UnScaled);
+        }
+
+        public override void PlayFrame(float normalized) {
+            if (_uiColorTarget != null) {
+                _uiColorTarget.color = _tweener.Get(normalized);
+            }
+            if (_colorTarget != null) {
+                _colorTarget.material.color = _tweener.Get(normalized);
+            }
         }
 
         public override void UpdateTween() {

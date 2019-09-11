@@ -1,23 +1,46 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class HealImpact : IActionImpact {
+    [KnownType(typeof(IActionImpact))]
+    public class HealImpact : IActionImpact, ISerializable {
 
         private string _targetVital;
-        private float _damagePercent;
+        private float _normalizedPercent;
+        private CachedStat<BaseStat> _stat;
+        private bool _healSelf;
 
-        public HealImpact(string targetVital, float damagePercent) {
+        public float Power { get { return _stat.Value * _normalizedPercent; } }
+
+        public HealImpact(Entity entity, string targetVital, float normalizedPercent, BaseStat stat, bool healSelf) {
             _targetVital = targetVital;
-            _damagePercent = damagePercent;
+            _normalizedPercent = normalizedPercent;
+            _healSelf = healSelf;
+            _stat = new CachedStat<BaseStat>(entity, stat);
         }
 
-        public void ProcessAction(CollisionEvent collisionEvent, ActionStateEvent stateEvent, Entity owner, Entity target) {
+        public void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent) {
             if (collisionEvent.Hit <= 0) {
                 return;
             }
-            target.Post(new HealEvent(collisionEvent.Target.FindStatValue(Stats.Power) * _damagePercent, owner, target, _targetVital));
+            var target = _healSelf ? collisionEvent.Origin : collisionEvent.Target;
+            target.Post(new HealEvent(Power, collisionEvent.Origin, target, _targetVital));
+        }
+
+        public HealImpact(SerializationInfo info, StreamingContext context) {
+            _healSelf = info.GetValue(nameof(_healSelf), _healSelf);
+            _targetVital = info.GetValue(nameof(_targetVital), _targetVital);
+            _normalizedPercent = info.GetValue(nameof(_normalizedPercent), _normalizedPercent);
+            _stat = info.GetValue(nameof(_stat), _stat);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_healSelf), _healSelf);
+            info.AddValue(nameof(_targetVital), _targetVital);
+            info.AddValue(nameof(_normalizedPercent), _normalizedPercent);
+            info.AddValue(nameof(_stat), _stat);
         }
     }
 }

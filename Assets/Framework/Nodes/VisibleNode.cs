@@ -4,28 +4,26 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class VisibleNode : INode {
-        public Entity Entity;
+    public class VisibleNode : BaseNode {
+
         public CachedComponent<ModelComponent> Model = new CachedComponent<ModelComponent>();
         public CachedComponent<LabelComponent> Label = new CachedComponent<LabelComponent>();
         public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
+        public CachedComponent<ColliderComponent> Collider = new CachedComponent<ColliderComponent>();
 
         private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
         private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
-        
-        public VisibleNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
-            Register(entity, list);
-        }
 
-        public VisibleNode() {}
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            Label, Model, Rb, _position, _rotation, Collider,
+        };
 
-        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
-            Entity = entity;
-            Model.Set(entity, list);
-            Label.Set(entity, list);
-            Rb.Set(entity, list);
-            _position.Set(entity, list);
-            _rotation.Set(entity, list);
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(RigidbodyComponent),
+                typeof(ModelComponent),
+                typeof(LabelComponent),
+            };
         }
 
         public void Setup(GameObject obj) {
@@ -33,22 +31,15 @@ namespace PixelComrades {
             Entity.Tr = obj.transform;
         }
 
-        public Vector3 position { get { return Entity.Tr?.position ?? _position.c?.Position ?? Vector3.zero; } }
+        public Vector3 position {
+            get {
+                if (Entity.Tr != null) {
+                    return Entity.Tr.position + Collider.c?.LocalCenter ?? new Vector3(0,1,0);
+                }
+                return _position.c?.Position ?? Vector3.zero;
+            }
+        }
         public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.c?.Rotation ?? Quaternion.identity; } }
 
-        public void Dispose() {
-            Rb.Dispose();
-            Model.Dispose();
-            Label.Dispose();
-            _position.Dispose();
-            _rotation.Dispose();
-        }
-
-        public static System.Type[] GetTypes() {
-            return new System.Type[]{ 
-                typeof(RigidbodyComponent), 
-                typeof(ModelComponent),
-            };
-        }
     }
 }

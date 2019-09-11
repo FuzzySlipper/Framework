@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class DataDescriptionComponent : IComponent {
-        public int Owner { get; set; }
         private string _text;
         public string Text {
             get {
@@ -22,6 +22,15 @@ namespace PixelComrades {
             _text = text;
         }
         public DataDescriptionComponent(){}
+
+        public DataDescriptionComponent(SerializationInfo info, StreamingContext context) {
+            _text = info.GetValue(nameof(_text), _text);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_text), _text);
+        }
+
     }
 
     public struct DataDescriptionAdded : IEntityMessage {

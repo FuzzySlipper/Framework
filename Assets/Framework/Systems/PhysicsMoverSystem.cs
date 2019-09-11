@@ -10,8 +10,10 @@ namespace PixelComrades {
         private bool _frozen = false;
         private List<RigidbodyMoverNode> _moverList;
         private ManagedArray<RigidbodyComponent> _rbList;
+        private ManagedArray<RigidbodyComponent>.Delegate _rbDel;
 
         public PhysicsMoverSystem() {
+            _rbDel = CheckPaused;
             MessageKit.addObserver(Messages.PauseChanged, CheckPause);
         }
 
@@ -47,7 +49,7 @@ namespace PixelComrades {
                 _rbList= EntityController.GetComponentArray<RigidbodyComponent>();
             }
             if (_rbList != null) {
-                _rbList.Run(CheckPaused);
+                _rbList.Run(_rbDel);
             }
         }
 
@@ -84,13 +86,11 @@ namespace PixelComrades {
         private void FinishMove(Entity owner, Vector3 moveTarget) {
             owner.Tags.Remove(EntityTags.Moving);
             owner.Post(new MoveComplete(owner, moveTarget));
-            owner.Get<MoveTarget>(m => m.Clear());
+            owner.Get<MoveTarget>(m => m.Complete());
         }
 
-        public void HandleGlobal(ManagedArray<AddForceEvent> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Rb.AddForce(arg[i].Force);
-            }
+        public void HandleGlobal(AddForceEvent arg) {
+            arg.Rb.AddForce(arg.Force);
         }
     }
 }

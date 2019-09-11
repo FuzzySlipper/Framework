@@ -29,5 +29,9 @@ namespace PixelComrades {
         public override void UpdateTween() {
             _rectTr.anchoredPosition3D = _tweener.Get();
         }
+
+        public override void PlayFrame(float normalized) {
+            _rectTr.anchoredPosition3D = _tweener.Get(normalized);
+        }
     }
 }

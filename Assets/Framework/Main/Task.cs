@@ -12,7 +12,7 @@ namespace PixelComrades {
             Task
         }
 
-        public event Action OnFinish;
+        public event System.Action OnFinish;
         public bool Unscaled { get; private set; }
         public float Current { get { return _current; } }
         public UpdateMode Mode { get { return _mode; } }
@@ -97,13 +97,13 @@ namespace PixelComrades {
                 return;
             }
             var yieldCommand = Routine.Current;
-            if (yieldCommand is int) {
-                _waitFor = (int) yieldCommand;
+            if (yieldCommand is int intCommand) {
+                _waitFor = intCommand;
                 _mode = UpdateMode.Frame;
                 return;
             }
-            if (yieldCommand is float) {
-                _waitFor = (float) yieldCommand;
+            if (yieldCommand is float floatCommand) {
+                _waitFor = floatCommand;
                 _mode = UpdateMode.Time;
                 return;
             }
@@ -121,8 +121,7 @@ namespace PixelComrades {
                 _waitFor = 0;
                 return;
             }
-            var taskArray = yieldCommand as IList<Task>;
-            if (taskArray != null) {
+            if (yieldCommand is IList<Task> taskArray) {
                 _mode = UpdateMode.Task;
                 for (int i = 0; i < taskArray.Count; i++) {
                     taskArray[i].OnFinish += WatchedTaskFinished;

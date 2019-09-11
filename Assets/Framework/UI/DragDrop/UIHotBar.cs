@@ -44,7 +44,7 @@ namespace PixelComrades {
         [SerializeField] private CanvasGroup _canvasgroup = null;
         [SerializeField] private bool _startDisabled = false;
         [SerializeField] private int _size = 9;
-        [SerializeField] private UIHotbarSlot _prefab;
+        [SerializeField] private UIHotbarSlot _prefab = null;
 
         private UIHotbarSlot[] _slots;
         private ItemInventory _playerInventory;

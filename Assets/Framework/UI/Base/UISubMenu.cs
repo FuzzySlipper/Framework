@@ -11,7 +11,7 @@ namespace PixelComrades {
         public static UISubMenu Default { get; private set; }
         private int _currentId;
 
-        public event Action OnMenuDisabled;
+        public event System.Action OnMenuDisabled;
 
         [SerializeField] private UIGenericButton _buttonPrefab = null;
         [SerializeField] private VerticalLayoutGroup _grid = null;

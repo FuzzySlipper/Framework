@@ -20,7 +20,7 @@ namespace PixelComrades {
 
         [SerializeField] private TMP_InputField _inputField = null;
         [SerializeField] private CanvasGroup _canvasGroup = null;
-        [SerializeField] private Dictionary<string, Action> _actionDictionary = new Dictionary<string, Action>();
+        [SerializeField] private Dictionary<string, System.Action> _actionDictionary = new Dictionary<string, System.Action>();
 
         void Awake() {
             //_actionDictionary.Add("attack", () => {

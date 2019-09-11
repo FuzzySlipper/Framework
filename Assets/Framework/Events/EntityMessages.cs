@@ -5,6 +5,14 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public interface IEntityMessage {}
 
+    public struct EntityDestroyed : IEntityMessage {
+        public Entity Entity;
+
+        public EntityDestroyed(Entity entity) {
+            Entity = entity;
+        }
+    }
+
     public class EntitySignals : GenericEnum<EntitySignals, int> {
         public const int TagsChanged = 0;
         public const int CharacterSetup = 1;

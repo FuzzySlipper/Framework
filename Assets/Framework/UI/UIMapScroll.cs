@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using PixelComrades;
+using PixelComrades.DungeonCrawler;
 using UnityEngine.EventSystems;
 
 namespace PixelComrades {
@@ -15,12 +16,7 @@ namespace PixelComrades {
 
         private bool _isActive = false;
 
-        private Camera Cam {
-            get {
-                return !_isLevelMap ? Player.MinimapCamera : LevelMapCamera.main.MapCamera;
-            }
-        }
-
+        private IMapCamera MapCamera { get { return _isLevelMap ? Game.LevelMap : Game.MiniMap; } }
 
         public void OnPointerEnter(PointerEventData eventData) {
             _isActive = true;
@@ -34,15 +30,17 @@ namespace PixelComrades {
             if (!_isActive) {
                 return;
             }
+
             Vector2 delta = eventData.scrollDelta;
-            Cam.orthographicSize += (-delta.y)*_scrollSpeed;
+            MapCamera.UpdateInput(Vector2.zero, (-delta.y) * _scrollSpeed, false);
         }
 
         public void OnDrag(PointerEventData eventData) {
-            if (!_isActive || !_isLevelMap) {
+            if (!_isActive) {
                 return;
             }
-            Cam.transform.position+= new Vector3(eventData.delta.x * (_reverseX ? -1 : 1), 0, eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed;
+            MapCamera.UpdateInput(new Vector2(eventData.delta.x * (_reverseX ? -1 : 1), eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed, 0, Input.GetMouseButton(1));
+            //Cam.transform.position+= new Vector3(eventData.delta.x * (_reverseX ? -1 : 1), 0, eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed;
         }
 
         public void OnBeginDrag(PointerEventData eventData) {}

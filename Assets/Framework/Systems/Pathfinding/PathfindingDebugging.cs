@@ -15,7 +15,7 @@ namespace PixelComrades {
             DebugObject = debugObject;
         }
 
-        private SimplePathfindingAgent.Status _updateStatus = SimplePathfindingAgent.Status.WaitingOnNode;
+        private PathfindingStatus _updateStatus = PathfindingStatus.WaitingOnNode;
 
         public void UpdateStatus(SimplePathfindingAgent agent) {
             if (agent.CurrentStatus == _updateStatus || Tm == null) {
@@ -23,7 +23,7 @@ namespace PixelComrades {
             }
             _updateStatus = agent.CurrentStatus;
             Tm.text = string.Format("{0}{2}{1}", agent.Entity.Id, agent.CurrentStatus, System.Environment.NewLine);
-            if (_updateStatus == SimplePathfindingAgent.Status.NoPath || _updateStatus == SimplePathfindingAgent.Status.InvalidPath) {
+            if (_updateStatus == PathfindingStatus.NoPath || _updateStatus == PathfindingStatus.InvalidPath) {
                 LineR.positionCount = 2;
                 LineR.SetPosition(0, Entity.Tr.position);
                 LineR.SetPosition(1, agent.End.toVector3());

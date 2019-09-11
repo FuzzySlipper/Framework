@@ -6,7 +6,7 @@ namespace PixelComrades {
         [SerializeField] private float[] _targets = new float[0];
         [SerializeField] private EasingTypes[] _easing = new EasingTypes[0];
         [SerializeField] private float[] _durations = new float[0];
-        [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField] private CanvasGroup _canvasGroup = null;
         [SerializeField] private bool _adjustInteractive = true;
 
         private int _index = -1;
@@ -20,6 +20,10 @@ namespace PixelComrades {
                 _index = 0;
             }
             _tweener.Restart(_canvasGroup.alpha, _targets[_index], _durations[_index], _easing[_index], UnScaled);
+        }
+
+        public override void PlayFrame(float normalized) {
+            _canvasGroup.alpha = _tweener.Get(normalized);
         }
 
         public override void UpdateTween() {

@@ -190,7 +190,8 @@ namespace PixelComrades {
                     break;
                 case "11":
                     //Color
-                    if (ColorUtility.TryParseHtmlString((data.Value<int>()).ToString("X"), out var color)) {
+                    var colorHex = "#" + (data.Value<int>()).ToString("X");
+                    if (ColorUtility.TryParseHtmlString(colorHex, out var color)) {
                         cell = new DataCell<Color>(column.Name, owner, color);
                     }
                     break;
@@ -426,6 +427,33 @@ namespace PixelComrades {
                 }
             }
             return default(T);
+        }
+
+        public float FindFloat(string id, float def = 0) {
+            for (int i = 0; i < Value.Count; i++) {
+                if (Value[i].ID == id) {
+                    return Value[i].GetValue<float>("Float");
+                }
+            }
+            return def;
+        }
+
+        public string FindString(string id, string def = "") {
+            for (int i = 0; i < Value.Count; i++) {
+                if (Value[i].ID == id) {
+                    return Value[i].GetValue<string>("String");
+                }
+            }
+            return def;
+        }
+
+        public int FindInt(string id, int def = 0) {
+            for (int i = 0; i < Value.Count; i++) {
+                if (Value[i].ID == id) {
+                    return Value[i].GetValue<int>("Int");
+                }
+            }
+            return def;
         }
 
         public bool HasID(string id) {
@@ -683,6 +711,7 @@ namespace PixelComrades {
         private string[] _ids;
         private string[] _names;
         private string[] _descriptions;
+        private JToken[] _data;
         private int[] _associatedValues;
         private Dictionary<string, int> _stringToIndex = new Dictionary<string, int>();
 
@@ -748,6 +777,14 @@ namespace PixelComrades {
             return _associatedValues[index];
         }
 
+        public T GetValue<T>(int index, string key) {
+            if (!_data.HasIndex(index) || _data[index] == null) {
+                return default(T);
+            }
+            var value = _data[index][key];
+            return value == null ? default(T) : value.Value<T>();
+        }
+
         public int GetAssociatedValue(string key) {
             if (TryParse(key, out var index)) {
                 return _associatedValues[index];
@@ -781,6 +818,7 @@ namespace PixelComrades {
             _stringToIndex.AddOrUpdate(_shortIDs[index].ToLower(), index);
             _stringToIndex.AddOrUpdate(_names[index].ToLower(), index);
             _stringToIndex.AddOrUpdate(_ids[index].ToLower(), index);
+            _data[index] = line;
         }
 
         public void AddNode(int index, string id, string name, string description, int value) {
@@ -811,6 +849,7 @@ namespace PixelComrades {
             _names = new string[cnt];
             _descriptions = new string[cnt];
             _associatedValues = new int[cnt];
+            _data = new JToken[cnt];
         }
 
         public bool TryParse(string text, out int index) {

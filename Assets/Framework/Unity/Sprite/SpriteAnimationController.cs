@@ -12,17 +12,23 @@ namespace PixelComrades {
         private int _currentFrameIndex = 0;
         private bool _playing = false;
         private Timer _frameTimer;
-        private SpriteAnimation _animation = null;
-
-        private AnimationFrame CurrentFrame { get { return _animation != null ? _animation.GetFrame(_currentFrameIndex) : null; } }
+        
+        private AnimationFrame CurrentFrame { get { return Animation != null ? Animation.GetFrame(_currentFrameIndex) : null; } }
+        public SpriteAnimation Animation { get; private set; }
+        public bool DefaultEventTriggered { get; private set; }
+        public bool Finished { get; private set; }
+        public AnimationFrame LastEventFrame { get; private set; }
         public int FrameIndex { get { return _currentFrameIndex; } }
-        public bool Active { get { return _animation != null && _playing; } }
-        public Sprite GetFrameSprite { get { return CurrentFrame != null ? _animation.GetSpriteFrame(_currentFrameIndex) : null; } }
+        public bool Active { get { return Animation != null && _playing; } }
+        public float TimeRemaining { get { return (Animation.LengthFrames - _currentFrameIndex) * Animation.FrameTime; } }
+        public Sprite GetFrameSprite { get { return CurrentFrame != null ? Animation.GetSpriteFrame(_currentFrameIndex) : null; } }
 
         public void ResetAnimation(SpriteAnimation spriteAnimation) {
             _currentFrameIndex = 0;
-            _animation = spriteAnimation;
-            if (_animation == null) {
+            LastEventFrame = null;
+            Animation = spriteAnimation;
+            DefaultEventTriggered = Finished = false;
+            if (Animation == null) {
                 _playing = false;
                 return;
             }
@@ -30,23 +36,57 @@ namespace PixelComrades {
             //_frameTimer.StartTimer();
         }
 
+        public void SkipFrame(int cnt) {
+            for (int i = 0; i < cnt; i++) {
+                _currentFrameIndex++;
+                if (CurrentFrame != null) {
+                    if (CurrentFrame.HasEvent) {
+                        if (CurrentFrame.Event == AnimationFrame.EventType.Default) {
+                            DefaultEventTriggered = true;
+                        }
+                        LastEventFrame = CurrentFrame;
+                    }
+                    _frameTimer.StartNewTime(Animation.FrameTime * CurrentFrame.Length);
+                    continue;
+                }
+                if (!Animation.IsComplete(_currentFrameIndex)) {
+                    continue;
+                }
+                if (Animation.Looping) {
+                    _currentFrameIndex = 0;
+                    _frameTimer.StartNewTime(Animation.FrameTime * CurrentFrame?.Length ?? 1);
+                    break;
+                }
+                Finished = true;
+                _playing = false;
+                break;
+            }
+        }
+
         public bool CheckFrameUpdate() {
-            if (!_playing || _frameTimer.IsActive) {
+            if (!_playing || _frameTimer.IsActive || Animation == null) {
                 return false;
             }
             _currentFrameIndex++;
             if (CurrentFrame != null) {
-                _frameTimer.StartNewTime(_animation.FrameTime * CurrentFrame.Length);
+                if (CurrentFrame.HasEvent) {
+                    if (CurrentFrame.Event == AnimationFrame.EventType.Default) {
+                        DefaultEventTriggered = true;
+                    }
+                    LastEventFrame = CurrentFrame;
+                }
+                _frameTimer.StartNewTime(Animation.FrameTime * CurrentFrame.Length);
                 return true;
             }
-            if (!_animation.IsComplete(_currentFrameIndex)) {
+            if (!Animation.IsComplete(_currentFrameIndex)) {
                 return true;
             }
-            if (_animation.Looping) {
+            if (Animation.Looping) {
                 _currentFrameIndex = 0;
-                _frameTimer.StartNewTime(_animation.FrameTime * CurrentFrame.Length);
+                _frameTimer.StartNewTime(Animation.FrameTime * CurrentFrame?.Length ?? 1);
                 return true;
             }
+            Finished = true;
             _playing = false;
             return false;
         }

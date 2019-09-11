@@ -1,7 +1,8 @@
-﻿//#define AStarPathfinding
+﻿#define AStarPathfinding
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 #if AStarPathfinding
 using Pathfinding;
@@ -13,6 +14,7 @@ namespace PixelComrades {
         [SerializeField] private Vector3 _offset = new Vector3(0, 0.25f, 0);
         [SerializeField] private Camera _cam = null;
         [SerializeField] private bool _onlyOnInput = true;
+        [SerializeField] private bool _useUnityNavMesh = true;
 
         private RaycastHit[] _hits = new RaycastHit[10];
         private Ray _mouseRay;
@@ -37,9 +39,18 @@ namespace PixelComrades {
             if (cnt <= 0) {
                 return;
             }
+            if (_useUnityNavMesh) {
+                for (int i = 0; i < cnt; i++) {
+                    if (NavMesh.SamplePosition(_hits[i].point, out var hit, 500, NavMesh.AllAreas)) {
+                        transform.position = hit.position + _offset;
+                        return;
+                    }
+                }
+                
+            }
 #if AStarPathfinding
-            if (CellGridGraph.Current != null && _testing.UseAstarProject) {
-                var info = CellGridGraph.Current.GetNearest(_hits[0].point, _constraint);
+            if (AstarPath.active != null) {
+                var info = AstarPath.active.GetNearest(_hits[0].point, _constraint);
                 if (info.node != null) {
                     transform.position = (Vector3) info.node.position + _offset;
                 }
@@ -47,7 +58,7 @@ namespace PixelComrades {
             }
 #endif
             var pnt = _hits[0].point;
-            if (World.Get<PathfindingSystem>().Grid.IsWalkable(pnt.toPoint3ZeroY(), false)) {
+            if (World.Get<PathfindingSystem>().IsWalkable(pnt, false)) {
                 transform.position = pnt + _offset;
             }
         }

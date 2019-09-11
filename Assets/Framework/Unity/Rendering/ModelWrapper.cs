@@ -14,13 +14,13 @@ namespace PixelComrades {
         }
 
         private MaterialPropertyBlock[] _blocks;
-        public virtual MaterialPropertyBlock[] GetMatBlocks {
+        public virtual MaterialPropertyBlock[] MaterialBlocks {
             get {
                 return _blocks;
             }
         }
         private Renderer[] _renderers;
-        public virtual Renderer[] GetRenderers {
+        public virtual Renderer[] Renderers {
             get {
                 return _renderers;
             }

@@ -6,51 +6,39 @@ namespace PixelComrades {
     [Priority(Priority.Lowest)]
     public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation> {
 
-        private ManagedArray<AnimatorData> _list;
-        private ManagedArray<AnimatorData>.RunDel<AnimatorData> _del;
+        private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>();
 
         public AnimatorSystem() {
-            _del = CheckPlayingAnimation;
         }
 
-        public void OnSystemUpdate(float dt) {
-            if (_list == null) {
-                _list = EntityController.GetComponentArray<AnimatorData>();
-            }
-            if (_list != null) {
-                _list.Run(_del);
-            }
-        }
-
-        private void CheckPlayingAnimation(AnimatorData data) {
-            if (data.Event != null) {
-                var msg = data.Event.Value;
-                if (msg.OnEventComplete && data.Animator.IsAnimationEventComplete(msg.Clip) || data.Animator.IsAnimationComplete(msg.Clip)) {
-                    msg.Target.Post(data.Event.Value);
-                    data.Event = null;
-                }
-            }
-            if (data.Animator.IsAnimationComplete() && !data.GetEntity().IsDead()) {
-                data.Animator.PlayAnimation(data.GetEntity().Tags.Contain(EntityTags.Moving) ? AnimatorClips.Move : AnimatorClips.Idle);
-            }
-        }
-
-        public void HandleGlobal(ManagedArray<PlayAnimation> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                var msg = arg[i];
-                if (msg.Target == null) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
+            _animations.Swap();
+            for (int i = 0; i < _animations.PreviousList.Max; i++) {
+                if (_animations.PreviousList.IsInvalid(i)) {
                     continue;
                 }
-                var anim = msg.Target.Find<AnimatorData>();
-                if (anim?.Animator == null) {
-                    if (msg.Event != null) {
-                        msg.Event.Value.Target.Post(msg.Event.Value);
-                    }
-                    return;
+                ref var anim = ref _animations.PreviousList[i];
+                if (anim.Animator?.Animator == null) {
+                    _animations.CurrentList.Remove(i);
+                    continue;
                 }
-                anim.Event = msg.Event;
-                anim.Animator.PlayAnimation(msg.Clip);
+                if (anim.PostEvent && anim.Animator.Animator.IsAnimationEventComplete(anim.Clip)) {
+                    anim.PostEvent = false;
+                    anim.Target.Post(new AnimationEventComplete(anim.Target, anim.Animator, anim.Clip));
+                }
+                if (anim.Animator.Animator.IsAnimationEventComplete(anim.Clip)) {
+                    anim.Target.Post(new AnimationComplete(anim.Target, anim.Animator, anim.Clip));
+                    _animations.CurrentList.Remove(i);
+                }
             }
+        }
+
+        public void HandleGlobal(PlayAnimation msg) {
+            if (msg.Animator?.Animator == null) {
+                return;
+            }
+            msg.Animator.Animator.PlayAnimation(msg.Clip, msg.Override, null);
+            _animations.Add(msg);
         }
     }
 }

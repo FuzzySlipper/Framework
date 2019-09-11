@@ -10,7 +10,7 @@ public static class EasingExtensionMethods{
 		#region Tweening Helpers
 		public static Task MoveTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                          Action onComplete = null) {
+		                          System.Action onComplete = null) {
 			Vector3 start = trans.position;
 			return new Tween((Vector3 pos)=>{
 				trans.position = pos;
@@ -18,7 +18,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task LocalMoveTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                               Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                               Action onComplete = null)
+		                               System.Action onComplete = null)
 		{
 			Vector3 start = trans.localPosition;
 			return new Tween((Vector3 pos)=>{
@@ -27,7 +27,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task WarpAndMoveTo(this Transform trans, Vector3 start, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                          Action onComplete = null)
+		                          System.Action onComplete = null)
 		{
 			return new Tween((Vector3 pos)=>{
 				trans.position = pos;
@@ -36,7 +36,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task ScaleTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                          Action onComplete = null)
+		                          System.Action onComplete = null)
 		{
 			Vector3 start = trans.localScale;
 			return new Tween((Vector3 scale)=>{
@@ -45,7 +45,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task RotateTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                          Action onComplete = null)
+		                          System.Action onComplete = null)
 		{
 			Vector3 start = trans.localEulerAngles;
 			return new Tween((Vector3 rot)=>{
@@ -54,7 +54,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task FadeTo(this CanvasGroup cgroup, float target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                            Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                            Action onComplete = null) {
+		                            System.Action onComplete = null) {
 			float start = cgroup.alpha;
 			return new Tween((float newAlpha)=>{
 				cgroup.alpha = newAlpha;
@@ -64,7 +64,7 @@ public static class EasingExtensionMethods{
 		}
         public static Task FadeTo(this TextMeshProUGUI cgroup, float target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                            Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                            Action onComplete = null)
+		                            System.Action onComplete = null)
 		{
 			float start = cgroup.alpha;
 			return new Tween((float newAlpha)=>{
@@ -73,7 +73,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task EaseFill(this Image image, float target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                          Action onComplete = null)
+		                          System.Action onComplete = null)
 		{
 			float start = image.fillAmount;
 			return new Tween((float newFill)=>{
@@ -82,7 +82,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task EaseLayoutMinValues(this LayoutElement layout, Vector2 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                                 Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                                 Action onComplete = null)
+		                                 System.Action onComplete = null)
 		{
 			Vector2 start = new Vector2(layout.minWidth, layout.minHeight);
 			return new Tween((Vector2 newDimensions)=>{
@@ -92,7 +92,7 @@ public static class EasingExtensionMethods{
 		}
 		public static Task jump(this ScrollRect scrollRect, Vector2 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                                            Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
-		                                            Action onComplete = null)
+		                                            System.Action onComplete = null)
 		{
 			Vector2 start = scrollRect.normalizedPosition;
 			return new Tween((Vector2 newPosition)=>{

@@ -49,7 +49,7 @@ public static class EnumHelper {
         var values = Enum.GetValues(typeof(T));
         var dict = new SortedList<int, string>();
         foreach (var value in values) {
-            dict.Add((int)value, Enum.GetName(typeof(T), value));
+            dict.Add(Convert.ToInt32(value), Enum.GetName(typeof(T), value));
         }
         return dict;
     }
@@ -120,6 +120,7 @@ public static class EnumHelper {
         if (type == typeof(string)) {
             return false;
         }
+        
         if (Int32.TryParse(valueToParse, out var intEnumValue)) {
             if (Enum.IsDefined(type, intEnumValue)) {
                 returnValue = (T) (object) intEnumValue;
@@ -133,11 +134,13 @@ public static class EnumHelper {
         var fullName = type.Name + "." + valueToParse;
         foreach (var name in names) {
             if (valueToParse.CompareCaseInsensitive(name.Value)) {
-                returnValue = (T) (object) name.Key;
+                returnValue = (T) Enum.ToObject(typeof(T), name.Key);
+                //returnValue = (T) (object) name.Key;
                 return true;
             }
             if (fullName.CompareCaseInsensitive(name.Value)) {
-                returnValue = (T) (object) name.Key;
+                returnValue = (T) Enum.ToObject(typeof(T), name.Key);
+                //returnValue = (T) (object) name.Key;
                 return true;
             }
         }

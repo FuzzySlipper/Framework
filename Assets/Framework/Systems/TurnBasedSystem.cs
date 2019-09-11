@@ -122,7 +122,7 @@ namespace PixelComrades {
             return null;
         }
 
-        public void OnSystemUpdate(float dt) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
             PrepareTurn();
             TurnUpdate();
             //if (Game.Debug) {
@@ -158,7 +158,7 @@ namespace PixelComrades {
             if (TurnCancel()) {
                 return;
             }
-            _active.Sort(_nodeSorter);
+            //_active.Sort(_nodeSorter);
             //_active.BubbleSort((i, i1) => i.Priority < i1.Priority);
             for (int i = 0; i < _active.Count; i++) {
                 if (TurnCancel()) {

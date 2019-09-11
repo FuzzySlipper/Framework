@@ -44,7 +44,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
         private bool _editorUpdate = false;
 #endif
-        public static float TimeScale { get { return Game.Paused ? 0 : _timeScale; } }
+        public static float TimeScale { get { return Game.Paused ? 0 : _timeScale; } set { _timeScale = value; } }
 
         public static float Time {
             get {
@@ -164,7 +164,7 @@ namespace PixelComrades {
             //_deltaUnscaled = UnityEngine.Time.unscaledDeltaTime;
             RunUpdate();
             SystemManager.SystemUpdate();
-            World.Update(_deltaTime);
+            World.Update(_deltaTime, _deltaUnscaled);
             //if (GameOptions.UseCulling) {
             //    CullingManager.Main.Update();
             //}

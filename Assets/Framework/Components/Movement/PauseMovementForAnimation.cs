@@ -1,13 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class PauseMovementForAnimation : IComponent, IReceive<DamageEvent> {
-        public int Owner { get; set; }
 
         private string _damageClip;
 
+        public PauseMovementForAnimation(SerializationInfo info, StreamingContext context) {
+            _damageClip = info.GetValue(nameof(_damageClip), _damageClip);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_damageClip), _damageClip);
+        }
+        
         public PauseMovementForAnimation(string damageClip) {
             _damageClip = damageClip;
         }

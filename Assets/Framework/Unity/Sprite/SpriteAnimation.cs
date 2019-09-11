@@ -46,6 +46,14 @@ namespace PixelComrades {
             return time;
         }
 
+        public Vector3 GetEventPosition(SpriteRenderer renderer, AnimationFrame frame) {
+            var pixelsPerUnit = renderer.sprite.pixelsPerUnit;
+            var width = (renderer.sprite.rect.width / 2) / pixelsPerUnit;
+            var height = (renderer.sprite.rect.height / 2) / pixelsPerUnit;
+            //return renderer.transform.position + new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0);
+            return renderer.transform.TransformPoint(new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
+            //return renderer.bounds.center + new Vector3(frame.EventPosition.x * -renderer.bounds.extents.x, frame.EventPosition.y * -renderer.bounds.extents.y);
+        }
     }
 
 
@@ -53,21 +61,20 @@ namespace PixelComrades {
     public class AnimationFrame {
         public float Length = 1;
         public int SpriteIndex;
-        public bool DefaultEventTrigger = false;
-
+        
         public EventType Event = EventType.None;
         public string EventName;
-        public int EventDataInt;
+        public Vector2 EventPosition;
         public float EventDataFloat;
         public string EventDataString;
-        public GameObject EventDataGameObject;
+        public UnityEngine.Object EventDataObject;
+
+        public bool HasEvent { get { return Event != EventType.None; } }
 
         public enum EventType {
-            None,
-            Int,
-            Float,
-            String,
-            Gameobject
+            None = 0,
+            Default = 1,
+            Message,
         }
     }
 }

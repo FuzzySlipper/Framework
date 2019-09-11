@@ -4,22 +4,42 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public static class CollisionExtensions {
-        public static void GenerateHitLocDir(Entity origin, Entity target, out Vector3 hitPnt, out Vector3 dir) {
+        public static void GenerateHitLocDir(Entity origin, Entity target, out Vector3 hitPnt, out Vector3 normal) {
+            if (origin == target) {
+                hitPnt = target.GetPosition();
+                normal = target.Tr.forward;
+                return;
+            }
             var collider = target.Get<ColliderComponent>();
-            hitPnt = target.GetPosition();
+            var originPos = origin.GetPosition();
             if (collider != null && collider.Collider != null) {
-                hitPnt += new Vector3(0, collider.Collider.bounds.size.y * 0.5f, 0);
+                //hitPnt += new Vector3(0, collider.Collider.bounds.size.y * 0.5f, 0);
+                hitPnt = collider.Collider.ClosestPointOnBounds(originPos);
             }
-            dir = (hitPnt - origin.GetPosition()).normalized;
-            if (target == origin) {
-                hitPnt += dir * 1;
+            else {
+                hitPnt = target.GetPosition();
             }
-            else if (collider != null && collider.Collider != null) {
-                //dir = hitPnt - Owner.Tr.position;
-                //dir = dir.normalized;
-                //hitPnt += (Owner.WorldCenter - hitPnt).normalized * targetActor.Collider.bounds.size.z * 0.5f;
-                hitPnt += dir * collider.Collider.bounds.size.z * 0.5f;
+            normal = (originPos - hitPnt).normalized;
+            //if (target == origin) {
+            //    hitPnt += dir * 1;
+            //}
+            //else if (collider != null && collider.Collider != null) {
+            //    //dir = hitPnt - Owner.Tr.position;
+            //    //dir = dir.normalized;
+            //    //hitPnt += (Owner.WorldCenter - hitPnt).normalized * targetActor.Collider.bounds.size.z * 0.5f;
+            //    hitPnt += dir * collider.Collider.bounds.size.z * 0.5f;
+            //}
+        }
+
+        public static void GenerateHitLocDir(Vector3 origin, Entity target, out Vector3 hitPnt, out Vector3 normal) {
+            var collider = target.Get<ColliderComponent>();
+            if (collider != null && collider.Collider != null) {
+                hitPnt = collider.Collider.ClosestPointOnBounds(origin);
             }
+            else {
+                hitPnt = target.GetPosition();
+            }
+            normal = (origin - hitPnt).normalized;
         }
 
         public static float GetHitMultiplier(int hit, Entity entity) {
@@ -44,11 +64,6 @@ namespace PixelComrades {
                 }
             }
             return target.GetPosition + (Random.onUnitSphere * 1.5f);
-        }
-
-        public static CollisionEvent BuildEvent(Entity owner, Entity target) {
-            GenerateHitLocDir(owner, target, out var hitPnt, out var dir);
-            return new CollisionEvent(owner, target, hitPnt, dir);
         }
     }
 }

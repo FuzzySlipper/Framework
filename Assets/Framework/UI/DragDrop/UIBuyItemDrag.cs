@@ -41,11 +41,11 @@ namespace PixelComrades {
                 return;
             }
             var sellPrice = InventoryItem.TotalPrice();
-            if (Player.Currency.Value < sellPrice) {
-                StatusMessages(null, string.Format("Costs {0}, Not enough {1}", sellPrice, GameLabels.Currency));
+            if (Player.DefaultCurrencyHolder.Value < sellPrice) {
+                StatusMessages(null, string.Format("Costs {0}, Not enough {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 return;
             }
-            UIModalQuestion.Set(CheckBuy, string.Format("Buy for {0} {1}?", sellPrice, GameLabels.Currency));
+            UIModalQuestion.Set(CheckBuy, string.Format("Buy for {0} {1}?", sellPrice, GameText.DefaultCurrencyLabel));
         }
 
         private void CheckBuy(int index) {
@@ -54,7 +54,7 @@ namespace PixelComrades {
             }
             var sellPrice = InventoryItem.TotalPrice();
             if (Player.MainInventory.TryAdd(Data)) {
-                StatusMessages(null, string.Format("Bought for {0} {1}", sellPrice, GameLabels.Currency));
+                StatusMessages(null, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 Clear();
             }
         }

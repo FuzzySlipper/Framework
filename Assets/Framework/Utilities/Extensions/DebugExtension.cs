@@ -11,7 +11,19 @@ using PixelComrades;
 #if UNITY_EDITOR
 public static class DebugExtension
 {
-	#region DebugDrawFunctions
+
+    public static void GizmoDrawFov(Vector3 pos, float length, Vector3 upDir, Vector3 dir) {
+        float halfFov = 90f / 2.0f;
+        Quaternion leftRayRotation = Quaternion.AngleAxis(-halfFov, upDir);
+        Quaternion rightRayRotation = Quaternion.AngleAxis(halfFov, upDir);
+        Vector3 leftRayDirection = leftRayRotation * dir;
+        Vector3 rightRayDirection = rightRayRotation * dir;
+        Gizmos.DrawRay(pos, leftRayDirection * length);
+        Gizmos.DrawRay(pos, rightRayDirection * length);
+    }
+    
+    
+    #region DebugDrawFunctions
 	
 	/// <summary>
 	/// 	- Debugs a point.

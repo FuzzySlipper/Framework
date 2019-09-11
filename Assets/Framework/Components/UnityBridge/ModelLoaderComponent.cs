@@ -37,7 +37,7 @@ namespace PixelComrades {
             }
             if (arg.Owner == null && _loadedComponents.Count > 0) {
                 var entity = this.GetEntity();
-                MonoBehaviourToEntity.Unregister(entity);
+                UnityToEntityBridge.Unregister(entity);
                 for (int i = 0; i < _loadedComponents.Count; i++) {
                     entity.Remove(_loadedComponents[i]);
                 }
@@ -60,14 +60,10 @@ namespace PixelComrades {
                 return;
             }
             var entity = this.GetEntity();
-            MonoBehaviourToEntity.RegisterToEntity(model.gameObject, entity);
+            UnityToEntityBridge.RegisterToEntity(model.gameObject, entity);
             _loadedComponents.Add(entity.Add(new ModelComponent(_loadedModel)));
             entity.Tr = model.Transform;
             _loadedComponents.Add(entity.Add(new FloatingTextStatusComponent(model.Transform, new Vector3(0, 1.5f, 0))));
-            var animTr = model.GetComponent<IAnimTr>();
-            if (animTr != null) {
-                _loadedComponents.Add(entity.Add(new AnimTr(animTr.AnimTr)));
-            }
             var rb = model.GetComponent<Rigidbody>();
             if (rb != null) {
                 _loadedComponents.Add(entity.Add(new RigidbodyComponent(rb)));

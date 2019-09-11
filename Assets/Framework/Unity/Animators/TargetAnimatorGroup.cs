@@ -43,6 +43,12 @@ namespace PixelComrades {
             _playing = TimeManager.StartUnscaled(WaitForTween(onFinish));
         }
 
+        public override void PlayFrame(float normalized) {
+            for (int i = 0; i < _animators.Length; i++) {
+                _animators[i].PlayFrame(normalized);
+            }
+        }
+
         private IEnumerator WaitForTween(System.Action del) {
             yield return null;
             bool animationsPlaying = true;

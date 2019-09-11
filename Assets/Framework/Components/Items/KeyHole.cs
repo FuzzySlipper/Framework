@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class KeyHole : IComponent, IWorldItemInteraction {
-        public int Owner { get; set; }
 
         public int PickDifficulty;
         public string KeyString;
-
 
         public KeyHole(){}
 
@@ -33,6 +32,16 @@ namespace PixelComrades {
 
         public bool TryInteract(Entity item) {
             return UnlockKey(item.Get<Key>().KeyId);
+        }
+
+        public KeyHole(SerializationInfo info, StreamingContext context) {
+            KeyString = info.GetValue(nameof(KeyString), "");
+            PickDifficulty = info.GetValue(nameof(PickDifficulty), PickDifficulty);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(KeyString), KeyString);
+            info.AddValue(nameof(PickDifficulty), PickDifficulty);
         }
     }
 }

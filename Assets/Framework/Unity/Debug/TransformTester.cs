@@ -35,5 +35,21 @@ namespace PixelComrades {
         public void SetAnchor3() {
             ((RectTransform) (transform)).SetAnchorsAndPivots(new Vector2(1, 0));
         }
+
+        public Transform NeighborTester = null;
+
+        #if UNITY_EDITOR
+
+        private void OnDrawGizmosSelected() {
+            if (NeighborTester == null) {
+                return;
+            }
+            Gizmos.DrawWireCube(NeighborTester.position, Vector3.one);
+            var pos = transform.position.WorldToGenericGrid(5);
+            var neighbor = NeighborTester.transform.position.WorldToGenericGrid(5);
+            UnityEditor.Handles.Label(transform.position, string.Format("{0}-{1} Neighbor pos {2} neighbor {3}", pos, neighbor, pos.IsNeighbor(neighbor), neighbor.IsNeighbor(pos)));
+        }
+
+#endif
     }
 }

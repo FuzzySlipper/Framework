@@ -1,30 +1,59 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Low)]
-    public class StatsContainer : IReceive<DamageEvent>, IReceive<HealEvent> {
+    public sealed class StatsContainer : IComponent, IReceive<HealEvent> {
 
-        public Entity Owner { get; private set; }
+        private CachedEntity _owner;
 
         private Dictionary<string, BaseStat> _dict = new Dictionary<string, BaseStat>();
         private Dictionary<string, VitalStat> _vitals = new Dictionary<string, VitalStat>();
-        protected List<BaseStat> List = new List<BaseStat>();
+        private List<BaseStat> _list = new List<BaseStat>();
 
         public StatsContainer(Entity owner) {
-            Owner = owner;
+            _owner = new CachedEntity(owner);
         }
 
-        public BaseStat this[int index] { get { return List[index]; } }
-        public int Count { get { return List.Count; } }
+        public StatsContainer(SerializationInfo info, StreamingContext context) {
+            _owner = new CachedEntity(info.GetValue(nameof(_owner), -1));
+            var stats = (List<BaseStat>) info.GetValue("Stats", typeof(List<BaseStat>));
+            var vitals = (List<VitalStat>) info.GetValue("Vitals", typeof(List<VitalStat>));
+            for (int i = 0; i < stats.Count; i++) {
+                Add(stats[i]);
+            }
+            for (int i = 0; i < vitals.Count; i++) {
+                Add(vitals[i]);
+            }
+        }
+                
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_owner), _owner.Entity.Id);
+            var baseStats = new List<BaseStat>();
+            var vitalStats = new List<VitalStat>();
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i] is VitalStat stat) {
+                    vitalStats.Add(stat);
+                }
+                else {
+                    baseStats.Add(_list[i]);
+                }
+            }
+            info.AddValue("Stats", baseStats);
+            info.AddValue("Vitals", vitalStats);
+        }
+
+        public BaseStat this[int index] { get { return _list[index]; } }
+        public int Count { get { return _list.Count; } }
         public VitalStat HealthStat { get; private set; }
 
         public void Add(BaseStat item) {
             if (item == null || _dict.ContainsKey(item.ID)) {
                 return;
             }
-            List.Add(item);
+            _list.Add(item);
             _dict.Add(item.ID, item);
             if (item is VitalStat vital) {
                 if (item.ID == GameOptions.Get(RpgSettings.HealthStat, "Vitals.Health")) {
@@ -44,7 +73,7 @@ namespace PixelComrades {
         }
 
         public void Remove(BaseStat item) {
-            List.Remove(item);
+            _list.Remove(item);
             _dict.Remove(item.ID);
             if (item is VitalStat vital) {
                 if (item.ID == GameOptions.Get(RpgSettings.HealthStat, "Vitals.Health")) {
@@ -103,22 +132,6 @@ namespace PixelComrades {
             return false;
         }
 
-        public void Handle(DamageEvent msg) {
-            var damage = msg.Amount;
-            if (damage <= 0) {
-                return;
-            }
-            if (_vitals.TryGetValue(msg.TargetVital, out var vital)) {
-                vital.Current -= msg.Amount;
-            }
-            else if (_vitals.TryGetValue(GameData.Vitals.GetID(msg.TargetVital), out vital)) {
-                vital.Current -= msg.Amount;
-            }
-            if (msg.Amount > 0) {
-                Owner.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.red));
-            }
-        }
-
         public void Handle(HealEvent msg) {
             if (_vitals.TryGetValue(msg.TargetVital, out var vital)) {
                 vital.Current += msg.Amount;
@@ -127,7 +140,7 @@ namespace PixelComrades {
                 vital.Current += msg.Amount;
             }
             if (msg.Amount > 0) {
-                Owner.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.green));
+                _owner.Entity?.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.green));
             }
         }
 

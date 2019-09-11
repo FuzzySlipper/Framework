@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     public class DirectionalAnimation : SpriteAnimation {
@@ -25,8 +26,30 @@ namespace PixelComrades {
         }
 
         public override Sprite GetSpriteFrame(int frame) {
+            if (DirectionalFrames == null || DirectionalFrames.Count == 0) {
+                return null;
+            }
             return DirectionalFrames[0].Frames[frame];
         }
 
+        [Button]
+        public void DoubleRearFrames() {
+            for (int d = 0; d < DirectionalFrames.Count; d++) {
+                var frames = DirectionalFrames[d].Frames;
+                switch (DirectionalFrames[d].Side) {
+                    case DirectionsEight.Rear:
+                    case DirectionsEight.RearLeft:
+                    case DirectionsEight.Left:
+                    case DirectionsEight.RearRight:
+                    case DirectionsEight.Right:
+                        for (int f = 1; f < frames.Length; f++) {
+                            if (f % 2 != 0) {
+                                frames[f] = frames[f - 1];
+                            }
+                        }
+                        break;
+                }
+            }
+        }
     }
 }

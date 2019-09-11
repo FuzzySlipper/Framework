@@ -30,7 +30,7 @@ namespace PixelComrades {
         }
 
         public void ShowToolTip(Image source, Sprite sprite, string title, string descr) {
-            _toolTipImage.sprite = sprite;
+            _toolTipImage.overrideSprite = sprite;
             _toolTipImage.enabled = sprite != null;
             _textTitle.text = title;
             _textDescr.text = descr;
@@ -46,7 +46,7 @@ namespace PixelComrades {
 
         public void ShowCompareToolTip(Sprite sprite = null, string title = "", string descr = "") {
             _compareTr.gameObject.SetActive(true);
-            _compareToolTipImage.sprite = sprite;
+            _compareToolTipImage.overrideSprite = sprite;
             _compareToolTipImage.gameObject.SetActive(_compareToolTipImage.sprite != null);
             _compareTextTitle.text = title;
             _compareTextDescr.text = descr;

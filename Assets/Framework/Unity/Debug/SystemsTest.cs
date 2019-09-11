@@ -53,17 +53,15 @@ namespace PixelComrades {
             private int _currentFrameIndex = 0;
             private bool _playing = false;
             private bool _activated = false;
-            private float _start = 0;
+            private float _animationStarted = 0;
             private float _nextUpdateTime;
             //private MaterialPropertyBlock _materialBlock = new MaterialPropertyBlock();
 
-            private float Time { get { return _unscaled ? TimeManager.TimeUnscaled : TimeManager.Time; } }
-            private bool IsFrameReady { get { return _activated && Time <= _start + _nextUpdateTime; } }
             private AnimationFrame CurrentFrame { get { return _animation != null ? _animation.GetFrame(_currentFrameIndex) : null; } }
             private int FrameIndex { get { return _currentFrameIndex; } }
             public bool Finished { get { return !_playing; } }
 
-            public void Setup(SpriteRenderer renderer, SpriteAnimation animation, bool unscaled) {
+            public void Setup(SpriteRenderer renderer, SpriteAnimation animation, bool unscaled, float time) {
                 _renderer = renderer;
                 _animation = animation;
                 _unscaled = unscaled;
@@ -77,7 +75,8 @@ namespace PixelComrades {
                 _currentFrameIndex = 0;
                 _playing = true;
                 _activated = true;
-                _start = Time;
+                StartNewTime(_animation.FrameTime * CurrentFrame.Length, time);
+                _animationStarted = time;
             }
 
             public void Clear() {
@@ -85,14 +84,14 @@ namespace PixelComrades {
                 _animation = null;
             }
 
-            public void UpdateSpriteFrame() {
-                if (!_playing || IsFrameReady) {
+            public void UpdateSpriteFrame(float time) {
+                if (!_playing || !_activated || time < _nextUpdateTime) {
                     return;
                 }
                 _currentFrameIndex++;
                 var cf = CurrentFrame;
                 if (cf != null) {
-                    StartNewTime(_animation.FrameTime * cf.Length);
+                    StartNewTime(_animation.FrameTime * cf.Length, time);
                     _renderer.sprite = _animation.GetSpriteFrame(FrameIndex);
                     return;
                 }
@@ -101,23 +100,22 @@ namespace PixelComrades {
                 }
                 if (_animation.Looping) {
                     _currentFrameIndex = 0;
-                    StartNewTime(_animation.FrameTime * cf.Length);
+                    StartNewTime(_animation.FrameTime * cf.Length, time);
                     _renderer.sprite = _animation.GetSpriteFrame(FrameIndex);
                     return;
                 }
                 _playing = false;
             }
 
-            private void StartNewTime(float length) {
-                _nextUpdateTime = length;
+            private void StartNewTime(float length, float time) {
+                _nextUpdateTime = time + length;
                 _activated = true;
-                _start = Time;
             }
         }
 
         public void AddAnimation(SpriteAnimation animation, SpriteRenderer renderer, bool unscaled) {
             var node = _pool.New();
-            node.Setup(renderer, animation, unscaled);
+            node.Setup(renderer, animation, unscaled, TimeManager.Time);
             _current.Add(node);
         }
 
@@ -127,9 +125,10 @@ namespace PixelComrades {
         //    _current1.Add(node);
         //}
 
-        public void OnSystemUpdate(float dt) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
+            var time = TimeManager.TimeUnscaled;
             for (int i = _current.Count - 1; i >= 0; i--) {
-                _current[i].UpdateSpriteFrame();
+                _current[i].UpdateSpriteFrame(time);
                 if (_current[i].Finished) {
                     _pool.Store(_current[i]);
                     _current.RemoveAt(i);

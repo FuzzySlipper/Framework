@@ -1,32 +1,25 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class CurrencyItem : IComponent, IReceive<ContainerStatusChanged> {
-        private int _owner = -1;
-        public int Owner {
-            get { return _owner; }
-            set {
-                if (_owner == value) {
-                    return;
-                }
-                _owner = value;
-                if (_owner < 0) {
-                    return;
-                }
-                this.GetEntity().Add(new LabelComponent(string.Format("{0} {1}", _count, GameLabels.Currency)));
-                this.GetEntity().GetOrAdd<UsableComponent>().OnUsableDel += OnControlUse;
-            }
-        }
-
 
         public void Handle(ContainerStatusChanged arg) {
-            if (arg.EntityContainer != null && arg.EntityContainer.GetEntity().HasComponent<PlayerComponent>()) {
+            this.GetEntity().Add(new LabelComponent(string.Format("{0} {1}", _count, GameText.DefaultCurrencyLabel)));
+            if (arg.EntityContainer != null && arg.Entity.ParentId >= 0 && arg.Entity.GetParent().HasComponent<PlayerComponent>()) {
                 TimeManager.StartUnscaled(WaitToRemove());
             }
         }
 
+        public CurrencyItem(SerializationInfo info, StreamingContext context) {
+            _count = info.GetValue(nameof(_count), _count);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_count), _count);
+        }
         private int _count;
 
         public CurrencyItem(int count) {
@@ -39,12 +32,12 @@ namespace PixelComrades {
 
         private IEnumerator WaitToRemove() {
             yield return 0.1f;
-            Player.Currency.AddToValue(_count);
+            Player.DefaultCurrencyHolder.AddToValue(_count);
             Despawn();
         }
 
         public bool OnControlUse(IComponent component) {
-            Player.Currency.AddToValue(_count);
+            Player.DefaultCurrencyHolder.AddToValue(_count);
             Despawn();
             return true;
         }

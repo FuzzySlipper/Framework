@@ -26,6 +26,7 @@ namespace PixelComrades {
         [SerializeField] private Sprite _defaultBootsIcon = null;
         [SerializeField] private Sprite _defaultGlovesIcon = null;
         [SerializeField] private Sprite _defaultLegsIcon = null;
+        [SerializeField] private Sprite[] _currencyIcons = new Sprite[0];
 
         public static Sprite DefaultArmorIcon { get { return Main._defaultArmorIcon; } }
         public static Sprite DefaultHelmetIcon { get { return Main._defaultHelmetIcon; } }
@@ -45,6 +46,7 @@ namespace PixelComrades {
         public static Sprite Move { get { return Main._move; } }
         public static Sprite Idle { get { return Main._idle; } }
         public static Sprite Dead { get { return Main._dead; } }
+        public static Sprite[] CurrencyIcons { get { return Main._currencyIcons; } }
         public static Sprite[] SpellSkills { get { return Main._spellSkills; } }
         public static ActorPortrait[] Portraits { get { return Main._portraits; } }
 

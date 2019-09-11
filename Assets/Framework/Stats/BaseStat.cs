@@ -7,8 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class BaseStat : IDisposable {
 
-        public BaseStat() {
-        }
+        public BaseStat() {}
 
         public BaseStat(string label, float baseValue) {
             _baseValue = baseValue;
@@ -31,8 +30,7 @@ namespace PixelComrades {
         [SerializeField] protected string _label = "";
         [Range(0, 100), SerializeField] protected float _baseValue = 0;
         [SerializeField] protected string _id;
-
-        public float MaxBaseValue = 9999;
+        [SerializeField] protected float MaxBaseValue = 9999;
 
         public event Action<BaseStat> OnStatChanged;
         public event Action<BaseStat> OnStatReset;
@@ -113,6 +111,20 @@ namespace PixelComrades {
             }
         }
 
+        public bool HasMod(string id) {
+            for (int i = 0; i < _valueMods.Count; i++) {
+                if (_valueMods[i].Id == id) {
+                    return true;
+                }
+            }
+            for (int i = 0; i < _percentMods.Count; i++) {
+                if (_percentMods[i].Id == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public string AddDerivedStat(float percent, BaseStat targetStat, string id = "") {
             if (targetStat == null) {
                 return "";
@@ -121,14 +133,6 @@ namespace PixelComrades {
             mod.UpdateValue(Value);
             _derivedStats.Add(mod);
             return mod.Id;
-        }
-
-        public void AddDerivedStat(float percent, Derived mod) {
-            if (mod == null) {
-                return;
-            }
-            mod.UpdateValue(Value);
-            _derivedStats.Add(mod);
         }
 
         public void RemoveDerivedStat(string id) {

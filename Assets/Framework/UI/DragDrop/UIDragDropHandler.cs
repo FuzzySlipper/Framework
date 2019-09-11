@@ -13,9 +13,9 @@ namespace PixelComrades {
         //[SerializeField] private float _minSizeDrag = 75f;
 
         private static Entity _currentData;
-        private static Action _onRightClick;
-        private static Action _onReturn;
-        private static Action _onTake;
+        private static System.Action _onRightClick;
+        private static System.Action _onReturn;
+        private static System.Action _onTake;
         private static int _currentId;
 
         public static Entity CurrentData { get { return _currentData; } }
@@ -114,7 +114,7 @@ namespace PixelComrades {
         public static void SetDragSprite(Sprite sprite) {
             UITooltip.main.HideTooltipImmediate();
             UITooltip.CanActivate = false;
-            main._dragDropSprite.sprite = sprite;
+            main._dragDropSprite.overrideSprite = sprite;
             //main._dragDropSprite.rectTransform.sizeDelta = new Vector2(
             //    Mathf.Clamp(size.x, main._minSizeDrag, 999), Mathf.Clamp(size.y, main._minSizeDrag, 999));
             main._dragDropSprite.enabled = true;

@@ -47,7 +47,7 @@ namespace PixelComrades {
             if (ControlRotation) {
                 HandleRotationMovement();
             }
-            var scroll = PlayerInput.GetAxis("Scroll");
+            var scroll = PlayerInput.main.GetAxis("Scroll");
             if (Mathf.Abs(scroll) < 0.05f) {
                 return;
             }
@@ -58,19 +58,19 @@ namespace PixelComrades {
 
         void FixedUpdate() {
             if (WhenUpdate == UpdateType.FixedUpdate) {
-                FollowTarget(Time.deltaTime);
+                FollowTarget(TimeManager.DeltaTime);
             }
         }
 
         void LateUpdate() {
             if (WhenUpdate == UpdateType.LateUpdate) {
-                FollowTarget(Time.deltaTime);
+                FollowTarget(TimeManager.DeltaTime);
             }
         }
 
         public void ManualUpdate() {
             if (WhenUpdate == UpdateType.ManualUpdate) {
-                FollowTarget(Time.deltaTime);
+                FollowTarget(TimeManager.DeltaTime);
             }
         }
 
@@ -100,14 +100,14 @@ namespace PixelComrades {
             if (Time.timeScale < float.Epsilon) {
                 return;
             }
-            SetRootRotation(PlayerInput.GetAxis(PlayerInput.Axis.MoveX));
-            float y = PlayerInput.GetAxis(PlayerInput.Axis.LookY);
+            SetRootRotation(PlayerInput.main.GetAxis(PlayerInput.Axis.MoveX));
+            float y = PlayerInput.main.GetAxis(PlayerInput.Axis.LookY);
             _tiltAngle -= y * TurnSpeed;
             _tiltAngle = Mathf.Clamp(_tiltAngle, -TiltMin, TiltMax);
             _pivotTargetRot = Quaternion.Euler(_tiltAngle, _pivotEulers.y, _pivotEulers.z);
             if (TurnSmoothing > 0) {
                 _pivot.localRotation = Quaternion.Slerp(_pivot.localRotation, _pivotTargetRot,
-                    TurnSmoothing * Time.deltaTime);
+                    TurnSmoothing * TimeManager.DeltaTime);
             }
             else {
                 _pivot.localRotation = _pivotTargetRot;
@@ -119,7 +119,7 @@ namespace PixelComrades {
             _transformTargetRot = Quaternion.Euler(0f, _lookAngle, 0f);
             if (TurnSmoothing > 0) {
                 transform.localRotation = Quaternion.Slerp(transform.localRotation, _transformTargetRot,
-                    TurnSmoothing * Time.deltaTime);
+                    TurnSmoothing * TimeManager.DeltaTime);
             }
             else {
                 transform.localRotation = _transformTargetRot;

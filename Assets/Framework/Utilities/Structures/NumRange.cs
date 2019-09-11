@@ -6,9 +6,8 @@ using Random = System.Random;
 
 
 namespace PixelComrades {
-    public class RangeBase {
+    public class RangeBase {}
 
-    }
     [Serializable]
     public class FloatRange : RangeBase {
         public float Min;

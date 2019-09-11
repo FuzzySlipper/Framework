@@ -10,18 +10,17 @@ namespace PixelComrades {
 
         private List<UIModIcon> _active = new List<UIModIcon>();
         private CharacterNode _actor;
+        private List<ModEntry> _mods = new List<ModEntry>();
 
         public void SetupActor(CharacterNode actor) {
             if (_actor != null) {
                 _actor.Entity.RemoveObserver(this);
-                MessageKit.removeObserver(Messages.ModifiersUpdated, UpdateMods);
             }
             _actor = actor;
             if (_actor == null) {
                 return;
             }
             _actor.Entity.AddObserver(this);
-            MessageKit.addObserver(Messages.ModifiersUpdated, UpdateMods);
         }
 
         private void ClearList() {
@@ -33,32 +32,19 @@ namespace PixelComrades {
 
         private void CheckMods() {
             ClearList();
-            for (int i = _actor.Modifiers.c.Count - 1; i >= 0; i--) {
+            _mods.Clear();
+            World.Get<ModifierSystem>().FillModList(_mods, _actor.Entity.Id);
+            for (int i = _mods.Count - 1; i >= 0; i--) {
                 if (_active.Count >= _modLimit) {
                     break;
                 }
-                var mod = _actor.Modifiers.c[i];
-                if (mod.Icon == null || ContainsMod(mod)) {
+                var mod = _mods[i];
+                if (mod.Icon == null) {
                     continue;
                 }
                 var modWatch = ItemPool.SpawnUIPrefab<UIModIcon>(_prefab.gameObject, transform);
                 _active.Add(modWatch);
-                modWatch.Assign(mod, _actor);
-            }
-        }
-
-        private bool ContainsMod(IEntityModifier mod) {
-            for (int i = 0; i < _active.Count; i++) {
-                if (_active[i].Mod == mod) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void UpdateMods() {
-            for (int i = 0; i < _active.Count; i++) {
-                _active[i].UpdateCoolDown();
+                modWatch.Assign(mod);
             }
         }
 

@@ -46,7 +46,7 @@ namespace PixelComrades {
 
         public void Show(Sprite sprite, string title, string descr, string stats) {
             if (_toolTipImage != null) {
-                _toolTipImage.sprite = sprite;
+                _toolTipImage.overrideSprite = sprite;
                 _toolTipImage.enabled = sprite != null;
             }
             _textTitle.text = title;
@@ -67,7 +67,7 @@ namespace PixelComrades {
 
         public void ShowCompare(Sprite sprite, string title, string descr, string stats) {
             _compareTr.gameObject.SetActive(true);
-            _compareToolTipImage.sprite = sprite;
+            _compareToolTipImage.overrideSprite = sprite;
             _compareToolTipImage.gameObject.SetActive(_compareToolTipImage.sprite != null);
             _compareTextTitle.text = title;
             _compareDescr.text = descr;
@@ -86,7 +86,7 @@ namespace PixelComrades {
 
         private void ClearCurrentData() {
             if (_toolTipImage != null) {
-                _toolTipImage.sprite = null;
+                _toolTipImage.overrideSprite = null;
                 _toolTipImage.enabled = false;
             }
             _textTitle.text = "";
@@ -96,7 +96,7 @@ namespace PixelComrades {
 
         private void DisableCompare() {
             if (_compareToolTipImage != null) {
-                _compareToolTipImage.sprite = null;
+                _compareToolTipImage.overrideSprite = null;
             }
             if (_compareTextTitle != null) {
                 _compareTextTitle.text = "";

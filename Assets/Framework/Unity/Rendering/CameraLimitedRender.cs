@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class CameraLimitedRender : MonoBehaviour {
-    [SerializeField] private GameObject _limitedRender;
+    [SerializeField] private GameObject _limitedRender = null;
 
     private MeshRenderer[] _renderers;
 

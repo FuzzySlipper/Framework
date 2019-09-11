@@ -1,17 +1,19 @@
 using UnityEngine;
 using System.Collections;
-using System.Linq;
+using System.Collections.Generic;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 
 namespace PixelComrades {
     [CustomEditor(typeof(SpriteAnimation), true)]
-    public class SpriteAnimationEditor : Editor {
+    public class SpriteAnimationEditor : OdinEditor {
 
         private TextureDrawType _selectedTextureDrawType = TextureDrawType.Transparent;
         private Material _normalMat;
         private SpriteAnimationPreview _timeControl;
 
-        void OnEnable() {
+        protected override void OnEnable() {
+            base.OnEnable();
             _normalMat = new Material(Shader.Find("Sprites/Default"));
             _timeControl = new SpriteAnimationPreview((SpriteAnimation)target);
         }
@@ -141,6 +143,67 @@ namespace PixelComrades {
             Normal,
             Alpha,
             Transparent
+        }
+    }
+
+    public class SpriteCopy : EditorWindow {
+        private Object _copyFrom;
+        private Object _copyTo;
+
+        // Creates a new option in "Windows"
+        [MenuItem("Window/Copy Spritesheet pivots and slices")]
+        private static void Init() {
+            // Get existing open window or if none, make a new one:
+            SpriteCopy window = (SpriteCopy) GetWindow(typeof(SpriteCopy));
+            window.Show();
+        }
+
+        private void OnGUI() {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Copy from:", EditorStyles.boldLabel);
+            _copyFrom = EditorGUILayout.ObjectField(_copyFrom, typeof(Texture2D), false, GUILayout.Width(220));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Copy to:", EditorStyles.boldLabel);
+            _copyTo = EditorGUILayout.ObjectField(_copyTo, typeof(Texture2D), false, GUILayout.Width(220));
+            GUILayout.EndHorizontal();
+            GUILayout.Space(25f);
+            if (GUILayout.Button("Copy pivots and slices")) {
+                CopyPivotsAndSlices(_copyTo);
+            }
+            if (GUILayout.Button("Copy pivots to selection")) {
+                for (int i = 0; i < Selection.objects.Length; i++) {
+                    CopyPivotsAndSlices(Selection.objects[i]);
+                }
+            }
+        }
+
+        private void CopyPivotsAndSlices(Object copyTo) {
+            if (!_copyFrom || !copyTo) {
+                Debug.Log("Missing one object");
+                return;
+            }
+            if (_copyFrom.GetType() != typeof(Texture2D) || copyTo.GetType() != typeof(Texture2D)) {
+                Debug.Log("Cant convert from: " + _copyFrom.GetType() + "to: " + copyTo.GetType() + ". Needs two Texture2D objects!");
+                return;
+            }
+            string copyFromPath = AssetDatabase.GetAssetPath(_copyFrom);
+            TextureImporter ti1 = AssetImporter.GetAtPath(copyFromPath) as TextureImporter;
+            ti1.isReadable = true;
+            string copyToPath = AssetDatabase.GetAssetPath(copyTo);
+            TextureImporter ti2 = AssetImporter.GetAtPath(copyToPath) as TextureImporter;
+            ti2.isReadable = true;
+            ti2.spriteImportMode = SpriteImportMode.Multiple;
+            List<SpriteMetaData> newData = new List<SpriteMetaData>();
+            Debug.Log("Amount of slices found: " + ti1.spritesheet.Length);
+            for (int i = 0; i < ti1.spritesheet.Length; i++) {
+                SpriteMetaData d = ti1.spritesheet[i];
+                d.name = copyTo.name + "_" + i;
+                newData.Add(d);
+            }
+            ti2.spritesheet = newData.ToArray();
+            AssetDatabase.ImportAsset(copyToPath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.Refresh();
         }
     }
 }

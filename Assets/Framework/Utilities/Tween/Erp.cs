@@ -20,7 +20,7 @@ namespace PixelComrades {
             while (elapsed < duration) {
                 float value = Interpolate(type, start, end, elapsed / duration);
                 callback(value);
-                elapsed += Time.deltaTime;
+                elapsed += TimeManager.DeltaTime;
                 yield return null;
             }
         }

@@ -7,7 +7,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
         [Multiline] public string DeveloperDescription = "";
 #endif
-        [SerializeField] private int _value;
+        [SerializeField] private int _value = 0;
 
         public int Value { get { return _value; } }
     }

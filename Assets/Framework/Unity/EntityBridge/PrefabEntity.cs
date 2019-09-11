@@ -10,7 +10,7 @@ namespace PixelComrades {
         [SerializeField] private AssetType _objectType = AssetType.Prefab;
         [SerializeField] private bool _pooled = false;
         [SerializeField] private string _resourcePath = "";
-        [SerializeField] private int _hashId = -1;
+        [SerializeField] private int _hashId = 0;
 
         private ISystemFixedUpdate[] _systemFixedUpdate;
         private ISystemUpdate[] _systemUpdate;

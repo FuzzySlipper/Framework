@@ -19,12 +19,11 @@ namespace PixelComrades {
             _rotation = rotation;
         }
 
-        public RotationComponent(SerializationInfo info, StreamingContext context) : base(info, context) {
+        public RotationComponent(SerializationInfo info, StreamingContext context) {
             _rotation = info.GetValue(nameof(_rotation), _rotation);
         }
 
-        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
-            base.GetObjectData(info, context);
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_rotation), _rotation);
         }
     }

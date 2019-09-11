@@ -12,7 +12,7 @@ namespace PixelComrades {
         private System.Action _onClose;
         private System.Action _onTakeAll;
 
-        public static void Open(ItemInventory inventory, Action del, Action del2) {
+        public static void Open(ItemInventory inventory, System.Action del, System.Action del2) {
             if (Instance.Active) {
                 Instance.SetStatus(false);
             }

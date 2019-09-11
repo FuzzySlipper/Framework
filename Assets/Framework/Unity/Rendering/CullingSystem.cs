@@ -6,6 +6,7 @@ namespace PixelComrades {
     public class CullingSystem : SystemBase, IMainSystemUpdate {
 
         private GameOptions.CachedFloat _sectorSize = new GameOptions.CachedFloat("CullingSize");
+        private GameOptions.CachedBool _useCulling = new GameOptions.CachedBool("UseCulling");
 
         private Dictionary<Point3, List<PrefabEntity>> _sectorObjects = new Dictionary<Point3, List<PrefabEntity>>();
         private Dictionary<Point3, List<GameObject>> _levelObjects = new Dictionary<Point3, List<GameObject>>();
@@ -17,10 +18,20 @@ namespace PixelComrades {
         public CullingSystem() {
             MessageKit.addObserver(Messages.LevelClear, ClearList);
             MessageKit.addObserver(Messages.PlayerReachedDestination, UpdatePlayerPosition);
+            MessageKit.addObserver(Messages.PlayerTeleported, UpdatePlayerPosition);
         }
 
-        public void OnSystemUpdate(float dt) {
-            if (!Game.GameStarted || !Game.GameActive || _updateTimer.IsActive) {
+        private bool IsActive {
+            get {
+                if (!Game.GameStarted || !Game.GameActive || !_useCulling) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public void OnSystemUpdate(float dt, float unscaledDt) {
+            if (!IsActive || _updateTimer.IsActive) {
                 return;
             }
             _updateTimer.StartTimer();
@@ -42,9 +53,9 @@ namespace PixelComrades {
 
         private void UpdatePlayerPosition() {
             //TODO: this needs to be more global
-            //if (!GameOptions.UseCulling) {
-            //    return;
-            //}
+            if (!IsActive) {
+                return;
+            }
             var playPos = Player.Tr.position.WorldToGenericGrid(_sectorSize);
             if (playPos == _playerPosition) {
                 return;
@@ -72,7 +83,7 @@ namespace PixelComrades {
         private void SetEntityList(PrefabEntity entity) {
             var list = GetList(entity.SectorPosition);
             list.Add(entity);
-            if (!Game.GameStarted || !Game.GameActive) {
+            if (!IsActive) {
                 return;
             }
             var active = _list.CurrentList.Contains(entity.SectorPosition);

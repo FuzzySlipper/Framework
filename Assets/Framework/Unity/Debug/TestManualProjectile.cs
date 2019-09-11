@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Sirenix.OdinInspector;
+
 namespace PixelComrades {
     public class TestManualProjectile : MonoBehaviour {
 
@@ -8,6 +10,7 @@ namespace PixelComrades {
         [SerializeField] private float _lookAhead = 0.25f;
         [SerializeField] private Vector3 _boundsCheckSize = new Vector3(0.1f,0.1f,0.01f);
         [SerializeField] private Transform _target = null;
+        [SerializeField] private TweenArc _testArc = new TweenArc(EasingTypes.Linear, true);
 
         public Vector3 LastTestStart;
 
@@ -17,6 +20,23 @@ namespace PixelComrades {
         private float _duration;
         private Vector3 _targetPos;
         private Vector3 _lastPos;
+
+        [Button]
+        public void TestTween() {
+            LastTestStart = transform.position;
+            _targetPos = _target.transform.position;
+            _testArc.Restart(transform, _targetPos);
+            TimeManager.StartUnscaled(UpdateTween());
+        }
+
+        private IEnumerator UpdateTween() {
+            while (_testArc.Active) {
+                _testArc.Get(transform);
+                yield return null;
+            }
+            Debug.LogFormat("reached destination {0} in {1}", _targetPos, _elapsedTime);
+            transform.position = LastTestStart;
+        }
 
         public void Test(bool testCollision) {
             if (_target == null) {

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace PixelComrades {
     [Priority(Priority.Higher)]
@@ -8,31 +9,88 @@ namespace PixelComrades {
         public GameOptions.CachedInt MaxTurnsNpcVisible = new GameOptions.CachedInt("MaxTurnsNpcVisible");
         public bool CheckVision = false;
 
-        private List<SensorDetectingNode> _sensorList;
-        private List<UnitOccupyingCellNode> _visibleNodes;
+        private List<SensorDetectingNode> _sensorNodes;
+        private List<UnitySensorNode> _unitySensorNodes;
+        private List<UnitOccupyingCellNode> _occupyNodes;
+        private List<Entity> _tempEnemyList = new List<Entity>();
+
+        private const float HearingSectorSize = 25f;
+        private const int HearingChance = 10;
 
         public SensorSystem() {
             NodeFilter<SensorDetectingNode>.New(SensorDetectingNode.GetTypes());
+            NodeFilter<UnitySensorNode>.New(UnitySensorNode.GetTypes());
         }
 
         public override void Dispose() {
             base.Dispose();
-            _visibleNodes.Clear();
+            if (_occupyNodes != null) {
+                _occupyNodes.Clear();
+            }
         }
 
         public void OnPeriodicUpdate() {
-            if (_visibleNodes == null) {
-                _visibleNodes = EntityController.GetNodeList<UnitOccupyingCellNode>();
+            if (_occupyNodes == null) {
+                _occupyNodes = EntityController.GetNodeList<UnitOccupyingCellNode>();
             }
-            if (_sensorList == null) {
-                _sensorList = EntityController.GetNodeList<SensorDetectingNode>();
+            if (_sensorNodes == null) {
+                _sensorNodes = EntityController.GetNodeList<SensorDetectingNode>();
             }
-            if (_visibleNodes == null || _sensorList == null || !Game.GameActive || Game.Paused ) {
+            if (_unitySensorNodes == null) {
+                _unitySensorNodes = EntityController.GetNodeList<UnitySensorNode>();
+            }
+            CheckNodeList();
+            CheckUnitySensors();
+        }
+
+        private void CheckUnitySensors() {
+            if (_unitySensorNodes == null || !Game.GameActive || Game.Paused) {
+                return;
+            }
+            for (int n = 0; n < _unitySensorNodes.Count; n++) {
+                var node = _unitySensorNodes[n];
+                node.Sensor.Sensor.Pulse();
+                node.Targets.UpdateWatchTargets();
+                for (int i = 0; i < node.Sensor.Sensor.DetectedColliders.Count; i++) {
+                    node.Targets.AddWatch(UnityToEntityBridge.GetEntity(node.Sensor.Sensor.DetectedColliders[i]), true);
+                }
+                if (node.Targets.WatchTargets.Count == 0) {
+                    _tempEnemyList.Clear();
+                    World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, node.Faction.Faction);
+                    var nodePos = node.Entity.Tr.position.WorldToGenericGrid(HearingSectorSize);
+                    for (int f = 0; f < _tempEnemyList.Count; f++) {
+                        var enemy = _tempEnemyList[f];
+                        if (enemy.Tr == null) {
+                            Debug.Log("Enemy has no TR " + enemy.DebugId);
+                            continue;
+                        }
+                        if (enemy.Tr.position.WorldToGenericGrid(HearingSectorSize) == nodePos) {
+                            var hearingChance = HearingChance;
+                            if (enemy.Tags.Contain(EntityTags.PerformingCommand)) {
+                                hearingChance *= 4;
+                            }
+                            else if (enemy.Tags.Contain(EntityTags.Moving)) {
+                                hearingChance *= 2;
+                            }
+                            if (Game.Random.DiceRollSucess(hearingChance)) {
+                                if (!UnityEngine.Physics.Linecast(enemy.Tr.position, node.Entity.Tr.position, LayerMasks.Walls)) {
+                                    node.Targets.AddWatch(enemy, false);
+                                    DebugText.Log(node.Entity.DebugId + " spotted " + enemy.DebugId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CheckNodeList() {
+            if (_occupyNodes == null || _sensorNodes == null || !Game.GameActive || Game.Paused ) {
                 return;
             }
             var ls = World.Get<LineOfSightSystem>();
-            for (int n = 0; n < _sensorList.Count; n++) {
-                var node = _sensorList[n];
+            for (int n = 0; n < _sensorNodes.Count; n++) {
+                var node = _sensorNodes[n];
                 var sensor = node.Sensor.c;
                 sensor.DetectedCells.Clear();
                 var start = node.Position.c.Position;
@@ -42,11 +100,11 @@ namespace PixelComrades {
                     var dir = (Directions) i;
                     var maxRowDistance = dir == fwd ? sensor.MaxVisionDistance : sensor.MaxHearDistance;
                     var adjacent = dir.Adjacent();
-                    ShadowFloodFill.CheckRow(ref sensor.DetectedCells,
-                        start, start, maxRowDistance, new[] { adjacent[0].ToPoint3(), adjacent[1].ToPoint3()}, dir.ToPoint3());
+                    ShadowFloodFill.CheckRow(ref sensor.DetectedCells,start, start, 
+                        maxRowDistance, new[] { adjacent[0].ToPoint3(), adjacent[1].ToPoint3()}, dir.ToPoint3());
                 }
-                for (int i = 0; i < _visibleNodes.Count; i++) {
-                    var visible = _visibleNodes[i];
+                for (int i = 0; i < _occupyNodes.Count; i++) {
+                    var visible = _occupyNodes[i];
                     if (visible.Entity == node.Entity) {
                         continue;
                     }

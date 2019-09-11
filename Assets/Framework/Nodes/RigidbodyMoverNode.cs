@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -12,13 +13,13 @@ namespace PixelComrades {
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<VelocityMover> Mover = new CachedComponent<VelocityMover>();
 
-        public RigidbodyMoverNode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+        public RigidbodyMoverNode(Entity entity, SortedList<System.Type, ComponentReference> list) {
             Register(entity, list);
         }
 
         public RigidbodyMoverNode(){}
 
-        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+        public void Register(Entity entity, SortedList<Type, ComponentReference> list) {
             Entity = entity;
             Rb.Set(entity, list);
             MoveSpeed.Set(entity, list);

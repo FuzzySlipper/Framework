@@ -60,7 +60,7 @@ namespace PixelComrades {
             return true;
         }
 
-        [MenuItem("Assets/Create/Simple Animation From Sprite", true)]
+        [MenuItem("Assets/Create/Simple Animation From Sprite", true, -100)]
         public static bool CreateSimpleAssetFromSelectedScript_Validator() {
             if (Selection.objects == null || Selection.objects.Length == 0) {
                 return false;
@@ -76,7 +76,7 @@ namespace PixelComrades {
             return true;
         }
 
-        [MenuItem("Assets/Create/Simple Animation From Sprite")]
+        [MenuItem("Assets/Create/Simple Animation From Sprite", false, -100)]
         public static void CreateSimpleAnimation() {
             
             for (int i = 0; i < Selection.objects.Length; i++) {

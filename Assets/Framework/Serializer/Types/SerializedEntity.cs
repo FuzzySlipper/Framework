@@ -21,7 +21,7 @@ namespace PixelComrades {
         }
 
         public SerializedEntity(Entity entity) {
-            var dict = EntityController.GetEntityComponentDict(entity);
+            var dict = entity.Components;
             _entity = entity;
             foreach (var cref in dict) {
                 _allComponents.Add((IComponent)cref.Value.Get());

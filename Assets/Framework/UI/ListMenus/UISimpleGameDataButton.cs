@@ -92,7 +92,7 @@ namespace PixelComrades {
             if (_sprite == null) {
                 return;
             }
-            _sprite.sprite = sprite;
+            _sprite.overrideSprite = sprite;
             if (sprite != null) {
                 _sprite.enabled = true;
             }

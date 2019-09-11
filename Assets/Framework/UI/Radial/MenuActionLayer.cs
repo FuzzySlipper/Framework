@@ -88,7 +88,7 @@ public abstract class MenuActionLayer {
     protected void UpdateDisplayedText(string detailText, Sprite elementSprite, Color spriteColour) {
         Radial.SetCenterText(Description);
         Radial.DetailText.text = detailText;
-        Radial.DetailSprite.sprite = elementSprite;
+        Radial.DetailSprite.overrideSprite = elementSprite;
         Radial.DetailSprite.color = spriteColour;
         Radial.DetailSprite.gameObject.SetActive(Radial.DetailSprite.sprite != null);
     }

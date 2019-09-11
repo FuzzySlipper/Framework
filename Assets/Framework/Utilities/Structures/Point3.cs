@@ -53,8 +53,8 @@ namespace PixelComrades {
             return Math.Max(Math.Abs(p2.x - x), Math.Abs(p2.z - z));
         }
 
-        public bool IsNeighbor(Point3 point) {
-            if (Mathf.Abs((point.x - x) + (point.y - y) + (point.z - z)) > 1) {
+        public bool IsNeighbor(Point3 p2) {
+            if ((Mathf.Abs(x - p2.x) + Mathf.Abs(y - p2.y) + Mathf.Abs(z - p2.z)) > 1) {
                 return false;
             }
             return true;

@@ -91,10 +91,11 @@ namespace PixelComrades {
     public class Timer {
 
         [SerializeField] private float _length = 0;
+        [SerializeField, HideInInspector] private bool _activated = false;
+        [SerializeField, HideInInspector] private bool _unscaled = false;
+        [SerializeField, HideInInspector] private float _start = 0;
+        
         public float Length { get { return _length; } }
-        private bool _activated = false;
-        private bool _unscaled = false;
-        private float _start = 0;
 
         public Timer(float length, bool unscaled) {
             _length = length;
@@ -109,7 +110,7 @@ namespace PixelComrades {
         public bool IsActive { get { return _activated && Time <= _start + Length; } }
         public float Percent { get { return _activated ? (Time - _start) / Length : 1; } }
 
-        public void Activate() {
+        public void Restart() {
             _start = Time;
             _activated = true;
         }
@@ -138,11 +139,10 @@ namespace PixelComrades {
     public class ScaledTimer {
 
         [SerializeField] private float _length = 0;
-
+        [SerializeField, HideInInspector] private bool _activated = false;
+        [SerializeField, HideInInspector] private float _start = 0;
         public float Length { get { return _length; } }
-        private bool _activated = false;
-        private float _start = 0;
-
+        
         public ScaledTimer(float length) {
             _length = length;
         }
@@ -179,12 +179,13 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class UnscaledTimer {
-        public float Length { get; private set; }
-        private bool _activated = false;
-        private float _start = 0;
-
+        
+        [SerializeField, HideInInspector] private bool _activated = false;
+        [SerializeField, HideInInspector] private float _start = 0;
+        [SerializeField] private float _length = 0;
+        public float Length { get { return _length; } }
         public UnscaledTimer(float length) {
-            Length = length;
+            _length = length;
         }
 
         public UnscaledTimer() {
@@ -213,7 +214,8 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class TriggerableUnscaledTimer : UnscaledTimer {
-        private bool _triggered = false;
+        
+        [SerializeField, HideInInspector] private bool _triggered = false;
         public bool Triggered { get { return _triggered; } set { _triggered = value; } }
 
         public override void StartNewTime(float length) {
@@ -230,10 +232,10 @@ namespace PixelComrades {
     [System.Serializable]
     public class TurnTimer {
 
-        private bool _active;
-        private int _start = 0;
-
-        public int Length { get; private set; }
+        [SerializeField, HideInInspector] private bool _active;
+        [SerializeField, HideInInspector] private int _start = 0;
+        [SerializeField] private int _length = 0;
+        public int Length { get { return _length; } }
         public int TimeLeft { get { return _active ? (_start + Length) - TurnBased.TurnNumber : 0; } }
         public float Percent { get { return _active ? (TurnBased.TurnNumber - _start) / Length : 1; } }
         public bool IsActive { get { return _active && TimeLeft > 0; } }
@@ -251,11 +253,11 @@ namespace PixelComrades {
         }
 
         public TurnTimer(int length) {
-            Length = length;
+            _length = length;
         }
 
         public void StartTime(int length) {
-            Length = length;
+            _length = length;
             _active = true;
             _start = TurnBased.TurnNumber;
         }

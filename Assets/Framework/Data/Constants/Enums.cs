@@ -43,12 +43,25 @@ namespace PixelComrades {
         public const string Vitals = "Vitals";
         public const string Attributes = "Attributes";
         public const string ItemRarity = "ItemRarity";
+        public const string EquipmentSlotType = "EquipmentSlotType";
+        public const string Currencies = "Currencies";
+
     }
     
     public enum PlayerPronouns {
         [Description("he")] He,
         [Description("she")] She,
         [Description("they")] They
+    }
+
+    public enum EnemyType {
+        EasyMelee,
+        Melee,
+        HardMelee,
+        EasyRanged,
+        Ranged,
+        HardRanged,
+        Boss
     }
 
     public enum MenuPivot {

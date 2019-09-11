@@ -25,6 +25,7 @@ namespace PixelComrades {
         private static bool _lockedText = false;
         private static string _queuedText;
         private List<UIModIcon> _active = new List<UIModIcon>();
+        private List<ModEntry> _mods = new List<ModEntry>();
         //private RaycastHit[] _hits = new RaycastHit[10];
         //private Ray _mouseRay;
         private static TriggerableUnscaledTimer _clearTextTimer = new TriggerableUnscaledTimer();
@@ -224,30 +225,20 @@ namespace PixelComrades {
         }
 
         private void CheckMods() {
+            if (_character == null) {
+                return;
+            }
             ClearModList();
-            for (int i = 0; i < _character.Modifiers.c.Count; i++) {
-                var mod = _character.Modifiers.c[i];
-                if (mod.Icon == null || ContainsMod(mod)) {
+            _mods.Clear();
+            World.Get<ModifierSystem>().FillModList(_mods, _character.Entity.Id);
+            for (int i = 0; i < _mods.Count; i++) {
+                var mod = _mods[i];
+                if (mod.Icon == null) {
                     continue;
                 }
                 var modWatch = ItemPool.SpawnUIPrefab<UIModIcon>(_modPrefab.gameObject, _modGrid);
                 _active.Add(modWatch);
-                modWatch.Assign(mod, _character);
-            }
-        }
-
-        private bool ContainsMod(IEntityModifier mod) {
-            for (int i = 0; i < _active.Count; i++) {
-                if (_active[i].Mod == mod) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void UpdateMods() {
-            for (int i = 0; i < _active.Count; i++) {
-                _active[i].UpdateCoolDown();
+                modWatch.Assign(mod);
             }
         }
 

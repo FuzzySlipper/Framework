@@ -24,6 +24,15 @@ namespace PixelComrades {
             return null;
         }
 
+        public EquipmentSlot GetSlotNameExact(string slotName) {
+            for (int i = 0; i < List.Count; i++) {
+                if (List[i].Name == slotName) {
+                    return List[i];
+                }
+            }
+            return null;
+        }
+
         public bool TryEquip(Entity entity) {
             var equip = entity.Get<Equipment>();
             if (equip == null) {
@@ -66,9 +75,9 @@ namespace PixelComrades {
 
     public struct EquipmentChanged : IEntityMessage {
         public Entity Owner;
-        public EquipmentSlot Slot;
+        public IEquipmentHolder Slot;
 
-        public EquipmentChanged(Entity owner, EquipmentSlot slot) {
+        public EquipmentChanged(Entity owner, IEquipmentHolder slot) {
             Owner = owner;
             Slot = slot;
         }

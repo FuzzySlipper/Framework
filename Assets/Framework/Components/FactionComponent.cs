@@ -4,14 +4,20 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public struct FactionComponent : IComponent {
-        public int Faction { get; }
+
+        private int _faction;
+
+        public int Faction { get { return Owner < 0 ? -1 : _faction; } } 
         public int Owner { get; set; }
 
         public FactionComponent(int faction) : this() {
-            Faction = faction;
+            _faction = faction;
         }
 
         public static implicit operator int(FactionComponent reference) {
+            if (reference.Owner < 0) {
+                return -1;
+            }
             return reference.Faction;
         }
     }

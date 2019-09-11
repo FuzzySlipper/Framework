@@ -2,10 +2,10 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class ItemInteraction : IComponent {
-        public int Owner { get; set; }
 
         public Func<Entity, bool> OnInteraction;
 
@@ -14,6 +14,12 @@ namespace PixelComrades {
                 return OnInteraction(other);
             }
             return false;
+        }
+
+        public ItemInteraction(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
     }
 }

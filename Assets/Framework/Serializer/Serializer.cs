@@ -50,7 +50,7 @@ namespace PixelComrades {
             _currentList.Clear();
         }
 
-        public static PrefabEntity GetEntity(int id) {
+        public static PrefabEntity GetPrefabEntity(int id) {
             return _currentList.TryGetValue(id, out var entity) ? entity : null;
         }
 

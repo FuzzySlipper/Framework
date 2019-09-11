@@ -4,25 +4,31 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
-    public enum BillboardMode {
-        ForceUp,
-        CamFwd,
-        TrUp,
-        NoYAxis,
-        None,
-        CamRot = 10,
-        CamRot45 = 12,
-        CamRot60 = 13,
-        CamRot90 = 14,
+    public enum BillboardMode : byte {
+        ForceUp=0,
+        CamFwd=1,
+        TrUp=2,
+        NoYAxis=3,
+        None=4,
+        CamRot=5,
+        FaceCam = 6,
+        FaceCamYDiff = 7,
+        CamRot45,
+        CamRot60,
+        CamRot90,
     }
 
     public static class BillboardExtension {
-        public static void Apply(this BillboardMode mode, Transform transform, bool backwards) {
+        private static float _changeSpeed = 200;
+        private static float _yMinDiff = 3;
+
+        public static void Apply(this BillboardMode mode, Transform transform, bool backwards, ref float lastAngleHeight) {
+            Vector3 lookPosition = Vector3.zero;
             switch (mode) {
                 case BillboardMode.ForceUp:
                 case BillboardMode.TrUp:
-                    var lookPos = transform.position + Game.SpriteCamera.transform.rotation * Vector3.forward;
-                    transform.LookAt(backwards ? lookPos : -lookPos, mode == BillboardMode.TrUp ? transform.up : Game.SpriteCamera.transform.rotation * Vector3.up);
+                    lookPosition = transform.position + Game.SpriteCamera.transform.rotation * Vector3.forward;
+                    //transform.LookAt(backwards ? lookPos : -lookPos, mode == BillboardMode.TrUp ? transform.up : Game.SpriteCamera.transform.rotation * Vector3.up);
                     break;
                 case BillboardMode.CamFwd:
                     transform.forward = backwards ? -Game.SpriteCamera.transform.forward : Game.SpriteCamera.transform.forward;
@@ -33,6 +39,22 @@ namespace PixelComrades {
                     break;
                 case BillboardMode.CamRot:
                     transform.rotation = backwards ?  Quaternion.Inverse(Game.SpriteCamera.transform.rotation) : Game.SpriteCamera.transform.rotation;
+                    break;
+                case BillboardMode.FaceCam:
+                    lookPosition = Game.SpriteCamera.transform.position;
+                    lookPosition.y = transform.position.y;
+                    //transform.LookAt(position);
+                    //transform.rotation = Quaternion.LookRotation(position - transform.position);
+                    break;
+                case BillboardMode.FaceCamYDiff:
+                    lookPosition = Game.SpriteCamera.transform.position;
+                    var yHeight = transform.parent.position.y;
+                    var yDiff = Mathf.Abs(yHeight - lookPosition.y);
+                    var targetY = yDiff < _yMinDiff ? yHeight : lookPosition.y;
+                    lastAngleHeight = Mathf.MoveTowards(lastAngleHeight, targetY, _changeSpeed * TimeManager.DeltaUnscaled);
+                    lookPosition.y = lastAngleHeight;
+                    //transform.LookAt(camPos);
+                    //transform.rotation = Quaternion.LookRotation(camPos - transform.position);
                     break;
                 case BillboardMode.CamRot45:
                 case BillboardMode.CamRot90:
@@ -50,6 +72,17 @@ namespace PixelComrades {
                     transform.rotation = backwards ? Quaternion.Inverse(rot) : rot;
                     break;
             }
+            Vector3 dir = !backwards ? (lookPosition - transform.position) : (transform.position - lookPosition);
+            switch (mode) {
+                case BillboardMode.ForceUp:
+                case BillboardMode.FaceCam:
+                case BillboardMode.FaceCamYDiff:
+                    transform.rotation = Quaternion.LookRotation(dir);
+                    break;
+                case BillboardMode.TrUp:
+                    transform.rotation = Quaternion.LookRotation(dir, transform.up);
+                    break;
+            }
         }
     }
 
@@ -64,6 +97,7 @@ namespace PixelComrades {
 
         private DirectionsEight _orientation = DirectionsEight.Top;
         private bool _active = true;
+        private float _lastAngleHeight;
 
         public void OnCreate(PrefabEntity entity) {
             MaterialPropertyBlock materialBlock = new MaterialPropertyBlock();
@@ -86,7 +120,7 @@ namespace PixelComrades {
             if (!_active) {
                 return;
             }
-            _billboard.Apply(transform, _backwards);
+            _billboard.Apply(_renderer.transform, _backwards, ref _lastAngleHeight);
             bool inMargin;
             var orientation = SpriteFacingControl.GetCameraSide(_facing, transform, transform.parent, 5, out inMargin);
             if (_orientation == orientation || (inMargin && (orientation.IsAdjacent(_orientation)))) {
@@ -94,7 +128,7 @@ namespace PixelComrades {
             }
             _orientation = orientation;
             var facing = orientation;
-            if (_facing == SpriteFacing.EightwayFlipped) {
+            if (_facing.RequiresFlipping()) {
                 facing = _orientation.GetFlippedSide();
                 _renderer.flipX = _orientation.IsFlipped();
             }

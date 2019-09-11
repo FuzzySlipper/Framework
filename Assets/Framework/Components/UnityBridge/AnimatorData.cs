@@ -4,86 +4,109 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [System.Serializable, Priority(Priority.Lowest)]
-    public class AnimatorData : IComponent, IReceive<DamageEvent>, IReceive<DeathEvent> {
+    public class AnimatorData : IComponent {
         public IAnimator Animator;
-        public AnimatorEvent? Event;
         public int Owner { get; set; }
 
         public AnimatorData(IAnimator animator) {
             Animator = animator;
-            Event = null;
             Owner = -1;
         }
         
         public void Dispose() {
             Animator = null;
         }
+    }
+
+    public class HurtAnimation : IComponent, IReceive<DamageEvent> {
+
+        public int Owner { get;set; }
+        private string _animation;
+        private IAnimator _animator;
+
+        public HurtAnimation(string animation, IAnimator animator) {
+            _animation = animation;
+            _animator = animator;
+        }
 
         public void Handle(DamageEvent arg) {
-            if (arg.Amount > 0 && Animator != null) {
-                Animator.PlayAnimation(AnimatorClips.GetHit);
+            if (arg.Amount > 0 && _animator != null) {
+                _animator.PlayAnimation(_animation, false, null);
             }
+        }
+    }
+
+    public class DeathAnimation : IComponent, IReceive<DeathEvent> {
+
+        public int Owner { get; set; }
+        private string _animation;
+        private IAnimator _animator;
+
+        public DeathAnimation(string animation, IAnimator animator) {
+            _animation = animation;
+            _animator = animator;
         }
 
         public void Handle(DeathEvent arg) {
-            if (Animator != null) {
-                Animator.PlayAnimation(AnimatorClips.Death);
+            if (_animator != null) {
+                _animator.PlayAnimation(_animation, true, null);
             }
         }
     }
 
     public interface IAnimator {
-        bool IsAnimationComplete();
-        bool IsAnimationComplete(string clip);
-        bool IsAnimationEventComplete(string clip);
+        string CurrentAnimationEvent { get; }
         string CurrentAnimation { get; }
         float CurrentAnimationLength { get; }
         float CurrentAnimationRemaining { get; }
-        void PlayAnimation(string clip);
-        void ClipEventTriggered();
-        void ClipFinished();
+        Vector3 GetEventPosition { get; }
+        Quaternion GetEventRotation { get; }
+        bool IsAnimationComplete(string clip);
+        bool IsAnimationEventComplete(string clip);
+        void PlayAnimation(string clip, bool overrideClip, Action action);
     }
 
-    [Priority(Priority.Normal)]
-    public struct AnimatorEvent : IEntityMessage {
-        public Entity Target;
-        public string Clip;
-        public bool OnEventComplete;
-        public bool OnAnimationComplete;
-
-        public AnimatorEvent(Entity target, string clip, bool onEventComplete, bool onAnimationComplete) {
-            Target = target;
-            Clip = clip;
-            OnEventComplete = onEventComplete;
-            OnAnimationComplete = onAnimationComplete;
-        }
-    }
 
     [Priority(Priority.Lowest)]
     public struct PlayAnimation : IEntityMessage {
         public Entity Target;
+        public AnimatorData Animator;
+        public bool Override;
+        public bool PostEvent;
         public string Clip;
-        public AnimatorEvent? Event;
 
-        public PlayAnimation(Entity target, string clip, AnimatorEvent? @event) {
+        public PlayAnimation(Entity target, AnimatorData anim, string clip, bool overrideAnim, bool postEvent) {
             Target = target;
             Clip = clip;
-            Event = @event;
+            Animator = anim;
+            Override = overrideAnim;
+            PostEvent = postEvent;
         }
     }
 
-    [Priority(Priority.Highest)]
+    [Priority(Priority.Normal)]
     public struct AnimationComplete : IEntityMessage {
-        public string Clip;
         public Entity Target;
+        public AnimatorData Animator;
+        public string Animation;
+
+        public AnimationComplete(Entity target, AnimatorData animator, string animation) {
+            Target = target;
+            Animator = animator;
+            Animation = animation;
+        }
     }
 
-    public static partial class AnimatorClips {
-        public const string Move = "Move";
-        public const string GetHit = "GetHit";
-        public const string Action = "Action";
-        public const string SpecialAction = "SpecialAction";
-        public const string Death = "Death";
-        public const string Idle = "Idle";
+    [Priority(Priority.Normal)]
+    public struct AnimationEventComplete : IEntityMessage {
+        public Entity Target;
+        public AnimatorData Animator;
+        public string Animation;
+
+        public AnimationEventComplete(Entity target, AnimatorData animator, string animation) {
+            Target = target;
+            Animator = animator;
+            Animation = animation;
+        }
     }
 }

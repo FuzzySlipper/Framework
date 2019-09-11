@@ -11,7 +11,7 @@ namespace PixelComrades {
     [CreateAssetMenu(menuName = "Assets/FloatFlat")]
     public class FloatFlatVariable : FloatVariable {
 
-        [SerializeField] private float _value;
+        [SerializeField] private float _value = 0;
 
         public override float Value { get { return _value; } }
     }

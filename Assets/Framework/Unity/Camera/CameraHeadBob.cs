@@ -1,19 +1,20 @@
+using System;
 using UnityEngine;
 
 namespace PixelComrades {
-    public class CameraHeadBob : MonoBehaviour, ISystemFixedUpdate {
+    public class CameraHeadBob : MonoBehaviour, ISystemUpdate {
 
         [Range(1f, 3f)] [SerializeField] private float _headBobFrequency = 1.5f;
-        [Range(.1f, 2f)] [SerializeField] private float _headBobHeight = .35f;
-        [Range(.01f, .1f)] [SerializeField] private float _headBobSideMovement = .075f;
-        [Range(.1f, 2f)] [SerializeField] private float _bobHeightSpeedMultiplier = .35f;
         [Range(.1f, 2f)] [SerializeField] private float _bobStrideSpeedLengthen = .35f;
         [Range(.1f, 2f)] [SerializeField] private float _headBobSwayAngle = .5f;
         [Range(.1f, 5f)] [SerializeField] private float _jumpLandMove = 2f;
         [Range(10f, 100f)] [SerializeField] private float _jumpLandTilt = 35f;
         [Range(.1f, 4f)] [SerializeField] private float _springElastic = 1.25f;
         [Range(.1f, 2f)] [SerializeField] private float _springDampen = .77f;
-
+        [Header("Position")]
+        [Range(-1, 1f)] [SerializeField] private float _headBobHeight = .35f;
+        [Range(0, 0.5f)] [SerializeField] private float _headBobSideMovement = .075f;
+        [Range(.1f, 2f)] [SerializeField] private float _bobHeightSpeedMultiplier = .35f;
 
         private Transform _tr;
         private float _springPos, _springVelocity, _headBobFade;
@@ -24,28 +25,38 @@ namespace PixelComrades {
         public static float YPos { get; private set; }
         public static float XTilt { get; private set; }
         public static float YTilt { get; private set; }
+        public bool Unscaled { get { return false; } }
 
         private void Awake() {
             _tr = transform;
-            HeadBobCycle = 0f;
-            XPos = YPos = 0f;
-            XTilt = YTilt = 0f;
+            ResetValues();
+            MessageKit.addObserver(Messages.PlayerTeleported, ResetValues);
         }
 
-        public void OnFixedSystemUpdate(float delta) {
-            _velocity = (_tr.position - _prevPosition) / Time.fixedDeltaTime;
+        private void ResetValues() {
+            _velocity = _velocityChange = _prevVelocity = Vector3.zero;
+            XPos = YPos = HeadBobCycle = XTilt = YTilt = _springPos = _springVelocity = _headBobFade = 0f;
+            _prevPosition = _tr.position;
+        }
+
+        public void OnSystemUpdate(float delta) {
+            if (Math.Abs(delta) < 0.00001f) {
+                return;
+            }
+            _velocity = (_tr.position - _prevPosition) / delta;
             _velocityChange = _velocity - _prevVelocity;
             _prevPosition = _tr.position;
             _prevVelocity = _velocity;
-
-            if (!FirstPersonController.Climbing) {
+            if (Player.FirstPersonController.CurrentMovement != FPMovementAction.Climbing) {
                 _velocity.y = 0f;
             }
-
+            if (float.IsNaN(_springVelocity)) {
+                ResetValues();
+            }
             _springVelocity -= _velocityChange.y;
             _springVelocity -= _springPos * _springElastic;
             _springVelocity *= _springDampen;
-            _springPos += _springVelocity * Time.fixedDeltaTime;
+            _springPos += _springVelocity * delta;
             _springPos = Mathf.Clamp(_springPos, -.32f, .32f);
 
             if (Mathf.Abs(_springVelocity) < .05f && Mathf.Abs(_springPos) < .05f) {
@@ -54,28 +65,21 @@ namespace PixelComrades {
 
             var flatVelocity = _velocity.magnitude;
 
-            if (FirstPersonController.Climbing) {
+            if (Player.FirstPersonController.CurrentMovement == FPMovementAction.Climbing) {
                 flatVelocity *= 4f;
             }
-            else if (!FirstPersonController.Climbing && !FirstPersonController.Grounded) {
+            else if (Player.FirstPersonController.CurrentMovement != FPMovementAction.Climbing && !Player.FirstPersonController.Grounded) {
                 flatVelocity /= 4f;
             }
 
             var strideLengthen = 1f + flatVelocity * _bobStrideSpeedLengthen;
-            HeadBobCycle += flatVelocity / strideLengthen * (Time.fixedDeltaTime / _headBobFrequency);
+            HeadBobCycle += flatVelocity / strideLengthen * (delta / _headBobFrequency);
 
-            var bobFactor = Mathf.Sin(HeadBobCycle * Mathf.PI * 2f);
             var bobSwayFactor = Mathf.Sin(HeadBobCycle * Mathf.PI * 2f + Mathf.PI * .5f);
+            var bobFactor = Mathf.Sin(HeadBobCycle * Mathf.PI * 2f);
             bobFactor = 1f - (bobFactor * .5f + 1f);
             bobFactor *= bobFactor;
-
-            if (_velocity.magnitude < .1f) {
-                _headBobFade = Mathf.Lerp(_headBobFade, 0f, Time.fixedDeltaTime);
-            }
-            else {
-                _headBobFade = Mathf.Lerp(_headBobFade, 1f, Time.fixedDeltaTime);
-            }
-
+            _headBobFade = Mathf.Lerp(_headBobFade, _velocity.magnitude < .1f ? 0f : 1f, delta);
             var speedHeightFactor = 1f + flatVelocity * _bobHeightSpeedMultiplier;
 
             XPos = -_headBobSideMovement * bobSwayFactor * _headBobFade;

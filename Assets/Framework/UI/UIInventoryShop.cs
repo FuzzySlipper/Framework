@@ -17,7 +17,7 @@ namespace PixelComrades {
         private UISimpleGameDataButton _currentButton;
         private System.Action _onClose;
 
-        public static void Open(ItemInventory inventory, string title, Action del) {
+        public static void Open(ItemInventory inventory, string title, System.Action del) {
             if (Instance.Active) {
                 Instance.SetStatus(false);
             }
@@ -44,16 +44,16 @@ namespace PixelComrades {
                     _onClose();
                 }
                 _onClose = null;
-                Player.Currency.OnResourceChanged -= SetPartyCurrency;
+                Player.DefaultCurrencyHolder.OnResourceChanged -= SetPartyCurrency;
             }
             else {
                 SetPartyCurrency();
-                Player.Currency.OnResourceChanged += SetPartyCurrency;
+                Player.DefaultCurrencyHolder.OnResourceChanged += SetPartyCurrency;
             }
         }
 
         private void SetPartyCurrency() {
-            _partyCurrency.text = string.Format("Party {0}: {1}", GameLabels.Currency, Player.Currency.Value);
+            _partyCurrency.text = string.Format("Party {0}: {1}", GameText.DefaultCurrencyLabel, Player.DefaultCurrencyHolder.Value);
         }
 
         public void ToggleMode() {
@@ -91,13 +91,13 @@ namespace PixelComrades {
                 return;
             }
             var sellPrice = item.TotalPrice();
-            if (Player.Currency.Value < sellPrice) {
-                FloatingText(button.RectTransform, string.Format("Costs {0}, Not enough {1}", sellPrice, GameLabels.Currency));
+            if (Player.DefaultCurrencyHolder.Value < sellPrice) {
+                FloatingText(button.RectTransform, string.Format("Costs {0}, Not enough {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 
                 return;
             }
             _currentButton = button;
-            UIModalQuestion.Set(CheckBuy, string.Format("Buy for {0} {1}?", sellPrice, GameLabels.Currency));
+            UIModalQuestion.Set(CheckBuy, string.Format("Buy for {0} {1}?", sellPrice, GameText.DefaultCurrencyLabel));
         }
 
         private void CheckBuy(int index) {
@@ -112,8 +112,8 @@ namespace PixelComrades {
             }
             var sellPrice = item.TotalPrice();
             if (Player.MainInventory.TryAdd(item.GetEntity())) {
-                Player.Currency.ReduceValue(sellPrice);
-                FloatingText(_currentButton.RectTransform, string.Format("Bought for {0} {1}", sellPrice, GameLabels.Currency));
+                Player.DefaultCurrencyHolder.ReduceValue(sellPrice);
+                FloatingText(_currentButton.RectTransform, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));
             }
             _currentButton = null;
         }
@@ -137,7 +137,7 @@ namespace PixelComrades {
             }
             var price = GameOptions.PriceEstimateSell(item.GetEntity());
             _currentButton = button;
-            UIModalQuestion.Set(CheckSell, string.Format("Sell for {0} {1}?", price, GameLabels.Currency));
+            UIModalQuestion.Set(CheckSell, string.Format("Sell for {0} {1}?", price, GameText.DefaultCurrencyLabel));
         }
 
         private void CheckSell(int index) {
@@ -151,8 +151,8 @@ namespace PixelComrades {
                 return;
             }
             var price = GameOptions.PriceEstimateSell(item.GetEntity());
-            FloatingText(_currentButton.RectTransform, string.Format("Sold for {0} {1}", price, GameLabels.Currency));
-            Player.Currency.AddToValue(price);
+            FloatingText(_currentButton.RectTransform, string.Format("Sold for {0} {1}", price, GameText.DefaultCurrencyLabel));
+            Player.DefaultCurrencyHolder.AddToValue(price);
             _sellingInventory.TryAdd(item.GetEntity());
             //item.Despawn(); better to be able to buy back
             _currentButton = null;

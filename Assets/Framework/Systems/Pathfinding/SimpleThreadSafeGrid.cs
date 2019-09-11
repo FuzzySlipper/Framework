@@ -48,6 +48,8 @@ namespace PixelComrades {
         private List<Point3> _cellKeys = new List<Point3>();
 
         public int CellsCount { get; private set; }
+        public void SetCellSize(float size) {
+        }
 
         public void ClearAll() {
             _threadLock.EnterWriteLock();
@@ -112,6 +114,10 @@ namespace PixelComrades {
             _threadLock.ExitWriteLock();
         }
 
+        public bool IsWalkable(Vector3 pos, bool isOversized) {
+            return IsWalkable(pos.toPoint3ZeroY(), isOversized);
+        }
+
         public bool IsWalkable(Point3 pos, bool isOversized) {
             _threadLock.EnterReadLock();
             bool val = false;
@@ -133,6 +139,10 @@ namespace PixelComrades {
             }
             _threadLock.ExitReadLock();
             return val;
+        }
+
+        public bool IsValidDestination(Vector3 pos) {
+            return IsValidDestination(pos.toPoint3ZeroY());
         }
 
         public bool IsValidDestination(Point3 pos) {
@@ -185,9 +195,9 @@ namespace PixelComrades {
             _threadLock.ExitWriteLock();
         }
 
-        public void SetWalkable(Point3 pos, bool status) {
+        public void SetWalkable(Vector3 pos, bool status) {
             _threadLock.EnterWriteLock();
-            SetWalkableInternal(pos, status);
+            SetWalkableInternal(pos.toPoint3ZeroY(), status);
             _threadLock.ExitWriteLock();
         }
 
@@ -372,6 +382,27 @@ namespace PixelComrades {
                 enumerator.Dispose();
             }
             _threadLock.ExitReadLock();
+        }
+
+        public void Scan() {
+            //World.Get<MapSystem>().ru
+            //Globall Instance.RunActionOnCells(grid.SetWalkable);
+            FinishPathfindingSetup();
+        }
+
+        public Vector3 FindOpenPosition(Vector3 origin, float dist) {
+            var currentPos = origin;
+            Vector3 returnPos = Vector3.zero;
+            WhileLoopLimiter.ResetInstance();
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                var position = currentPos + (UnityEngine.Random.insideUnitSphere * dist);
+                if (!IsWalkable(position, false) || position == currentPos) {
+                    continue;
+                }
+                returnPos = position;
+                break;
+            }
+            return returnPos;
         }
     }
 }

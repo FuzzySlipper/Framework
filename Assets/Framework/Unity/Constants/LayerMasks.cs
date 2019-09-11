@@ -6,7 +6,7 @@ public static class LayerMasks  {
     public static int NumberEnvironment = 9;
     public static int NumberCollision = 10;
     public static int NumberWorldControls = 11;
-    public static int NumberHideDisplay = 12;
+    public static int NumberSensors = 12;
     public static int NumberPlayerExemptColl = 13;
     public static int NumberPlayer = 14;
     public static int NumberMap = 15;
@@ -41,5 +41,6 @@ public static class LayerMasks  {
     public static LayerMask ActorCollision {get { return _actorCollision; } }
     public static LayerMask Map { get { return _map; } }
     public static LayerMask Floor { get { return _floor; } }
+    public static LayerMask Ceiling { get { return _ceiling; } }
     public static LayerMask Walls { get { return _wall; } }
 }

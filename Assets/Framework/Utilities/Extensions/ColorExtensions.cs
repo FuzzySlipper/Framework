@@ -36,9 +36,7 @@ public static class ColorHelper {
 	    string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2");
 	    return hex;
     }
-
-
-
+    
     public enum ColorType {
         Bright,
         Pastel,
@@ -86,7 +84,7 @@ public static class ColorHelper {
     }
     public const float ColorOffset = 40;
 
-    public static Color[] GetGradiants(int darkness) {
+    public static Color[] GetGradients(int darkness) {
         Color[] colorGradient = new Color[2];
         var newColor = RandomBrightColor();
         bool increase = newColor.h < 100;

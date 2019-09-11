@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         private static SortByPriorityReceiver _msgSorter = new SortByPriorityReceiver();
 
-        private Dictionary<int, List<Action>> _simpleHub = new Dictionary<int, List<Action>>();
+        private Dictionary<int, List<System.Action>> _simpleHub = new Dictionary<int, List<System.Action>>();
         private List<ISignalReceiver> _genericReceivers = new List<ISignalReceiver>();
 
         public BufferedList<IReceive> MessageReceivers = new BufferedList<IReceive>();
@@ -38,9 +38,9 @@ namespace PixelComrades {
             _genericReceivers.Remove(generic);
         }
 
-        public void AddObserver(int messageType, Action handler) {
+        public void AddObserver(int messageType, System.Action handler) {
             if (!_simpleHub.TryGetValue(messageType, out var list)) {
-                list = new List<Action>();
+                list = new List<System.Action>();
                 _simpleHub.Add(messageType, list);
             }
             if (!list.Contains(handler)) {
@@ -48,7 +48,7 @@ namespace PixelComrades {
             }
         }
 
-        public void RemoveObserver(int messageType, Action handler) {
+        public void RemoveObserver(int messageType, System.Action handler) {
             if (_simpleHub.TryGetValue(messageType, out var list)) {
                 list.Remove(handler);
             }
@@ -82,13 +82,11 @@ namespace PixelComrades {
             }
         }
 
-
         public void ClearMessageTable(int messageType) {
             if (_simpleHub.ContainsKey(messageType)) {
                 _simpleHub.Remove(messageType);
             }
         }
-
 
         public void Clear() {
             _simpleHub.Clear();

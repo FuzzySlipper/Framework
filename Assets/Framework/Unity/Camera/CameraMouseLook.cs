@@ -4,17 +4,17 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class CameraMouseLook : MonoSingleton<CameraMouseLook> {
 
-        [Tooltip("Should the rotation around x-axis be clamped?")] [SerializeField] private bool _shouldClampPitch = true;
-        [Tooltip("How fast the cursor moves in response to mouse lateral (x-axis) movement.")] [SerializeField] private float _lateralSensitivity = 2.0f;
-        [Tooltip("The maximum pitch angle (in degrees).")] [SerializeField] private float _maxPitchAngle = 90.0f;
-        [Tooltip("The minimum pitch angle (in degrees).")] [SerializeField] private float _minPitchAngle = -90.0f;
-        [Tooltip("Should the rotation be smoothed (eg: interpolated)?")] [SerializeField] private bool _smooth;
-        [Tooltip("How fast the cursor moves in response to mouse vertical (y-axis) movement.")] [SerializeField] private float _verticalSensitivity = 2.0f;
-        [Tooltip("Approximately the time (in secs) it will take to reach target.\n" + "A smaller value will reach the target faster.")] [SerializeField] private float _smoothTime = 5.0f;
+        [SerializeField] private bool _shouldClampPitch = true;
+        [SerializeField] private float _lateralSensitivity = 2.0f;
+        [SerializeField] private float _maxPitchAngle = 90.0f;
+        [SerializeField] private float _minPitchAngle = -90.0f;
+        [SerializeField] private bool _smooth = false;
+        [SerializeField] private float _verticalSensitivity = 2.0f;
+        [SerializeField] private float _smoothTime = 5.0f;
         [SerializeField] private Transform _camTr = null;
         [SerializeField] private Transform _pivotTr = null;
         [SerializeField] private GridCamera _gridCamera = null;
-        
+        [SerializeField] private bool _syncPosition = true;
 
         private Quaternion _cameraTargetRotation;
         private Quaternion _characterTargetRotation;
@@ -41,10 +41,14 @@ namespace PixelComrades {
         void Awake() {
             _characterTargetRotation = _pivotTr.localRotation;
             _cameraTargetRotation = _camTr.localRotation;
+            MessageKit<float>.addObserver(Messages.PlayerViewRotated, ChangeRotation);
             // don't forget about keyboard turning
         }
 
         void LateUpdate() {
+            if (_syncPosition) {
+                _pivotTr.transform.position = Player.Tr.position;
+            }
             if (!Game.GameActive) {
                 return;
             }

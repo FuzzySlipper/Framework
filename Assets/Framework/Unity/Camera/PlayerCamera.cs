@@ -29,10 +29,20 @@ namespace PixelComrades {
                 return _cam;
             }
         }
+        private static Transform _tr;
+        public static Transform Tr {
+            get {
+                if (_tr == null) {
+                    _tr = Cam.transform;
+                }
+                return _tr;
+            }
+        }
         public static AudioListener Listener;
 
         protected virtual void Awake() {
             _cam = GetComponent<Camera>();
+            _tr = transform;
             Game.SpriteCamera = _cam;
             Listener = GetComponent<AudioListener>();
             WorldControlMonitor.SetCamera(Player.Cam);

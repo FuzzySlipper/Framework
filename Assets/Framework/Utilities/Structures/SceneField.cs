@@ -11,7 +11,7 @@ namespace PixelComrades {
         [Serializable]
     public class SceneField {
 
-        [SerializeField] private Object _sceneAsset;
+        [SerializeField] private Object _sceneAsset = null;
         [SerializeField] private string _sceneName = "";
         [SerializeField] private int _buildIndex = -1;
 

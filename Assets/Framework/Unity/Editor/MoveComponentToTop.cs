@@ -25,18 +25,19 @@ public class ExtendedComponentReodering  {
     [MenuItem("CONTEXT/Component/Move To Top")]
     private static void MoveToTop(MenuCommand menuCommand) {
         Component c = (Component)menuCommand.context;
+        MoveComponentToTop(c);
+    }
+
+    public static void MoveComponentToTop(Component c) {
         Component[] allComponents = c.GetComponents<Component>();
         int iOffset = 0;
-        for(int i=0; i < allComponents.Length; i++)
-        {
-            if(allComponents[i] == c)
-            {
+        for (int i = 0; i < allComponents.Length; i++) {
+            if (allComponents[i] == c) {
                 iOffset = i;
                 break;
             }
         }
-        for(int i =0; i < iOffset -1; i++)
-        {
+        for (int i = 0; i < iOffset - 1; i++) {
             UnityEditorInternal.ComponentUtility.MoveComponentUp(c);
         }
         EditorSceneManager.MarkAllScenesDirty();

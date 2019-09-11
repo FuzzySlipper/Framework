@@ -3,13 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public struct CommandTargeting : IComponent {
+    public struct CommandTargeting {
         public TargetType Criteria;
         public float Range;
         public bool RequireLoS;
-        public int Owner { get; set; }
-        
-        public CommandTargeting(TargetType criteria, float range, bool requireLoS) : this() {
+
+        public CommandTargeting(TargetType criteria, float range, bool requireLoS) {
             Criteria = criteria;
             Range = range;
             RequireLoS = requireLoS;
@@ -92,56 +91,24 @@ namespace PixelComrades {
     }
 
     public static class CommandTargetingExtensions {
-        public static bool SatisfiesCondition(this CommandTargeting targeting, CommandTarget target, bool postUpdates = true) {
-            if (targeting.Criteria == TargetType.Any && targeting.Range <= 0) {
+        public static bool SatisfiesCondition(this CommandTargeting targeting, Entity owner, CommandTarget cmdTarget, bool postUpdates = true) {
+            if (targeting.Criteria == TargetType.Any && targeting.Range <= 0 || owner == null) {
                 return true;
             }
-            var owner = targeting.GetEntity();
-            if (owner == null) {
-                return true;
-            }
-            switch (targeting.Criteria) {
-                case TargetType.Enemy:
-                    if (!World.Get<FactionSystem>().AreEnemies(owner, target.Target)) {
-                        if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
-                        }
-                        return false;
-                    }
-                    break;
-                case TargetType.Friendly:
-                    if (!World.Get<FactionSystem>().AreFriends(owner, target.Target)) {
-                        if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
-                        }
-                        return false;
-                    }
-                    break;
-                case TargetType.Self:
-                    if (target.Target != null && target.Target.Id != targeting.Owner) {
-                        if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Self only", Color.yellow));
-                        }
-                        return false;
-                    }
-                    break;
+            var target = cmdTarget.Target;
+            if (target != null && !targeting.SatisfiesCondition(owner, target, postUpdates)) {
+                return false;
             }
             if (targeting.RequireLoS) {
-                if (target.Target != null && !World.Get<LineOfSightSystem>().CanSee(owner, target.Target)) {
-                    if (postUpdates) {
-                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
-                    }
-                    return false;
-                }
-                if (target.Target == null && !World.Get<LineOfSightSystem>().CanSee(owner, target.GetPosition)) {
+                if (target == null && !World.Get<LineOfSightSystem>().CanSee(owner, cmdTarget.GetPosition)) {
                     if (postUpdates) {
                         owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
                     }
                     return false;
                 }
             }
-            if (targeting.Range > 0.25f) {
-                var distance = DistanceSystem.GetDistance(owner, target.GetPosition);
+            if (target == null && targeting.Range > 0.25f) {
+                var distance = DistanceSystem.GetDistance(owner, cmdTarget.GetPosition);
                 if (distance > targeting.Range) {
                     if (postUpdates) {
                         owner.PostAll(new StatusUpdate(distance + " distance out of range", Color.yellow));
@@ -152,36 +119,44 @@ namespace PixelComrades {
             return true;
         }
 
-        public static bool SatisfiesCondition(this CommandTargeting targeting, Entity target) {
+        public static bool SatisfiesCondition(this CommandTargeting targeting, Entity owner, Entity target, bool postUpdates = true) {
             if (targeting.Criteria == TargetType.Any && targeting.Range <= 0) {
                 return true;
             }
-            var owner = targeting.GetEntity();
-            if (owner == null) {
+            if (owner == null || target == null) {
                 return true;
             }
             switch (targeting.Criteria) {
                 case TargetType.Enemy:
                     if (!World.Get<FactionSystem>().AreEnemies(owner, target)) {
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
+                        }
                         return false;
                     }
                     break;
                 case TargetType.Friendly:
                     if (!World.Get<FactionSystem>().AreFriends(owner, target)) {
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
+                        }
                         return false;
                     }
                     break;
                 case TargetType.Self:
-                    if (target != null && target.Id != targeting.Owner) {
+                    if (target.Id != owner) {
+                        if (postUpdates) {
+                            owner.PostAll(new StatusUpdate("Self only", Color.yellow));
+                        }
                         return false;
                     }
                     break;
             }
             if (targeting.RequireLoS) {
-                if (target!= null && !World.Get<LineOfSightSystem>().CanSee(owner, target)) {
-                    return false;
-                }
-                if (target== null) {
+                if (!World.Get<LineOfSightSystem>().CanSee(owner, target)) {
+                    if (postUpdates) {
+                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                    }
                     return false;
                 }
             }

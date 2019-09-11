@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIModIcon : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPoolEvents {
+    public class UIModIcon : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPoolEvents, ISystemUpdate {
 
         [SerializeField] private Image _hoverGraphic = null;
         [SerializeField] private Color _hoverColor = Color.white;
@@ -13,11 +13,17 @@ namespace PixelComrades {
         [SerializeField] private Image _cooldownImage = null;
 
         private Color _defaultColor;
-        private IEntityModifier _watchedMod;
-        private CharacterNode _target;
+        private ModEntry? _watchedMod;
+        private ScaledTimer _timer = new ScaledTimer(0.2f);
+        public bool Unscaled { get { return false; } }
 
-        public IEntityModifier Mod { get { return _watchedMod; } }
+        public void OnSystemUpdate(float dt) {
+            if (_watchedMod != null && !_timer.IsActive) {
+                _timer.Activate();
+                UpdateCoolDown();
+            }
 
+        }
         protected virtual void Awake() {
             if (_hoverGraphic != null) {
                 _defaultColor = _hoverGraphic.color;
@@ -30,25 +36,19 @@ namespace PixelComrades {
             _watchedMod = null;
         }
 
-        public void Assign(IEntityModifier mod, CharacterNode target) {
-            _target = target;
+        public void Assign(ModEntry mod) {
             _watchedMod = mod;
             if (_watchedMod != null) {
-                _iconImage.sprite = mod.Icon != null ? mod.Icon : _defaultIcon;
+                _iconImage.overrideSprite = mod.Icon != null ? mod.Icon : _defaultIcon;
                 UpdateCoolDown();
             }
         }
 
         public void UpdateCoolDown() {
-            if (_watchedMod.TurnsLeft() == 0 || _watchedMod.TurnLength == 0) {
-                _cooldownImage.fillAmount = 0;
+            if (_watchedMod == null) {
                 return;
             }
-            if (_watchedMod.TurnStart == TurnBased.TurnNumber) {
-                _cooldownImage.fillAmount = 1;
-                return;
-            }
-            _cooldownImage.fillAmount = 1 - ((TurnBased.TurnNumber - _watchedMod.TurnStart) / _watchedMod.TurnLength);
+            _cooldownImage.fillAmount = _watchedMod.Value.PercentLeft;
         }
 
         public void HoverStatus(bool active) {
@@ -67,14 +67,17 @@ namespace PixelComrades {
                 return;
             }
             if (eventData.button == PointerEventData.InputButton.Right) {
-                if (_watchedMod.Owner.HasComponent<PlayerComponent>()) {
-                    _watchedMod.Owner.Get<ModifiersContainer>(m => m.RemoveMod(_watchedMod.Id));
+                if (_watchedMod.Value.Target.HasComponent<PlayerComponent>()) {
+                    World.Get<ModifierSystem>().RemoveStatMod(_watchedMod.Value.Id);
                 }
             }
         }
 
         protected virtual void DisplayHoverData() {
-            UITooltip.main.ShowToolTip(_hoverGraphic, _watchedMod.Icon, _watchedMod.Label, _watchedMod.Description);
+            if (_watchedMod == null) {
+                return;
+            }
+            UITooltip.main.ShowToolTip(_hoverGraphic, _watchedMod.Value.Icon, _watchedMod.Value.Label, _watchedMod.Value.Description);
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
@@ -93,9 +96,10 @@ namespace PixelComrades {
 #if UNITY_EDITOR
         void OnDrawGizmosSelected() {
             if (_watchedMod != null) {
-                UnityEditor.Handles.Label(transform.position, _watchedMod.Description);
+                UnityEditor.Handles.Label(transform.position, _watchedMod.Value.Description);
             }
         }
 #endif
+        
     }
 }

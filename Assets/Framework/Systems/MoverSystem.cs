@@ -9,19 +9,22 @@ namespace PixelComrades {
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
         private ManagedArray<RotateToTarget> _rotateList;
-        private ManagedArray<RotateToTarget>.RunDel<RotateToTarget> _rotateDel;
+        private ManagedArray<RotateToTarget>.Delegate _rotateDel;
         private ManagedArray<SimplerMover> _simpleMoveList;
-        private ManagedArray<SimplerMover>.RunDel<SimplerMover> _simpleMoveDel;
+        private ManagedArray<SimplerMover>.Delegate _simpleMoveDel;
         private ManagedArray<ArcMover> _arcMoverList;
-        private ManagedArray<ArcMover>.RunDel<ArcMover> _arcMoveDel;
+        private ManagedArray<ArcMover>.Delegate _arcMoveDel;
+        private ManagedArray<ForwardMover> _forwardMovers;
+        private ManagedArray<ForwardMover>.Delegate _forwardMoveDel;
 
         public MoverSystem() {
             _rotateDel = HandleRotation;
             _simpleMoveDel = HandleMoveSimple;
             _arcMoveDel = HandleArcMovement;
+            _forwardMoveDel = HandleForwardMovement;
         }
 
-        public void OnSystemUpdate(float dt) {
+        public void OnSystemUpdate(float dt, float unscaledDt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
                 _moveTweens[i].Tr.position = _moveTweens[i].Tween.Get();
                 if (_moveTweens[i].Owner.Tags.Contain(EntityTags.RotateToMoveTarget)) {
@@ -50,12 +53,18 @@ namespace PixelComrades {
             if (_arcMoverList != null) {
                 _arcMoverList.Run(_arcMoveDel);
             }
+            if (_forwardMovers == null) {
+                _forwardMovers = EntityController.GetComponentArray<ForwardMover>();
+            }
+            if (_forwardMovers != null) {
+                _forwardMovers.Run(_forwardMoveDel);
+            }
         }
         
         private void FinishMove(Entity owner, Vector3 moveTarget) {
             owner.Tags.Remove(EntityTags.Moving);
             owner.Post(new MoveComplete(owner, moveTarget));
-            owner.Get<MoveTarget>(m => m.Clear());
+            owner.Get<MoveTarget>(m => m.Complete());
         }
 
         private void RotateTowardsMoveTarget(Transform tr, Vector3 moveTarget, float speed) {
@@ -86,54 +95,88 @@ namespace PixelComrades {
             }
         }
 
+        //private void HandleForwardTargetMover(ForwardTargetMover mover) {
+        //    var entity = mover.GetEntity();
+        //    if (!entity.Tags.Contain(EntityTags.Moving)) {
+        //        return;
+        //    }
+        //    var target = entity.Get<MoveTarget>();
+        //    if (target == null) {
+        //        return;
+        //    }
+        //    var tr = entity.Tr;
+        //    if (tr == null) {
+        //        return;
+        //    }
+        //    var targetPos = target.GetTargetPosition;
+        //    var dir = targetPos - tr.position;
+        //    tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.Get<MoveSpeed>()?.Speed ?? 1 * TimeManager.DeltaTime);
+        //    var targetRotation = Quaternion.LookRotation(dir);
+        //    tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.Get<RotationSpeed>()?.Speed ?? 1 * TimeManager.DeltaTime);
+        //    if (Vector3.Distance(targetPos, tr.position) < ReachedDestination) {
+        //        FinishMove(entity, targetPos);
+        //    }
+        //}
+
         private void HandleArcMovement(ArcMover mover) {
             var entity = mover.GetEntity();
             if (!entity.Tags.Contain(EntityTags.Moving)) {
                 return;
             }
             mover.ElapsedTime += TimeManager.DeltaTime;
-            mover.Entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Speed * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
+            mover.Entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
             if (mover.ElapsedTime > mover.Duration) {
                 FinishMove(entity, mover.Entity.Tr.position);
             }
         }
 
+        private void HandleForwardMovement(ForwardMover mover) {
+            var entity = mover.GetEntity();
+            if (!entity.Tags.Contain(EntityTags.Moving) || !entity.Tr) {
+                return;
+            }
+            var ms = entity.Get<MoveSpeed>()?.Speed ?? 1;
+            entity.Tr.Translate(Vector3.forward * ms * TimeManager.DeltaTime, Space.Self); 
+        }
+
         private void HandleRotation(RotateToTarget r) {
-            var targetRotation = Quaternion.LookRotation(r.Position - r.GetCurrent);
-            if (r.Rb != null) {
-                r.Rb.MoveRotation(Quaternion.RotateTowards(r.Rb.rotation, targetRotation, r.RotationSpeed * TimeManager.DeltaTime));
+            var targetRotation = Quaternion.LookRotation(r.Position - r.GetEntity().GetPosition());
+            var rb = r.Get<RigidbodyComponent>().Rb;
+            if (rb != null) {
+                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRotation, r.RotationSpeed * TimeManager.DeltaTime));
             }
             else {
-                r.TargetTr.rotation = Quaternion.RotateTowards(r.TargetTr.rotation, targetRotation, r.RotationSpeed * TimeManager.DeltaTime);
+                r.TargetTr.Tr.rotation = Quaternion.RotateTowards(r.TargetTr.Tr.rotation, targetRotation, r.RotationSpeed * TimeManager
+                .DeltaTime);
             }
         }
 
-        public void HandleGlobal(ManagedArray<MoveTweenEvent> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                _moveTweens.Add(arg[i]);
-                arg[i].Owner.Tags.Add(EntityTags.Moving);
+        public void HandleGlobal(MoveTweenEvent arg) {
+            if (arg.Owner == null) {
+                return;
             }
+            _moveTweens.Add(arg);
+            arg.Owner.Tags.Add(EntityTags.Moving);
         }
 
-        public void HandleGlobal(ManagedArray<StartMoveEvent> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                var moveEvent = arg[i];
-                moveEvent.Origin.Tags.Add(EntityTags.Moving);
-                var target = moveEvent.Origin.Get<MoveTarget>();
-                if (target == null) {
-                    target = new MoveTarget(moveEvent.Origin);
-                    moveEvent.Origin.Add(target);
-                }
-                target.TargetTr = moveEvent.Follow;
-                target.TargetV3 = moveEvent.MoveTarget;
-                moveEvent.Origin.Get<ArcMover>(m => CalculateFlight(m, moveEvent.GetPosition));
+        public void HandleGlobal(StartMoveEvent moveEvent) {
+            if (moveEvent.Origin == null) {
+                return;
             }
+            moveEvent.Origin.Tags.Add(EntityTags.Moving);
+            var target = moveEvent.Origin.Get<MoveTarget>();
+            if (target == null) {
+                target = new MoveTarget();
+                moveEvent.Origin.Add(target);
+            }
+            target.SetMoveTarget(moveEvent.GetPosition);
+            moveEvent.Origin.Get<ArcMover>(m => CalculateFlight(m, moveEvent.GetPosition, m.Get<MoveSpeed>()));
         }
 
-        private void CalculateFlight(ArcMover mover, Vector3 target) {
+        private void CalculateFlight(ArcMover mover, Vector3 target, float speed) {
             float targetDistance = Vector3.Distance(mover.Entity.Tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
-            float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / mover.Speed);
+            float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / speed);
             mover.MoveVector.z = Mathf.Sqrt(projectileVelocity) * Mathf.Cos(mover.Angle * Mathf.Deg2Rad);
             mover.MoveVector.y = Mathf.Sqrt(projectileVelocity) * Mathf.Sin(mover.Angle * Mathf.Deg2Rad);
             // Calculate flight time.

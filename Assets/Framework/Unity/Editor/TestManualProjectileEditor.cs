@@ -1,9 +1,10 @@
 ﻿using PixelComrades;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(TestManualProjectile))]
-public class TestManualProjectileEditor : Editor {
+public class TestManualProjectileEditor : OdinEditor {
 
     public override void OnInspectorGUI() {
         var script = (TestManualProjectile)target;

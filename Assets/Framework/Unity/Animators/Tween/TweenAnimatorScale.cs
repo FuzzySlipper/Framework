@@ -28,5 +28,9 @@ namespace PixelComrades {
         public override void UpdateTween() {
             Target.localScale = _tweener.Get();
         }
+
+        public override void PlayFrame(float normalized) {
+            Target.localScale = _tweener.Get(normalized);
+        }
     }
 }

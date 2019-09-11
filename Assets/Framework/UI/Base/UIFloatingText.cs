@@ -39,7 +39,7 @@ namespace PixelComrades {
                 _negative = !_negative;
             }
             _iconTimer.StartTimer();
-            spawn._icon.sprite = icon;
+            spawn._icon.overrideSprite = icon;
             TimeManager.StartUnscaled(spawn.SetTargetText(text, 2f, startPosition + new Vector3(0, 150, 0), color));
         }
 

@@ -16,12 +16,12 @@ namespace PixelComrades {
                 return;
             }
             var price = GameOptions.IdentifyEstimate(UIDragDropHandler.CurrentData);
-            if (Player.Currency.Value < price) {
-                UIFloatingText.Spawn(string.Format("Identify Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            if (Player.DefaultCurrencyHolder.Value < price) {
+                UIFloatingText.Spawn(string.Format("Identify Cost: {0} Not enough {1}", price, GameText.DefaultCurrencyLabel), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
                 UIDragDropHandler.Return();
                 return;
             }
-            UIModalQuestion.Set(ConfirmIdentify, string.Format("Identify for {0} {1}?", price, GameLabels.Currency));
+            UIModalQuestion.Set(ConfirmIdentify, string.Format("Identify for {0} {1}?", price, GameText.DefaultCurrencyLabel));
         }
 
         private void ConfirmIdentify(int id) {
@@ -32,8 +32,8 @@ namespace PixelComrades {
                 return;
             }
             var price = GameOptions.IdentifyEstimate(UIDragDropHandler.CurrentData);
-            UIFloatingText.Spawn(string.Format("Identified for {0} {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
-            Player.Currency.AddToValue(-price);
+            UIFloatingText.Spawn(string.Format("Identified for {0} {1}", price, GameText.DefaultCurrencyLabel), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            Player.DefaultCurrencyHolder.AddToValue(-price);
             UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Identified = true);
             UIDragDropHandler.Return();
         }

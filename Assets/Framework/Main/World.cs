@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
     public class World : Singleton<World> {
@@ -21,14 +22,15 @@ namespace PixelComrades {
         private Dictionary<int, object> _data = new Dictionary<int, object>();
         private static Dictionary<Type, SystemBase> _systems = new Dictionary<Type, SystemBase>();
         private static List<System.Type> _systemTypes = new List<Type>();
-        private static List<IMainSystemUpdate> _updaters = new List<IMainSystemUpdate>();
+        private static List<IMainSystemUpdate> _updates = new List<IMainSystemUpdate>();
         private static List<IMainFixedUpdate> _fixedUpdates = new List<IMainFixedUpdate>();
         private static List<IPeriodicUpdate> _periodicUpdates = new List<IPeriodicUpdate>();
-        private static Dictionary<Type, List<IReceive>> _globalReceivers = new Dictionary<Type, List<IReceive>>();
+        private static Dictionary<Type, List<IReceive>> _globalArrayReceivers = new Dictionary<Type, List<IReceive>>();
+        private static Dictionary<Type, List<IReceive>> _globalDelegateReceivers = new Dictionary<Type, List<IReceive>>();
         //private static Queue<Type> _msgTypesAwaitingProcess = new Queue<Type>();
         private static List<Type>[] _typeEvents = new []{ new List<Type>(), new List<Type>()};
         private static int _typeListIdx = 0;
-        private static UnscaledTimer _periodicTimer = new UnscaledTimer(1);
+        private static UnscaledTimer _periodicTimer = new UnscaledTimer(0.5f);
         private static List<Type> TypeList { get { return _typeEvents[_typeListIdx]; } }
         private static Dictionary<Type, TypedMessageQueue> _msgLists = new Dictionary<Type, TypedMessageQueue>();
         private static SortByPriorityClass _typeSorter = new SortByPriorityClass();
@@ -42,22 +44,21 @@ namespace PixelComrades {
             NodeFilter<VisibleNode>.New(VisibleNode.GetTypes());
             NodeFilter<CharacterNode>.New(CharacterNode.GetTypes());
             Get<AnimatorSystem>();
-            Get<CameraSystem>();
-            Get<CollisionCheckSystem>();
             Get<CommandSystem>();
+            Get<CollisionCheckSystem>();
             Get<CollisionEventSystem>();
             Get<DespawnEntitySystem>();
             Get<DistanceSystem>();
-            Get<EntityModifierSystem>();
             Get<FactionSystem>();
             Get<ItemSceneSystem>();
+            Get<ModifierSystem>();
             Get<MoverSystem>();
             Get<PhysicsMoverSystem>();
             Get<RadiusSystem>();
-            Get<TurnBasedSystem>();
             Get<CharacterRectSystem>();
             Get<SensorSystem>();
             Get<EntityUIPoolSystem>();
+            Get<TagTimerSystem>();
             EcsDebug.RegisterDebugCommands();
             //TODO: default setup here
         }
@@ -154,39 +155,52 @@ namespace PixelComrades {
 
         
         public static void Add(object obj) {
-            var reciever = obj as IReceive;
-            if (reciever == null) {
+            var receiver = obj as IReceive;
+            if (receiver == null) {
                 return;
             }
             var all = obj.GetType().GetInterfaces();
-            foreach (var intType in all) {
-                if (intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
-                    Instance.Add(reciever, intType.GetGenericArguments()[0]);
+            foreach (var type in all) {
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobalArray<>)) {
+                    var list = GetArrayList(type.GetGenericArguments()[0]);
+                    list.Add(receiver);
+                    list.Sort(_receiverSorter);
                 }
-                //else if (intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IReceiveRefGlobal<>)) {
-                //    Instance.Add(reciever, intType.GetGenericArguments()[0]);
-                //}
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
+                    var targetType = type.GetGenericArguments()[0];
+                    if (!_msgLists.TryGetValue(targetType, out var queue)) {
+                        var generic = typeof(TypedMessageQueue<>).MakeGenericType(targetType);
+                        queue = (TypedMessageQueue) Activator.CreateInstance(generic);
+                        _msgLists.Add(targetType, queue);
+                    }
+                    queue.AddReceiver(receiver);
+                }
             }
         }
 
-        private List<IReceive> GetList(Type type) {
-            if (!_globalReceivers.TryGetValue(type, out var list)) {
+        private static List<IReceive> GetArrayList(Type type) {
+            if (!_globalArrayReceivers.TryGetValue(type, out var list)) {
                 list = new List<IReceive>();
-                _globalReceivers.Add(type, list);
+                _globalArrayReceivers.Add(type, list);
             }
             return list;
         }
 
         public void Add<T>(IReceive receive) {
-            var list = GetList(typeof(T));
-            list.Add(receive);
-            list.Sort(_receiverSorter);
+            if (receive is IReceiveGlobalArray<T>) {
+                var list = GetArrayList(typeof(T));
+                list.Add(receive);
+                list.Sort(_receiverSorter);
+            }
+            else {
+                var queue = GetMessageQueueGeneric<T>();
+                if (queue != null) {
+                    queue.AddReceiver(receive);
+                }
+            }
+            
         }
 
-        public void Add(IReceive receive, Type type) {
-            GetList(type).Add(receive);
-        }
-        
         public static void RemoveSystem(SystemBase system) {
             CheckUpdates(system, false);
             _systems.Remove(system.GetType());
@@ -196,10 +210,10 @@ namespace PixelComrades {
         private static void CheckUpdates(SystemBase system, bool add) {
             if (system is IMainSystemUpdate update) {
                 if (add) {
-                    _updaters.Add(update);
+                    _updates.Add(update);
                 }
                 else {
-                    _updaters.Remove(update);
+                    _updates.Remove(update);
                 }
             }
             if (system is IMainFixedUpdate fixedUpdate) {
@@ -221,37 +235,41 @@ namespace PixelComrades {
         }
 
         public static void Remove(object obj) {
-            if (!(obj is IReceive reciever)) {
+            if (!(obj is IReceive receiver)) {
                 return;
             }
             var all = obj.GetType().GetInterfaces();
-            foreach (Type intType in all) {
-                if (intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
-                    Instance.Remove(reciever, intType.GetGenericArguments()[0]);
+            foreach (var type in all) {
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobalArray<>)) {
+                    var list = GetArrayList(type.GetGenericArguments()[0]);
+                    list.Remove(receiver);
+                    list.Sort(_receiverSorter);
                 }
-                //else if (intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IReceiveRefGlobal<>)) {
-                //    Instance.Remove(reciever, intType.GetGenericArguments()[0]);
-                //}
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
+                    var targetType = type.GetGenericArguments()[0];
+                    if (_msgLists.TryGetValue(targetType, out var queue)) {
+                        queue.RemoveReceiver(receiver);
+                    }
+                }
             }
         }
         
         public void Remove<T>(IReceive receive) {
-            GetList(typeof(T)).Remove(receive);
-        }
-
-        public void Remove(IReceive receive, Type type) {
-            GetList(type).Remove(receive);
+            if (receive is IReceiveGlobalArray<T>) {
+                var list = GetArrayList(typeof(T));
+                list.Remove(receive);
+                list.Sort(_receiverSorter);
+            }
+            else {
+                var queue = GetMessageQueueGeneric<T>();
+                if (queue != null) {
+                    queue.RemoveReceiver(receive);
+                }
+            }
         }
 
         public static void Enqueue<T>(T message) where T : struct, IEntityMessage {
-            TypedMessageQueue<T> queue;
-            if (!_msgLists.ContainsKey(typeof(T))) {
-                queue = new TypedMessageQueue<T>();
-                _msgLists[typeof(T)] = queue;
-            }
-            else {
-                queue = (TypedMessageQueue<T>) _msgLists[typeof(T)];
-            }
+            var queue = GetMessageQueue<T>();
             queue.Enqueue(message);
             var type = typeof(T);
             if (!TypeList.Contains(type)) {
@@ -262,7 +280,27 @@ namespace PixelComrades {
             //}
         }
 
-        public static void Update(float dt) {
+        private static TypedMessageQueue<T> GetMessageQueue<T>() where T : struct, IEntityMessage {
+            var type = typeof(T);
+            if (!_msgLists.TryGetValue(type, out var queue)) {
+                queue = new TypedMessageQueue<T>();
+                _msgLists.Add(type, queue);
+            }
+            return (TypedMessageQueue<T>) queue;
+        }
+
+        private static TypedMessageQueue GetMessageQueueGeneric<T>() {
+            var type = typeof(T);
+            if (!_msgLists.TryGetValue(type, out var queue)) {
+                if (type.InheritsFrom(typeof(IEntityMessage)) && type.IsValueType) {
+                    queue = new TypedMessageQueue<T>();
+                    _msgLists.Add(type, queue);
+                }
+            }
+            return queue;
+        }
+
+        public static void Update(float dt, float unscaledDt) {
             //while (_msgTypesAwaitingProcess.Count > 0) {
             //    var type = _msgTypesAwaitingProcess.Dequeue();
             //    if (!_globalReceivers.TryGetValue(type, out var list)) {
@@ -270,8 +308,8 @@ namespace PixelComrades {
             //    }
             //    _msgLists[type].Process(list);
             //}
-            for (int i = 0; i < _updaters.Count; i++) {
-                _updaters[i].OnSystemUpdate(dt);
+            for (int i = 0; i < _updates.Count; i++) {
+                _updates[i].OnSystemUpdate(dt, unscaledDt);
             }
             if (!_periodicTimer.IsActive) {
                 _periodicTimer.StartTimer();
@@ -284,9 +322,7 @@ namespace PixelComrades {
             _typeListIdx = (int) MathEx.WrapAround(_typeListIdx + 1, 0, _typeEvents.Length);
             for (int i = 0; i < list.Count; i++) {
                 var type = list[i];
-                if (!_globalReceivers.TryGetValue(type, out var receiverList)) {
-                    continue;
-                }
+                _globalArrayReceivers.TryGetValue(type, out var receiverList);
                 _msgLists[type].Process(receiverList);
             }
             list.Clear();
@@ -300,19 +336,44 @@ namespace PixelComrades {
 
         private abstract class TypedMessageQueue {
             public abstract void Process(List<IReceive> list);
+            public abstract void AddReceiver(IReceive receiver);
+            public abstract void RemoveReceiver(IReceive receiver);
         }
 
-        private class TypedMessageQueue<T> : TypedMessageQueue where T : struct, IEntityMessage {
+        private class TypedMessageQueue<T> : TypedMessageQueue {
             private BufferedList<T> _msgs = new BufferedList<T>();
+            private List<ManagedArray<T>.Delegate> _globalDel = new List<ManagedArray<T>.Delegate>();
+            private SortByPriorityClass<T> _sorter = new SortByPriorityClass<T>();
 
             public void Enqueue(T message) {
                 _msgs.CurrentList.Add(message);
             }
 
+            public override void AddReceiver(IReceive receiver) {
+                if (receiver is IReceiveGlobal<T> del) {
+                    _globalDel.Add(del.HandleGlobal);
+                    _globalDel.Sort(_sorter);
+                }
+            }
+
+            public override void RemoveReceiver(IReceive receiver) {
+                if (receiver is IReceiveGlobal<T> del) {
+                    _globalDel.Remove(del.HandleGlobal);
+                    _globalDel.Sort(_sorter);
+                }
+            }
+
             public override void Process(List<IReceive> list) {
                 _msgs.Advance();
-                for (int i = 0; i < list.Count; i++) {
-                    (list[i] as IReceiveGlobal<T>)?.HandleGlobal(_msgs.PreviousList);
+                if (list != null) {
+                    for (int i = 0; i < list.Count; i++) {
+                        if (list[i] is IReceiveGlobalArray<T> globalDel) {
+                            globalDel.HandleGlobal(_msgs.PreviousList);
+                        }
+                    }
+                }
+                for (int i = 0; i < _globalDel.Count; i++) {
+                    _msgs.PreviousList.Run(_globalDel[i]);
                 }
             }
         }

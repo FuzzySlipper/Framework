@@ -160,7 +160,7 @@ namespace PixelComrades {
                     }
                 }
                 if (currentActor == null) {
-                    currentActor = MonoBehaviourToEntity.GetEntity(hit.collider);
+                    currentActor = UnityToEntityBridge.GetEntity(hit.collider);
                 }
                 if (LayerMasks.Environment.ContainsLayer(hit.transform.gameObject.layer)) {
                     if (_debug) {

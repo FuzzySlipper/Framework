@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 namespace PixelComrades {
     public static class GoogleSheetsDownloadUtility {
@@ -16,8 +17,9 @@ namespace PixelComrades {
                 url += "&gid=" + sheetId;
             }
 
-            WWWForm form = new WWWForm();
-            WWW download = new WWW(url, form);
+            //WWWForm form = new WWWForm();
+            var download = new UnityWebRequest(url);
+            //WWW download = new WWW(url, form);
             while (!download.isDone) {
                 //if (!string.IsNullOrEmpty(download.error)) {
                 //    break;
@@ -29,10 +31,10 @@ namespace PixelComrades {
                 Debug.Log("Error downloading: " + download.error);
             }
             else {
-                del(download.text, ',');
+                del(download.downloadHandler.text, ',');
                 if (saveAsset) {
                     if (!string.IsNullOrEmpty(assetName))
-                        System.IO.File.WriteAllText("Assets/GameData/" + assetName + ".csv", download.text);
+                        System.IO.File.WriteAllText("Assets/GameData/" + assetName + ".csv", download.downloadHandler.text);
                     else {
                         throw new System.Exception("assetName is null");
                     }

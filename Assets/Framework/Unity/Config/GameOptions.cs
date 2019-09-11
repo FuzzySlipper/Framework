@@ -13,6 +13,7 @@ namespace PixelComrades {
         private static Dictionary<string, float> _dictFloat = new Dictionary<string, float>();
         private static Dictionary<string, bool> _dictBool = new Dictionary<string, bool>();
         private static Dictionary<string, string> _dictString = new Dictionary<string, string>();
+        private static Dictionary<string, Color> _dictColor = new Dictionary<string, Color>();
 
         private static void Init() {
             GameData.AddInit(Init);
@@ -21,6 +22,7 @@ namespace PixelComrades {
             LoadDictionary(row.Get<DataList>("Bool"), _dictBool);
             LoadDictionary(row.Get<DataList>("Int"), _dictInt);
             LoadDictionary(row.Get<DataList>("Float"), _dictFloat);
+            LoadDictionary(row.Get<DataList>("Color"), _dictColor);
             Cached.Reset();
         }
 
@@ -79,6 +81,13 @@ namespace PixelComrades {
             return _dictBool.TryGetValue(id, out var value) ? value : defaultValue;
         }
 
+        public static Color Get(string id, Color defaultValue) {
+            if (_dictColor.Count == 0) {
+                Init();
+            }
+            return _dictColor.TryGetValue(id, out var value) ? value : defaultValue;
+        }
+
         public static void Set(string id, string value) {
             _dictString.AddOrUpdate(id, value);
         }
@@ -93,6 +102,10 @@ namespace PixelComrades {
 
         public static void Set(string id, bool value) {
             _dictBool.AddOrUpdate(id, value);
+        }
+
+        public static void Set(string id, Color value) {
+            _dictColor.AddOrUpdate(id, value);
         }
 
         public static float GetDefenseAmount(float damage, float stat) {
@@ -117,13 +130,11 @@ namespace PixelComrades {
 
         public static CachedBool UseShaking = new CachedBool("UseShaking");
         public static CachedBool UsePainFlash = new CachedBool("UsePainFlash");
-        public static CachedBool UseHeadBob = new CachedBool("UseHeadBob");
         public static CachedBool VerboseInventory = new CachedBool("VerboseInventory");
         public static CachedBool LogAllDamage = new CachedBool("LogAllDamage");
         public static CachedBool ShowMiss = new CachedBool("ShowMiss");
         public static CachedBool PauseForInput = new CachedBool("PauseForInput");
         public static CachedBool ReadyNotice = new CachedBool("ReadyNotice");
-        public static CachedBool UseCulling = new CachedBool("UseCulling");
         public static CachedBool DebugMode = new CachedBool("DebugMode");
         public static CachedBool LoadSceneDestructive = new CachedBool("LoadSceneDestructive");
 
@@ -137,6 +148,7 @@ namespace PixelComrades {
                 Set(MouseLookLabel, value);
                 if (value && !Game.CursorUnlocked) {
                     Cursor.lockState = CursorLockMode.Locked;
+                    UICursor.main.SetCursor(UICursor.CrossHair);
                 }
                 else if (!value) {
                     Cursor.lockState = CursorLockMode.None;
@@ -403,6 +415,57 @@ namespace PixelComrades {
                     _parsed = true;
                     return _value;
                 }
+            }
+        }
+
+        public class CachedColor : Cached {
+            private Color _value;
+
+            public CachedColor(string key) : base(key) {
+            }
+
+            public Color Value {
+                get {
+                    if (!ValueSet) {
+                        _value = Get(Key, Color.white);
+                        ValueSet = true;
+                    }
+                    return _value;
+                }
+                set {
+                    _value = value;
+                    Set(Key, value);
+                }
+            }
+
+            public static implicit operator Color(CachedColor cached) {
+                return cached.Value;
+            }
+
+            public static bool operator ==(CachedColor cached, Color value) {
+                return cached != null && cached.Value == value;
+            }
+
+            public static bool operator !=(CachedColor cached, Color value) {
+                return cached != null && cached.Value != value;
+            }
+
+            protected bool Equals(CachedColor other) {
+                return other != null && Value == other.Value;
+            }
+
+            public override bool Equals(object obj) {
+                if (ReferenceEquals(null, obj)) {
+                    return false;
+                }
+                if (ReferenceEquals(this, obj)) {
+                    return true;
+                }
+                return Equals((CachedColor) obj);
+            }
+
+            public override int GetHashCode() {
+                return Value.GetHashCode();
             }
         }
     }

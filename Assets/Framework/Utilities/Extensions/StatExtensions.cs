@@ -23,7 +23,8 @@ namespace PixelComrades {
 
         public static void SetupVitalStats(Entity owner) {
             for (int i = 0; i < GameData.Vitals.Count; i++) {
-                owner.Stats.Add(new VitalStat(GameData.Vitals.Names[i], GameData.Vitals.GetID(i), GameData.Vitals.GetAssociatedValue(i)));
+                var vital = new VitalStat(GameData.Vitals.Names[i], GameData.Vitals.GetID(i), GameData.Vitals.GetAssociatedValue(i), GameData.Vitals.GetValue<float>(i, "Recovery"));
+                owner.Stats.Add(vital);
             }
         }
 

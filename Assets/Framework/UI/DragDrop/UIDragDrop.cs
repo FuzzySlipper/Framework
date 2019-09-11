@@ -51,10 +51,13 @@ namespace PixelComrades {
         }
 
         public void SetSprite(Sprite sprite) {
-            _dragImage.sprite = sprite;
-            if (sprite != null) {
-                _dragImage.enabled = true;
-            }
+            //_dragImage.enabled = false;
+            //if (_dragImage == null) {
+            //    return;
+            //}
+            _dragImage.overrideSprite = sprite;
+            _dragImage.enabled = sprite != null;
+            //_dragImage.sprite = sprite;
         }
 
         public void SetSpriteStatus(bool status) {
@@ -117,13 +120,16 @@ namespace PixelComrades {
         }
 
         public virtual void OnCreate(PrefabEntity entity) {
+            if (_hoverGraphic != null) {
+                _defaultColor = _hoverGraphic.color;
+            }
             Entity = entity;
         }
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected() {
             if (Data != null) {
-                UnityEditor.Handles.Label(transform.position, Data.Get<LabelComponent>()?.Text);
+                UnityEditor.Handles.Label(transform.position, Data.DebugId);
             }
         }
 #endif

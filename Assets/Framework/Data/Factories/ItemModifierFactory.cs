@@ -5,15 +5,13 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public static class ItemModifierFactory  {
         
-        public static void AddModifiers(string modGroup, int level, Entity entity) {
-            var prefix = GetModifier(modGroup, level, true);
+        public static void AddModifiers(string modGroup, int level, Entity entity, out DataEntry prefix, out DataEntry suffix) {
+            prefix = GetModifier(modGroup, level, true);
             if (prefix != null) {
-                entity.Add(new ItemModifierPrefix(prefix));
                 SetBonuses(entity, prefix);
             }
-            var suffix = GetModifier(modGroup, level, false);
+             suffix = GetModifier(modGroup, level, false);
             if (suffix != null) {
-                entity.Add(new ItemModifierSuffix(suffix));
                 SetBonuses(entity, suffix);
             }
         }

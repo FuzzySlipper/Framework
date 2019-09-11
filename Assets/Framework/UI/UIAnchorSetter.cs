@@ -51,7 +51,7 @@ namespace PixelComrades {
     }
 
     public class UIAnchorSetter : MonoBehaviour {
-        [SerializeField] private UIAnchor _target;
+        [SerializeField] private UIAnchor _target = UIAnchor.Center;
 
         void Awake() {
             UIAnchors.Register(_target, transform as RectTransform);

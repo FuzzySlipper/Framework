@@ -7,16 +7,30 @@ namespace PixelComrades {
     public enum ImpactRadiusTypes {
         Single = 0,
         Cone = 1,
-        Cross = 2,
-        Cross2 = 3,
-        Line = 4,
-        Radius1 = 5,
-        Radius2 = 6,
-        Party = 7,
+        Radius1 = 2,
+        Radius2 = 3,
+        Radius3 = 4,
+        Cross = 5,
+        Cross2 = 6,
+        Line = 7,
+        Party = 8,
     }
 
     public static class ImpactExtensions {
-        
+
+
+        public static float ToFloat(this ImpactRadiusTypes radius) {
+            switch (radius) {
+                case ImpactRadiusTypes.Radius1:
+                    return Game.MapCellSize;
+                case ImpactRadiusTypes.Radius2:
+                    return Game.MapCellSize * 2;
+                case ImpactRadiusTypes.Radius3:
+                    return Game.MapCellSize * 3;
+            }
+            return 0;
+        }
+
         public static List<Point3> RadiusPoints(this ImpactRadiusTypes radius, Point3 center, Directions fwd) {
             if (radius == ImpactRadiusTypes.Single) {
                 return null;
@@ -33,6 +47,8 @@ namespace PixelComrades {
                     return RadiusPnts(_surrounding8Way, center, 2);
                 case ImpactRadiusTypes.Radius2:
                     return RadiusPnts(_surrounding8Way, center, 3);
+                case ImpactRadiusTypes.Radius3:
+                    return RadiusPnts(_surrounding8Way, center, 4);
                 case ImpactRadiusTypes.Cone:
                     return GetOctantPnts(center, 2, fwd);
             }

@@ -16,7 +16,7 @@ namespace PixelComrades {
 
         [Button]
         public void Clear() {
-            World.Get<PathfindingSystem>().Grid.ClearAll();
+            World.Get<PathfindingSystem>().Clear();
         }
 
         void OnDrawGizmos() {

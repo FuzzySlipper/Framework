@@ -13,7 +13,7 @@ namespace PixelComrades {
     }
 
     public interface IMainSystemUpdate {
-        void OnSystemUpdate(float dt);
+        void OnSystemUpdate(float dt, float unscaledDt);
     }
 
     public interface IPeriodicUpdate {

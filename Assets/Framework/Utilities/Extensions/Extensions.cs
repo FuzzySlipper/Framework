@@ -20,6 +20,7 @@ namespace PixelComrades {
         public GameObject Prefab;
         public bool CenteredPrefab = false;
         public Vector3 OffsetGridMulti = new Vector3(0, 0, 0);
+        //public Vector3 Rotation = Vector3.zero;
     }
 
     [System.Serializable]
@@ -35,11 +36,11 @@ namespace PixelComrades {
                 return Prefabs[0];
             }
             //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(Game.Random.NextFloat(0,1))));
+            return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0,1))));
         }
 
         public int GetIndex() {
-            return (int) (Prefabs.Length * Curve.Evaluate(Game.Random.NextFloat(0, 1)));
+            return (int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
         }
     }
 
@@ -56,11 +57,11 @@ namespace PixelComrades {
                 return Objects[0];
             }
             //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.Random.NextFloat(0, 1))));
+            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
         }
 
         public int GetIndex() {
-            return (int) (Objects.Length * Curve.Evaluate(Game.Random.NextFloat(0, 1)));
+            return (int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
         }
     }
 
@@ -76,11 +77,261 @@ namespace PixelComrades {
             if (Objects.Length == 1) {
                 return Objects[0];
             }
-            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.Random.NextFloat(0, 1))));
+            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
         }
 
         public int GetIndex() {
-            return (int) (Objects.Length * Curve.Evaluate(Game.Random.NextFloat(0, 1)));
+            return (int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
+        }
+    }
+    public class SmoothRandom {
+        private static FractalNoise s_Noise;
+        private static Vector3 s_Result1;
+        private static Vector3 s_Result2;
+        private static FractalNoise Noise {
+            get {
+                if (s_Noise == null) {
+                    s_Noise = new FractalNoise(1.27f, 2.04f, 8.36f);
+                }
+                return s_Noise;
+            }
+        }
+
+        /// <summary>
+        ///     Slightly refactored fractal noise class from the Procedular Examples package.
+        /// </summary>
+        private class FractalNoise {
+            private float[] m_Exponent;
+            private int m_IntOctaves;
+            private float m_Lacunarity;
+            private Perlin m_Noise;
+            private float m_Octaves;
+
+            public FractalNoise(float inH, float inLacunarity, float inOctaves) : this(inH, inLacunarity, inOctaves, null) {
+            }
+
+            public FractalNoise(float inH, float inLacunarity, float inOctaves, Perlin noise) {
+                m_Lacunarity = inLacunarity;
+                m_Octaves = inOctaves;
+                m_IntOctaves = (int) inOctaves;
+                m_Exponent = new float[m_IntOctaves + 1];
+                float frequency = 1.0f;
+                for (int i = 0; i < m_IntOctaves + 1; i++) {
+                    m_Exponent[i] = (float) Math.Pow(m_Lacunarity, -inH);
+                    frequency *= m_Lacunarity;
+                }
+                if (noise == null) {
+                    m_Noise = new Perlin();
+                }
+                else {
+                    m_Noise = noise;
+                }
+            }
+
+            public float HybridMultifractal(float x, float y, float offset) {
+                float weight, signal, remainder, result;
+                result = (m_Noise.Noise(x, y) + offset) * m_Exponent[0];
+                weight = result;
+                x *= m_Lacunarity;
+                y *= m_Lacunarity;
+                int i;
+                for (i = 1; i < m_IntOctaves; i++) {
+                    if (weight > 1.0f) {
+                        weight = 1.0f;
+                    }
+                    signal = (m_Noise.Noise(x, y) + offset) * m_Exponent[i];
+                    result += weight * signal;
+                    weight *= signal;
+                    x *= m_Lacunarity;
+                    y *= m_Lacunarity;
+                }
+                remainder = m_Octaves - m_IntOctaves;
+                result += remainder * m_Noise.Noise(x, y) * m_Exponent[i];
+                return result;
+            }
+        }
+
+        /// <summary>
+        ///     Slightly refactored perlin class from the Procedular Examples package.
+        /// </summary>
+        private class Perlin {
+            // Original C code derived from 
+            // http://astronomy.swin.edu.au/~pbourke/texture/perlin/perlin.c
+            // http://astronomy.swin.edu.au/~pbourke/texture/perlin/perlin.h
+            private const int B = 0x100;
+            private const int BM = 0xff;
+            private const int N = 0x1000;
+            private float[] g1 = new float[B + B + 2];
+            private float[,] g2 = new float[B + B + 2, 2];
+            private float[,] g3 = new float[B + B + 2, 3];
+            private int[] p = new int[B + B + 2];
+
+            public Perlin() {
+                int i, j, k;
+                Random rnd = new Random();
+                for (i = 0; i < B; i++) {
+                    p[i] = i;
+                    g1[i] = (float) (rnd.Next(B + B) - B) / B;
+                    for (j = 0; j < 2; j++) {
+                        g2[i, j] = (float) (rnd.Next(B + B) - B) / B;
+                    }
+                    Normalize2(ref g2[i, 0], ref g2[i, 1]);
+                    for (j = 0; j < 3; j++) {
+                        g3[i, j] = (float) (rnd.Next(B + B) - B) / B;
+                    }
+                    Normalize3(ref g3[i, 0], ref g3[i, 1], ref g3[i, 2]);
+                }
+                while (--i != 0) {
+                    k = p[i];
+                    p[i] = p[j = rnd.Next(B)];
+                    p[j] = k;
+                }
+                for (i = 0; i < B + 2; i++) {
+                    p[B + i] = p[i];
+                    g1[B + i] = g1[i];
+                    for (j = 0; j < 2; j++) {
+                        g2[B + i, j] = g2[i, j];
+                    }
+                    for (j = 0; j < 3; j++) {
+                        g3[B + i, j] = g3[i, j];
+                    }
+                }
+            }
+
+            private float At2(float rx, float ry, float x, float y) {
+                return rx * x + ry * y;
+            }
+
+            private float At3(float rx, float ry, float rz, float x, float y, float z) {
+                return rx * x + ry * y + rz * z;
+            }
+
+            private float Lerp(float t, float a, float b) {
+                return a + t * (b - a);
+            }
+
+            private void Normalize2(ref float x, ref float y) {
+                float s;
+                s = (float) Math.Sqrt(x * x + y * y);
+                x = y / s;
+                y = y / s;
+            }
+
+            private void Normalize3(ref float x, ref float y, ref float z) {
+                float s;
+                s = (float) Math.Sqrt(x * x + y * y + z * z);
+                x = y / s;
+                y = y / s;
+                z = z / s;
+            }
+
+            private float SCurve(float t) {
+                return t * t * (3.0f - 2.0f * t);
+            }
+
+            private void Setup(float value, out int b0, out int b1, out float r0, out float r1) {
+                float t = value + N;
+                b0 = (int) t & BM;
+                b1 = (b0 + 1) & BM;
+                r0 = t - (int) t;
+                r1 = r0 - 1.0f;
+            }
+
+            public float Noise(float arg) {
+                int bx0, bx1;
+                float rx0, rx1, sx, u, v;
+                Setup(arg, out bx0, out bx1, out rx0, out rx1);
+                sx = SCurve(rx0);
+                u = rx0 * g1[p[bx0]];
+                v = rx1 * g1[p[bx1]];
+                return Lerp(sx, u, v);
+            }
+
+            public float Noise(float x, float y) {
+                int bx0, bx1, by0, by1, b00, b10, b01, b11;
+                float rx0, rx1, ry0, ry1, sx, sy, a, b, u, v;
+                int i, j;
+                Setup(x, out bx0, out bx1, out rx0, out rx1);
+                Setup(y, out by0, out by1, out ry0, out ry1);
+                i = p[bx0];
+                j = p[bx1];
+                b00 = p[i + by0];
+                b10 = p[j + by0];
+                b01 = p[i + by1];
+                b11 = p[j + by1];
+                sx = SCurve(rx0);
+                sy = SCurve(ry0);
+                u = At2(rx0, ry0, g2[b00, 0], g2[b00, 1]);
+                v = At2(rx1, ry0, g2[b10, 0], g2[b10, 1]);
+                a = Lerp(sx, u, v);
+                u = At2(rx0, ry1, g2[b01, 0], g2[b01, 1]);
+                v = At2(rx1, ry1, g2[b11, 0], g2[b11, 1]);
+                b = Lerp(sx, u, v);
+                return Lerp(sy, a, b);
+            }
+
+            public float Noise(float x, float y, float z) {
+                int bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
+                float rx0, rx1, ry0, ry1, rz0, rz1, sy, sz, a, b, c, d, t, u, v;
+                int i, j;
+                Setup(x, out bx0, out bx1, out rx0, out rx1);
+                Setup(y, out by0, out by1, out ry0, out ry1);
+                Setup(z, out bz0, out bz1, out rz0, out rz1);
+                i = p[bx0];
+                j = p[bx1];
+                b00 = p[i + by0];
+                b10 = p[j + by0];
+                b01 = p[i + by1];
+                b11 = p[j + by1];
+                t = SCurve(rx0);
+                sy = SCurve(ry0);
+                sz = SCurve(rz0);
+                u = At3(rx0, ry0, rz0, g3[b00 + bz0, 0], g3[b00 + bz0, 1], g3[b00 + bz0, 2]);
+                v = At3(rx1, ry0, rz0, g3[b10 + bz0, 0], g3[b10 + bz0, 1], g3[b10 + bz0, 2]);
+                a = Lerp(t, u, v);
+                u = At3(rx0, ry1, rz0, g3[b01 + bz0, 0], g3[b01 + bz0, 1], g3[b01 + bz0, 2]);
+                v = At3(rx1, ry1, rz0, g3[b11 + bz0, 0], g3[b11 + bz0, 1], g3[b11 + bz0, 2]);
+                b = Lerp(t, u, v);
+                c = Lerp(sy, a, b);
+                u = At3(rx0, ry0, rz1, g3[b00 + bz1, 0], g3[b00 + bz1, 2], g3[b00 + bz1, 2]);
+                v = At3(rx1, ry0, rz1, g3[b10 + bz1, 0], g3[b10 + bz1, 1], g3[b10 + bz1, 2]);
+                a = Lerp(t, u, v);
+                u = At3(rx0, ry1, rz1, g3[b01 + bz1, 0], g3[b01 + bz1, 1], g3[b01 + bz1, 2]);
+                v = At3(rx1, ry1, rz1, g3[b11 + bz1, 0], g3[b11 + bz1, 1], g3[b11 + bz1, 2]);
+                b = Lerp(t, u, v);
+                d = Lerp(sy, a, b);
+                return Lerp(sz, c, d);
+            }
+        }
+
+        public static Vector3 GetVector3(float speed) {
+            float time = Time.time * 0.01f * speed;
+            s_Result1.Set(Noise.HybridMultifractal(time, 15.73f, 0.58f), Noise.HybridMultifractal(time, 63.94f, 0.58f), Noise.HybridMultifractal(time, 0.2f, 0.58f));
+            return s_Result1;
+        }
+
+        public static Vector3 GetVector3Centered(float speed) {
+            var time1 = Time.time * 0.01f * speed;
+            var time2 = (Time.time - 1) * 0.01f * speed;
+            s_Result1.Set(Noise.HybridMultifractal(time1, 15.73f, 0.58f), Noise.HybridMultifractal(time1, 63.94f, 0.58f), Noise.HybridMultifractal(time1, 0.2f, 0.58f));
+            s_Result2.Set(Noise.HybridMultifractal(time2, 15.73f, 0.58f), Noise.HybridMultifractal(time2, 63.94f, 0.58f), Noise.HybridMultifractal(time2, 0.2f, 0.58f));
+            return s_Result1 - s_Result2;
+        }
+    }
+
+    public static class PhysicsExtensions {
+        public static Vector3 ComputeGunLead(Vector3 targetPos, Vector3 targetVel, Vector3 ownPos, Vector3 ownVel, float muzzleVelocity) {
+            // Figure out ETA for bullets to reach target.
+            Vector3 predictedTargetPos = targetPos + targetVel;
+            Vector3 predictedOwnPos = ownPos + ownVel;
+
+            float range = Vector3.Distance(predictedOwnPos, predictedTargetPos);
+            float timeToHit = range / muzzleVelocity;
+
+            // Project velocity of target using the TimeToHit.
+            Vector3 leadMarker = (targetVel - ownVel) * timeToHit + targetPos;
+
+            return leadMarker;
         }
     }
 
@@ -132,6 +383,12 @@ namespace PixelComrades {
 
         public static void RemoveLast<T>(this IList<T> list) {
             list.RemoveAt(list.Count - 1);
+        }
+
+        public static T PopLast<T>(this IList<T> list) {
+            var element = list[list.Count - 1];
+            list.RemoveAt(list.Count - 1);
+            return element;
         }
 
         public static T LastElement<T>(this IList<T> list) {
@@ -829,6 +1086,18 @@ namespace PixelComrades {
             return Directions.Down;
         }
 
+        public static string GetPath(this Transform tr) {
+            string path = tr.name;
+            while (tr.parent != null) {
+                tr = tr.parent;
+                if (tr.parent == null) {
+                    break;
+                }
+                path += tr.name + "/";
+            }
+            return path;
+        }
+        
         public static Directions ForwardDirection2D(this Transform tr) {
             var v = tr.forward;
             v.y = 0;
@@ -870,6 +1139,8 @@ namespace PixelComrades {
                 }
 #if UNITY_EDITOR
             UnityEngine.Object.DestroyImmediate(child.gameObject);
+#else
+            UnityEngine.Object.Destroy(child.gameObject);
 #endif
             }
         }
@@ -917,12 +1188,25 @@ namespace PixelComrades {
             }
             var targetPos = target.position;
             targetPos.y = me.position.y;
-            Vector3 relativePos = targetPos - me.position;
+            Vector3 relativePos = (targetPos - me.position).normalized;
             return Quaternion.LookRotation(relativePos);
         }
     }
 
     public static class RigidbodyExtensions {
+
+        /// <summary>
+        ///     Calculate the maximum speed of this Rigidbody for a given force.
+        /// </summary>
+        /// <param name="rb">Rigidbody</param>
+        /// <param name="force">The linear force to be used in the calculation.</param>
+        /// <returns>The maximum speed.</returns>
+        public static float GetSpeedFromForce(this Rigidbody rb, float force) {
+            float deltaVThrust = force / rb.mass * Time.fixedDeltaTime;
+            float dragFactor = Time.fixedDeltaTime * rb.drag;
+            float maxSpeed = deltaVThrust / dragFactor;
+            return maxSpeed;
+        }
 
         public static void ApplyDamageForce(this Rigidbody rb, Vector3 dir, float physAmt) {
             rb.AddForce(dir * physAmt, ForceMode.Impulse);
@@ -1281,6 +1565,11 @@ namespace PixelComrades {
             DirectionsEight.Rear, DirectionsEight.RearLeft, DirectionsEight.Left, DirectionsEight.FrontLeft
         };
 
+        public static DirectionsEight[] ShuffledDiagonalPrimeArray = new DirectionsEight[] {
+            DirectionsEight.Front, DirectionsEight.Right, 
+            DirectionsEight.Rear, DirectionsEight.Left,
+        };
+
         public static Directions[] ShuffledArray2D = new Directions[] {
             Directions.Forward, Directions.Right, Directions.Back, Directions.Left
         };
@@ -1322,11 +1611,26 @@ namespace PixelComrades {
             new [] {DirectionsEight.Right, DirectionsEight.Rear},
             new [] {DirectionsEight.RearRight, DirectionsEight.RearLeft},
             new [] {DirectionsEight.Rear, DirectionsEight.Left},
-            new [] {DirectionsEight.FrontLeft, DirectionsEight.RearLeft},
-            new [] {DirectionsEight.Front, DirectionsEight.Left},
+            new [] {DirectionsEight.RearLeft, DirectionsEight.FrontLeft},
+            new [] {DirectionsEight.Left, DirectionsEight.Front},
+        };
+
+        private static DirectionsEight[][] _adjacentInclusive = new DirectionsEight[8][] {
+            new[] {DirectionsEight.Front, DirectionsEight.FrontLeft, DirectionsEight.FrontRight},
+            new[] {DirectionsEight.FrontRight, DirectionsEight.Front, DirectionsEight.Right},
+            new[] {DirectionsEight.Right, DirectionsEight.FrontRight, DirectionsEight.RearRight},
+            new[] {DirectionsEight.RearRight, DirectionsEight.Right, DirectionsEight.Rear},
+            new[] {DirectionsEight.Rear, DirectionsEight.RearRight, DirectionsEight.RearLeft},
+            new[] {DirectionsEight.RearLeft, DirectionsEight.Rear, DirectionsEight.Left},
+            new[] {DirectionsEight.Left, DirectionsEight.RearLeft, DirectionsEight.FrontLeft},
+            new[] {DirectionsEight.FrontLeft, DirectionsEight.Left, DirectionsEight.Front},
         };
 
         public static DirectionsEight[] Adjacent(this DirectionsEight dir) {
+            return _adjacent[(int) dir];
+        }
+
+        public static DirectionsEight[] AdjacentInclusive(this DirectionsEight dir) {
             return _adjacent[(int) dir];
         }
 
@@ -1676,23 +1980,20 @@ namespace PixelComrades {
         }
 
         public static Directions GetTravelDirTo(this Point3 origin, Point3 newpos) {
-            if (origin.z < newpos.z) {
-                return Directions.Forward;
-            }
-
-            if (origin.x < newpos.x) {
-                return Directions.Right;
-            }
-
-            if (origin.z > newpos.z) {
-                return Directions.Back;
-            }
-
             if (origin.y < newpos.y) {
                 return Directions.Up;
             }
             if (origin.y > newpos.y) {
                 return Directions.Down;
+            }
+            if (origin.z < newpos.z) {
+                return Directions.Forward;
+            }
+            if (origin.x < newpos.x) {
+                return Directions.Right;
+            }
+            if (origin.z > newpos.z) {
+                return Directions.Back;
             }
             return Directions.Left;
         }
@@ -1845,6 +2146,30 @@ namespace PixelComrades {
             }
         }
 
+        public static void SortByDistanceAsc(this List<Vector3> list, Vector3 center) {
+            for (int write = 0; write < list.Count; write++) {
+                for (int sort = 0; sort < list.Count - 1; sort++) {
+                    if (list[sort].SqrDistance(center) > list[sort + 1].SqrDistance(center)) {
+                        var lesser = list[sort + 1];
+                        list[sort + 1] = list[sort];
+                        list[sort] = lesser;
+                    }
+                }
+            }
+        }
+
+        public static void SortByDistanceAsc(this List<Point3> list, Point3 center) {
+            for (int write = 0; write < list.Count; write++) {
+                for (int sort = 0; sort < list.Count - 1; sort++) {
+                    if (list[sort].SqrDistance(center) > list[sort + 1].SqrDistance(center)) {
+                        var lesser = list[sort + 1];
+                        list[sort + 1] = list[sort];
+                        list[sort] = lesser;
+                    }
+                }
+            }
+        }
+
         public static void SortByDistanceAsc(this List<WatchTarget> list, Point3 center) {
             for (int write = 0; write < list.Count; write++) {
                 for (int sort = 0; sort < list.Count - 1; sort++) {
@@ -1921,6 +2246,10 @@ namespace PixelComrades {
             return text.Split('\n');
         }
 
+        public static string[] SplitIntoWords(this string text) {
+            return text.Split(' ');
+        }
+
         public static string EncodeWithEntryBreak(this IList<string> text) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < text.Count; i++) {
@@ -1976,7 +2305,7 @@ namespace PixelComrades {
     public static class GameObjectExtensions {
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component {
             var newOrExistingComponent = gameObject.GetComponent<T>();
-            if (newOrExistingComponent == null) {
+            if (!(newOrExistingComponent != null)) {
                 newOrExistingComponent = gameObject.AddComponent<T>();
             }
             //var newOrExistingComponent = gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
@@ -2716,9 +3045,78 @@ namespace PixelComrades {
             return float.TryParse(data, out var value) ? value : defaultValue;
         }
 
+        public static Vector3 TryParse(string data, Vector3 defaultValue) {
+            data = data.Trim();
+            var v3 = data.Split(',');
+            if (v3.Length < 3) {
+                return defaultValue;
+            }
+            if (float.TryParse(v3[0], out var x) &&
+                float.TryParse(v3[1], out var y) &&
+                float.TryParse(v3[2], out var z)) {
+                return new Vector3(x, y, z);
+            }
+            return defaultValue;
+        }
+
+        public static bool TryParse(string data, out Vector3 value) {
+            data = data.Trim();
+            var v3 = data.Split(',');
+            if (v3.Length < 3) {
+                value = Vector3.zero;
+                return false;
+            }
+            if (float.TryParse(v3[0], out var x) &&
+                float.TryParse(v3[1], out var y) &&
+                float.TryParse(v3[2], out var z)) {
+                value = new Vector3(x, y, z);
+                return true;
+            }
+            value = Vector3.zero;
+            return false;
+        }
+
+        public static string EncodeV3(Vector3 vector) {
+            return $"{vector.x},{vector.y},{vector.z}";
+        }
+
+        public static bool TryParse(string data, out Quaternion value) {
+            data = data.Trim();
+            var qt = data.Split(',');
+            if (qt.Length < 3) {
+                value = Quaternion.identity;
+                return false;
+            }
+            if (float.TryParse(qt[0], out var x) &&
+                float.TryParse(qt[1], out var y) &&
+                float.TryParse(qt[2], out var z)) {
+                value = Quaternion.Euler(x,y,z);
+                return true;
+            }
+            value = Quaternion.identity;
+            return false;
+        }
+
+        public static string EncodeEulerQuaternion(Quaternion vector) {
+            return $"{vector.x},{vector.y},{vector.z}";
+        }
+        
         public static T TryParseEnum<T>(string data, T defaultValue) {
-            T value;
-            if (EnumHelper.TryParse(data, out value)) {
+            //var type = typeof(T);
+            //if (type.GetEnumUnderlyingType() == typeof(int)) {
+            //    if (!Int32.TryParse(data, out var intEnumValue)) {
+            //        return defaultValue;
+            //    }
+            //    return (T) Enum.ToObject(typeof(T), intEnumValue);
+            //}
+            //if (type.GetEnumUnderlyingType() == typeof(byte)) {
+            //    if (!byte.TryParse(data, out var byteEnumValue)) {
+            //        return defaultValue;
+            //    }
+            //    return (T) Enum.ToObject(typeof(T), byteEnumValue);
+            //}
+            //return defaultValue;
+            if (EnumHelper.TryParse(data, out T value)) {
                 return value;
             }
             return defaultValue;
@@ -2839,9 +3237,8 @@ namespace PixelComrades {
 
     public static class GridExtension {
         public static Vector3 GridPositionPlace(this Point3 gridPos) {
-            RaycastHit hit;
             var ray = new Ray(gridPos.CellToWorldV3(), Vector3.down);
-            if (Physics.Raycast(ray, out hit, Game.MapCellSize * 5, LayerMasks.Floor)) {
+            if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 5, LayerMasks.Floor)) {
                 return hit.point;
             }
             return ray.origin;
@@ -2902,6 +3299,60 @@ namespace PixelComrades {
             return new Point3(k, 0f, k - (m - n - t));
         }
     }
+
+    public static class TextureScaler {
+        public static Texture2D Scaled(Texture2D src, int width, int height, FilterMode mode = FilterMode.Trilinear)
+        {
+                Rect texR = new Rect(0,0,width,height);
+                GpuScale(src,width,height,mode);
+               
+                //Get rendered data back to a new texture
+                Texture2D result = new Texture2D(width, height, TextureFormat.ARGB32, true);
+                result.Resize(width, height);
+                result.ReadPixels(texR,0,0,true);
+                return result;                 
+        }
+       
+        /// <summary>
+        /// Scales the texture data of the given texture.
+        /// </summary>
+        /// <param name="tex">Texure to scale</param>
+        /// <param name="width">New width</param>
+        /// <param name="height">New height</param>
+        /// <param name="mode">Filtering mode</param>
+        public static void Scale(Texture2D tex, int width, int height, FilterMode mode = FilterMode.Trilinear)
+        {
+                Rect texR = new Rect(0,0,width,height);
+                GpuScale(tex,width,height,mode);
+               
+                // Update new texture
+                tex.Resize(width, height);
+                tex.ReadPixels(texR,0,0,true);
+                tex.Apply(true);        //Remove this if you hate us applying textures for you :)
+        }
+               
+        // Internal unility that renders the source texture into the RTT - the scaling method itself.
+        private static void GpuScale(Texture2D src, int width, int height, FilterMode fmode)
+        {
+                //We need the source texture in VRAM because we render with it
+                src.filterMode = fmode;
+                src.Apply(true);       
+                               
+                //Using RTT for best quality and performance. Thanks, Unity 5
+                RenderTexture rtt = new RenderTexture(width, height, 32);
+               
+                //Set the RTT in order to render to it
+                Graphics.SetRenderTarget(rtt);
+               
+                //Setup 2D matrix in range 0..1, so nobody needs to care about sized
+                GL.LoadPixelMatrix(0,1,1,0);
+               
+                //Then clear & draw the texture to fill the entire RTT.
+                GL.Clear(true,true,new Color(0,0,0,0));
+                Graphics.DrawTexture(new Rect(0,0,1,1),src);
+        }
+    }
+
 
 #if UNITY_EDITOR
     public static class SceneExtensions {

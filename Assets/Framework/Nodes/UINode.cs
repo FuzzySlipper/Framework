@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,14 +16,14 @@ namespace PixelComrades {
         private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
 
 
-        public UINode(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+        public UINode(Entity entity, SortedList<System.Type, ComponentReference> list) {
             Register(entity, list);
         }
 
         public UINode() {
         }
 
-        public void Register(Entity entity, Dictionary<System.Type, ComponentReference> list) {
+        public void Register(Entity entity, SortedList<Type, ComponentReference> list) {
             Entity = entity;
             Model.Set(entity, list);
             Label.Set(entity, list);

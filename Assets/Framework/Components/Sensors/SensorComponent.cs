@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class SensorComponent : IComponent {
-        public int Owner { get; set; }
 
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public PointList DetectedCells = new PointList();
@@ -16,6 +16,22 @@ namespace PixelComrades {
         public SensorComponent(int maxHearDistance = 12, int maxVisionDistance = 6) {
             MaxHearDistance = maxHearDistance;
             MaxVisionDistance = maxVisionDistance;
+        }
+
+        public SensorComponent(SerializationInfo info, StreamingContext context) {
+            LastDetectedCenter = info.GetValue(nameof(LastDetectedCenter), LastDetectedCenter);
+            MaxHearDistance = info.GetValue(nameof(MaxHearDistance), MaxHearDistance);
+            MaxVisionDistance = info.GetValue(nameof(MaxVisionDistance), MaxVisionDistance);
+            DetectedCells = info.GetValue(nameof(DetectedCells), DetectedCells);
+            WatchTargets = info.GetValue(nameof(WatchTargets), WatchTargets);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(LastDetectedCenter), LastDetectedCenter);
+            info.AddValue(nameof(MaxHearDistance), MaxHearDistance);
+            info.AddValue(nameof(MaxVisionDistance), MaxVisionDistance);
+            info.AddValue(nameof(DetectedCells), DetectedCells);
+            info.AddValue(nameof(WatchTargets), WatchTargets);
         }
 
         public void AddWatch(Entity entity, bool isVision) {

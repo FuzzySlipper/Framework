@@ -26,6 +26,13 @@ namespace PixelComrades {
             
         }
 
+        public override void PlayFrame(float normalized) {
+            _animation.Play(_animationClips[_animationIndex].name);
+            _animation[_animationClips[_animationIndex].name].speed = 1;
+            _animation[_animationClips[_animationIndex].name].normalizedTime = normalized;
+            _animation[_animationClips[_animationIndex].name].speed = 0;
+        }
+
         public override float Length { get { return _animationIndex < _animationClips.Length ? _animationClips[_animationIndex].length : 0.5f; } }
         public override bool IsPlaying { get { return _animation.isPlaying; } }
     }

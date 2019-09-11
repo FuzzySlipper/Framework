@@ -354,7 +354,7 @@ namespace PixelComrades {
                 angleSet = true;
             }
             //increment the touch timer by the time since the last frame
-            _touchTimer += Time.deltaTime;
+            _touchTimer += TimeManager.DeltaUnscaled;
             //if the touch timer is above the threshold
             if (_touchTimer >= _touchTime) {
                 if (!angleSet) {

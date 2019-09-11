@@ -63,7 +63,7 @@ namespace PixelComrades {
 
         public void SetIcon(Sprite icon) {
             if (_iconHolder != null) {
-                _iconHolder.sprite = icon;
+                _iconHolder.overrideSprite = icon;
                 _iconHolder.enabled = _iconHolder.sprite != null;
             }
         }

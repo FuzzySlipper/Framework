@@ -113,7 +113,7 @@ namespace PixelComrades {
             _xDeg = ClampAngle(_xDeg, _xMinLimit, _xMaxLimit);
             _yDeg = ClampAngle(_yDeg, _yMinLimit, _yMaxLimit);
             _desiredRotation = Quaternion.Euler(_yDeg, _xDeg, 0.0f);
-            transform.localRotation = Quaternion.Lerp(transform.localRotation, _desiredRotation, Time.deltaTime*_zoomDampening);;
+            transform.localRotation = Quaternion.Lerp(transform.localRotation, _desiredRotation, TimeManager.DeltaTime *_zoomDampening);;
         }
 
         private static float ClampAngle(float angle, float min, float max) {

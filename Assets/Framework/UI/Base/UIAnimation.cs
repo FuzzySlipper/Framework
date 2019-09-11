@@ -63,7 +63,7 @@ namespace PixelComrades {
         private IEnumerator PlayAnimation() {
             _currentFrameIndex = 0;
             while (true) {
-                _image.sprite = _animation.GetSpriteFrame(_currentFrameIndex);
+                _image.overrideSprite = _animation.GetSpriteFrame(_currentFrameIndex);
                 yield return _animation.GetFrameClamped(_currentFrameIndex).Length * _animation.FrameTime;
                 _currentFrameIndex++;
                 if (_currentFrameIndex >= _animation.LengthFrames) {

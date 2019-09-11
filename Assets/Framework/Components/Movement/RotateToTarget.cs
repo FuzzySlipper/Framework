@@ -1,51 +1,40 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public class RotateToTarget : IComponent {
-        public int Owner { get; set; }
 
         public Vector3 Position;
-        public Transform TargetTr;
+        public CachedTransformReference TargetTr;
         public float RotationSpeed;
 
         public Vector3 GetTarget {
             get {
                 if (TargetTr != null) {
-                    return TargetTr.position;
+                    return TargetTr.Tr.position;
                 }
                 return Position;
             }
         }
 
-        public Vector3 GetCurrent {
-            get {
-                if (Rb != null) {
-                    return Rb.position;
-                }
-                if (RotateTr != null) {
-                    return RotateTr.position;
-                }
-                return this.GetEntity().GetPosition();
-            }
+        public RotateToTarget(Vector3 position, Transform targetTr, float rotationSpeed) {
+            Position = position;
+            TargetTr = new CachedTransformReference(targetTr);
+            RotationSpeed = rotationSpeed;
         }
 
-        public Rigidbody Rb { get; }
-        public Transform RotateTr { get; }
+        public RotateToTarget(SerializationInfo info, StreamingContext context) {
+            Position = info.GetValue(nameof(Position), Position);
+            RotationSpeed = info.GetValue(nameof(RotationSpeed), RotationSpeed);
+            TargetTr = info.GetValue(nameof(TargetTr), TargetTr);
+        }
 
-        public RotateToTarget(Entity owner, Vector3 position, Transform targetTr, float rotationSpeed) {
-            Position = position;
-            TargetTr = targetTr;
-            Owner = owner;
-            RotationSpeed = rotationSpeed;
-            var rb = owner.Get<RigidbodyComponent>();
-            if (rb != null) {
-                Rb = rb.Rb;
-            }
-            if (Rb == null) {
-                RotateTr = owner.Tr;
-            }
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Position), Position);
+            info.AddValue(nameof(RotationSpeed), RotationSpeed);
+            info.AddValue(nameof(TargetTr), TargetTr);
         }
     }
 }

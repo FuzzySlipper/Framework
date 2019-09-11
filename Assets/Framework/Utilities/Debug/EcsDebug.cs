@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,18 +19,112 @@ namespace PixelComrades {
         }
     }
 
-    public static class EcsDebug {
+    [Priority(Priority.Highest)]
+    public class GodModeComponent : ComponentBase, IReceiveRef<DamageEvent> {
+        public void Handle(ref DamageEvent arg) {
+            arg.Amount = 0;
+        }
+    }
 
+    public static class EcsDebug {
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
         //DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
 
         public static void RegisterDebugCommands() {
+            DebugConsole.RegisterCommand("actionTest", RunActionDelTest);
+            DebugConsole.RegisterCommand("messageTest", RunMessageTest);
+            DebugConsole.RegisterCommand("timescale", ChangeTimeScale);
+            DebugConsole.RegisterCommand("heal", strings => {
+                Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Health"));
+                return Player.Party[0].Entity.Stats.GetVital("Vitals.Health").ToLabelString();
+            });
+            DebugConsole.RegisterCommand("recover", strings => {
+                Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Energy"));
+                return Player.Party[0].Entity.Stats.GetVital("Vitals.Energy").ToLabelString();
+            });
+            DebugConsole.RegisterCommand("godmode", strings => {
+                if (Player.Party[0].Entity.HasComponent<GodModeComponent>()){
+                    Player.Party[0].Entity.Remove<GodModeComponent>();
+                    return "Disabled god mode";
+                }
+                Player.Party[0].Entity.Add(new GodModeComponent());
+                return "Enabled god mode";
+            });
             //Minibuffer.Register(typeof(EcsDebug));
+        }
+
+        private static string ChangeTimeScale(string[] scale) {
+            if (scale == null) {
+                TimeManager.TimeScale = 1;
+                return "Timescale is 1";
+            }
+            if (float.TryParse(scale[0], out var result)) {
+                TimeManager.TimeScale = result;
+                return "Timescale is " + TimeManager.TimeScale.ToString("F2");
+            }
+            return "Didn't provide a float";
         }
 
         public static void ImportGameData() {
             GameData.Init();
         }
+
+        private static string RunMessageTest(string[] count) {
+            ManagedArray<Entity> array = EntityController.EntitiesArray;
+            int testCount = 5000;
+            if (count.Length > 0) {
+                if (int.TryParse(count[0], out var convertedCount)) {
+                    testCount = convertedCount;
+                }
+            }
+            RunMessageTest(testCount);
+            return "Finished Test";
+        }
+
+        private static void RunMessageTest(int testCount) {
+            var entity = Player.MainEntity;
+            for (int i = 0; i < testCount; i++) {
+                entity.Post(new MoveTweenEvent(null, null, null));
+            }
+        }
+
+        private static string RunActionDelTest(string[] count) {
+            ManagedArray<Entity> array = EntityController.EntitiesArray;
+            int testCount = 5000;
+            if (count.Length > 0) {
+                if (int.TryParse(count[0], out var convertedCount)) {
+                    testCount = convertedCount;
+                }
+            }
+            _stored = TestEntity;
+            RunImplicitActionTest(array, testCount);
+            RunStoredActionTest(array, testCount);
+            RunExplicitActionTest(array, testCount);
+            return "";
+        }
+
+        private static ManagedArray<Entity>.Delegate _stored;
+
+        private static void RunImplicitActionTest(ManagedArray<Entity> array, int testCount) {
+            for (int i = 0; i < testCount; i++) {
+                array.Run(TestEntity);
+            }
+        }
+
+        private static void RunExplicitActionTest(ManagedArray<Entity> array, int testCount) {
+            ManagedArray<Entity>.Delegate del = TestEntity;
+            for (int i = 0; i < testCount; i++) {
+                array.Run(del);
+            }
+        }
+
+        private static void RunStoredActionTest(ManagedArray<Entity> array, int testCount) {
+            for (int i = 0; i < testCount; i++) {
+                array.Run(_stored);
+            }
+        }
+
+        private static void TestEntity(Entity entity) {}
 
         public static void Version() {
             Debug.LogFormat("Game Version: {0}", Game.Version);
@@ -56,16 +151,16 @@ namespace PixelComrades {
             }
         }
 
-        public static void TestAnimationEvent(int entityId, string clip) {
-            var entity = EntityController.GetEntity(entityId);
-            if (entity == null) {
-                return;
-            }
-            var handle = new TestReceiver<AnimatorEvent>();
-            entity.AddObserver(handle);
-            entity.Post(new PlayAnimation(entity, clip, new AnimatorEvent(entity, clip, true, true)));
-            handle.OnDel += receiver => entity.RemoveObserver(handle);
-        }
+        //public static void TestAnimationEvent(int entityId, string clip) {
+        //    var entity = EntityController.GetEntity(entityId);
+        //    if (entity == null) {
+        //        return;
+        //    }
+        //    var handle = new TestReceiver<AnimatorEvent>();
+        //    entity.AddObserver(handle);
+        //    entity.Post(new PlayAnimation(entity, clip, new AnimatorEvent(entity, clip, true, true)));
+        //    handle.OnDel += receiver => entity.RemoveObserver(handle);
+        //}
 
         private static IEnumerator RunTimerTest(float length) {
             var watch = new System.Diagnostics.Stopwatch();
@@ -172,19 +267,18 @@ namespace PixelComrades {
         
         public static void ListEntities() {
             StringBuilder sb = new StringBuilder();
-            EntityController.EntitiesArray.RunAction(e => {
-                    var label = e.Get<LabelComponent>()?.Text ?? "None";
-                    sb.Append(e.Id);
-                    sb.Append(" ");
-                    sb.AppendNewLine(label);
-                }
-            );
+            foreach (Entity e in EntityController.EntitiesArray) {
+                var label = e.Get<LabelComponent>()?.Text ?? "None";
+                sb.Append(e.Id);
+                sb.Append(" ");
+                sb.AppendNewLine(label);
+            }
             Debug.LogFormat("entities {0}", sb.ToString());
         }
 
         
         public static void ListComponents(int id) {
-            var dict = EntityController.GetEntityComponentDict(id);
+            var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -201,7 +295,7 @@ namespace PixelComrades {
 
         
         public static void ListEntityContainer(int id, string typeName) {
-            var dict = EntityController.GetEntityComponentDict(id);
+            var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -226,7 +320,7 @@ namespace PixelComrades {
 
         
         public static void DebugComponent(int id, string typeName) {
-            var dict = EntityController.GetEntityComponentDict(id);
+            var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -254,7 +348,7 @@ namespace PixelComrades {
 
         
         public static void TestSerializeComponent(int id, string typeName) {
-            var dict = EntityController.GetEntityComponentDict(id);
+            var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;

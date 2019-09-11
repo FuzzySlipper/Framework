@@ -1,13 +1,24 @@
 using UnityEngine;
 using System.Collections;
 namespace PixelComrades {
-    public class LevelMapCamera : MonoSingleton<LevelMapCamera> {
+
+    public interface IMapCamera {
+        void UpdateInput(Vector2 move, float scroll, bool rotateDown);
+    }
+
+    public class LevelMapCamera : MonoSingleton<LevelMapCamera>, IMapCamera {
 
         [SerializeField] private Camera _camera = null;
-        
+        [SerializeField] private RtsCamera _input = null;
+
         public Camera MapCamera { get { return _camera; } }
 
+        public void UpdateInput(Vector2 move, float scroll, bool rotateDown) {
+            _input.UpdateInput(move, scroll, rotateDown);
+        }
+
         void Start() {
+            Game.LevelMap = this;
             _camera.enabled = false;
         }
         

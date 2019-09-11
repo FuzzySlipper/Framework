@@ -6,9 +6,9 @@ namespace PixelComrades {
     [ExecuteInEditMode]
     public class CameraParallax : MonoBehaviour {
 
-        [SerializeField] private Camera _farCamera;
-        [SerializeField] private Camera _mainCamera;
-        [SerializeField] private Camera _nearCamera;
+        [SerializeField] private Camera _farCamera = null;
+        [SerializeField] private Camera _mainCamera = null;
+        [SerializeField] private Camera _nearCamera = null;
 
         private void LateUpdate() {
             UpdateCameras();

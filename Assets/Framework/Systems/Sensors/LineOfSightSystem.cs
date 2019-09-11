@@ -39,7 +39,7 @@ namespace PixelComrades {
                     canHear = false;
                     continue;
                 }
-                var entity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                var entity = UnityToEntityBridge.GetEntity(_rayHits[i].collider);
                 if (entity == null) {
                     continue;
                 }
@@ -65,7 +65,7 @@ namespace PixelComrades {
                 if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment)) {
                     return null;
                 }
-                var entity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                var entity = UnityToEntityBridge.GetEntity(_rayHits[i].collider);
                 if (entity == null) {
                     continue;
                 }
@@ -113,7 +113,7 @@ namespace PixelComrades {
                 if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment)) {
                     return false;
                 }
-                var colliderEntity = MonoBehaviourToEntity.GetEntity(_rayHits[i].collider);
+                var colliderEntity = UnityToEntityBridge.GetEntity(_rayHits[i].collider);
                 if (colliderEntity == null || colliderEntity == source) {
                     continue;
                 }

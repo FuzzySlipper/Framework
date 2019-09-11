@@ -32,7 +32,7 @@ namespace PixelComrades {
 
         public void OnActionSpawn(ActionStateEvent actionEvent) {
             if (_parentAnimTr && actionEvent.Origin != null) {
-                var parentTr = actionEvent.Origin.GetSelfOrParent<AnimTr>().Tr;
+                var parentTr = actionEvent.Origin.Tr;
                 if (parentTr != null) {
                     transform.SetParent(parentTr);
                 }

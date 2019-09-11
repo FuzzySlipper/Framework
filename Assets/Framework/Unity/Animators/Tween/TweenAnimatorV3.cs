@@ -32,5 +32,14 @@ namespace PixelComrades {
                 Target.position = _tweener.Get();
             }
         }
+
+        public override void PlayFrame(float normalized) {
+            if (_local) {
+                Target.localPosition = _tweener.Get(normalized);
+            }
+            else {
+                Target.position = _tweener.Get(normalized);
+            }
+        }
     }
 }

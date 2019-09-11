@@ -50,12 +50,14 @@ namespace PixelComrades {
 		                current = meshCombines.LastElement();
 		            }
 		        }
-		        var mesh = Application.isPlaying ? meshFilter.mesh : meshFilter.sharedMesh;
+                var mesh = meshFilter.sharedMesh;
+		        //var mesh = Application.isPlaying ? meshFilter.mesh : meshFilter.sharedMesh;
                 if (mesh.GetInstanceID() < 0) { //is already combined
                     continue;
                 }
                 for (int m = 0; m < mesh.subMeshCount; m++) {
-                    var matList = Application.isPlaying ? meshRenderer.materials : meshRenderer.sharedMaterials;
+                    var matList = meshRenderer.sharedMaterials;
+                    //var matList = Application.isPlaying ? meshRenderer.materials : meshRenderer.sharedMaterials;
                     if (m >= matList.Length || m >= mesh.subMeshCount) {
                         if (errorCnt < 50) {
                             errorCnt++;
@@ -74,34 +76,118 @@ namespace PixelComrades {
                     current.AddMesh(meshFilter, mat, m);
                 }
 		    }
+            Transform createPivot = null;
             if (splitSectors) {
                 foreach (var combine in sectorMeshCombines) {
                     var created =BuildCombineList(combine.Value, target, deleteOriginal, combine.Key.ToString());
                     for (int i = 0; i < created.Count; i++) {
                         World.Get<CullingSystem>().Add(combine.Key, created[i]);
                     }
+                    createPivot = created[0].transform;
                 }
             }
             else {
-                BuildCombineList(meshCombines, target, deleteOriginal, source.name);
+                createPivot = BuildCombineList(meshCombines, target, deleteOriginal, source.name)[0].transform;
             }
-            source.transform.position = originalPos;
-            if (!deleteOriginal) {
+            source.position = originalPos;
+            if (!deleteOriginal || createPivot == null) {
                 return;
             }
+            var childTr = source.GetComponentsInChildren<Transform>(true);
+            Dictionary<Point3, Dictionary<int, Transform>> colliderDict = new Dictionary<Point3, Dictionary<int, Transform>>();
+            colliderDict.Add(createPivot.rotation.eulerAngles.toPoint3(), new Dictionary<int, Transform>() {
+                {createPivot.gameObject.layer, createPivot}
+            });
             for (int i = 0; i < meshFilters.Count; i++) {
-                if (meshFilters[i] != null && meshFilters[i].gameObject.isStatic) {
-                    UnityEngine.Object.DestroyImmediate(meshFilters[i].gameObject);
-                }
-            }
-            var childTr = source.GetComponentsInChildren<Transform>();
-            for (int i = 0; i < childTr.Length; i++) {
-                if (childTr[i] == null ||
-                    childTr[i].transform.childCount > 0 || !childTr[i].CompareTag(StringConst.TagDummy)) {
+                if (meshFilters[i] == null) {
                     continue;
                 }
-                UnityEngine.Object.DestroyImmediate(childTr[i].gameObject);
+                if (meshFilters[i].gameObject.isStatic) {
+                    DeleteObject(createPivot, meshFilters[i].gameObject, colliderDict);
+                }
             }
+            for (int i = 0; i < childTr.Length; i++) {
+                if (childTr[i] == null) {
+                    continue;   
+                }
+                if (childTr[i].transform.childCount > 0 || childTr[i].CompareTag(StringConst.TagCreated) || childTr[i].CompareTag(StringConst.TagDoNotDisable)) {
+                    continue;
+                }
+                if (childTr[i].CompareTag(StringConst.TagDeleteObject)) {
+                    DeleteObject(createPivot, childTr[i].gameObject, colliderDict);
+                    continue;
+                }
+                childTr[i].GetComponents<Component>(_monoList);
+                bool foundScripts = false;
+                for (int j = 0; j < _monoList.Count; j++) {
+                    var mono = _monoList[j];
+                    if (mono is Transform) {
+                        continue;
+                    }
+                    foundScripts = true;
+                    break;
+                }
+                if (foundScripts) {
+                    continue;
+                }
+                DeleteObject(createPivot, childTr[i].gameObject, colliderDict);
+            }
+        }
+
+        private static List<Collider> _colliderList = new List<Collider>(5);
+        private static List<Component> _monoList = new List<Component>(15);
+
+        private static void DeleteObject(Transform combined, GameObject checkedObj, Dictionary<Point3, Dictionary<int, Transform>> colliderDict) {
+            checkedObj.GetComponentsInChildren<Collider>(true, _colliderList);
+            for (int i = 0; i < _colliderList.Count; i++) {
+                if (_colliderList[i] == null) {
+                    continue;
+                }
+                var coll = _colliderList[i];
+                var p3 = coll.transform.rotation.eulerAngles.WorldToGenericGrid(1);
+                if (!colliderDict.TryGetValue(p3, out var dict)) {
+                    dict = new Dictionary<int, Transform>();
+                    colliderDict.Add(p3, dict);
+                }
+                if (!dict.TryGetValue(coll.gameObject.layer, out var target)) {
+                    var rotated = new GameObject("Rotation: " + p3);
+                    rotated.tag = StringConst.TagEnvironment;
+                    rotated.transform.SetParentResetPos(combined);
+                    rotated.transform.rotation = coll.transform.rotation;
+                    rotated.layer = coll.gameObject.layer;
+                    target = rotated.transform;
+                    dict.Add(coll.gameObject.layer, target);
+                }
+                if (coll is BoxCollider boxCollider) {
+                    var box = target.gameObject.AddComponent<BoxCollider>();
+                    box.center = target.InverseTransformPoint(coll.transform.TransformPoint(boxCollider.center));
+                    box.size = new Vector3(Mathf.Abs(boxCollider.size.x * coll.transform.lossyScale.x), Mathf.Abs(boxCollider.size.y * coll.transform.lossyScale.y), Mathf.Abs(boxCollider.size.z * coll.transform.lossyScale.z));
+                }
+                if (coll is SphereCollider sphereCollider) {
+                    var sphere = target.gameObject.AddComponent<SphereCollider>();
+                    sphere.center = target.InverseTransformPoint(coll.transform.TransformPoint(sphereCollider.center));
+                    sphere.radius = sphereCollider.radius * coll.transform.lossyScale.AbsMax();
+                }
+                if (coll is MeshCollider meshCollider) {
+                    var go = new GameObject(coll.transform.name + " Collider");
+                    go.tag = coll.tag;
+                    go.transform.SetParent(target);
+                    go.transform.position = coll.transform.position;
+                    go.transform.rotation = coll.transform.rotation;
+                    go.transform.localScale = coll.transform.lossyScale;
+                    go.layer = coll.gameObject.layer;
+                    var mesh = go.gameObject.AddComponent<MeshCollider>();
+                    mesh.sharedMesh = meshCollider.sharedMesh;
+                    mesh.convex = meshCollider.convex;
+                }
+                if (coll is CapsuleCollider capsuleCollider) {
+                    var capsule = target.gameObject.AddComponent<CapsuleCollider>();
+                    capsule.center = target.InverseTransformPoint(coll.transform.TransformPoint(capsuleCollider.center));
+                    capsule.radius = capsuleCollider.radius * coll.transform.lossyScale.AbsMax();
+                    capsule.height = capsuleCollider.height * coll.transform.lossyScale.AbsMax();
+                }
+            }
+            UnityEngine.Object.DestroyImmediate(checkedObj);
         }
 
         private static List<GameObject> BuildCombineList(List<MeshCombiner> meshCombines, Transform target, bool deleteOriginal, string combineName) {
@@ -115,6 +201,7 @@ namespace PixelComrades {
                 sceneObj.transform.parent = target;
                 sceneObj.transform.localPosition = Vector3.zero;
                 sceneObj.layer = LayerMasks.NumberEnvironment;
+                sceneObj.tag = StringConst.TagEnvironment;
                 sceneObj.isStatic = true;
                 var mf = sceneObj.AddComponent<MeshFilter>();
                 var meshes = new Mesh[combiner.Combines.Count];
@@ -129,9 +216,9 @@ namespace PixelComrades {
                     };
                 }
                 mf.sharedMesh = new Mesh();
-                if (deleteOriginal) {
-                    mf.hideFlags = HideFlags.DontSave;
-                }
+                //if (deleteOriginal) {
+                //    mf.hideFlags = HideFlags.DontSave;
+                //}
                 mf.sharedMesh.CombineMeshes(finalCombines, false, false);
                 var render = sceneObj.AddComponent<MeshRenderer>();
                 // maybe need to add specific tag for objects that cast shadows and put them on their own renderer
@@ -139,7 +226,7 @@ namespace PixelComrades {
                 render.materials = mats;
                 mf.sharedMesh.name = newName;
                 StaticBatchingUtility.Combine(mf.gameObject);
-                sceneObj.AddComponent<MeshCollider>();
+                //sceneObj.AddComponent<MeshCollider>();
                 for (int m = 0; m < mats.Length; m++) {
                     meshes[m].Clear();
                     UnityEngine.Object.DestroyImmediate(meshes[m]);

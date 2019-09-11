@@ -53,7 +53,7 @@ namespace PixelComrades {
             if (_tailMode == TailMode.CurlUpRight) {
                 for (int i = 0; i < SegmentCount; ++i) {
                     float delta = _targets[i] - _segments[i];
-                    float turnSpeed = 0.14f * Time.deltaTime;
+                    float turnSpeed = 0.14f * TimeManager.DeltaTime;
                     if (delta > 0 && delta > turnSpeed) {
                         delta = turnSpeed;
                     }
@@ -67,7 +67,7 @@ namespace PixelComrades {
             if (_tailMode == TailMode.CurlUpLeft) {
                 for (int i = 0; i < SegmentCount; ++i) {
                     float delta = _targets[i] - _segments[i];
-                    float turnSpeed = -0.07f * Time.deltaTime;
+                    float turnSpeed = -0.07f * TimeManager.DeltaTime;
                     if (delta > 0 && delta > turnSpeed) {
                         delta = turnSpeed;
                     }

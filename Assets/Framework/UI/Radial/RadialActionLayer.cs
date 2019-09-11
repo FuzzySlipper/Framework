@@ -141,7 +141,7 @@ namespace PixelComrades {
         }
         
         private bool AnimationComplete(bool isStart) {
-            CurrentAnimationPercent += Time.deltaTime;
+            CurrentAnimationPercent += TimeManager.DeltaUnscaled;
             var percent = CurrentAnimationPercent / Radial.TransitionLength;
             CursorImage.fillAmount = Mathf.Lerp(SavedCursorFill, _elementAngleDeg / 360.0f, percent);
             //translate the percent progess into a rotation aeound the z axis to move in a clockwise direction
@@ -297,7 +297,7 @@ namespace PixelComrades {
                 //_savedIconScale = CurrentRadials[SelectedIndex].transform.GetChild(0).localScale.x;
             }
             // work out the percent progress as double the tracker variable over the limit effectively doubling the speed of the process
-            CurrentAnimationPercent += Time.deltaTime;
+            CurrentAnimationPercent += TimeManager.DeltaUnscaled;
             //if at the end of the setup
             //if (percent >= 0.99f) {
             //    percent = 1.0f;

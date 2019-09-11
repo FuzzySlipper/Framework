@@ -10,7 +10,10 @@ namespace PixelComrades {
 
         public static Camera Cam { get { return PlayerCamera.Cam; } }
         public static Camera MinimapCamera { get;set; }
-        public static IntValueHolder Currency { get; set; }
+        
+        private static FloatValueCollection _currencies = new FloatValueCollection();
+
+        public static FloatValueHolder DefaultCurrencyHolder { get { return _currencies.GetHolder(Game.DefaultCurrencyId); } }
         public static Transform Tr {
             get {
                 if (_tr == null) {
@@ -25,6 +28,7 @@ namespace PixelComrades {
         public static Rigidbody Rb { get; set; }
         public static Entity MainEntity { get; set; }
         public static Entity[] Entities { get; set; }
+        public static IFirstPersonController FirstPersonController { get; set; }
 
         public static int HighestCurrentLevel {
             get {
@@ -37,6 +41,10 @@ namespace PixelComrades {
                 }
                 return level;
             }
+        }
+
+        public static FloatValueHolder GetCurrency(string id) {
+            return _currencies.GetHolder(id);
         }
     }
 }

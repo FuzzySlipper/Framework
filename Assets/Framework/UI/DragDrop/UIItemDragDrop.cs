@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, IReceive<StatusUpdate>, IReceive<EquipmentChanged> {
+    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, IReceive<StatusUpdate>, IReceive<EquipmentChanged>, IPoolEvents {
 
         [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
         [SerializeField] private TextMeshProUGUI _amount = null;
@@ -19,11 +19,14 @@ namespace PixelComrades {
         private bool _animatingCooldown = false;
         private UnscaledTimer _statusTimer = new UnscaledTimer(0.25f);
         private float _minMainText = 3;
+        private IntValueHolder _currentAmmo;
         public InventoryItem InventoryItem { get; protected set; }
         
         public override void OnCreate(PrefabEntity entity) {
             base.OnCreate(entity);
-            _minMainText = _label.fontSizeMin;
+            if (_label != null) {
+                _minMainText = _label.fontSizeMin;
+            }
         }
 
         public override void OnDrop(PointerEventData eventData) {
@@ -96,7 +99,13 @@ namespace PixelComrades {
         }
 
         protected virtual void TryDrop() {
-            if (Player.MainInventory.TryAdd(UIDragDropHandler.CurrentData)) {
+            var dragInventoryData = UIDragDropHandler.CurrentData.Get<InventoryItem>();
+            if (dragInventoryData.Inventory == Player.MainInventory && Player.MainInventory.TryChangeIndex(dragInventoryData.Index, Index, dragInventoryData)) {
+                Player.MainInventory.ContainerChanged();
+                UIDragDropHandler.Take();
+                return;
+            }
+            if (Player.MainInventory.Add(UIDragDropHandler.CurrentData, Index)) {
                 UIDragDropHandler.Take();
             }
             else {
@@ -113,24 +122,44 @@ namespace PixelComrades {
                 return;
             }
             Entity oldItem = Data;
-            UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Index = Index);
-            if (Player.MainInventory.TryAdd(UIDragDropHandler.CurrentData)) {
+            var dragInventoryData = UIDragDropHandler.CurrentData.Get<InventoryItem>();
+            var currentInventoryData = oldItem.Get<InventoryItem>();
+            if (dragInventoryData == null || currentInventoryData == null) {
+                RejectDrag();
+                return;
+            }
+            if (dragInventoryData.Inventory == Player.MainInventory &&
+                currentInventoryData.Inventory == Player.MainInventory) {
+                if (Player.MainInventory.TrySwap(dragInventoryData.Index, currentInventoryData.Index)) {
+                    UIDragDropHandler.Take();
+                    Player.MainInventory.ContainerChanged();
+                    return;
+                }
+            }
+            if (Player.MainInventory.TryReplace(UIDragDropHandler.CurrentData, currentInventoryData.Index)) {
                 UIDragDropHandler.Take();
                 UIDragDropHandler.SetItem(oldItem);
+                Player.MainInventory.ContainerChanged();
             }
             else {
-                if (PlayAudio) {
-                    AudioPool.PlayClip(StringConst.AudioDefaultItemReturn, transform.position, 0, AudioVolume);
-                }
-                UIDragDropHandler.Return();
+                RejectDrag();
                 Player.MainInventory.TryAdd(oldItem);
             }
+        }
+
+        protected void RejectDrag() {
+            if (PlayAudio) {
+                AudioPool.PlayClip(StringConst.AudioDefaultItemReturn, transform.position, 0, AudioVolume);
+            }
+            UIDragDropHandler.Return();
         }
 
         public override void Clear() {
             CleanUpCurrentItem();
             DisableSlotDetails();
-            _label.fontSizeMin = _minMainText;
+            if (_label != null) {
+                _label.fontSizeMin = _minMainText;
+            }
             Data = null;
 
         }
@@ -150,11 +179,13 @@ namespace PixelComrades {
             }
             Data = item;
             InventoryItem = Data.Get<InventoryItem>();
-            SetSprite(item.Get<IconComponent>());
-            //if (_durabilitySlider != null) {
-            //    _durabilitySlider.value = Item.Durability.CurrentPercent;
-            //    Item.Durability.OnStatChanged += UpdateDurability;
-            //}
+            SetSprite(item.Get<IconComponent>()?.Sprite);
+            var action = item.Get<Action>();
+            if (action != null && action.Ammo != null) {
+                _currentAmmo = action.Ammo.Amount;
+                _currentAmmo.OnResourceChanged += CheckAmmo;
+                CheckAmmo();
+            }
             if (_cooldownImage != null) {
                 Data.AddObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
@@ -183,9 +214,9 @@ namespace PixelComrades {
                 Data.RemoveObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
             Data.RemoveObserver(this);
-            //if (_durabilitySlider != null && Item != null) {
-            //    Item.Durability.OnStatChanged -= UpdateDurability;
-            //}
+            if (_currentAmmo != null) {
+                _currentAmmo.OnResourceChanged -= CheckAmmo;
+            }
             Data = null;
         }
 
@@ -195,6 +226,15 @@ namespace PixelComrades {
             }
             _statusTimer.StartTimer();
             UIFloatingText.Spawn(message, transform as RectTransform, Color.yellow, _textOrientation);
+        }
+
+        private void CheckAmmo() {
+            if (_durabilitySlider != null) {
+                _durabilitySlider.value = _currentAmmo.CurrentPercent;
+            }
+            if (_amount != null) {
+                _amount.text = _currentAmmo.Value.ToString();
+            }
         }
 
         private void UpdateDurability(BaseStat stat) {
@@ -245,7 +285,7 @@ namespace PixelComrades {
                     _cooldownImage.fillAmount = Mathf.Clamp(coolDown.Percent, 0, 1);
                     break;
                 }
-                var fillAmt = Mathf.MoveTowards(_cooldownImage.fillAmount, coolDown.Percent, 2f * Time.deltaTime);
+                var fillAmt = Mathf.MoveTowards(_cooldownImage.fillAmount, coolDown.Percent, 2f * TimeManager.DeltaUnscaled);
                 _cooldownImage.fillAmount = Mathf.Clamp(fillAmt, 0, 1);
                 yield return null;
             }
@@ -264,13 +304,19 @@ namespace PixelComrades {
         }
 
         public void Handle(StatusUpdate arg) {
-            if (_postStatusUpdates && gameObject.activeInHierarchy) {
+            if (_postStatusUpdates && gameObject != null && gameObject.activeInHierarchy) {
                 StatusMessages(Data, arg.Update);
             }
         }
 
         public void Handle(EquipmentChanged arg) {
             RefreshItem();
+        }
+
+        public void OnPoolSpawned() {}
+
+        public void OnPoolDespawned() {
+            CleanUpCurrentItem();
         }
     }
 }

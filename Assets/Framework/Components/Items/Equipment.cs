@@ -1,34 +1,52 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
     public class Equipment : IComponent, IReceive<DataDescriptionAdded> {
-        private int _owner = -1;
-        public int Owner {
-            get { return _owner; }
-            set {
-                if (_owner == value) {
-                    return;
-                }
-                _owner = value;
-                if (_owner < 0) {
-                    return;
-                }
-                Handle(this.GetEntity());
+        
+        public Equipment(SerializationInfo info, StreamingContext context) {
+            EquipmentSlotType = info.GetValue(nameof(EquipmentSlotType), EquipmentSlotType);
+            _statsToEquip = info.GetValue(nameof(_statsToEquip), _statsToEquip);
+            var equipEntity = info.GetValue("EquipEntity", -1);
+            if (equipEntity < 0) {
+                return;
             }
+            var equipSlot = info.GetValue("EquipName", "");
+            TimeManager.PauseFor(0.1f, true, () => EquipToSerializedEntity(equipEntity, equipSlot));
         }
         
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(EquipmentSlotType), EquipmentSlotType);
+            info.AddValue(nameof(_statsToEquip), _statsToEquip);
+            info.AddValue("EquipEntity", _equip?.SlotOwner.GetEntity().Id ?? -1);
+            info.AddValue("EquipName", _equip?.Name ?? "");
+        }
+        
+        private List<string> _statsToEquip = new List<string>();
         private EquipmentSlot _equip;
         private StatModHolder[] _mods;
-        private List<string> _statsToEquip = new List<string>();
 
         public bool Equipped { get { return _equip != null; } }
         public EquipmentSlot EquipmentSlot { get { return _equip; } }
-        public string EquipmentSlotType { get; set; }
+        public string EquipmentSlotType { get; }
 
         public Equipment(string equip) {
             EquipmentSlotType = equip;
+        }
+
+        private void EquipToSerializedEntity(int entityId, string equipName) {
+            var targetEntity = EntityController.Get(entityId);
+            var ourEntity = this.GetEntity();
+            if (targetEntity == null || ourEntity == null) {
+                return;
+            }
+            var slot = targetEntity.Get<EquipmentSlots>()?.GetSlotNameExact(equipName) ?? null;
+            if (slot == null) {
+                return;
+            }
+            slot.EquipItem(ourEntity);
         }
 
         public void Handle(Entity entity) {
@@ -47,8 +65,16 @@ namespace PixelComrades {
             if (container?.Inventory == null) {
                 return;
             }
-            var compareItem = container.Inventory.GetEntity().Get<EquipmentSlots>()?.GetSlot(EquipmentSlotType).Item ?? null;
-            if (compareItem != null && compareItem.Id != Owner) {
+            var equipSlots = container.Inventory.GetEntity().Get<EquipmentSlots>();
+            if (equipSlots == null) {
+                return;
+            }
+            var slot = equipSlots.GetSlot(EquipmentSlotType);
+            if (slot == null) {
+                return;
+            }
+            var compareItem = slot.Item ?? null;
+            if (compareItem != null && compareItem.Id != this.GetEntity()) {
                 Game.DisplayCompareData(compareItem);
             }
         }

@@ -34,14 +34,6 @@ namespace PixelComrades {
         private UnscaledTimer _waitTimer = new UnscaledTimer(1.25f);
         private Vector3[] _worldCorners = new Vector3[4];
 
-        [Serializable] public class References {
-            public Sprite LeftBottonBg;
-            public Sprite LeftTopBg;
-            public Sprite RightBottonBg;
-            public Sprite RightTopBg;
-            public Image ToolTipBg = null;
-        }
-
         void Awake() {
             _rect = GetComponent<RectTransform>();
             _canvasGroup = GetComponent<CanvasGroup>();
@@ -127,7 +119,10 @@ namespace PixelComrades {
                 UITooltipReplacer.Current.ShowToolTip(source, sprite, title, descr);
                 return;
             }
-            _toolTipImage.sprite = sprite;
+            if (source == null) {
+                return;
+            }
+            _toolTipImage.overrideSprite = sprite;
             _toolTipImage.enabled = sprite != null;
             _textTitle.text = title;
             _textDescr.text = descr;
@@ -165,7 +160,7 @@ namespace PixelComrades {
                 return;
             }
             _compareTr.gameObject.SetActive(true);
-            _compareToolTipImage.sprite = sprite;
+            _compareToolTipImage.overrideSprite = sprite;
             _compareToolTipImage.gameObject.SetActive(_compareToolTipImage.sprite != null);
             _compareTextTitle.text = title;
             _compareTextDescr.text = descr;
@@ -233,7 +228,7 @@ namespace PixelComrades {
         }
 
         private void SetImageActive(bool status) {
-            _toolTipImage.gameObject.SetActive(status);
+            _toolTipImage.enabled = status;
         }
 
         private enum VerticalOffset {

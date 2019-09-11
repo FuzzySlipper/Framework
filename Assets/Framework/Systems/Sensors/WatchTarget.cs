@@ -6,10 +6,14 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class WatchTarget {
-        public Entity Target;
+        [SerializeField] private int _target;
         public int LastSensedTurnCount;
         public Point3 LastSensedPos;
         public bool Seen;
+        public Entity Target {
+            get { return EntityController.Get(_target); }
+            set { _target = value.Id; }
+        }
     }
 
     public static class ActorWatchTargetExtension {

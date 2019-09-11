@@ -14,15 +14,16 @@ namespace PixelComrades {
         public static bool AllInputBlocked { get { return _allInputBlocked; } set { _allInputBlocked = value; } }
 
 
-        private event Action OnCancel;
+        private event System.Action OnCancel;
         private string _cancelTarget;
         protected Rewired.Player InputSystem;
 
+        public Ray GetLookTargetRay { get { return Player.Cam.ScreenPointToRay(Input.mousePosition); } }
+
         public static Rewired.Player RewiredPlayer { get { return main.InputSystem; } }
-        public static bool PauseInMenus { get; set; }
         public static Vector2 LookInput { get; set; }
         public static Vector2 MoveInput { get; set; }
-        public static Ray GetTargetRay { get { return Player.Cam.ScreenPointToRay(Input.mousePosition); } }
+        public static Ray GetTargetRay { get { return main.GetLookTargetRay; } }
 
         public static bool IsCursorOverUI {
             get {
@@ -39,8 +40,6 @@ namespace PixelComrades {
             }
         }
 
-        public static Ray GetCenterRay { get { return Player.Cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, -0.25f)); } }
-
         private static RewiredStandaloneInputModule _currentInput;
         public static RewiredStandaloneInputModule CurrentInput {
             get {
@@ -54,12 +53,30 @@ namespace PixelComrades {
             }
         }
 
+        private RaycastHit[] _hits = new RaycastHit[10];
+
+        public Vector3 GetMouseRaycastPosition(float range = 500) {
+            var ray = GetTargetRay;
+            var cnt = Physics.RaycastNonAlloc(ray, _hits, range, LayerMasks.DefaultCollision);
+            _hits.SortByDistanceAsc(cnt);
+            for (int i = 0; i < cnt; i++) {
+                if (_hits[i].transform.CompareTag(StringConst.TagPlayer)) {
+                    continue;
+                }
+                return _hits[i].point;
+            }
+            return ray.origin + (ray.direction * range);
+        }
+
+        public Vector3 GetMousePosition(float range = 500) {
+            var ray = GetTargetRay;
+            return ray.origin + (ray.direction * range);
+        }
+
         protected virtual void Awake() {
             //MessageKit.addObserver(Messages.MenuStatusChanged, CheckForOpenMenus);
             InputSystem = Rewired.ReInput.players.GetPlayer(0);
-
         }
-
 
         void Update() {
             if (AllInputBlocked) {
@@ -146,6 +163,7 @@ namespace PixelComrades {
             Cursor.visible = false;
             if (GameOptions.MouseLook) {
                 Cursor.lockState = Game.CursorUnlocked ? CursorLockMode.None : CursorLockMode.Locked;
+                UICursor.main.SetCursor(UICursor.CrossHair);
             }
         }
 
@@ -164,15 +182,19 @@ namespace PixelComrades {
             if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyDown(KeyCode.F)) {
                 UIFrameCounter.main.Toggle();
             }
-            if (Input.GetKeyDown(KeyCode.P)) {
+            if (Input.GetKeyDown(KeyCode.O)) {
                 ScreenCapture.CaptureScreenshot(
                     string.Format(
                         "Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png",
                         Game.Title, DateTime.Now));
             }
+            if (Input.GetKeyDown(KeyCode.L)) {
+                Cursor.lockState = Game.CursorUnlocked ? CursorLockMode.None : CursorLockMode.Locked;
+                UICursor.main.SetCursor(UICursor.CrossHair);
+            }
         }
 
-        public static void SetCancelDel(Action onCancel, string target) {
+        public static void SetCancelDel(System.Action onCancel, string target) {
             if (main.OnCancel != null) {
                 main.OnCancel();
             }
@@ -186,23 +208,23 @@ namespace PixelComrades {
             }
         }
 
-        public static bool GetKeyDown(string action) {
+        public bool GetKeyDown(string action) {
             return main.InputSystem.GetButtonDown(action);
         }
 
-        public static bool GetKey(string action) {
+        public bool GetKey(string action) {
             return main.InputSystem.GetButton(action);
         }
 
-        public static bool GetKeyUp(string action) {
+        public bool GetKeyUp(string action) {
             return main.InputSystem.GetButtonUp(action);
         }
 
-        public static float GetAxis(string axis) {
+        public float GetAxis(string axis) {
             return main.InputSystem.GetAxis(axis);
         }
 
-        public static float GetAxisRaw(string axis) {
+        public float GetAxisRaw(string axis) {
             return main.InputSystem.GetAxisRaw(axis);
         }
 

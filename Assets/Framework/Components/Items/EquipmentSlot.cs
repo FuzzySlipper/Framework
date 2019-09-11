@@ -10,6 +10,7 @@ namespace PixelComrades {
         string LastEquipStatus { get; }
         Entity Item { get; }
         bool AddItem(Entity item);
+        Transform EquipTr { get; }
     }
 
     public class EquipmentSlot: IEquipmentHolder {

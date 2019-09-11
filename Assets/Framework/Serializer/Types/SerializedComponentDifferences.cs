@@ -7,7 +7,7 @@ using UnityEngine;
 namespace PixelComrades {
     /**
      * Stores a dictionary of modified values and their corresponding component.  This is 
-     * used to serialize changes to prefabs without writing the entirity of their serialized
+     * used to serialize changes to prefabs without writing their entire serialized
      * data to disk.
      */
     public class SerializedComponentDifferences : ISerializable {
@@ -89,7 +89,7 @@ namespace PixelComrades {
         }
 
         /**
-         * Called after an object is deserialized.  This interates through components and sets the modified values,
+         * Called after an object is deserialized.  This iterates through components and sets the modified values,
          * while simultaneously rebuilding modifiedValues so that the keys point to actual component objects.
          */
         public void ApplyDifferences(PrefabEntity target) {

@@ -4,20 +4,23 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [Priority(Priority.Lowest)]
-    public class CameraShakeOnDamage : IComponent, IReceive<DamageEvent> {
+    public class CameraShakeOnDamage : IComponent, IReceive<CollisionEvent> {
 
         public int Owner { get; set; }
-        private float _intensity;
+        private float _intensityMulti;
 
-        public CameraShakeOnDamage(int owner, float intensity = 150f) {
-            Owner = owner;
-            _intensity = intensity;
+        public CameraShakeOnDamage(float intensityMulti = 2f) {
+            _intensityMulti = intensityMulti;
         }
 
-        public void Handle(DamageEvent arg) {
-            if (arg.Amount > 0.5f) {
-                this.GetEntity().Post(new CameraShakeEvent(_intensity));
-            }
+        //public void Handle(DamageEvent arg) {
+        //    if (arg.Amount > 0.5f) {
+        //        FirstPersonCamera.AddForce(arg.);
+        //        this.GetEntity().Post(new CameraShakeEvent(_intensityMulti));
+        //    }
+        //}
+        public void Handle(CollisionEvent arg) {
+            FirstPersonCamera.AddForce(-arg.HitNormal * _intensityMulti, true);
         }
     }
 }

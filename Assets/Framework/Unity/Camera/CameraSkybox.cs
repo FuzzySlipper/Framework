@@ -14,7 +14,7 @@ namespace PixelComrades {
         [SerializeField] private Camera _cam = null;
         [SerializeField] private MonoBehaviour[] _cameraScripts = new MonoBehaviour[0];
         [SerializeField] private bool _blurBackground = true;
-        [SerializeField] private MonoBehaviour _blurScript;
+        [SerializeField] private MonoBehaviour _blurScript = null;
 
         public void ResetMask() {
             _cam.cullingMask = _resetMask;

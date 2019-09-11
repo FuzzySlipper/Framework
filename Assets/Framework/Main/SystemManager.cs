@@ -53,7 +53,7 @@ namespace PixelComrades {
                         var unityUpdate = update as UnityEngine.Component;
                         var otherUnity = otherUpdate as UnityEngine.Component;
                         if (unityUpdate != null && otherUnity != null) {
-                            Debug.LogErrorFormat("Update {0} / {1} is in list twice", unityUpdate.transform.name, otherUnity.transform.name);
+                            Debug.LogErrorFormat("Update {0}/{1} {2} / {3} is in list twice", update.GetType().Name, otherUpdate.GetType().Name, unityUpdate.transform.name, otherUnity.transform.name);
                         }
                         else {
                             Debug.LogErrorFormat("Update {0} / {1} is in list twice", update.ToString(), otherUpdate.ToString());
@@ -95,15 +95,18 @@ namespace PixelComrades {
         }
 
         public static void SystemUpdate() {
+            var paused = Game.Paused;
+            var dt = TimeManager.DeltaTime;
+            var dtu = TimeManager.DeltaUnscaled;
             for (int i = EveryUpdate.Count - 1; i >= 0; i--) {
-                if (EveryUpdate[i] == null) {
-                    EveryUpdate.RemoveAt(i);
+                if (i >= EveryUpdate.Count || EveryUpdate[i] == null) {
                     continue;
                 }
-                if (Game.Paused && !EveryUpdate[i].Unscaled) {
+                var unscaled = EveryUpdate[i].Unscaled;
+                if (paused && !unscaled) {
                     continue;
                 }
-                EveryUpdate[i].OnSystemUpdate(EveryUpdate[i].Unscaled ? TimeManager.DeltaUnscaled : TimeManager.DeltaTime);
+                EveryUpdate[i].OnSystemUpdate(unscaled ? dtu : dt);
             }
         }
 

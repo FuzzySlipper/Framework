@@ -7,15 +7,16 @@ namespace PixelComrades {
         
         [SerializeField] private Transform _actorPivot = null;
 
-        private IntValueHolder _currency = new IntValueHolder();
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
         private bool _isMoving = false;
 
+        public SensorComponent Sensor { get; protected set; }
         public Entity Entity { get; protected set; }
         public ValueHolder<bool> MoveEnabledHolder { get { return _moveEnabled; } }
         public Transform Tr { get; private set; }
         public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
         public Transform ActorPivot { get { return _actorPivot; } }
+        public virtual Point3 GridPosition { get { return (Tr.position + Vector3.up).ToCellGridP3(); } }
         public virtual bool Unscaled { get { return false; } }
         public virtual bool Slowed { get; protected set; }
         public virtual bool CanMove {
@@ -25,14 +26,25 @@ namespace PixelComrades {
         }
 
         protected virtual void Awake() {
+            SetupControllerDefaults();
+            SetupGenericControllerEntity();
+        }
+
+        protected void SetupGenericControllerEntity() {
+            SetupControllerEntity(Entity.New("PlayerController"));
+            Entity.Add(new LabelComponent("PlayerController"));
+        }
+
+        protected void SetupControllerDefaults() {
             Player.Tr = transform;
             Tr = transform;
-            Player.Currency = _currency;
             MessageKit.addObserver(Messages.LoadingFinished, EnablePlayer);
-            Entity = Entity.New("PlayerController");
-            Entity.Add(new LabelComponent("PlayerController"));
-            Entity.Tr = Tr;
-            Player.MainEntity = Entity;
+        }
+
+        protected virtual void SetupControllerEntity(Entity entity) {
+            Entity = entity;
+            entity.Tr = Tr;
+            Player.MainEntity = entity;
         }
 
         public virtual void OnSystemUpdate(float dt) {
@@ -42,20 +54,30 @@ namespace PixelComrades {
         }
 
         public virtual void NewGame() {
-            _currency.ChangeValue(100);
+            Player.DefaultCurrencyHolder.ChangeValue(100);
             MessageKit.post(Messages.PlayerNewGame);
         }
 
         public virtual void SetVitalMax() {}
 
-        public void Teleport(Vector3 location, Quaternion rotation) {
+        public virtual void Teleport(Vector3 location, Quaternion rotation) {
             Tr.rotation = rotation;
-            CameraMouseLook.main.ChangeRotation(rotation.eulerAngles.y);
-            Teleport(location);
+            Tr.position = FindFloorPoint(location);
+            MessageKit<float>.post(Messages.PlayerViewRotated, rotation.eulerAngles.y);
+            MessageKit.post(Messages.PlayerTeleported);
         }
 
         public virtual void Teleport(Vector3 location) {
-            
+            Tr.position = FindFloorPoint(location);
+            MessageKit.post(Messages.PlayerTeleported);
+        }
+
+        protected Vector3 FindFloorPoint(Vector3 location) {
+            var ray = new Ray(location + (Vector3.up * Game.MapCellSize), -Tr.up);
+            if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 1.5f, LayerMasks.Floor)) {
+                return hit.point;
+            }
+            return location;
         }
 
         public virtual void DisableMove(string id) {
@@ -65,9 +87,6 @@ namespace PixelComrades {
         public virtual void RemoveDisabledMove(string id) {
             _moveEnabled.RemoveValue(id);
         }
-
-        public virtual void AddExperience(float amount) {}
-        public virtual void SetExperience(float amount) {}
 
         protected virtual void OnDeath() {
             MessageKit.post(Messages.PlayerDead);

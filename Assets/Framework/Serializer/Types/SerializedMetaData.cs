@@ -16,11 +16,9 @@ namespace PixelComrades {
         [SerializeField] private AssetType _assetType;
         [SerializeField] private string _prefabPath = "";
         [SerializeField] private int _serializationId = -1;
-        [SerializeField] private string _origin;
         [SerializeField] private SerializedComponentDifferences _componentDiff;
 
         public string PrefabPath { get { return _prefabPath; } }
-        public string Origin { get { return _origin; } }
         public SerializedComponentDifferences ComponentDiff { get { return _componentDiff; } }
         public AssetType AssetType { get { return _assetType; } set { _assetType = value; } }
         public int SerializationId {
@@ -42,7 +40,6 @@ namespace PixelComrades {
         public SerializedMetaData(SerializationInfo info, StreamingContext context) {
             _prefabPath = info.GetValue(nameof(_prefabPath), _prefabPath);
             _serializationId = (int)info.GetValue("SerializationId", typeof(int));
-            _origin = (string)info.GetValue("Origin", typeof(string));
             _assetType = (AssetType)info.GetValue("AssetType", typeof(AssetType));
             _componentDiff = (SerializedComponentDifferences)info.GetValue("ComponentDiff", typeof(SerializedComponentDifferences));
         }
@@ -50,7 +47,6 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_prefabPath), _prefabPath);
             info.AddValue("SerializationId", _serializationId, typeof(int));
-            info.AddValue("Origin", _origin, typeof(string));
             info.AddValue("AssetType", _assetType, typeof(AssetType));
             info.AddValue("ComponentDiff", _componentDiff, typeof(SerializedComponentDifferences));
         }
@@ -62,7 +58,6 @@ namespace PixelComrades {
         public void SetDatabaseEntry(PrefabEntity entity) {
             _prefabPath = entity.ResourcePath;
             _assetType = AssetType.Prefab;
-            _origin = entity.ResourcePath;
             _componentDiff = new SerializedComponentDifferences();
         }
         

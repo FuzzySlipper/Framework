@@ -68,7 +68,7 @@ namespace PixelComrades {
                 }
             }
 #if UNITY_EDITOR
-            if (Application.isPlaying || UnityEditor.PrefabUtility.GetPrefabType(root) == PrefabType.None) {
+            if (Application.isPlaying || UnityEditor.PrefabUtility.GetPrefabAssetType(root) == PrefabAssetType.NotAPrefab) {
                 return;
             }
             var mods = UnityEditor.PrefabUtility.GetPropertyModifications(root);

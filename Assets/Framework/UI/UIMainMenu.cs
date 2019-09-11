@@ -256,13 +256,13 @@ namespace PixelComrades {
             }
             while (true) {
                 if (active) {
-                    _menuMusic.volume += length * Time.deltaTime;
+                    _menuMusic.volume += length * TimeManager.DeltaTime;
                     if (_menuMusic.volume >= _maxMenuMusicVolume) {
                         break;
                     }
                 }
                 else {
-                    _menuMusic.volume -= length * Time.deltaTime;
+                    _menuMusic.volume -= length * TimeManager.DeltaTime;
                     if (_menuMusic.volume <= 0) {
                         _menuMusic.Stop();
                         break;

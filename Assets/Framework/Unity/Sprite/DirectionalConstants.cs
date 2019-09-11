@@ -7,7 +7,8 @@ namespace PixelComrades {
     public enum SpriteFacing {
         Fourway,
         Eightway,
-        EightwayFlipped
+        EightwayFlipped,
+        FourwayFlipped,
     }
 
     [System.Serializable]
@@ -32,6 +33,8 @@ namespace PixelComrades {
         public float PercentEvent = 1;
         public bool Loop;
         public bool GlobalFps = true;
+        public float LengthMulti;
+        public float Length { get { return Clip != null ? Clip.length * LengthMulti : LengthMulti; } }
     }
 
     public static class SpriteFacingControl {
@@ -62,6 +65,7 @@ namespace PixelComrades {
                 case SpriteFacing.EightwayFlipped:
                     return GetFacing(_dirRangesEight, spriteFacingAngle, margin, out inMargin);
                 case SpriteFacing.Fourway:
+                case SpriteFacing.FourwayFlipped:
                 default:
                     return GetFacing(DirRangesFour, spriteFacingAngle, margin, out inMargin);
             }
@@ -108,13 +112,21 @@ namespace PixelComrades {
             }
             switch (side) {
                 case DirectionsEight.Front:
-                    return true;
                 case DirectionsEight.Right:
-                    return true;
                 case DirectionsEight.Rear:
-                    return facing == SpriteFacing.Fourway;
-                case DirectionsEight.Left:
                     return true;
+                case DirectionsEight.Left:
+                    return facing == SpriteFacing.Eightway || facing == SpriteFacing.Fourway;
+            }
+            if (facing == SpriteFacing.EightwayFlipped) {
+                switch (side) {
+                    case DirectionsEight.FrontRight:
+                    case DirectionsEight.RearRight:
+                        return true;
+                }
+            }
+            if (facing == SpriteFacing.Eightway) {
+                return true;
             }
             return false;
         }
@@ -129,6 +141,15 @@ namespace PixelComrades {
                     return DirectionsEight.RearRight;
             }
             return facing;
+        }
+
+        public static bool RequiresFlipping(this SpriteFacing facing) {
+            switch (facing) {
+                case SpriteFacing.EightwayFlipped:
+                case SpriteFacing.FourwayFlipped:
+                    return true;
+            }
+            return false;
         }
 
         public static bool IsFlipped(this DirectionsEight facing) {

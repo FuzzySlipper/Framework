@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
     public class StatusContainer : IComponent  {
-
-        public int Owner { get; set; }
 
         public event System.Action OnResourceChanged;
 
@@ -21,6 +21,17 @@ namespace PixelComrades {
             return AddValue(value, System.Guid.NewGuid().ToString());
         }
 
+        public StatusContainer(SerializationInfo info, StreamingContext context) {
+            _keys = info.GetValue(nameof(_keys), _keys);
+            _preventsMove = info.GetValue(nameof(_preventsMove), _preventsMove);
+            _preventsAction = info.GetValue(nameof(_preventsAction), _preventsAction);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_keys), _keys);
+            info.AddValue(nameof(_preventsMove), _preventsMove);
+            info.AddValue(nameof(_preventsAction), _preventsAction);
+        }
         public string AddValue(CharacterStatus value, string id) {
             if (_keys.ContainsKey(id)) {
                 _keys[id] = value;

@@ -5,11 +5,11 @@ using System.Collections;
 namespace PixelComrades {
     [System.Serializable] public class VitalStat : BaseStat {
 
-        private const float RecoverMinimum = 5f;
-
         public VitalStat() {}
 
-        public VitalStat(string label, string id, float baseValue) : base(label, id, baseValue) {}
+        public VitalStat(string label, string id, float baseValue, float recovery) : base(label, id, baseValue) {
+            _recoveryPercent = new BaseStat("RecoverRate", recovery);
+        }
 
         private float _current;
         private bool _canRecover = true;
@@ -31,18 +31,18 @@ namespace PixelComrades {
         public bool IsMax { get { return Current >= Value; } }
         public bool CanRecover => _canRecover;
 
-        private BaseStat _recover = new BaseStat("RecoverRate", RecoverMinimum);
-        public BaseStat Recovery { get { return _recover; } }
+        private BaseStat _recoveryPercent;
+        public BaseStat RecoveryPercent { get { return _recoveryPercent; } }
 
         public void DoRecover(float mod = 1) {
-            if (_current < Value) {
-                _current += _recover?.Value * mod ?? mod;
+            if (_recoveryPercent != null && _current < Value && _recoveryPercent.Value > 0) {
+                _current += (_recoveryPercent.Value * Value) * mod;
                 StatChanged();
             }
         }
 
         public void ClearRecovery(bool canRecover) {
-            _recover = null;
+            _recoveryPercent = null;
             _canRecover = canRecover;
         }
 
@@ -67,11 +67,11 @@ namespace PixelComrades {
         //}
 
         public override string ToString() {
-            return string.Format("{0}: {1}/{2}", Label, Current, Value);
+            return string.Format("{0}: {1:F0}/{2:F0}", Label, Current, Value);
         }
 
         public override string ToLabelString() {
-            return string.Format("<b>{0}:</b> {1}/{2}", Label, _current.ToString("F0"), Value.ToString("F0"));
+            return string.Format("<b>{0}:</b> {1:F0}/{2:F0}", Label, _current, Value);
 
         }
 

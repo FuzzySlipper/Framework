@@ -16,4 +16,22 @@ namespace PixelComrades {
             };
         }
     }
+
+    public class UnitySensorNode : BaseNode {
+
+        private CachedComponent<SensorTargetsComponent> _targets = new CachedComponent<SensorTargetsComponent>();
+        private CachedComponent<UnitySensorComponent> _sensor = new CachedComponent<UnitySensorComponent>();
+        private CachedComponent<FactionComponent> _faction = new CachedComponent<FactionComponent>();
+
+        public SensorTargetsComponent Targets { get => _targets.c; }
+        public UnitySensorComponent Sensor { get => _sensor.c; }
+        public FactionComponent Faction { get => _faction.c; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {_targets, _sensor, _faction};
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(SensorTargetsComponent), typeof(UnitySensorComponent), typeof(FactionComponent)
+            };
+        }
+    }
 }

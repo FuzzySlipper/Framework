@@ -35,7 +35,7 @@ namespace PixelComrades {
         private WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(MaxPathCheck);
         private bool[] _validPos = new bool[4];
         private GenericPool<P3Node> _nodePool = new GenericPool<P3Node>(2500, node => node.Clear());
-        private IPathfindingGrid _grid;
+        private SimpleThreadSafeGrid _grid;
         private PathfindingRequest _request;
         private List<Point3> _neighbors = new List<Point3>();
 
@@ -68,7 +68,7 @@ namespace PixelComrades {
 
         public PathfindingResult Run(PathfindingRequest request) {
             Clear();
-            _grid = request.Grid;
+            _grid = request.Grid as SimpleThreadSafeGrid;
             _request = request;
             _start = request.Start;
             _end = request.End;

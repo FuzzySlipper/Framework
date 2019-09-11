@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 using Random = System.Random;
 
 namespace PixelComrades {
@@ -10,26 +12,29 @@ namespace PixelComrades {
         public static float Version { get; set; }
         public static string Title { get; set; }
         public static bool InTown { get; set; } = false;
-        public static int MapCellSize { get; set; } = 3;
-
+        public static int MapCellSize { get; set; }
         private static ValueHolder<bool> _paused = new ValueHolder<bool>(false, PauseChanged);
         private static ValueHolder<bool> _cursorUnlocked = new ValueHolder<bool>(false);
         private static bool _gameStarted = false;
         private static Random _random = new Random();
+        private static Random _levelRandom = new Random();
         private static Camera _spriteCamera;
         private static int _mapSectorSize = 50;
 
-        
+        public static IMapCamera MiniMap;
+        public static IMapCamera LevelMap;
         public static Camera SpriteCamera { get { return _spriteCamera != null ? _spriteCamera : Camera.main; } set { _spriteCamera = value; } }
         public static Random Random { get { return _random; } }
+        public static Random LevelRandom { get { return _levelRandom; } }
         public static int Seed { get; private set; }
         public static ValueHolder<bool> PauseHolder { get { return _paused; } }
         public static ValueHolder<bool> CursorUnlockedHolder { get { return _cursorUnlocked; } }
         public static bool CursorUnlocked { get { return _cursorUnlocked.Value; } }
-        public static bool GameActive { get; private set; }
+        public static bool GameActive { get; private set; } = false;
         public static bool GameStarted { get { return _gameStarted; } set { _gameStarted = value; } }
         public static bool IsEditor { get; set; }
         public static bool Debug { get { return GameOptions.DebugMode; } }
+        public static string DefaultCurrencyId { get { return "Default"; } }
 
         public static void SetGameActive(bool status) {
             GameActive = status;
@@ -101,8 +106,13 @@ namespace PixelComrades {
 
         public static void SetRandomSeed(int seed) {
             _random = new Random(seed);
+            _levelRandom = new Random(seed);
             UnityEngine.Random.InitState(seed);
             Seed = seed;
+        }
+
+        public static void SetLevelSeed(int seed) {
+            _levelRandom = new Random(seed);
         }
 
         public static void SetDataString(string key, string data) {
@@ -153,11 +163,11 @@ namespace PixelComrades {
             MessageKit<string>.post(Messages.GlobalDataChanged, key);
         }
 
-        public static void DisplayData(UnityEngine.UI.Image source, Entity entity) {
+        public static void DisplayData(Image source, Entity entity) {
             DisplayData(source, entity.Get<IconComponent>()?.Sprite, entity.Get<LabelComponent>()?.Text, entity.Get<DescriptionComponent>()?.Text, entity.Get<DataDescriptionComponent>()?.Text);
         }
 
-        public static void DisplayData(UnityEngine.UI.Image source, Sprite sprite, string title, string descr, string data) {
+        public static void DisplayData(Image source, Sprite sprite, string title, string descr, string data) {
             if (UIDataDetailDisplay.Current != null) {
                 UIDataDetailDisplay.Current.Show(sprite, title, descr, data);
             }
@@ -193,7 +203,7 @@ namespace PixelComrades {
                     if (_mainObject == null) {
                         _mainObject = new GameObject(StringConst.MainObject);
                     }
-                    UnityEngine.Object.DontDestroyOnLoad(_mainObject);
+                    Object.DontDestroyOnLoad(_mainObject);
                 }
                 return _mainObject;
             }
@@ -240,6 +250,5 @@ namespace PixelComrades {
         public static Vector3 GridToWorld(Point3 position) {
             return new Vector3(position.x * MapCellSize, position.y * MapCellSize, position.z * MapCellSize);
         }
-
     }
 }
