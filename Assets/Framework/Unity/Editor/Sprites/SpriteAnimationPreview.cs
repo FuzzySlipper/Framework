@@ -68,18 +68,18 @@ namespace PixelComrades {
         }
 
         public void NextSprite() {
-            _frame++;
+            _frame = Mathf.Clamp(_frame + 1, 0, _animation.LengthFrames);
         }
 
         public void PrevSprite() {
-            _frame--;
+            _frame = Mathf.Clamp(_frame - 1, 0, _animation.LengthFrames);
         }
 
         public Texture GetPreviewTexture(Rect previewRect, Sprite sprite) {
             if (IsDirty(previewRect))
                 RebuildPreviewTextures(previewRect);
             var spriteEditor = GetSpriteEditor(sprite);
-            return _latestPreviewTextures[spriteEditor];
+            return _latestPreviewTextures.TryGetValue(spriteEditor, out var texture) ? texture : null;
         }
 
         private void RebuildPreviewTextures(Rect previewRect) {

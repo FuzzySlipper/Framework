@@ -3,7 +3,6 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades.DungeonCrawler;
 #if AStarPathfinding
 using Pathfinding;
 using Pathfinding.RVO;
