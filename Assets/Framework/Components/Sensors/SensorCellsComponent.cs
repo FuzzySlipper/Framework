@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SensorCellsComponent : ComponentBase {
+    public class SensorCellsComponent : IComponent {
         public System.Action OnUpdate;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public int MaxHearDistance { get; private set; }
@@ -16,6 +17,22 @@ namespace PixelComrades {
             MaxVisionDistance = maxVisionDistance;
         }
 
+        public SensorCellsComponent(SerializationInfo info, StreamingContext context) {
+            WatchTargets = info.GetValue(nameof(WatchTargets), WatchTargets);
+            MaxHearDistance = info.GetValue(nameof(MaxHearDistance), MaxHearDistance);
+            MaxVisionDistance = info.GetValue(nameof(MaxVisionDistance), MaxVisionDistance);
+            MaxTurnsNpcVisible = info.GetValue(nameof(MaxTurnsNpcVisible), MaxTurnsNpcVisible);
+            Cells = info.GetValue(nameof(Cells), Cells);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(WatchTargets), WatchTargets);
+            info.AddValue(nameof(MaxHearDistance), MaxHearDistance);
+            info.AddValue(nameof(MaxVisionDistance), MaxVisionDistance);
+            info.AddValue(nameof(MaxTurnsNpcVisible), MaxTurnsNpcVisible);
+            info.AddValue(nameof(Cells), Cells);
+        }
+        
         public void UpdateSenses() {
             //var watch = new System.Diagnostics.Stopwatch();
             //watch.Start();
@@ -23,7 +40,7 @@ namespace PixelComrades {
             //watch.Stop();
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
             var start = this.Get<GridPosition>().Position;
-            var fwd = Entity?.Tr.ForwardDirection2D();
+            var fwd = this.GetEntity()?.Tr.ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
                 var maxRowDistance = dir == fwd ? MaxVisionDistance : MaxHearDistance;

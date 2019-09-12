@@ -27,7 +27,7 @@ namespace PixelComrades {
 
         public void Store(Entity entity) {
             UnityToEntityBridge.Unregister(entity);
-            entity.Get<ModelComponent>().Model = null;
+            entity.Get<ModelComponent>().Clear();
             entity.Remove(typeof(SpriteAnimationComponent));
             entity.Tags.Clear();
             entity.Post(new ProjectileDespawned(entity));
@@ -102,7 +102,7 @@ namespace PixelComrades {
                 entity.Get<RigidbodyComponent>().SetRb(spawn.Rigidbody);
             }
             entity.Tags.Add(EntityTags.Moving);
-            entity.Get<ModelComponent>().Model = spawn;
+            entity.Get<ModelComponent>().Set(spawn);
             UnityToEntityBridge.RegisterToEntity(spawn.Tr.gameObject, entity);
             entity.ParentId = owner.Id;
             entity.Post(new ProjectileSpawned(template, entity));

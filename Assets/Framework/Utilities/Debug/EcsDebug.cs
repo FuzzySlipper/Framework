@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -20,9 +21,19 @@ namespace PixelComrades {
     }
 
     [Priority(Priority.Highest)]
-    public class GodModeComponent : ComponentBase, IReceiveRef<DamageEvent> {
+    public class GodModeComponent : IComponent, IReceiveRef<DamageEvent> {
         public void Handle(ref DamageEvent arg) {
             arg.Amount = 0;
+        }
+
+        public GodModeComponent() {}
+
+        public GodModeComponent(SerializationInfo info, StreamingContext context) {
+            
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            
         }
     }
 

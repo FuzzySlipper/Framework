@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CanMoveComponent : ComponentBase {
+    public class CanMoveComponent : IComponent {
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
 
         public bool CanMove { get { return _moveEnabled.Value; } }
@@ -14,7 +15,16 @@ namespace PixelComrades {
         }
 
         private void SendMessage() {
-            Entity.Post(new CanMoveStatusChanged(CanMove, Entity));
+            var entity = this.GetEntity();
+            entity.Post(new CanMoveStatusChanged(CanMove, entity));
+        }
+
+        public CanMoveComponent(SerializationInfo info, StreamingContext context) {
+            _moveEnabled = info.GetValue(nameof(_moveEnabled), _moveEnabled);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_moveEnabled), _moveEnabled);
         }
     }
 

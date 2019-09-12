@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SensorComponent : IComponent {
+    public sealed class SensorComponent : IComponent {
 
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public PointList DetectedCells = new PointList();

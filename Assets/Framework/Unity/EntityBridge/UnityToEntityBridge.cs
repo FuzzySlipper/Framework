@@ -48,6 +48,7 @@ namespace PixelComrades {
                 }
                 _colliderToDictionary.Add(_tempColliders[i], entId);
             }
+            EntityController.Get(entId).Tags.Set(EntityTags.CanUnityCollide, 1);
         }
 
         public static void Unregister(Entity entity) {

@@ -253,6 +253,25 @@ namespace PixelComrades {
             }
         }
 
+        public static PrefabEntity FindPrefabRoot(Transform tr) {
+            var checkTr = tr;
+            WhileLoopLimiter.ResetInstance();
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                if (checkTr == null) {
+                    break;
+                }
+                var prefab = checkTr.GetComponent<PrefabEntity>();
+                if (prefab != null) {
+                    return prefab;
+                }
+                if (checkTr.parent == null) {
+                    return checkTr.GetComponentInChildren<PrefabEntity>();
+                }
+                checkTr = checkTr.parent;
+            }
+            return null;
+        }
+
         public static void RegisterNonPooled(GameObject nonPooled, bool status) {
             if (status) {
                 var onCreate = nonPooled.GetComponentsInChildren<IOnCreate>();

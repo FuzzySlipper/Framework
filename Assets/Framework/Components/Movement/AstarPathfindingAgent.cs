@@ -5,18 +5,19 @@ using System.Collections;
 using System.Collections.Generic;
 
 #if AStarPathfinding
+using System.Runtime.Serialization;
 using Pathfinding;
 
 namespace PixelComrades {
-    public class AstarPathfindingAgent : ComponentBase, IDisposable, IReceive<ChangePositionEvent> {
+    public class AstarPathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
         
         public PathfindingStatus CurrentStatus = PathfindingStatus.Created;
-
-        public AstarRvoController Controller;
         public Point3 LastPosition;
         public float LastPositionTime;
         public int StuckPathCount = 0;
-
+        private CachedUnityComponent<AstarRvoController> _controller = new CachedUnityComponent<AstarRvoController>();
+        
+        public AstarRvoController Controller { get { return _controller; } }
         public Vector3 Destination { get { return Controller.Destination; } }
         public Point3 DestinationP3 { get { return Controller.Destination.toPoint3(); } }
         public Vector3 SteeringTarget { get { return Controller.SteeringTarget; } }
@@ -27,13 +28,28 @@ namespace PixelComrades {
 
 
         public AstarPathfindingAgent(AstarRvoController controller) {
-            Controller = controller;
-            Controller.OnSearchPathComplete += PathCompleted;
+            _controller  = new CachedUnityComponent<AstarRvoController>(controller);
+            controller.OnSearchPathComplete += PathCompleted;
+        }
+
+        public AstarPathfindingAgent(SerializationInfo info, StreamingContext context) {
+            CurrentStatus = info.GetValue(nameof(CurrentStatus), CurrentStatus);
+            _controller = info.GetValue(nameof(_controller), _controller);
+            LastPosition = info.GetValue(nameof(LastPosition), LastPosition);
+            LastPositionTime = info.GetValue(nameof(LastPositionTime), LastPositionTime);
+            StuckPathCount = info.GetValue(nameof(StuckPathCount), StuckPathCount);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(CurrentStatus), CurrentStatus);
+            info.AddValue(nameof(_controller), _controller);
+            info.AddValue(nameof(LastPosition), LastPosition);
+            info.AddValue(nameof(LastPositionTime), LastPositionTime);
+            info.AddValue(nameof(StuckPathCount), StuckPathCount);
         }
 
         public void Dispose() {
-            Controller = null;
-            Owner = -1;
+            _controller = null;
         }
 
         private void PathCompleted(Path p) {

@@ -14,11 +14,11 @@ namespace PixelComrades {
 
         public float Power { get { return _stat.Value * _normalizedPercent; } }
 
-        public HealImpact(Entity entity, string targetVital, float normalizedPercent, BaseStat stat, bool healSelf) {
+        public HealImpact(string targetVital, float normalizedPercent, BaseStat stat, bool healSelf) {
             _targetVital = targetVital;
             _normalizedPercent = normalizedPercent;
             _healSelf = healSelf;
-            _stat = new CachedStat<BaseStat>(entity, stat);
+            _stat = new CachedStat<BaseStat>(stat);
         }
 
         public void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent) {

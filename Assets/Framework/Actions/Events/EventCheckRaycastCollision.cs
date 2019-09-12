@@ -30,7 +30,7 @@ namespace PixelComrades {
                 originPos = animData?.Animator?.GetEventPosition ?? (entity.Tr != null ? entity.Tr.position : Vector3.zero);
             }
             var target = node.ActionEvent.Target;
-            var actionEntity = node.ActionEvent.Action.Entity;
+            var actionEntity = node.ActionEvent.Action.GetEntity();
             var ray = new Ray(originPos, (target - originPos).normalized);
             CollisionEvent? ce = CollisionCheckSystem.Raycast(actionEntity, ray, RayDistance, LimitToEnemy, Impacts);
             if (ce == null && RaySize > 0.01f) {

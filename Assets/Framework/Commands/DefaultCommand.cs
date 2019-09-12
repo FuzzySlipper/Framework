@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class DefaultCommand : IComponent {
+    public sealed class DefaultCommand : IComponent {
         public Command Default { get; }
         public Command Loaded;
         public Command Get { get { return Loaded ?? Default; } }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ActionTimer : IComponent, IReceive<ActionStateEvent> {
+    public sealed class ActionTimer : IComponent, IReceive<ActionStateEvent> {
         public float ElapsedTime { get; private set; }
         private float _startTime;
 

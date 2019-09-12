@@ -132,7 +132,7 @@ namespace PixelComrades {
                             if (node.Debugging.c != null) {
                                 node.Debugging.c.SetPath(pathfinder.CurrentNodePath);
                             }
-                            _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.Entity, false);
+                            _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.GetEntity(), false);
                         }
                         if (!node.Pathfinder.TryEnterNextNode()) {
                             node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
@@ -150,7 +150,7 @@ namespace PixelComrades {
                 var pos = Vector3.Lerp(pathfinder.PreviousTarget, pathfinder.CurrentTarget, progress);
                 var dir = pathfinder.CurrentTarget - pathfinder.PreviousTarget;
                 var diff = (pos - node.Entity.Tr.position);
-                var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : pathfinder.Entity.Tr.rotation;
+                var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : pathfinder.GetEntity().Tr.rotation;
                 //var rot = Quaternion.RotateTowards(pathfinder.Entity.Tr.rotation, nextRotation, _pathfinderRotationSpeed * dt);
                 Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
                 node.Entity.Post(new MoveInputMessage(diff.normalized, cameraPlanarDirection));

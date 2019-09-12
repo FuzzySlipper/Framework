@@ -23,7 +23,7 @@ namespace PixelComrades {
     }
 
     public interface ITurnBasedUnit {
-        int Owner { get; set; }
+        int Owner { get; }
         float Speed { get; }
         void TurnUpdate(float turnEnergy);
         bool TryStartTurn();

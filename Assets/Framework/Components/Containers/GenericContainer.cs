@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
 
     [System.Serializable]
-    public class GenericContainer<T> : ComponentBase {
+    public class GenericContainer<T> : IComponent {
         /// <summary>
         /// Warning Add runs before derived class constructor
         /// </summary>
@@ -40,6 +41,14 @@ namespace PixelComrades {
             for (int i = 0; i < values.Count; i++) {
                 Add(values[i]);
             }
+        }
+
+        public GenericContainer(SerializationInfo info, StreamingContext context) {
+            List = info.GetValue(nameof(List), List);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(List), List);
         }
     }
 }

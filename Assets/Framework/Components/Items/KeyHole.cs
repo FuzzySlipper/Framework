@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class KeyHole : IComponent, IWorldItemInteraction {
+    public sealed class KeyHole : IComponent, IWorldItemInteraction {
 
         public int PickDifficulty;
         public string KeyString;

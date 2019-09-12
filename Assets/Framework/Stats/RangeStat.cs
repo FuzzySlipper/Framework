@@ -7,11 +7,11 @@ namespace PixelComrades {
 
         private float _max;
 
-        public RangeStat(string label,FloatRange range) : base(label, range.Min) {
+        public RangeStat(int entity, string label,FloatRange range) : base(entity, label, range.Min) {
             _max = (range.Max - range.Min);
         }
 
-        public RangeStat(string label, string id, float rangeMin, float rangeMax) : base(label, id, rangeMin) {
+        public RangeStat(int entity, string label, string id, float rangeMin, float rangeMax) : base(entity, label, id, rangeMin) {
             _max = rangeMax - rangeMin;
         }
 
@@ -30,8 +30,8 @@ namespace PixelComrades {
         }
 
         public override void AddToBase(float amountToAdd) {
-            _baseValue += amountToAdd;
-            _baseValue = Mathf.Clamp(_baseValue, -MaxBaseValue, MaxBaseValue);
+            BaseValue += amountToAdd;
+            BaseValue = Mathf.Clamp(BaseValue, -MaxBaseValue, MaxBaseValue);
             _max += amountToAdd;
             StatChanged();
         }

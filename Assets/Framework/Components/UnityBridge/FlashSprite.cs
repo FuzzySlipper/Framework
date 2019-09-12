@@ -1,31 +1,55 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SpriteColorComponent : ComponentBase, IReceive<DamageEvent>, IReceive<StunEvent>, IReceive<SlowEvent>, IReceive<ConfusionEvent> {
+    public class SpriteColorComponent : IComponent, IReceive<DamageEvent>, IReceive<StunEvent>, IReceive<SlowEvent>, IReceive<ConfusionEvent> {
 
         private const float Duration = 0.5f;
 
         private string _shaderColor;
-        private SpriteRenderer _spriteRender;
+        private CachedUnityComponent<SpriteRenderer> _spriteRender;
         private float _dmgMaxScale;
+        private Color _baseColor = Color.white;
+        
+        
         private TweenFloat _scaleDmgTween;
         private MaterialPropertyBlock _matBlock;
-        private Color _baseColor = Color.white;
         private bool _animatingColor = false;
-
+        
+        private SpriteRenderer Renderer { get { return _spriteRender.Component; } }
+        
         private static GameOptions.CachedColor _stunColor = new GameOptions.CachedColor("Stunned");
         private static GameOptions.CachedColor _confusedColor = new GameOptions.CachedColor("Confused");
         private static GameOptions.CachedColor _frozenColor = new GameOptions.CachedColor("Frozen");
 
         public SpriteColorComponent(SpriteRenderer renderer, string shaderColor = "_Color", float maxDamageScale = 1.15f) {
-            _spriteRender = renderer;
+            _spriteRender = new CachedUnityComponent<SpriteRenderer>(renderer);
             _shaderColor = shaderColor;
             _dmgMaxScale = maxDamageScale;
+            Setup();
+        }
+
+        public SpriteColorComponent(SerializationInfo info, StreamingContext context) {
+            _shaderColor = info.GetValue(nameof(_shaderColor), _shaderColor);
+            _spriteRender = info.GetValue(nameof(_spriteRender), _spriteRender);
+            _dmgMaxScale = info.GetValue(nameof(_dmgMaxScale), _dmgMaxScale);
+            _baseColor = info.GetValue(nameof(_baseColor), _baseColor);
+        }
+
+        private void Setup() {
             _scaleDmgTween = new TweenFloat(0, 1, Duration, EasingTypes.BounceInOut, false);
             _matBlock = new MaterialPropertyBlock();
-            _spriteRender.GetPropertyBlock(_matBlock);
+            _spriteRender.Component.GetPropertyBlock(_matBlock);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_shaderColor), _shaderColor);
+            info.AddValue(nameof(_spriteRender), _spriteRender);
+            info.AddValue(nameof(_dmgMaxScale), _dmgMaxScale);
+            info.AddValue(nameof(_baseColor), _baseColor);
+            Setup();
         }
 
         public void ChangeBaseColor(Color color) {
@@ -46,29 +70,29 @@ namespace PixelComrades {
         
         private IEnumerator DamageTween() {
             _animatingColor = true;
-            _spriteRender.GetPropertyBlock(_matBlock);
+            Renderer.GetPropertyBlock(_matBlock);
             _matBlock.SetColor(_shaderColor, Color.red);
-            _spriteRender.SetPropertyBlock(_matBlock);
+            Renderer.SetPropertyBlock(_matBlock);
             _scaleDmgTween.Restart(1, _dmgMaxScale);
-            var scale = _spriteRender.transform.localScale;
+            var scale = Renderer.transform.localScale;
             while (_scaleDmgTween.Active) {
-                _spriteRender.transform.localScale = new Vector3(scale.x * _scaleDmgTween.Get(),
+                Renderer.transform.localScale = new Vector3(scale.x * _scaleDmgTween.Get(),
                     scale.y, scale.z);
                 yield return null;
             }
             _scaleDmgTween.Restart(_dmgMaxScale,1);
             while (_scaleDmgTween.Active) {
-                _spriteRender.GetPropertyBlock(_matBlock);
-                _spriteRender.transform.localScale = new Vector3(scale.x * _scaleDmgTween.Get(),
+                Renderer.GetPropertyBlock(_matBlock);
+                Renderer.transform.localScale = new Vector3(scale.x * _scaleDmgTween.Get(),
                     scale.y, scale.z);
                 _matBlock.SetColor(_shaderColor, Color.Lerp(Color.red, _baseColor, _scaleDmgTween.Get()));
-                _spriteRender.SetPropertyBlock(_matBlock);
+                Renderer.SetPropertyBlock(_matBlock);
                 yield return null;
             }
             _animatingColor = false;
-            _spriteRender.GetPropertyBlock(_matBlock);
+            Renderer.GetPropertyBlock(_matBlock);
             _matBlock.SetColor(_shaderColor, _baseColor);
-            _spriteRender.SetPropertyBlock(_matBlock);
+            Renderer.SetPropertyBlock(_matBlock);
         }
 
         public void Handle(StunEvent arg) {
@@ -84,13 +108,14 @@ namespace PixelComrades {
         }
 
         private void CheckTagColor(TagTypes tagType) {
-            if (Entity.Tags.IsStunned || tagType == TagTypes.Stun) {
+            var entity = this.GetEntity();
+            if (entity.Tags.IsStunned || tagType == TagTypes.Stun) {
                 _baseColor = _stunColor;
             }
-            else if (Entity.Tags.IsConfused || tagType == TagTypes.Confuse) {
+            else if (entity.Tags.IsConfused || tagType == TagTypes.Confuse) {
                 _baseColor = _confusedColor;
             }
-            else if (Entity.Tags.IsSlowed || tagType == TagTypes.Slow) {
+            else if (entity.Tags.IsSlowed || tagType == TagTypes.Slow) {
                 _baseColor = _frozenColor;
             }
             else {
@@ -99,9 +124,9 @@ namespace PixelComrades {
             if (_animatingColor) {
                 return;
             }
-            _spriteRender.GetPropertyBlock(_matBlock);
+            Renderer.GetPropertyBlock(_matBlock);
             _matBlock.SetColor(_shaderColor, _baseColor);
-            _spriteRender.SetPropertyBlock(_matBlock);
+            Renderer.SetPropertyBlock(_matBlock);
         }
 
         enum TagTypes {

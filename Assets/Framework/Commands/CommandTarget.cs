@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PixelComrades {
     
-    public class CommandTarget : IComponent {
+    public sealed class CommandTarget : IComponent {
 
         private CachedEntity _target = new CachedEntity(-1);
         private Vector3? _explicitPosition;

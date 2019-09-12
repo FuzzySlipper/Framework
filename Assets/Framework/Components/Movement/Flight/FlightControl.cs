@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightControl : ComponentBase {
+    public class FlightControl : IComponent {
         public Mode CurrentMode;
         public FlightControlConfig Config;
 
@@ -24,6 +25,19 @@ namespace PixelComrades {
             EnginesActivated = true;
             CurrentMode = config.DefaultMode;
             ClearValues();
+        }
+
+        public FlightControl(SerializationInfo info, StreamingContext context) {
+            Config = ItemPool.LoadAsset<FlightControlConfig>(info.GetValue(nameof(Config), ""));
+            CurrentMode = info.GetValue(nameof(CurrentMode), CurrentMode);
+            EnginesActivated = info.GetValue(nameof(EnginesActivated), EnginesActivated);
+            ClearValues();
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Config), ItemPool.GetAssetLocation(Config));
+            info.AddValue(nameof(CurrentMode), CurrentMode);
+            info.AddValue(nameof(EnginesActivated), EnginesActivated);
         }
         
         public void ClearValues() {

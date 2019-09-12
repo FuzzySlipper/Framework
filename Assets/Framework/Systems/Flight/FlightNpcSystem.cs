@@ -38,7 +38,7 @@ namespace PixelComrades {
                 if (npc.Projectile.ShootTimer.IsActive) {
                     continue;
                 }
-                if (Physics.Raycast(npc.Projectile.ShootPivot.position, npc.Projectile.ShootPivot.forward, out var hit, 50, LayerMasks.DefaultCollision)) {
+                if (Physics.Raycast(npc.Projectile.ShootPivot.Tr.position, npc.Projectile.ShootPivot.Tr.forward, out var hit, 50, LayerMasks.DefaultCollision)) {
                     if (UnityToEntityBridge.GetEntity(hit.collider) == target) {
                         npc.Stop();
                         npc.Projectile.Fire();

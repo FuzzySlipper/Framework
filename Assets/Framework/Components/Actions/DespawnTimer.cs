@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class DespawnTimer : IComponent, IReceive<EntityDestroyed>{
+    public sealed class DespawnTimer : IComponent, IReceive<EntityDestroyed>{
         public float Time { get; set; }
         public bool Unscaled { get; }
 

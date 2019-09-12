@@ -47,7 +47,7 @@ namespace PixelComrades {
         }
 
         public bool AddItem(Action item) {
-            Item = item.Entity;
+            Item = item.GetEntity();
             ActionComponent = item;
             OnItemChanged.SafeInvoke(Item);
             return true;
@@ -66,7 +66,7 @@ namespace PixelComrades {
         public Transform EquipTr { get { return null; } }
     }
 
-    public class CurrentActions : IComponent {
+    public sealed class CurrentActions : IComponent {
 
         private CurrentActionSlot[] _actions;
 

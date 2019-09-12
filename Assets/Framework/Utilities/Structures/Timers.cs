@@ -206,7 +206,7 @@ namespace PixelComrades {
         }
 
         public virtual void StartNewTime(float length) {
-            Length = length;
+            _length = length;
             _activated = true;
             _start = TimeManager.TimeUnscaled;
         }

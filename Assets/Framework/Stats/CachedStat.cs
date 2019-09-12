@@ -17,6 +17,12 @@ namespace PixelComrades {
             _stat = EntityController.Get(_entityId)?.Get<StatsContainer>()?.Get<T>(_statId);
         }
 
+        public CachedStat(T stat) {
+            _entityId = stat.Entity;
+            _statId = stat.ID;
+            _stat = EntityController.Get(_entityId)?.Get<StatsContainer>()?.Get<T>(_statId);
+        }
+
         public CachedStat(int entity, T stat) {
             _stat = stat;
             _entityId = entity;

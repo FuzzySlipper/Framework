@@ -2,22 +2,30 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Higher)]
-    public class DefendDamageWithStats : IComponent, IReceiveRef<DamageEvent> {
+    public sealed class DefendDamageWithStats : IComponent, IReceiveRef<DamageEvent> {
 
-        public int Owner { get; set; }
         private List<StatEntry> _stats = new List<StatEntry>();
 
+        public DefendDamageWithStats() {}
+
+        public DefendDamageWithStats(SerializationInfo info, StreamingContext context) {
+            _stats = info.GetValue(nameof(_stats), _stats);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_stats), _stats);
+        }
+        
         public void AddStat(string type, string id, BaseStat stat) {
             var statEntry = FindStat(type);
             if (statEntry == null) {
-                statEntry = new StatEntry();
+                statEntry = new StatEntry(stat);
                 _stats.Add(statEntry);
             }
-            statEntry.Stat = stat;
-            statEntry.Id = id;
             statEntry.DamageType = type;
         }
 
@@ -38,9 +46,6 @@ namespace PixelComrades {
             if (statEntry == null) {
                 return;
             }
-            if (statEntry.Stat == null) {
-                statEntry.Stat = this.GetEntity().Stats.Get(statEntry.Id);
-            }
             if (statEntry.Stat == null || statEntry.Stat.Value <= 0) {
                 return;
             }
@@ -48,19 +53,33 @@ namespace PixelComrades {
             arg.Amount = MathEx.Max(0, arg.Amount - amtDefended);
         }
 
+        [System.Serializable]
         public class StatEntry {
-            public BaseStat Stat;
+            public CachedStat<BaseStat> Stat;
             public string DamageType;
-            public string Id;
+            public StatEntry(){}
+
+            public StatEntry(BaseStat stat) {
+                Stat = new CachedStat<BaseStat>(stat);
+            }
         }
     }
 
     [Priority(Priority.Higher)]
-    public class DefendDamageFlat : IComponent, IReceiveRef<DamageEvent> {
-
-        public int Owner { get; set; }
+    public sealed class DefendDamageFlat : IComponent, IReceiveRef<DamageEvent> {
 
         private List<DefendType> _validTypes = new List<DefendType>();
+
+        public DefendDamageFlat() {
+        }
+
+        public DefendDamageFlat(SerializationInfo info, StreamingContext context) {
+            _validTypes = info.GetValue(nameof(_validTypes), _validTypes);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_validTypes), _validTypes);
+        }
 
         public DefendDamageFlat(string[] validTypes, float amount, float limitAmount = -1f) {
             if (validTypes != null) {
@@ -109,8 +128,9 @@ namespace PixelComrades {
             }
         }
 
+        [System.Serializable]
         public class DefendType {
-            public string Type;
+            public readonly string Type;
             public float Amount;
             public float DefendLimit;
 

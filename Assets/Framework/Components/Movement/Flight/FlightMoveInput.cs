@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightMoveInput : ComponentBase, IReceive<CanMoveStatusChanged>, IReceive<MoveInputMessage>, IReceive<ChangePositionEvent>, IReceive<PhysicsInputMessage>{
+    public class FlightMoveInput : IComponent, IReceive<CanMoveStatusChanged>, IReceive<MoveInputMessage>, IReceive<ChangePositionEvent>, 
+    IReceive<PhysicsInputMessage>{
         
         public Vector3 LookInputVector { get; private set; }
         public Vector3 MoveInputVector { get; private set; }
@@ -27,7 +29,7 @@ namespace PixelComrades {
         }
 
         public void Handle(ChangePositionEvent arg) {
-            Entity.Tr.position = arg.Position;
+            this.GetEntity().Tr.position = arg.Position;
         }
 
         public void Handle(PhysicsInputMessage arg) {
@@ -40,6 +42,16 @@ namespace PixelComrades {
             control.Yaw = LookInputVector.x;
             control.StrafeHorizontal = MoveInputVector.x;
             control.StrafeVertical = MoveInputVector.y;
+        }
+
+        public FlightMoveInput() {}
+
+        public FlightMoveInput(SerializationInfo info, StreamingContext context) {
+            _canMove = info.GetValue(nameof(_canMove), _canMove);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_canMove), _canMove);
         }
     }
 }

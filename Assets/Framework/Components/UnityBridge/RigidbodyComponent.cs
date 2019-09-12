@@ -2,25 +2,38 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class RigidbodyComponent : IComponent, IDisposable {
+    public sealed class RigidbodyComponent : IComponent, IDisposable {
 
-        public int Owner { get; set; }
-        public Rigidbody Rb { get; private set; }
+        private CachedUnityComponent<Rigidbody> _component;
+        public Rigidbody Rb { get { return _component.Component; } }
 
         public RigidbodySettings RigidbodySetup;
 
         public RigidbodyComponent(Rigidbody rb) {
             RigidbodySetup = new RigidbodySettings();
-            Rb = rb;
+            _component = new CachedUnityComponent<Rigidbody>(rb);
             if (Rb != null) {
                 RigidbodySetup.Setup(Rb);
             }
         }
 
+        public RigidbodyComponent(SerializationInfo info, StreamingContext context) {
+            _component = info.GetValue(nameof(_component), _component);
+            RigidbodySetup = new RigidbodySettings();
+            if (Rb != null) {
+                RigidbodySetup.Setup(Rb);
+            }
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_component), _component);
+        }
+        
         public void SetRb(Rigidbody rb) {
-            Rb = rb;
+            _component = new CachedUnityComponent<Rigidbody>(rb);
             if (Rb != null) {
                 RigidbodySetup.Setup(Rb);
             }
@@ -46,7 +59,7 @@ namespace PixelComrades {
 
         public void Dispose() {
             RigidbodySetup = null;
-            Rb = null;
+            _component = null;
         }
     }
 }

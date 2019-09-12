@@ -1,21 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Low)]
-    public class DamageComponent : ComponentBase, IReceive<DamageEvent>, IReceive<HealEvent> {
-        public bool IsDead = false;
+    public class DamageComponent : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
 
+        public DamageComponent(){}
+        public DamageComponent(SerializationInfo info, StreamingContext context) {}
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {}
+        
         public void Handle(DamageEvent msg) {
             var damage = msg.Amount;
             if (damage <= 0) {
                 return;
             }
+            var entity = this.GetEntity();
             float previousValue = 0;
-            var vital = Entity.Stats.GetVital(msg.TargetVital);
+            var vital = entity.Stats.GetVital(msg.TargetVital);
             if (vital == null) {
-                vital = Entity.Stats.GetVital(GameData.Vitals.GetID(msg.TargetVital));
+                vital = entity.Stats.GetVital(GameData.Vitals.GetID(msg.TargetVital));
                 
             }
             if (vital != null) {
@@ -23,34 +28,34 @@ namespace PixelComrades {
                 vital.Current -= msg.Amount;
             }
             if (msg.Amount > 0) {
-                Entity.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.red));
+                entity.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.red));
             }
-            if (vital == null || vital != Entity.Stats.HealthStat || vital.Current > 0.05f) {
+            if (vital == null || vital != entity.Stats.HealthStat || vital.Current > 0.05f) {
                 return;
             }
-            IsDead = true;
-            this.GetEntity().Tags.Add(EntityTags.IsDead);
-            this.GetEntity().Tags.Add(EntityTags.CantMove);
-            this.GetEntity().Post(new DeathEvent(msg.Origin, msg.Target, msg.Amount - previousValue));
+            entity.Tags.Add(EntityTags.IsDead);
+            entity.Tags.Add(EntityTags.CantMove);
+            entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Amount - previousValue));
         }
 
         public void Raise() {
-            IsDead = false;
-            this.GetEntity().Tags.Remove(EntityTags.IsDead);
-            this.GetEntity().Tags.Remove(EntityTags.CantMove);
-            this.GetEntity().Post(new RaiseDead(this.GetEntity()));
+            var entity = this.GetEntity();
+            entity.Tags.Remove(EntityTags.IsDead);
+            entity.Tags.Remove(EntityTags.CantMove);
+            entity.Post(new RaiseDead(this.GetEntity()));
         }
 
         public void Handle(HealEvent arg) {
-            var vital = Entity.Stats.GetVital(arg.TargetVital);
+            var entity = this.GetEntity();
+            var vital = entity.Stats.GetVital(arg.TargetVital);
             if (vital == null) {
-                vital = Entity.Stats.GetVital(GameData.Vitals.GetID(arg.TargetVital));
+                vital = entity.Stats.GetVital(GameData.Vitals.GetID(arg.TargetVital));
             }
             if (vital != null) {
                 vital.Current += arg.Amount;
                 if (arg.Amount > 0) {
                     Color color = arg.TargetVital == Stats.Health ? Color.green : Color.yellow;
-                    Entity.Post(new CombatStatusUpdate(arg.Amount.ToString("F1"), color));
+                    entity.Post(new CombatStatusUpdate(arg.Amount.ToString("F1"), color));
                 }
             }
         }

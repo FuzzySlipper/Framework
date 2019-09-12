@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class VelocityMover : IComponent {
+    public sealed class VelocityMover : IComponent {
 
         public float CurrentSpeed;
 
+        public VelocityMover(){}
         public VelocityMover(SerializationInfo info, StreamingContext context) {
             CurrentSpeed = info.GetValue(nameof(CurrentSpeed), CurrentSpeed);
         }

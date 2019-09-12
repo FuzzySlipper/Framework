@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightPlayerInput : ComponentBase {
+    public class FlightPlayerInput : IComponent {
 
         public PlayerInput Input;
         public string Boost;
@@ -23,6 +24,12 @@ namespace PixelComrades {
             PitchAxis = pitchAxis;
             YawAxis = yawAxis;
             RollAxis = rollAxis;
+        }
+
+        public FlightPlayerInput(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
 
         public void UpdateControl(FlightControl control) {
@@ -67,7 +74,7 @@ namespace PixelComrades {
                     }
                 }
                 else {
-                    control.TurnTowardsPoint(control.Entity.Tr, control.GotoPos);
+                    control.TurnTowardsPoint(control.GetEntity().Tr, control.GotoPos);
                 }
             }
             else {

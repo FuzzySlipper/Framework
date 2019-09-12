@@ -109,18 +109,18 @@ namespace PixelComrades {
 
         public void UpdateDebug(PathfindingDebugging debug) {
             if (Pathfinder.Controller.Path == null) {
-                debug.LineR.positionCount = 0;
+                debug.LineR.Component.positionCount = 0;
             }
             else {
                 var cnt = Pathfinder.Controller.Path.Count;
-                debug.LineR.positionCount = cnt;
+                debug.LineR.Component.positionCount = cnt;
                 for (int p = 0; p < cnt; p++) {
-                    debug.LineR.SetPosition(p, Pathfinder.Controller.Path[p]);
+                    debug.LineR.Component.SetPosition(p, Pathfinder.Controller.Path[p]);
                 }
             }
-            debug.Tm.text = Pathfinder.CurrentStatus.ToString();
+            debug.Tm.Component.text = Pathfinder.CurrentStatus.ToString();
             if (Pathfinder.IsPathFinished) {
-                debug.Tm.text += " At Goal";
+                debug.Tm.Component.text += " At Goal";
             }
         }
 

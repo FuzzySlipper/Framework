@@ -1,16 +1,25 @@
-﻿using UnityEngine;
+﻿using System.Runtime.Serialization;
+using UnityEngine;
 
 namespace PixelComrades {
 
-    public class ImpactRendererComponent : ComponentBase {
-        private IImpactRenderer _renderer;
+    public class ImpactRendererComponent : IComponent {
+        private CachedGenericComponent<IImpactRenderer> _renderer;
 
         public ImpactRendererComponent(IImpactRenderer renderer) {
-            _renderer = renderer;
+            _renderer = new CachedGenericComponent<IImpactRenderer>(renderer);
         }
 
         public void PlayAnimation(SpriteAnimation animation, Color color) {
-            _renderer.PlayAnimation(animation, color);
+            _renderer.Component.PlayAnimation(animation, color);
+        }
+
+        public ImpactRendererComponent(SerializationInfo info, StreamingContext context) {
+            _renderer = info.GetValue(nameof(_renderer), _renderer);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_renderer), _renderer);
         }
     }
 

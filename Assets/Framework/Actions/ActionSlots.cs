@@ -94,8 +94,9 @@ namespace PixelComrades {
             Action = action;
             _item = actionEntity;
             actionEntity.Get<InventoryItem>(i => i.Inventory?.Remove(actionEntity));
-            _item.ParentId = SlotOwner.Owner;
-            var msg = new EquipmentChanged(SlotOwner.Entity, this);
+            var owner = SlotOwner.GetEntity();
+            _item.ParentId = owner;
+            var msg = new EquipmentChanged(owner, this);
             _item.Post(msg);
             _item.AddObserver(this);
             if (OnItemChanged != null) {
@@ -117,7 +118,7 @@ namespace PixelComrades {
         private void ClearEquippedItem() {
             if (_item != null) {
                 if (Action.EquippedSlot >= 0) {
-                    SlotOwner.Entity.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
+                    SlotOwner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
                 }
                 Action = null;
                 _item.RemoveObserver(this);

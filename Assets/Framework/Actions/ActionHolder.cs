@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [System.Serializable]
     public class ActionHolder {
         public int LastRoll { get; private set; }
         public int Chance; // this needs to be in range 0 -100

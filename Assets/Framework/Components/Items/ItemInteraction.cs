@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ItemInteraction : IComponent {
+    public sealed class ItemInteraction : IComponent {
 
         public Func<Entity, bool> OnInteraction;
 

@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FloatingMessages : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
-        public int Owner { get; set; }
+    public sealed class FloatingMessages : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
+        
+        public FloatingMessages() {}
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {}
+        public FloatingMessages(SerializationInfo info, StreamingContext context) {}
 
         public void Handle(DamageEvent arg) {
             UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), this.GetEntity().GetPosition(), Color.red);

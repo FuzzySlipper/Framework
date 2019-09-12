@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightEngine : ComponentBase {
+    public class FlightEngine : IComponent {
 
         public Vector3 AvailableBoostForces;
         public Vector3 AvailableRotationForces;
@@ -21,6 +22,23 @@ namespace PixelComrades {
             AvailableRotationForces = Config.DefaultRotationForces;
             AvailableBoostForces = Config.DefaultBoostForces;
             MaxTranslationForces = Config.DefaultTranslationForces * Config.MaxMulti;
+        }
+
+        public FlightEngine(SerializationInfo info, StreamingContext context) {
+            Config = ItemPool.LoadAsset<FlightEngineConfig>(info.GetValue(nameof(Config), ""));
+            AvailableBoostForces = info.GetValue(nameof(AvailableBoostForces), AvailableBoostForces);
+            AvailableRotationForces = info.GetValue(nameof(AvailableRotationForces), AvailableRotationForces);
+            AvailableTranslationForces = info.GetValue(nameof(AvailableTranslationForces), AvailableTranslationForces);
+            MaxTranslationForces = info.GetValue(nameof(MaxTranslationForces), MaxTranslationForces);
+            RefreshEngine();
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Config), ItemPool.GetAssetLocation(Config));
+            info.AddValue(nameof(AvailableBoostForces), AvailableBoostForces);
+            info.AddValue(nameof(AvailableRotationForces), AvailableRotationForces);
+            info.AddValue(nameof(AvailableTranslationForces), AvailableTranslationForces);
+            info.AddValue(nameof(MaxTranslationForces), MaxTranslationForces);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ItemInventory : IComponent, IEntityContainer {
+    public sealed class ItemInventory : IComponent, IEntityContainer {
         
         public event System.Action OnRefreshItemList;
 
@@ -13,7 +13,7 @@ namespace PixelComrades {
         public bool IsFull { get { return _array.IsFull; } }
         public int Count { get { return _array.UsedCount; } }
         public int Max { get; private set; }
-        public virtual bool RequiresInventoryComponent { get { return true; } }
+        public Entity Owner { get { return this.GetEntity(); } }
         public Entity this[int index] {
             get {
                 return _array[index];
@@ -39,7 +39,7 @@ namespace PixelComrades {
             return _array.Contains(item);
         }
 
-        public virtual bool Add(Entity entity) {
+        public bool Add(Entity entity) {
             if (!CanAdd(entity)) {
                 return false;
             }
@@ -51,7 +51,7 @@ namespace PixelComrades {
             return true;
         }
 
-        public virtual bool Add(Entity entity, int index) {
+        public bool Add(Entity entity, int index) {
             if (!CanAdd(entity)) {
                 return false;
             }
@@ -69,17 +69,13 @@ namespace PixelComrades {
 
         private bool SetupNewEntity(Entity entity) {
             InventoryItem containerItem = entity.Get<InventoryItem>();
-            if (RequiresInventoryComponent) {
-                if (containerItem == null) {
-                    return false;
-                }
-                if (containerItem.Inventory != null) {
-                    containerItem.Inventory.Remove(entity);
-                }
+            if (containerItem == null) {
+                return false;
             }
-            if (containerItem != null) {
-                containerItem.SetContainer(this);
+            if (containerItem.Inventory != null) {
+                containerItem.Inventory.Remove(entity);
             }
+            containerItem.SetContainer(this);
             entity.ParentId = this.GetEntity();
             var msg = new ContainerStatusChanged(this, entity);
             entity.Post(msg);
@@ -116,12 +112,12 @@ namespace PixelComrades {
             return entity.HasComponent<InventoryItem>();
         }
 
-        public virtual void Clear() {
+        public void Clear() {
             _array.Clear();
             OnRefreshItemList.SafeInvoke();
         }
 
-        public virtual void Destroy() {
+        public void Destroy() {
             for (int i = 0; i < Count; i++) {
                 this[i].Destroy();
             }

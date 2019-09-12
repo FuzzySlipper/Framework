@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     
     [Priority(Priority.Highest)]
-    public class BlockDamage : IComponent, IReceiveRef<DamageEvent> {
+    public sealed class BlockDamage : IComponent, IReceiveRef<DamageEvent> {
 
         public List<Func<DamageEvent, bool>> Dels = new List<Func<DamageEvent, bool>>();
 
@@ -21,6 +21,8 @@ namespace PixelComrades {
                 }
             }
         }
+        
+        public BlockDamage(){}
 
         public BlockDamage(SerializationInfo info, StreamingContext context) {
         }

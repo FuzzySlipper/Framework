@@ -7,8 +7,8 @@ namespace PixelComrades {
 
         public VitalStat() {}
 
-        public VitalStat(string label, string id, float baseValue, float recovery) : base(label, id, baseValue) {
-            _recoveryPercent = new BaseStat("RecoverRate", recovery);
+        public VitalStat(int entity, string label, string id, float baseValue, float recovery) : base(entity, label, id, baseValue) {
+            _recoveryPercent = new BaseStat(entity, "RecoverRate", recovery);
         }
 
         private float _current;

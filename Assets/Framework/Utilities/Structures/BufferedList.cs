@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [System.Serializable]
     public class BufferedList<T> {
 
-        private int _currentIndex = 0;
-        private ManagedArray<T>[] _list = new ManagedArray<T>[2];
+        [SerializeField] private int _currentIndex = 0;
+        [SerializeField] private ManagedArray<T>[] _list = new ManagedArray<T>[2];
 
         public BufferedList(int size = 10) {
             _list[0] = new ManagedArray<T>(size);

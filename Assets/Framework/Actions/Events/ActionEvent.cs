@@ -11,7 +11,7 @@ namespace PixelComrades {
         public int Index { get; }
         public Transform SpawnPivot;
 
-        public Entity ActionEntity { get { return Action.Entity; } }
+        public Entity ActionEntity { get { return Action.GetEntity(); } }
         public bool IsLastIndex { get { return Action.Sequence.Count - 1 == Index; } }
         public ActionLayer Current { get { return Index >= 0 && Index < Action.Sequence.Count ? Action.Sequence[Index] : null; } }
 

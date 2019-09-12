@@ -73,7 +73,7 @@ namespace PixelComrades {
             }
             _item = item;
             item.Get<InventoryItem>(i => i.Inventory?.Remove(item));
-            _item.ParentId = SlotOwner.Owner;
+            _item.ParentId = SlotOwner.GetEntity();
             equip.Equip(this);
             CurrentEquipment = equip;
             SetStats();
@@ -119,7 +119,7 @@ namespace PixelComrades {
         private void ClearEquippedItem(bool isSwap) {
             if (_item != null) {
                 ClearStats();
-                _item.ClearParent(SlotOwner.Owner);
+                _item.ClearParent(SlotOwner.GetEntity());
                 _item.Get<Equipment>().UnEquip();
                 _item.RemoveObserver(SlotOwner);
                 _item.Post(new EquipmentChanged(null, null));

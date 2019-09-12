@@ -3,12 +3,14 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
-    public struct SpriteAnimationComponent : IComponent {
-        public int Owner { get; set; }
-        public SpriteRenderer Renderer { get; }
+    public class SpriteAnimationComponent : IComponent {
+        
+        private CachedUnityComponent<SpriteRenderer> _component;
+        public SpriteRenderer Renderer { get { return _component.Component; } }
         public SpriteAnimation Animation { get; }
         public bool Unscaled { get;}
         public BillboardMode Billboard { get; }
@@ -16,9 +18,29 @@ namespace PixelComrades {
         public float NextUpdateTime;
         public short CurrentFrameIndex;
         public float LastAngleHeight;
+        
+        public SpriteAnimationComponent(SerializationInfo info, StreamingContext context) {
+            _component = info.GetValue(nameof(_component), _component);
+            Unscaled = info.GetValue(nameof(Unscaled), Unscaled);
+            Billboard = info.GetValue(nameof(Billboard), Billboard);
+            NextUpdateTime = info.GetValue(nameof(NextUpdateTime), NextUpdateTime);
+            CurrentFrameIndex = info.GetValue(nameof(CurrentFrameIndex), CurrentFrameIndex);
+            LastAngleHeight = info.GetValue(nameof(LastAngleHeight), LastAngleHeight);
+            Animation = ItemPool.LoadAsset<SpriteAnimation>(info.GetValue(nameof(Animation), ""));
+        }
 
-        public SpriteAnimationComponent(SpriteRenderer renderer, SpriteAnimation animation, bool unscaled, BillboardMode billboard) : this() {
-            Renderer = renderer;
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_component), _component);
+            info.AddValue(nameof(Unscaled), Unscaled);
+            info.AddValue(nameof(Billboard), Billboard);
+            info.AddValue(nameof(NextUpdateTime), NextUpdateTime);
+            info.AddValue(nameof(CurrentFrameIndex), CurrentFrameIndex);
+            info.AddValue(nameof(LastAngleHeight), LastAngleHeight);
+            info.AddValue(nameof(Animation), ItemPool.GetAssetLocation(Animation));
+        }
+
+        public SpriteAnimationComponent(SpriteRenderer renderer, SpriteAnimation animation, bool unscaled, BillboardMode billboard) {
+            _component = new CachedUnityComponent<SpriteRenderer>(renderer);
             Animation = animation;
             Unscaled = unscaled;
             Billboard = billboard;
@@ -35,14 +57,13 @@ namespace PixelComrades {
         public bool Active { get { return CurrentFrameIndex >= 0; } }
     }
 
-    public class DirectionalSpriteAnimationComponent : ComponentBase, IModelComponent, IAnimator, IDisposable {
+    public class DirectionalSpriteAnimationComponent : IComponent, IModelComponent, IAnimator, IDisposable {
         private BillboardMode _billboard;
         private bool _unscaled;
-        private SpriteRenderer _renderer;
-        private SpriteCollider _spriteCollider;
-        private Transform _spriteBaseTr;
-        private Transform _spriteTr;
-        
+        private CachedUnityComponent<SpriteRenderer> _renderer;
+        private CachedUnityComponent<SpriteCollider> _spriteCollider;
+        private CachedTransform _spriteBaseTr;
+        private CachedTransform _spriteTr;
         private SpriteFacing _facing;
         private bool _backwards;
 
@@ -52,9 +73,10 @@ namespace PixelComrades {
         private AnimationFrame _currentFrame;
         private float _lastAngleHeight;
 
+        private List<KeyValuePair<string, string>> _animDict = new List<KeyValuePair<string, string>>();
+        private Dictionary<string, DirectionalAnimationClipHolder> _animDictionary = new Dictionary<string, DirectionalAnimationClipHolder>();
         private DirectionalAnimationClipHolder _currentAnimation;
         private string _currentClipID;
-        private Dictionary<string, DirectionalAnimationClipHolder> _animDictionary = new Dictionary<string, DirectionalAnimationClipHolder>();
         private MaterialPropertyBlock[] _blocks = new MaterialPropertyBlock[1];
         private Renderer[] _renderers = new Renderer[1];
         private Queue<DirectionalAnimationClipHolder> _animationClipQueue = new Queue<DirectionalAnimationClipHolder>();
@@ -69,7 +91,7 @@ namespace PixelComrades {
         public float CurrentAnimationLength { get { return _currentAnimation?.Length ?? 1f; } }
         public float CurrentAnimationRemaining { get { return _currentAnimation?.Remaining ?? 0f; } }
         public Vector3 GetEventPosition { get; private set; }
-        public Quaternion GetEventRotation { get { return _spriteBaseTr.rotation; } }
+        public Quaternion GetEventRotation { get { return _spriteBaseTr.Tr.rotation; } }
         public SpriteCollider SpriteCollider { get => _spriteCollider; }
         public DirectionsEight Orientation { get => _orientation; }
         public string CurrentAnimationEvent { get; private set; }
@@ -78,25 +100,72 @@ namespace PixelComrades {
                 if (_renderer == null) {
                     return null;
                 }
-                _renderer.GetPropertyBlock(_blocks[0]);
+                _renderer.Component.GetPropertyBlock(_blocks[0]);
                 return _blocks;
             }
         }
 
-        public DirectionalSpriteAnimationComponent(SpriteHolder animator, Dictionary<string, List<DirectionalAnimation>> dict) {
+        public DirectionalSpriteAnimationComponent(SpriteHolder animator, Dictionary<string, List<DirectionalAnimation>> dict,
+            List<KeyValuePair<string, string>> animDict) {
             _unscaled = animator.Unscaled;
             _billboard = animator.Billboard;
-            _renderer = animator.Renderer;
-            _spriteBaseTr = animator.SpriteBaseTr;
-            _spriteTr = animator.SpriteTr;
+            _renderer = new CachedUnityComponent<SpriteRenderer>(animator.Renderer);
+            _spriteBaseTr = new CachedTransform(animator.SpriteBaseTr);
+            _spriteTr = new CachedTransform(animator.SpriteTr);
             _facing = animator.Facing;
             _backwards = animator.Backwards;
+            _spriteCollider = new CachedUnityComponent<SpriteCollider>(_renderer.Component.GetComponent<SpriteCollider>());
+            Setup(dict);
+        }
+        
+        public DirectionalSpriteAnimationComponent(SerializationInfo info, StreamingContext context) {
+            _unscaled = info.GetValue(nameof(_unscaled), _unscaled);
+            _billboard = info.GetValue(nameof(_billboard), _billboard);
+            _renderer = info.GetValue(nameof(_renderer), _renderer);
+            _spriteBaseTr = info.GetValue(nameof(_spriteBaseTr), _spriteBaseTr);
+            _spriteTr = info.GetValue(nameof(_spriteTr), _spriteTr);
+            _facing = info.GetValue(nameof(_facing), _facing);
+            _backwards = info.GetValue(nameof(_backwards), _backwards);
+            _spriteCollider = info.GetValue(nameof(_spriteCollider), _spriteCollider);
+            _currentClipID = info.GetValue(nameof(_currentClipID), _currentClipID);
+            _animDict = info.GetValue(nameof(_animDict), _animDict);
 
+            var currentSet = new Dictionary<string, List<DirectionalAnimation>>();
+            for (int i = 0; i < _animDict.Count; i++) {
+                var line = _animDict[i];
+                if (!currentSet.TryGetValue(line.Key, out var setList)) {
+                    setList = new List<DirectionalAnimation>();
+                    currentSet.Add(line.Key, setList);
+                }
+                var animation = ItemPool.LoadAsset<DirectionalAnimation>(UnityDirs.CharacterAnimations, line.Value);
+                if (animation != null) {
+                    setList.Add(animation);
+                }
+            }
+            Setup(currentSet);
+            if (!string.IsNullOrEmpty(_currentClipID)) {
+                PlayAnimation(_currentClipID, false, null);
+            }
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_unscaled), _unscaled);
+            info.AddValue(nameof(_billboard), _billboard);
+            info.AddValue(nameof(_renderer), _renderer);
+            info.AddValue(nameof(_spriteBaseTr), _spriteBaseTr);
+            info.AddValue(nameof(_spriteTr), _spriteTr);
+            info.AddValue(nameof(_facing), _facing);
+            info.AddValue(nameof(_backwards), _backwards);
+            info.AddValue(nameof(_spriteCollider), _spriteCollider);
+            info.AddValue(nameof(_currentClipID), _playing ? _currentClipID : "");
+            info.AddValue(nameof(_animDict), _animDict);
+        }
+
+        private void Setup(Dictionary<string, List<DirectionalAnimation>> dict) {
             _frameTimer = new Timer(0, _unscaled);
             _renderers[0] = _renderer;
-            _spriteCollider = _renderer.GetComponent<SpriteCollider>();
             _blocks[0] = new MaterialPropertyBlock();
-            _renderer.GetPropertyBlock(_blocks[0]);
+            _renderer.Component.GetPropertyBlock(_blocks[0]);
             foreach (var animList in dict) {
                 if (!_animDictionary.TryGetValue(animList.Key, out var holder)) {
                     _animDictionary.Add(animList.Key, new DirectionalAnimationClipHolder(animList.Key, animList.Value.ToArray()));
@@ -106,7 +175,6 @@ namespace PixelComrades {
                 list.AddRange(animList.Value);
                 holder.Clips = list.ToArray();
             }
-            CheckMoving();
         }
 
         public void Dispose() {
@@ -123,13 +191,14 @@ namespace PixelComrades {
         }
 
         public void Update(float dt) {
+            var entity = this.GetEntity();
             if (_currentAnimation == null || IsSimpleClip) {
-                CheckMoving();
+                CheckMoving(entity);
             }
             _billboard.Apply(_spriteTr, _backwards, ref _lastAngleHeight);
             var orientation = SpriteFacingControl.GetCameraSide(_facing, _spriteTr, _spriteBaseTr, 5, out var inMargin);
             if (_orientation == orientation || (inMargin && (orientation.IsAdjacent(_orientation)))) {
-                if (CheckFrameUpdate()) {
+                if (CheckFrameUpdate(entity)) {
                     UpdateSpriteFrame();
                 }
                 return;
@@ -138,17 +207,17 @@ namespace PixelComrades {
             UpdateSpriteFrame();
         }
 
-        private void CheckMoving() {
-            if (Entity == null || Entity.IsDead()) {
+        private void CheckMoving(Entity entity) {
+            if (entity == null || entity.IsDead()) {
                 return;
             }
             if (_currentAnimation == null) {
-                PlayAnimation(Entity.Tags.Contain(EntityTags.Moving) ? AnimationIds.Move : AnimationIds.Idle, false, null);
+                PlayAnimation(entity.Tags.Contain(EntityTags.Moving) ? AnimationIds.Move : AnimationIds.Idle, false, null);
             }
-            else if (_currentClipID == AnimationIds.Move && !Entity.Tags.Contain(EntityTags.Moving)) {
+            else if (_currentClipID == AnimationIds.Move && !entity.Tags.Contain(EntityTags.Moving)) {
                 PlayAnimation(AnimationIds.Idle, false, null);
             }
-            else if (_currentClipID == AnimationIds.Idle && Entity.Tags.Contain(EntityTags.Moving)) {
+            else if (_currentClipID == AnimationIds.Idle && entity.Tags.Contain(EntityTags.Moving)) {
                 PlayAnimation(AnimationIds.Move, false, null);
             }
         }
@@ -157,7 +226,7 @@ namespace PixelComrades {
             var facing = _orientation;
             if (_facing.RequiresFlipping()) {
                 facing = _orientation.GetFlippedSide();
-                _renderer.flipX = _orientation.IsFlipped();
+                _renderer.Component.flipX = _orientation.IsFlipped();
             }
             if (_currentAnimation == null) {
                 return;
@@ -166,9 +235,9 @@ namespace PixelComrades {
             if (sprite == null) {
                 return;
             }
-            _renderer.sprite = sprite;
+            _renderer.Component.sprite = sprite;
             if (_spriteCollider != null) {
-                _spriteCollider.UpdateCollider();
+                _spriteCollider.Component.UpdateCollider();
             }
         }
 
@@ -176,7 +245,7 @@ namespace PixelComrades {
             if (_renderer == null) {
                 return;
             }
-            _renderer.enabled = status;
+            _renderer.Component.enabled = status;
         }
 
         public bool IsAnimationComplete(string clip) {
@@ -217,23 +286,23 @@ namespace PixelComrades {
             _currentClipID = clipHolder.Id;
             _currentAnimation = clipHolder;
             clipHolder.ResetBools();
-            GetEventPosition = _spriteBaseTr.position;
+            GetEventPosition = _spriteBaseTr.Tr.position;
             _currentFrameIndex = -1;
             _playing = true;
             _frameTimer.Cancel();
             _blocks[0].SetTexture("_BumpMap", clipHolder.CurrentClip.NormalMap);
             _blocks[0].SetTexture("_EmissionMap", clipHolder.CurrentClip.EmissiveMap);
             if (clipHolder.CurrentClip.EmissiveMap != null) {
-                _renderer.material.EnableKeyword("_EMISSION");
+                _renderer.Component.material.EnableKeyword("_EMISSION");
             }
             else {
-                _renderer.material.DisableKeyword("_EMISSION");
+                _renderer.Component.material.DisableKeyword("_EMISSION");
             }
-            _renderer.SetPropertyBlock(_blocks[0]);
+            _renderer.Component.SetPropertyBlock(_blocks[0]);
         }
 
-        public bool CheckFrameUpdate() {
-            if (!_playing || _frameTimer.IsActive || _currentAnimation == null || Entity.Tags.IsStunned) {
+        private bool CheckFrameUpdate(Entity entity) {
+            if (!_playing || _frameTimer.IsActive || _currentAnimation == null || entity.Tags.IsStunned) {
                 return false;
             }
             _currentFrameIndex++;
@@ -246,7 +315,7 @@ namespace PixelComrades {
                     return true;
                 }
                 _playing = false;
-                if (!ClipFinished()) {
+                if (!ClipFinished(entity)) {
                     return false;
                 }
                 _currentFrameIndex = 0;
@@ -262,7 +331,7 @@ namespace PixelComrades {
                     CurrentAnimationEvent = _currentFrame.EventName;
                 }
                 GetEventPosition =_currentAnimation.CurrentClip.GetEventPosition(_renderer, _currentFrame);
-                Debug.DrawRay(GetEventPosition, _spriteBaseTr.forward, Color.red, 5f);
+                Debug.DrawRay(GetEventPosition, _spriteBaseTr.Tr.forward, Color.red, 5f);
             }
             return true;
         }
@@ -275,17 +344,17 @@ namespace PixelComrades {
             //_frameTimer.StartNewTime(_currentAnimation.CurrentClip.FrameTime * _currentFrame?.Length ?? 1);
         }
 
-        private bool ClipFinished() {
+        private bool ClipFinished(Entity entity) {
             _currentAnimation.EventTriggered = true;
             _currentAnimation = null;
-            if (Entity.IsDead()) {
+            if (entity.IsDead()) {
                 return false;
             }
             if (_animationClipQueue.Count > 0) {
                 PlayAnimation(_animationClipQueue.Dequeue());
             }
             else {
-                CheckMoving();
+                CheckMoving(entity);
             }
             return true;
         }

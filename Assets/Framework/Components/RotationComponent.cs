@@ -5,12 +5,15 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class RotationComponent : ComponentBase {
+    public class RotationComponent : IComponent {
 
         [SerializeField] private Float4 _rotation;
 
         public Quaternion Rotation {
-            get { return Entity?.Tr != null ? Entity.Tr.rotation : _rotation.toQuaternion(); }
+            get {
+                var entity = this.GetEntity();
+                return entity?.Tr != null ? entity.Tr.rotation : _rotation.toQuaternion();
+            }
         }
 
         public RotationComponent() {}

@@ -62,7 +62,7 @@ namespace PixelComrades {
         Merchant = 3,
     }
 
-    public class MessageEventReceiver<T> : IComponent, IReceive<T> where T : IEntityMessage {
+    public sealed class MessageEventReceiver<T> : IComponent, IReceive<T> where T : IEntityMessage {
 
         private int _messageKitMessage;
         public MessageEventReceiver(int messageKitMessage) {

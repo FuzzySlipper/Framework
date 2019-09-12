@@ -35,12 +35,12 @@ namespace PixelComrades {
         }
 
         public void Setup(GameObject obj) {
-            Model.c.Model = obj.GetComponent<ModelWrapper>();
+            Model.c.Set(obj.GetComponent<ModelWrapper>());
             Entity.Tr = obj.transform;
         }
 
         public void Clear() {
-            Model.c.Model = null;
+            Model.c.Clear();
             Entity.Tr = null;
         }
 

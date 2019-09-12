@@ -2,11 +2,12 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
         
     [System.Serializable]
-    public class SimplePathfindingAgent : ComponentBase, IDisposable, IReceive<ChangePositionEvent> {
+    public class SimplePathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
 
         public Point3 CurrentPos;
         public PathfindingStatus CurrentStatus = PathfindingStatus.Created;
@@ -36,26 +37,27 @@ namespace PixelComrades {
             _repathRate = repathRate;
         }
 
-        protected override void SetEntity(Entity entity) {
-            base.SetEntity(entity);
-            if (entity != null) {
-                _moveSpeed = new CachedComponent<MoveSpeed>();
-            }
+        public SimplePathfindingAgent(SerializationInfo info, StreamingContext context) {
+            _repathRate = info.GetValue(nameof(_repathRate), _repathRate);
+            _grid = World.Get<PathfindingSystem>().Grid;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_repathRate), _repathRate);
         }
 
         public void Dispose() {
             for (int i = 0; i < _currentNodePath.Count; i++) {
-                _grid.SetAgentCurrentPath(_currentNodePath[i], Owner, false);
+                _grid.SetAgentCurrentPath(_currentNodePath[i], this.GetEntity(), false);
             }
             _currentNodePath.Clear();
             if (_currentRequest != null) {
                 _currentRequest.Dispose();
             }
-            _grid.SetStationaryAgent(CurrentPos, Entity, false);
+            _grid.SetStationaryAgent(CurrentPos, this.GetEntity(), false);
             _currentRequest = null;
             _moveSpeed = null;
             _grid = null;
-            Owner = -1;
         }
 
         public void CancelPath() {
@@ -63,31 +65,33 @@ namespace PixelComrades {
             CurrentStatus = PathfindingStatus.NoPath;
             MovementLerp = 0;
             for (int i = 0; i < _currentNodePath.Count; i++) {
-                _grid.SetAgentCurrentPath(_currentNodePath[i], Owner, false);
+                _grid.SetAgentCurrentPath(_currentNodePath[i], this.GetEntity(), false);
             }
             _currentNodePath.Clear();
         }
 
         public void Stop() {
-            if (Entity.Tags.Contain(EntityTags.Moving)) {
-                Entity.Tags.Remove(EntityTags.Moving);
+            var entity = this.GetEntity();
+            if (entity.Tags.Contain(EntityTags.Moving)) {
+                entity.Tags.Remove(EntityTags.Moving);
             }
         }
 
         public void SetMoving() {
             CurrentStatus = PathfindingStatus.Moving;
-            if (!Entity.Tags.Contain(EntityTags.Moving)) {
-                Entity.Tags.Add(EntityTags.Moving);
+            var entity = this.GetEntity();
+            if (!entity.Tags.Contain(EntityTags.Moving)) {
+                entity.Tags.Add(EntityTags.Moving);
             }
         }
 
         public void ReachedDestination() {
             CancelPath();
-            _grid.SetStationaryAgent(CurrentPos, Entity, true);
+            _grid.SetStationaryAgent(CurrentPos, this.GetEntity(), true);
         }
 
         public bool TryEnterNextNode() {
-            if (!_grid.CanAgentEnter(Entity, GridTarget, IsLastIndex)) {
+            if (!_grid.CanAgentEnter(this.GetEntity(), GridTarget, IsLastIndex)) {
                 CurrentStatus = PathfindingStatus.WaitingOnNode;
                 Stop();
                 return false;
@@ -98,15 +102,16 @@ namespace PixelComrades {
 
         public void SetPosition(Point3 pos) {
             CurrentPos = pos;
-            if (Entity.Tr != null) {
-                Entity.Tr.position = pos.toVector3() + new Vector3(0, -(Game.MapCellSize * 0.5f), 0);
+            var entity = this.GetEntity();
+            if (entity.Tr != null) {
+                entity.Tr.position = pos.toVector3() + new Vector3(0, -(Game.MapCellSize * 0.5f), 0);
             }
         }
 
         public void SearchPath() {
             RepathTime = Mathf.Infinity;
             CurrentStatus = PathfindingStatus.WaitingOnPath;
-            _currentRequest = PathfindingRequest.Create(_grid, Entity, CurrentPos, End, PathCompleted, IsOversized, _currentNodePath);
+            _currentRequest = PathfindingRequest.Create(_grid, this.GetEntity(), CurrentPos, End, PathCompleted, IsOversized, _currentNodePath);
         }
 
         public void SetEnd(Point3 pos) {
@@ -131,9 +136,10 @@ namespace PixelComrades {
             PreviousTarget = _currentNodePath[0].toVector3() + moveOffset;
             CurrentTarget = _currentNodePath[1].toVector3() + moveOffset;
             MovementLerp = 0f;
-            if (Vector3.Distance(PreviousTarget, Entity.Tr.position) > 0.1f) {
-                MovementLerp = Vector3.Distance(Entity.Tr.position, CurrentTarget) * (_moveSpeed.c?.Speed ?? 1);
-                PreviousTarget = Entity.Tr.position;
+            var entity = this.GetEntity();
+            if (Vector3.Distance(PreviousTarget, entity.Tr.position) > 0.1f) {
+                MovementLerp = Vector3.Distance(entity.Tr.position, CurrentTarget) * (_moveSpeed.c?.Speed ?? 1);
+                PreviousTarget = entity.Tr.position;
             }
             GridTarget = _currentNodePath[1];
             CurrentStatus = PathfindingStatus.PathReceived;
@@ -159,7 +165,8 @@ namespace PixelComrades {
                 _currentRequest.Dispose();
             }
             _currentRequest = null;
-            if (Entity == null) {
+            var entity = this.GetEntity();
+            if (entity == null) {
                 return;
             }
             switch (result) {
@@ -181,7 +188,7 @@ namespace PixelComrades {
                 default:
                     SetRepathTimer(true);
                     CurrentStatus = PathfindingStatus.InvalidPath;
-                    Entity.Post(new StatusUpdate(result.ToString()));
+                    entity.Post(new StatusUpdate(result.ToString()));
                     break;
             }
         }

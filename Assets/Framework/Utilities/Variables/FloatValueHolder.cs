@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using PixelComrades;
 using UnityEngine;
 using Action = System.Action;
@@ -8,9 +9,9 @@ using Action = System.Action;
 public class FloatValueHolder {
     
     public event Action OnResourceChanged;
-    private float _value = 0f;
-    private int _maxValue = 0;
-    private int _minValue = 0;
+    [SerializeField] private float _value = 0f;
+    [SerializeField] private int _maxValue = 0;
+    [SerializeField] private int _minValue = 0;
 
     public float Value { get { return _value; } }
     public int MaxValue { get => _maxValue; }
@@ -69,9 +70,9 @@ public class IntValueHolder {
     
     public event Action OnResourceChanged;
 
-    private int _value = 0;
-    private int _maxValue = 0;
-    private int _minValue = 0;
+    [SerializeField] private int _value = 0;
+    [SerializeField] private int _maxValue = 0;
+    [SerializeField] private int _minValue = 0;
 
     public int Value { get { return _value; } }
     public int MaxValue { get => _maxValue; }
@@ -128,7 +129,7 @@ public class IntValueHolder {
 [System.Serializable]
 public class IntValueCollection {
 
-    private Dictionary<string, IntValueHolder> _valueCollections = new Dictionary<string, IntValueHolder>();
+    [SerializeField] private Dictionary<string, IntValueHolder> _valueCollections = new Dictionary<string, IntValueHolder>();
 
     public IntValueHolder GetHolder(string id) {
         if (!_valueCollections.TryGetValue(id, out var holder)) {
@@ -158,7 +159,7 @@ public class IntValueCollection {
 [System.Serializable]
 public class FloatValueCollection {
 
-    private Dictionary<string, FloatValueHolder> _valueCollections = new Dictionary<string, FloatValueHolder>();
+    [SerializeField] private Dictionary<string, FloatValueHolder> _valueCollections = new Dictionary<string, FloatValueHolder>();
 
     public FloatValueHolder GetHolder(string id) {
         if (!_valueCollections.TryGetValue(id, out var holder)) {
@@ -187,8 +188,8 @@ public class FloatValueCollection {
 
 public class FixedSortedArray<T>  {
 
-    private T[] _values;
-    private int _index = 0;
+    [SerializeField] private T[] _values;
+    [SerializeField] private int _index = 0;
 
     public T[] Values { get { return _values; } }
 
@@ -221,7 +222,7 @@ public class FixedSortedArray<T>  {
 }
 
 [System.Serializable]
-public class ValueHolder<T> where T : struct {
+public class ValueHolder<T> : ISerializable  where T : struct {
 
     public event Action OnResourceChanged;
 
@@ -237,6 +238,20 @@ public class ValueHolder<T> where T : struct {
         DefaultValue = defaultValue;
         Value = defaultValue;
         OnResourceChanged += del;
+    }
+
+    public ValueHolder(SerializationInfo info, StreamingContext context) {
+        Value = info.GetValue(nameof(Value), Value);
+        DefaultValue = info.GetValue(nameof(DefaultValue), DefaultValue);
+        _dictionary = info.GetValue(nameof(_dictionary), _dictionary);
+        _keys = info.GetValue(nameof(_keys), _keys);
+    }
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context) {
+        info.AddValue(nameof(Value), Value);
+        info.AddValue(nameof(DefaultValue), DefaultValue);
+        info.AddValue(nameof(_dictionary), _dictionary);
+        info.AddValue(nameof(_keys), _keys);
     }
 
     private Dictionary<string, T> _dictionary = new Dictionary<string, T>();
@@ -336,7 +351,7 @@ public class ValueHolder<T> where T : struct {
 [Serializable]
 public class FloatHolder {
     private System.Action<float> _del;
-    private float _value;
+    [SerializeField] private float _value;
     public float Value {
         get { return _value; }
         set {
@@ -362,7 +377,7 @@ public class FloatHolder {
 [Serializable]
 public class IntHolder {
     private System.Action<int> _del;
-    private int _value;
+    [SerializeField] private int _value;
     public int Value {
         get { return _value; }
         set {

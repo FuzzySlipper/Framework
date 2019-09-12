@@ -106,7 +106,7 @@ namespace PixelComrades {
             if (string.IsNullOrEmpty(label)) {
                 label = id;
             }
-            stat = new BaseStat(label, id, value);
+            stat = new BaseStat(this.GetEntity(), label, id, value);
             Add(stat);
             return stat;
         }

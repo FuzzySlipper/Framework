@@ -10,6 +10,7 @@ namespace PixelComrades {
         private float _length;
         private string _targetStat;
         private float _normalizedPercent;
+        private string _iconLocation;
         private Sprite _icon;
         private string _id;
         private CachedStat<BaseStat> _powerStat;
@@ -17,12 +18,13 @@ namespace PixelComrades {
         private static FastString _fastString = new FastString();
         public float Power { get { return _powerStat.Value * _normalizedPercent; } }
 
-        public AddModImpact(Entity entity, float length, string targetStat, float normalizedPercent, BaseStat powerStat, Sprite icon) {
+        public AddModImpact(float length, string targetStat, float normalizedPercent, BaseStat powerStat, IconComponent icon) {
             _length = length;
             _targetStat = targetStat;
             _normalizedPercent = normalizedPercent;
-            _powerStat = new CachedStat<BaseStat>(entity, powerStat);
+            _powerStat = new CachedStat<BaseStat>(powerStat);
             _icon = icon;
+            _iconLocation = icon?.IconLocation;
             _id = System.Guid.NewGuid().ToString();
         }
 
@@ -32,7 +34,8 @@ namespace PixelComrades {
             _normalizedPercent = info.GetValue(nameof(_normalizedPercent), _normalizedPercent);
             _id = info.GetValue(nameof(_id), _id);
             _powerStat = info.GetValue(nameof(_powerStat), _powerStat);
-            _id = info.GetValue(nameof(_id), _id);
+            _iconLocation = info.GetValue(nameof(_iconLocation), _iconLocation);
+            _icon = ItemPool.LoadAsset<Sprite>(_iconLocation);
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
@@ -41,7 +44,7 @@ namespace PixelComrades {
             info.AddValue(nameof(_normalizedPercent), _normalizedPercent);
             info.AddValue(nameof(_id), _id);
             info.AddValue(nameof(_powerStat), _powerStat);
-            info.AddValue(nameof(_id), _id);
+            info.AddValue(nameof(_iconLocation), _iconLocation);
         }
 
         public void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent) {

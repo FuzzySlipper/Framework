@@ -11,19 +11,19 @@ namespace PixelComrades {
 
         public static void SetupBasicCharacterStats(Entity owner) {
             for (int i = 0; i < GameData.Attributes.Count; i++) {
-                owner.Stats.Add(new BaseStat(GameData.Attributes.Names[i], GameData.Attributes.GetID(i), GameData.Attributes.GetAssociatedValue(i)));
+                owner.Stats.Add(new BaseStat(owner, GameData.Attributes.Names[i], GameData.Attributes.GetID(i), GameData.Attributes.GetAssociatedValue(i)));
             }
             var atkStats = GameData.Enums[Stats.AttackStats];
             if (atkStats != null) {
                 for (int i = 0; i < atkStats.Length; i++) {
-                    owner.Stats.Add(new BaseStat(atkStats.Names[i], atkStats.IDs[i], 0));
+                    owner.Stats.Add(new BaseStat(owner, atkStats.Names[i], atkStats.IDs[i], 0));
                 }
             }
         }
 
         public static void SetupVitalStats(Entity owner) {
             for (int i = 0; i < GameData.Vitals.Count; i++) {
-                var vital = new VitalStat(GameData.Vitals.Names[i], GameData.Vitals.GetID(i), GameData.Vitals.GetAssociatedValue(i), GameData.Vitals.GetValue<float>(i, "Recovery"));
+                var vital = new VitalStat(owner, GameData.Vitals.Names[i], GameData.Vitals.GetID(i), GameData.Vitals.GetAssociatedValue(i), GameData.Vitals.GetValue<float>(i, "Recovery"));
                 owner.Stats.Add(vital);
             }
         }
@@ -31,18 +31,18 @@ namespace PixelComrades {
         public static void SetupDefenseStats(Entity owner) {
             var defend = owner.Add(new DefendDamageWithStats());
             for (int i = 0; i < GameData.DamageTypes.Count; i++) {
-                var typeDef = new BaseStat(string.Format("{0} Defense", GameData.DamageTypes.GetNameAt(i)), GameData.DamageTypes.GetID(i), 0);
+                var typeDef = new BaseStat(owner, string.Format("{0} Defense", GameData.DamageTypes.GetNameAt(i)), GameData.DamageTypes.GetID(i), 0);
                 owner.Stats.Add(typeDef);
                 defend.AddStat(GameData.DamageTypes.GetID(i), typeDef.ID, typeDef);
             }
-            owner.Stats.Add(new BaseStat(Stats.Evasion, 0));
+            owner.Stats.Add(new BaseStat(owner, Stats.Evasion, 0));
         }
 
-        public static BaseStat[] GetBasicCommandStats() {
+        public static BaseStat[] GetBasicCommandStats(Entity owner) {
             BaseStat[] stats = new BaseStat[3];
-            stats[0] = new BaseStat(Stats.Power, 0);
-            stats[1] = new BaseStat(Stats.CriticalHit, 0);
-            stats[2] = new BaseStat(Stats.CriticalMulti, GameOptions.Get(RpgSettings.DefaultCritMulti, 1f));
+            stats[0] = new BaseStat(owner, Stats.Power, 0);
+            stats[1] = new BaseStat(owner, Stats.CriticalHit, 0);
+            stats[2] = new BaseStat(owner, Stats.CriticalMulti, GameOptions.Get(RpgSettings.DefaultCritMulti, 1f));
             return stats;
         }
 
@@ -108,7 +108,7 @@ namespace PixelComrades {
                         id = label = statName;
                     }
                 }
-                rangeStat = new RangeStat(label, id, adjustedAmount, adjustedAmount * multiplier);
+                rangeStat = new RangeStat(entity, label, id, adjustedAmount, adjustedAmount * multiplier);
                 entity.Stats.Add(rangeStat);
             }
         }

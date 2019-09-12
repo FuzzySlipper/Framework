@@ -74,7 +74,7 @@ namespace PixelComrades {
         }
     }
 
-    public class BlockDamageWithCostComponent : IComponent, IReceiveRef<DamageEvent>, IReceive<CollisionEvent> {
+    public sealed class BlockDamageWithCostComponent : IComponent, IReceiveRef<DamageEvent>, IReceive<CollisionEvent> {
 
         private CachedStat<VitalStat> _stat;
         private float _cost;

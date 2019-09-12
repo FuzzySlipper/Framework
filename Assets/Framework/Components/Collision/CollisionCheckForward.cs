@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CollisionCheckForward : IComponent {
+    public sealed class CollisionCheckForward : IComponent {
 
         public float RayDistance { get; }
         public Vector3? LastPos = null;

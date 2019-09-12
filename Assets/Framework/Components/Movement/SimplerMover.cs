@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SimplerMover : IComponent {
+    public sealed class SimplerMover : IComponent {
         public CachedComponent<RotationSpeed> RotationSpeed;
         public CachedComponent<MoveSpeed> MoveSpeed;
         public SimplerMover(Entity owner) {

@@ -1,14 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ActionFxComponent : IComponent, IReceive<ActionStateEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent>, IReceive<CollisionEvent> {
+    public sealed class ActionFxComponent : IComponent, IReceive<ActionStateEvent>, IReceive<EnvironmentCollisionEvent>, 
+    IReceive<PerformedCollisionEvent>, IReceive<CollisionEvent> {
         public ActionFx Fx { get; private set; }
-        public int Owner { get; set; }
 
         public ActionFxComponent(ActionFx fx) {
             Fx = fx;
+        }
+
+        public ActionFxComponent(SerializationInfo info, StreamingContext context) {
+            Fx = ItemPool.LoadAsset<ActionFx>(info.GetValue(nameof(Fx), ""));
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Fx), ItemPool.GetAssetLocation(Fx));
         }
 
         public void ChangeFx(ActionFx fx) {

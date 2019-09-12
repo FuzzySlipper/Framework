@@ -2,10 +2,10 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class UsableComponent : IComponent {
-        public int Owner { get; set; }
+    public sealed class UsableComponent : IComponent {
         public Func<IComponent, bool> OnUsableDel;
         public Func<IComponent, bool> OnSecondaryDel;
         public System.Object LastRequester { get; private set; }
@@ -24,6 +24,14 @@ namespace PixelComrades {
                 return OnSecondaryDel(this);
             }
             return false;
+        }
+
+        public UsableComponent() {}
+
+        public UsableComponent(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
     }
 }

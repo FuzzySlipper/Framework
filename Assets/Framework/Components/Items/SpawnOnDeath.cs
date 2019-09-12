@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SpawnPrefabOnDeath : ComponentBase, IReceive<DeathEvent> {
+    public class SpawnPrefabOnDeath : IComponent, IReceive<DeathEvent> {
 
         private string _prefab;
         private IntRange _countRange;
@@ -15,8 +16,20 @@ namespace PixelComrades {
             _radius = radius;
         }
 
+        public SpawnPrefabOnDeath(SerializationInfo info, StreamingContext context) {
+            _prefab = info.GetValue(nameof(_prefab), _prefab);
+            _countRange = info.GetValue(nameof(_countRange), _countRange);
+            _radius = info.GetValue(nameof(_radius), _radius);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_prefab), _prefab);
+            info.AddValue(nameof(_countRange), _countRange);
+            info.AddValue(nameof(_radius), _radius);
+        }
+
         public void Handle(DeathEvent arg) {
-            var position = Entity.Tr.position;
+            var position = arg.Target.Tr.position;
             var count = _countRange.Get();
             if (count <= 0) {
                 return;
@@ -48,28 +61,46 @@ namespace PixelComrades {
         }
     }
 
-    public class SpawnSimplePrefabOnDeath : ComponentBase, IReceive<DeathEvent> {
+    public class SpawnSimplePrefabOnDeath : IComponent, IReceive<DeathEvent> {
 
-        private GameObject _prefab;
+        private PrefabEntity _prefab;
         private int _count;
 
-        public SpawnSimplePrefabOnDeath(GameObject prefab, int count) {
+        public SpawnSimplePrefabOnDeath(PrefabEntity prefab, int count) {
             _prefab = prefab;
             _count = count;
         }
 
+        public SpawnSimplePrefabOnDeath(SerializationInfo info, StreamingContext context) {
+            _prefab = ItemPool.GetReferencePrefab( info.GetValue(nameof(_prefab), _prefab.PrefabId));
+            _count = info.GetValue(nameof(_count), _count);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_prefab), _prefab.PrefabId);
+            info.AddValue(nameof(_count), _count);
+        }
+        
         public void Handle(DeathEvent arg) {
             for (int i = 0; i < _count; i++) {
-                ItemPool.Spawn(_prefab, Entity.Tr.position, Entity.Tr.rotation, true);
+                ItemPool.Spawn(_prefab, arg.Target.Tr.position, arg.Target.Tr.rotation, true);
             }
         }
     }
 
     [Priority(Priority.Lowest)]
-    public class DisableTrOnDeath : ComponentBase, IReceive<DeathEvent> {
+    public class DisableTrOnDeath : IComponent, IReceive<DeathEvent> {
 
         public void Handle(DeathEvent arg) {
-            Entity.Tr.gameObject.SetActive(false);
+            arg.Target.Tr.gameObject.SetActive(false);
+        }
+
+        public DisableTrOnDeath() {}
+
+        public DisableTrOnDeath(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
     }
 }

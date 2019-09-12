@@ -1,56 +1,74 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable, Priority(Priority.Lowest)]
-    public class AnimatorData : IComponent {
-        public IAnimator Animator;
-        public int Owner { get; set; }
+    public sealed class AnimatorData : IComponent {
+        private CachedAnimator _animator;
+        public IAnimator Animator { get { return _animator.Animator; } }
 
         public AnimatorData(IAnimator animator) {
-            Animator = animator;
-            Owner = -1;
+            _animator = new CachedAnimator(animator);
         }
-        
-        public void Dispose() {
-            Animator = null;
+
+        public AnimatorData(SerializationInfo info, StreamingContext context) {
+            _animator = info.GetValue(nameof(_animator), _animator);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_animator), _animator);
         }
     }
 
-    public class HurtAnimation : IComponent, IReceive<DamageEvent> {
+    public sealed class HurtAnimation : IComponent, IReceive<DamageEvent> {
 
-        public int Owner { get;set; }
         private string _animation;
-        private IAnimator _animator;
+        private CachedAnimator _animator;
 
         public HurtAnimation(string animation, IAnimator animator) {
             _animation = animation;
-            _animator = animator;
+            _animator = new CachedAnimator(animator);
         }
 
         public void Handle(DamageEvent arg) {
             if (arg.Amount > 0 && _animator != null) {
-                _animator.PlayAnimation(_animation, false, null);
+                _animator.Animator.PlayAnimation(_animation, false, null);
             }
+        }
+
+        public HurtAnimation(SerializationInfo info, StreamingContext context) {
+            _animator = info.GetValue(nameof(_animator), _animator);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_animator), _animator);
         }
     }
 
-    public class DeathAnimation : IComponent, IReceive<DeathEvent> {
+    public sealed class DeathAnimation : IComponent, IReceive<DeathEvent> {
 
-        public int Owner { get; set; }
         private string _animation;
-        private IAnimator _animator;
+        private CachedAnimator _animator;
 
         public DeathAnimation(string animation, IAnimator animator) {
             _animation = animation;
-            _animator = animator;
+            _animator =  new CachedAnimator(animator);
         }
 
         public void Handle(DeathEvent arg) {
             if (_animator != null) {
-                _animator.PlayAnimation(_animation, true, null);
+                _animator.Animator.PlayAnimation(_animation, true, null);
             }
+        }
+
+        public DeathAnimation(SerializationInfo info, StreamingContext context) {
+            _animator = info.GetValue(nameof(_animator), _animator);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_animator), _animator);
         }
     }
 

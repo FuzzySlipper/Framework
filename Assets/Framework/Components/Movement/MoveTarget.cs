@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class MoveTarget : IComponent, IReceive<SetMoveTarget>, IReceive<SetLookTarget> {
+    public sealed class MoveTarget : IComponent, IReceive<SetMoveTarget>, IReceive<SetLookTarget> {
         private enum State : byte {
             None,
             ForceLook,

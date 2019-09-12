@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
-    public class StatusContainer : IComponent  {
+    public sealed class StatusContainer : IComponent  {
 
         public event System.Action OnResourceChanged;
 
@@ -21,6 +21,7 @@ namespace PixelComrades {
             return AddValue(value, System.Guid.NewGuid().ToString());
         }
 
+        public  StatusContainer(){}
         public StatusContainer(SerializationInfo info, StreamingContext context) {
             _keys = info.GetValue(nameof(_keys), _keys);
             _preventsMove = info.GetValue(nameof(_preventsMove), _preventsMove);

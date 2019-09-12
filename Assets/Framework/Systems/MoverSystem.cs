@@ -87,9 +87,9 @@ namespace PixelComrades {
             }
             var targetPos = target.GetTargetPosition;
             var dir = targetPos - tr.position;
-            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Speed * TimeManager.DeltaTime);
+            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.c.Speed * TimeManager.DeltaTime);
             var targetRotation = Quaternion.LookRotation(dir);
-            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.Speed * TimeManager.DeltaTime);
+            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.c.Speed * TimeManager.DeltaTime);
             if (Vector3.Distance(targetPos, tr.position) < ReachedDestination) {
                 FinishMove(entity, targetPos);
             }
@@ -124,9 +124,9 @@ namespace PixelComrades {
                 return;
             }
             mover.ElapsedTime += TimeManager.DeltaTime;
-            mover.Entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
+            entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
             if (mover.ElapsedTime > mover.Duration) {
-                FinishMove(entity, mover.Entity.Tr.position);
+                FinishMove(entity, entity.Tr.position);
             }
         }
 
@@ -174,7 +174,8 @@ namespace PixelComrades {
         }
 
         private void CalculateFlight(ArcMover mover, Vector3 target, float speed) {
-            float targetDistance = Vector3.Distance(mover.Entity.Tr.position, target);
+            var entity = mover.GetEntity();
+            float targetDistance = Vector3.Distance(entity.Tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
             float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / speed);
             mover.MoveVector.z = Mathf.Sqrt(projectileVelocity) * Mathf.Cos(mover.Angle * Mathf.Deg2Rad);
@@ -182,7 +183,7 @@ namespace PixelComrades {
             // Calculate flight time.
             mover.Duration = targetDistance / mover.MoveVector.z;
             // Rotate projectile to face the target.
-            mover.Entity.Tr.rotation = Quaternion.LookRotation(target - mover.Entity.Tr.position);
+            entity.Tr.rotation = Quaternion.LookRotation(target - entity.Tr.position);
             mover.ElapsedTime = 0;
         }
     }

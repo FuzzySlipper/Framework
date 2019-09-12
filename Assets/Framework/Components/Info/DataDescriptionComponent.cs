@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class DataDescriptionComponent : IComponent {
+    public sealed class DataDescriptionComponent : IComponent {
         private string _text;
         public string Text {
             get {

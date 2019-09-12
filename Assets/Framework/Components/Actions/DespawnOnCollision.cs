@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Lowest)]
-    public class DespawnOnCollision : IComponent, IReceive<CollisionEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
+    public sealed class DespawnOnCollision : IComponent, IReceive<CollisionEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
 
         public void Handle(CollisionEvent arg) {
             this.GetEntity().Destroy();
@@ -18,6 +18,8 @@ namespace PixelComrades {
         public void Handle(PerformedCollisionEvent arg) {
             this.GetEntity().Destroy();
         }
+
+        public DespawnOnCollision() {}
 
         public DespawnOnCollision(SerializationInfo info, StreamingContext context) {}
 

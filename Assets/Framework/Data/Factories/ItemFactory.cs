@@ -163,10 +163,7 @@ namespace PixelComrades {
             var entity = Entity.New(data.ID);
             entity.Add(new TypeId(data.ID));
             if (!string.IsNullOrEmpty(data.Icon)) {
-                entity.Add(new IconComponent(ItemPool.LoadAsset<Sprite>(UnityDirs.ItemIcons, data.Icon)));
-            }
-            else {
-                entity.Add(new IconComponent(SpriteDatabase.Item));
+                entity.Add(new IconComponent(UnityDirs.ItemIcons, data.Icon));
             }
             entity.Add(new EntityLevelComponent(level));
             if (data.TypeComponents != null) {

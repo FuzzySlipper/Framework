@@ -6,14 +6,14 @@ using Sirenix.OdinInspector;
 
 namespace PixelComrades {
 
-    public class SpriteDissolveParticlesComponent : IComponent, IReceive<CollisionEvent>, IReceive<DeathEvent> {
+    public sealed class SpriteDissolveParticlesComponent : IComponent, IReceive<CollisionEvent>, IReceive<DeathEvent> {
         
-        private CachedUnityComponentReference<SpriteRenderer> _spriteRenderer;
+        private CachedUnityComponent<SpriteRenderer> _spriteRenderer;
         private CollisionEvent _lastCollision;
         private float _currentHealth;
 
         public SpriteDissolveParticlesComponent(SpriteRenderer spriteRenderer) {
-            _spriteRenderer = new CachedUnityComponentReference<SpriteRenderer>(spriteRenderer);
+            _spriteRenderer = new CachedUnityComponent<SpriteRenderer>(spriteRenderer);
         }
 
         public void Handle(CollisionEvent arg) {
@@ -35,7 +35,7 @@ namespace PixelComrades {
         }
     }
 
-    public class HitParticlesComponent : IComponent, IReceive<CollisionEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
+    public sealed class HitParticlesComponent : IComponent, IReceive<CollisionEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
 
         private Color _color;
 
@@ -65,7 +65,7 @@ namespace PixelComrades {
         }
     }
 
-    public class ParticleTrailComponent : IComponent, IReceive<ProjectileDespawned>, IReceive<ProjectileSpawned> {
+    public sealed class ParticleTrailComponent : IComponent, IReceive<ProjectileDespawned>, IReceive<ProjectileSpawned> {
         public int Amount { get; }
         public float Frequency { get; }
         public Color Color { get; }

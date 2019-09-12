@@ -1,36 +1,41 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
-    [System.Serializable]
+    [System.Serializable, KnownType(typeof(BaseStat))]
     public class BaseStat : IDisposable {
 
         public BaseStat() {}
 
-        public BaseStat(string label, float baseValue) {
+        public BaseStat(int entity, string label, float baseValue) {
+            _entity = entity;
             _baseValue = baseValue;
             _id = label;
             _label = label;
         }
 
-        public BaseStat(string label, string id, float baseValue) {
+        public BaseStat(int entity, string label, string id, float baseValue) {
+            _entity = entity;
             _baseValue = baseValue;
             _id = id;
             _label = label;
         }
 
-        public BaseStat(float baseValue, string label, float maxBaseValue) {
+        public BaseStat(int entity, float baseValue, string label, float maxBaseValue) {
+            _entity = entity;
             _baseValue = baseValue;
             _label = label;
-            MaxBaseValue = maxBaseValue;
+            _maxBaseValue = maxBaseValue;
         }
 
-        [SerializeField] protected string _label = "";
-        [Range(0, 100), SerializeField] protected float _baseValue = 0;
-        [SerializeField] protected string _id;
-        [SerializeField] protected float MaxBaseValue = 9999;
+        [HideInInspector, SerializeField] private int _entity;
+        [SerializeField] private string _label = "";
+        [Range(0, 100), SerializeField] private float _baseValue = 0;
+        [SerializeField] private string _id;
+        [SerializeField] private float _maxBaseValue = 9999;
 
         public event Action<BaseStat> OnStatChanged;
         public event Action<BaseStat> OnStatReset;
@@ -40,24 +45,26 @@ namespace PixelComrades {
         private List<Derived> _derivedStats = new List<Derived>();
         private float _modTotal;
 
+        public Entity Entity { get { return EntityController.Get(_entity); } }
         public string ID { get { return _id; } }
         public string Label { get { return _label; } }
-        public float BaseValue { get { return _baseValue; } }
+        public float BaseValue { get { return _baseValue; } protected set { _baseValue = value; } }
         public float ModTotal { get { return _modTotal; } }
+        public float MaxBaseValue { get => _maxBaseValue; }
         public virtual float Value { get { return _baseValue + _modTotal; } }
 
         public virtual void AddToBase(float amountToAdd) {
-            if (_baseValue >= MaxBaseValue) {
+            if (_baseValue >= _maxBaseValue) {
                 return;
             }
             _baseValue += amountToAdd;
-            _baseValue = Mathf.Clamp(_baseValue, -MaxBaseValue, MaxBaseValue);
+            _baseValue = Mathf.Clamp(_baseValue, -_maxBaseValue, _maxBaseValue);
             StatChanged();
         }
 
         public virtual void ChangeBase(float newBase) {
             _baseValue = newBase;
-            _baseValue = Mathf.Clamp(_baseValue, -MaxBaseValue, MaxBaseValue);
+            _baseValue = Mathf.Clamp(_baseValue, -_maxBaseValue, _maxBaseValue);
             StatChanged();
         }
 

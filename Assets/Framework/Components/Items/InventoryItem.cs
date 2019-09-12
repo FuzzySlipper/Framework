@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
+    public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;

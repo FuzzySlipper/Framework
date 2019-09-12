@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ArcMover : ComponentBase {
+    public class ArcMover : IComponent {
 
         public float Angle;
 
@@ -13,6 +14,20 @@ namespace PixelComrades {
 
         public ArcMover(float angle = 15) {
             Angle = angle;
+        }
+
+        public ArcMover(SerializationInfo info, StreamingContext context) {
+            Angle = info.GetValue(nameof(Angle), Angle);
+            MoveVector = info.GetValue(nameof(MoveVector), MoveVector);
+            ElapsedTime = info.GetValue(nameof(ElapsedTime), ElapsedTime);
+            Duration = info.GetValue(nameof(Duration), Duration);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Angle), Angle);
+            info.AddValue(nameof(MoveVector), MoveVector);
+            info.AddValue(nameof(ElapsedTime), ElapsedTime);
+            info.AddValue(nameof(Duration), Duration);
         }
 
         public static void CalculateFlight(Transform tr, float angle, Vector3 target, float speed, out Vector3 moveVector, out float duration) {

@@ -20,7 +20,8 @@ namespace PixelComrades {
             action.Primary = type?.TargetID == "WeaponUsable";
             action.WeaponModel = data.TryGetValue("WeaponModel", "");
             List<IActionImpact> impacts = new List<IActionImpact>();
-            var power = new RangeStat(Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue(DatabaseFields.PowerMax, 1f));
+            var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
+            (DatabaseFields.PowerMax, 1f));
             entity.Stats.Add(power);
             var animation = data.TryGetValue("Animation", "");
             bool generateCollision = false;
@@ -37,14 +38,12 @@ namespace PixelComrades {
                     default:
                     case "Attack":
                         impacts.Add(
-                            new DamageImpact(
-                                entity,
-                                data.TryGetValue(
+                            new DamageImpact(data.TryGetValue(
                                     DatabaseFields.DamageType,
                                     GameData.DamageTypes.GetID(0)), Stats.Health, 1, power));
                         break;
                     case "Heal":
-                        impacts.Add(AddHealImpact(entity, config, power, false));
+                        impacts.Add(AddHealImpact( config, power, false));
                         generateCollision = true;
                         limitEnemy = false;
                         break;
@@ -60,7 +59,7 @@ namespace PixelComrades {
                 }
                 switch (secondaryType) {
                     case "Heal":
-                        impacts.Add(AddHealImpact(entity, config, power, true));
+                        impacts.Add(AddHealImpact(config, power, true));
                         break;
                     case "AddModImpact":
                         impacts.Add(AddModImpact(entity, config, power));
@@ -92,9 +91,7 @@ namespace PixelComrades {
             }
             else {
                 impacts.Add(
-                    new DamageImpact(entity,
-                        data.TryGetValue(
-                            DatabaseFields.DamageType,
+                    new DamageImpact(data.TryGetValue(DatabaseFields.DamageType,
                             GameData.DamageTypes.GetID(0)), Stats.Health, 1, power));
                 var reload = data.TryGetValue("ReloadType", "Repair");
                 var reloadSpeed = data.TryGetValue("ReloadSpeed", 1f);
@@ -191,13 +188,13 @@ namespace PixelComrades {
             }
         }
 
-        private HealImpact AddHealImpact(Entity entity, DataList config, BaseStat power, bool self) {
-            return new HealImpact(entity, config.FindString("TargetVital", Stats.Health), config.FindFloat("Percent", 1f), power, self);
+        private HealImpact AddHealImpact(DataList config, BaseStat power, bool self) {
+            return new HealImpact(config.FindString("TargetVital", Stats.Health), config.FindFloat("Percent", 1f), power, self);
         }
 
         private AddModImpact AddModImpact(Entity entity, DataList config, BaseStat power) {
-            return new AddModImpact(entity, config.FindFloat("Length", 1f), config.FindString("Stat", ""), config.FindFloat("Percent", 1f), 
-            power, entity.Get<IconComponent>()?.Sprite);
+            return new AddModImpact( config.FindFloat("Length", 1f), config.FindString("Stat", ""), config.FindFloat("Percent", 1f), 
+            power, entity.Get<IconComponent>());
         }
     }
 }

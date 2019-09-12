@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class HoverEngine : ComponentBase {
+    public class HoverEngine : IComponent {
 
         public bool IsOnGround;
         public float Height;
@@ -23,6 +24,16 @@ namespace PixelComrades {
             HoverPid.P = Config.HoverPid.P;
             HoverPid.I = Config.HoverPid.I;
             HoverPid.D = Config.HoverPid.D;
+        }
+
+        public HoverEngine(SerializationInfo info, StreamingContext context) {
+            Config = ItemPool.LoadAsset<HoverEngineConfig>(info.GetValue(nameof(Config), ""));
+            Drag = Config.DriveForce / Config.MaxForwardSpeed;
+            RefreshPid();
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(Config), ItemPool.GetAssetLocation(Config));
         }
     }
 }

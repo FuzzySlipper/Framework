@@ -58,7 +58,7 @@ namespace PixelComrades {
                 var stat = entity.Stats.Get(statName);
                 if (stat == null) {
                     var baseValue = GameData.Enums.GetFakeEnum(statName).GetAssociatedValue(statName);
-                    stat = new BaseStat(statName, statName, baseValue * bonus);
+                    stat = new BaseStat(entity, statName, statName, baseValue * bonus);
                     entity.Stats.Add(stat);
                 }
                 else {

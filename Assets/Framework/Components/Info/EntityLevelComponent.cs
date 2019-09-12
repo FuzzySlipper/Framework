@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class EntityLevelComponent : IComponent {
+    public sealed class EntityLevelComponent : IComponent {
         public int Level;
 
         public EntityLevelComponent(){}

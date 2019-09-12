@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class PronounComponent : IComponent {
+    public sealed class PronounComponent : IComponent {
         public PlayerPronouns Pronoun;
 
         public PronounComponent(PlayerPronouns pronoun) {

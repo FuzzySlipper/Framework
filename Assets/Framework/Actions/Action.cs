@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class Action : ComponentBase {
+    public class Action : IComponent {
 
         public List<ActionLayer> Sequence = new List<ActionLayer>();
         public List<ICommandCost> Costs = new List<ICommandCost>();
@@ -13,6 +13,8 @@ namespace PixelComrades {
         public string WeaponModel;
         public bool Primary;
         public int EquippedSlot = -1;
+        
+        public Entity Entity { get { return this.GetEntity(); } }
 
         public bool CanStart(Entity entity) {
             if (entity == null) {

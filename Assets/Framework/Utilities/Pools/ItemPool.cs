@@ -139,6 +139,13 @@ namespace PixelComrades {
             return Resources.Load<T>(_stringBuilder.ToString());
         }
 
+        public static string GetCombinedLocator(string dir, string file) {
+            _stringBuilder.Clear();
+            _stringBuilder.Append(dir);
+            _stringBuilder.Append(file);
+            return _stringBuilder.ToString();
+        }
+        
         public static T LoadAsset<T>(string fullFilePath) where T : UnityEngine.Object {
             return Resources.Load<T>(fullFilePath);
         }

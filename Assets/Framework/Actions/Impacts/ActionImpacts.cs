@@ -10,7 +10,7 @@ namespace PixelComrades {
         void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent);
     }
 
-    public class ActionImpacts : IComponent {
+    public sealed class ActionImpacts : IComponent {
         public List<IActionImpact> Impacts;
 
         public ActionImpacts(List<IActionImpact> values) : base() {

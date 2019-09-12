@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class RotateToTarget : IComponent {
+    public sealed class RotateToTarget : IComponent {
 
         public Vector3 Position;
-        public CachedTransformReference TargetTr;
+        public CachedTransform TargetTr;
         public float RotationSpeed;
 
         public Vector3 GetTarget {
@@ -21,7 +21,7 @@ namespace PixelComrades {
 
         public RotateToTarget(Vector3 position, Transform targetTr, float rotationSpeed) {
             Position = position;
-            TargetTr = new CachedTransformReference(targetTr);
+            TargetTr = new CachedTransform(targetTr);
             RotationSpeed = rotationSpeed;
         }
 

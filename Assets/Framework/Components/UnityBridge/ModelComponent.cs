@@ -1,15 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ModelComponent : IComponent {
-        public int Owner { get; set; }
+    public sealed class ModelComponent : IComponent {
 
-        public IModelComponent Model;
+        private CachedGenericComponent<IModelComponent> _component;
+        public IModelComponent Model { get { return _component.Component; } }
 
         public ModelComponent(IModelComponent model) {
-            Model = model;
+            _component = new CachedGenericComponent<IModelComponent>(model);
+        }
+
+        public void Set(IModelComponent model) {
+            _component.Set(model);
+        }
+
+        public void Clear() {
+            _component.Clear();
         }
 
         public MaterialPropertyBlock[] GetMatBlocks { get { return Model.MaterialBlocks; } }
@@ -21,6 +30,14 @@ namespace PixelComrades {
 
         public void SetVisible(bool status) {
             Model.SetVisible(status);
+        }
+
+        public ModelComponent(SerializationInfo info, StreamingContext context) {
+            _component = info.GetValue(nameof(_component), _component);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_component), _component);
         }
     }
 
