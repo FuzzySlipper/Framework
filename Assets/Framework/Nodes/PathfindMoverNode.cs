@@ -13,7 +13,7 @@ namespace PixelComrades {
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
         
-        public SimplePathfindingAgent Pathfinder { get { return _pathfinder.c; } }
+        public SimplePathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging
@@ -26,7 +26,7 @@ namespace PixelComrades {
             };
         }
 
-        public float GetMoveSpeed { get { return MoveSpeed.c?.Speed ?? 1; } }
+        public float GetMoveSpeed { get { return MoveSpeed.Value?.Speed ?? 1; } }
     }
 
     public class AstarPathfindMoverNode : BaseNode {
@@ -36,7 +36,7 @@ namespace PixelComrades {
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
 
-        public AstarPathfindingAgent Pathfinder { get { return _pathfinder.c; } }
+        public AstarPathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Point3 DestinationP3 { get { return Pathfinder.DestinationP3; } }
         public PathfindingStatus CurrentStatus { get { return Pathfinder.CurrentStatus; } }
         public bool IsPathFinished { get { return Pathfinder.Controller.ReachedEndOfPath; } }
@@ -60,8 +60,8 @@ namespace PixelComrades {
         
         public void ProcessNoMove() {
             var look = Vector3.zero;
-            if (Target.c.HasValidLook) {
-                var dir = Target.c.GetLookTarget - Pathfinder.Controller.transform.position;
+            if (Target.Value.HasValidLook) {
+                var dir = Target.Value.GetLookTarget - Pathfinder.Controller.transform.position;
                 var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;
                 look = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
             }
@@ -109,18 +109,18 @@ namespace PixelComrades {
 
         public void UpdateDebug(PathfindingDebugging debug) {
             if (Pathfinder.Controller.Path == null) {
-                debug.LineR.Component.positionCount = 0;
+                debug.LineR.Value.positionCount = 0;
             }
             else {
                 var cnt = Pathfinder.Controller.Path.Count;
-                debug.LineR.Component.positionCount = cnt;
+                debug.LineR.Value.positionCount = cnt;
                 for (int p = 0; p < cnt; p++) {
-                    debug.LineR.Component.SetPosition(p, Pathfinder.Controller.Path[p]);
+                    debug.LineR.Value.SetPosition(p, Pathfinder.Controller.Path[p]);
                 }
             }
-            debug.Tm.Component.text = Pathfinder.CurrentStatus.ToString();
+            debug.Tm.Value.text = Pathfinder.CurrentStatus.ToString();
             if (Pathfinder.IsPathFinished) {
-                debug.Tm.Component.text += " At Goal";
+                debug.Tm.Value.text += " At Goal";
             }
         }
 
@@ -147,8 +147,8 @@ namespace PixelComrades {
 
         public void UpdateMovement() {
             Pathfinder.Controller.MovementUpdate(TimeManager.DeltaUnscaled, out var position);
-            if (Target.c.HasValidLook) {
-                position = Target.c.GetLookTarget;
+            if (Target.Value.HasValidLook) {
+                position = Target.Value.GetLookTarget;
             }
             var dir = position - Pathfinder.Controller.transform.position;
             var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;

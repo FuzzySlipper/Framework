@@ -6,7 +6,8 @@ using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
-    public sealed class StatusContainer : IComponent  {
+    [System.Serializable]
+	public sealed class StatusContainer : IComponent  {
 
         public event System.Action OnResourceChanged;
 

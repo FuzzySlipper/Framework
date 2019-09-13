@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class RotationComponent : IComponent {
+	public sealed class RotationComponent : IComponent {
 
         [SerializeField] private Float4 _rotation;
 

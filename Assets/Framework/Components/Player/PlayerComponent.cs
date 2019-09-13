@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class PlayerComponent : IComponent {
+    [System.Serializable]
+	public sealed class PlayerComponent : IComponent {
         public PlayerComponent(SerializationInfo info, StreamingContext context) {
         }
 

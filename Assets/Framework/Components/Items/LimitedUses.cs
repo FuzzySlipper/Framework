@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class LimitedUses : IComponent {
+    [System.Serializable]
+	public sealed class LimitedUses : IComponent {
         public int Max { get; }
         public int Current { get; private set; }
 

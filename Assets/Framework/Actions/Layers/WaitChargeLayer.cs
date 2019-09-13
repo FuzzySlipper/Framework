@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ChargeComponent : IComponent {
+    [System.Serializable]
+	public sealed class ChargeComponent : IComponent {
         public float CurrentCharge;
 
         public ChargeComponent(){}
@@ -17,8 +19,9 @@ namespace PixelComrades {
             info.AddValue(nameof(CurrentCharge), CurrentCharge);
         }
     }
-    
-    public class WaitForCharge : ActionLayer  {
+
+    [Serializable]
+    public class WaitForCharge : ActionLayer, ISerializable  {
         public FloatRange ForceRange { get; }
         public float MaxChargeTime { get; }
         public string ChargeInput { get; }
@@ -32,6 +35,19 @@ namespace PixelComrades {
             ChargeInput = input;
         }
 
+        public WaitForCharge(SerializationInfo info, StreamingContext context) : base(info, context) {
+            ForceRange = info.GetValue(nameof(ForceRange), ForceRange);
+            MaxChargeTime = info.GetValue(nameof(MaxChargeTime), MaxChargeTime);
+            ChargeInput = info.GetValue(nameof(ChargeInput), ChargeInput);
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(ForceRange), ForceRange);
+            info.AddValue(nameof(MaxChargeTime), MaxChargeTime);
+            info.AddValue(nameof(ChargeInput), ChargeInput);
+        }
+        
         public override void Start(ActionUsingNode node) {
             base.Start(node);
             _start = TimeManager.Time;

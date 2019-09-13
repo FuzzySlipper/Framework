@@ -14,15 +14,15 @@ namespace PixelComrades {
         private CachedComponent<FlightPlayerInput> _playerInput = new CachedComponent<FlightPlayerInput>();
         private CachedComponent<FlightMoveInput> _moveInput = new CachedComponent<FlightMoveInput>();
         private CachedComponent<SimpleProjectileSpawner> _projectile = new CachedComponent<SimpleProjectileSpawner>();
-        public FlightEngine Engine => _flight.c;
-        public FakeFlightEngine FakeFlight => _fakeFlight.c;
-        public HoverEngine Hover => _hover.c;
-        public FlightControl Control => _control.c;
-        public CosmeticFlightBanking Banking => _banking.c;
-        public Rigidbody Rigidbody => _rigidBody.c.Rb;
-        public FlightPlayerInput PlayerInput => _playerInput.c;
-        public FlightMoveInput MoveInput => _moveInput.c;
-        public SimpleProjectileSpawner Projectile => _projectile.c;
+        public FlightEngine Engine => _flight.Value;
+        public FakeFlightEngine FakeFlight => _fakeFlight.Value;
+        public HoverEngine Hover => _hover.Value;
+        public FlightControl Control => _control.Value;
+        public CosmeticFlightBanking Banking => _banking.Value;
+        public Rigidbody Rigidbody => _rigidBody.Value.Rb;
+        public FlightPlayerInput PlayerInput => _playerInput.Value;
+        public FlightMoveInput MoveInput => _moveInput.Value;
+        public SimpleProjectileSpawner Projectile => _projectile.Value;
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _flight, _control, _rigidBody, _fakeFlight, _hover, _banking, _playerInput, _moveInput, _projectile
@@ -62,8 +62,8 @@ namespace PixelComrades {
         private Timer _wanderTimer = new Timer(6f, false);
 
         public bool Chasing = false;
-        public MoveTarget MoveTarget => _moveTarget.c;
-        public SensorTargetsComponent SensorTargets => _sensorTargets.c;
+        public MoveTarget MoveTarget => _moveTarget.Value;
+        public SensorTargetsComponent SensorTargets => _sensorTargets.Value;
         
 
         public override List<CachedComponent> GatherComponents {

@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Low)]
-    public class DamageComponent : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
+    [System.Serializable]
+	public sealed class DamageComponent : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
 
         public DamageComponent(){}
         public DamageComponent(SerializationInfo info, StreamingContext context) {}

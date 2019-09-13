@@ -1,30 +1,41 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CostAmmo : CommandCost {
+    [Serializable]
+    public class CostAmmo : CommandCost, ISerializable {
 
-        private AmmoComponent _ammoComponent;
+        private CachedComponent<AmmoComponent> _ammoComponent;
 
         public CostAmmo(AmmoComponent ammoComponent) {
-            _ammoComponent = ammoComponent;
+            _ammoComponent = new CachedComponent<AmmoComponent>(ammoComponent);
+        }
+
+        public CostAmmo(SerializationInfo info, StreamingContext context) {
+            _ammoComponent = info.GetValue(nameof(_ammoComponent), _ammoComponent);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_ammoComponent), _ammoComponent);
         }
 
         public override void ProcessCost(Entity entity) {
             if (!entity.HasComponent<PlayerComponent>()) {
                 return;
             }
-            _ammoComponent.Amount.ReduceValue(1);
+            _ammoComponent.Value.Amount.ReduceValue(1);
         }
 
         public override bool CanAct(Entity entity) {
             if (!entity.HasComponent<PlayerComponent>()) {
                 return true;
             }
-            if (_ammoComponent.Amount > 0) {
+            if (_ammoComponent.Value.Amount > 0) {
                 return true;
             }
-            entity.PostAll(new StatusUpdate("Not enough " + _ammoComponent.Template.Name));
+            entity.PostAll(new StatusUpdate("Not enough " + _ammoComponent.Value.Template.Name));
             return false;
         }
     }

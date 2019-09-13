@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Highest)]
-    public sealed class ModelLoaderComponent : IComponent, IReceive<EquipmentChanged> {
+    [System.Serializable]
+	public sealed class ModelLoaderComponent : IComponent, IReceive<EquipmentChanged> {
         
         private bool _onlyActiveWhileEquipped;
         private string _modelName;
@@ -61,7 +62,7 @@ namespace PixelComrades {
             }
             var entity = this.GetEntity();
             UnityToEntityBridge.RegisterToEntity(model.gameObject, entity);
-            _loadedComponents.Add(entity.Add(new ModelComponent(_loadedModel.Component)).GetType());
+            _loadedComponents.Add(entity.Add(new ModelComponent(_loadedModel.Value)).GetType());
             entity.Tr = model.Transform;
             _loadedComponents.Add(entity.Add(new FloatingTextStatusComponent(model.Transform, new Vector3(0, 1.5f, 0))).GetType());
             var rb = model.GetComponent<Rigidbody>();

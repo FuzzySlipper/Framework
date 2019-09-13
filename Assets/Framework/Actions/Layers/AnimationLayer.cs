@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class AnimationLayer : ActionLayer {
+    [Serializable]
+    public class AnimationLayer : ActionLayer, ISerializable {
 
         public string Animation;
 
@@ -11,6 +14,15 @@ namespace PixelComrades {
             Animation = animation;
         }
 
+        public AnimationLayer(SerializationInfo info, StreamingContext context) : base(info, context) {
+            Animation = info.GetValue(nameof(Animation), Animation);
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(Animation), Animation);
+        }
+        
         public override void Start(ActionUsingNode node) {
             base.Start(node);
             node.LastProcessedAnimationEvent = "";

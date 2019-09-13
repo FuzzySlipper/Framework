@@ -9,7 +9,8 @@ using System.Runtime.Serialization;
 using Pathfinding;
 
 namespace PixelComrades {
-    public class AstarPathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
+    [System.Serializable]
+	public sealed class AstarPathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
         
         public PathfindingStatus CurrentStatus = PathfindingStatus.Created;
         public Point3 LastPosition;

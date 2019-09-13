@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
         
     [System.Serializable]
-    public class SimplePathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
+	public sealed class SimplePathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
 
         public Point3 CurrentPos;
         public PathfindingStatus CurrentStatus = PathfindingStatus.Created;
@@ -138,7 +138,7 @@ namespace PixelComrades {
             MovementLerp = 0f;
             var entity = this.GetEntity();
             if (Vector3.Distance(PreviousTarget, entity.Tr.position) > 0.1f) {
-                MovementLerp = Vector3.Distance(entity.Tr.position, CurrentTarget) * (_moveSpeed.c?.Speed ?? 1);
+                MovementLerp = Vector3.Distance(entity.Tr.position, CurrentTarget) * (_moveSpeed.Value?.Speed ?? 1);
                 PreviousTarget = entity.Tr.position;
             }
             GridTarget = _currentNodePath[1];

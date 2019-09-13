@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class UsableComponent : IComponent {
+    [System.Serializable]
+	public sealed class UsableComponent : IComponent {
         public Func<IComponent, bool> OnUsableDel;
         public Func<IComponent, bool> OnSecondaryDel;
         public System.Object LastRequester { get; private set; }

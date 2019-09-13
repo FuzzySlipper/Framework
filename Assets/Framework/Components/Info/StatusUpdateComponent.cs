@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Highest)]
-    public sealed class StatusUpdateComponent : IComponent, IReceive<StatusUpdate> {
+    [System.Serializable]
+	public sealed class StatusUpdateComponent : IComponent, IReceive<StatusUpdate> {
 
         public string Status;
         public StatusUpdateComponent() {}

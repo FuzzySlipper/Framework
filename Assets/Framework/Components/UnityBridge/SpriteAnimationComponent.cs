@@ -7,10 +7,11 @@ using System.Runtime.Serialization;
 using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
-    public class SpriteAnimationComponent : IComponent {
+    [System.Serializable]
+	public sealed class SpriteAnimationComponent : IComponent {
         
         private CachedUnityComponent<SpriteRenderer> _component;
-        public SpriteRenderer Renderer { get { return _component.Component; } }
+        public SpriteRenderer Renderer { get { return _component.Value; } }
         public SpriteAnimation Animation { get; }
         public bool Unscaled { get;}
         public BillboardMode Billboard { get; }
@@ -57,7 +58,8 @@ namespace PixelComrades {
         public bool Active { get { return CurrentFrameIndex >= 0; } }
     }
 
-    public class DirectionalSpriteAnimationComponent : IComponent, IModelComponent, IAnimator, IDisposable {
+    [System.Serializable]
+	public sealed class DirectionalSpriteAnimationComponent : IComponent, IModelComponent, IAnimator, IDisposable {
         private BillboardMode _billboard;
         private bool _unscaled;
         private CachedUnityComponent<SpriteRenderer> _renderer;
@@ -100,7 +102,7 @@ namespace PixelComrades {
                 if (_renderer == null) {
                     return null;
                 }
-                _renderer.Component.GetPropertyBlock(_blocks[0]);
+                _renderer.Value.GetPropertyBlock(_blocks[0]);
                 return _blocks;
             }
         }
@@ -114,7 +116,7 @@ namespace PixelComrades {
             _spriteTr = new CachedTransform(animator.SpriteTr);
             _facing = animator.Facing;
             _backwards = animator.Backwards;
-            _spriteCollider = new CachedUnityComponent<SpriteCollider>(_renderer.Component.GetComponent<SpriteCollider>());
+            _spriteCollider = new CachedUnityComponent<SpriteCollider>(_renderer.Value.GetComponent<SpriteCollider>());
             Setup(dict);
         }
         
@@ -165,7 +167,7 @@ namespace PixelComrades {
             _frameTimer = new Timer(0, _unscaled);
             _renderers[0] = _renderer;
             _blocks[0] = new MaterialPropertyBlock();
-            _renderer.Component.GetPropertyBlock(_blocks[0]);
+            _renderer.Value.GetPropertyBlock(_blocks[0]);
             foreach (var animList in dict) {
                 if (!_animDictionary.TryGetValue(animList.Key, out var holder)) {
                     _animDictionary.Add(animList.Key, new DirectionalAnimationClipHolder(animList.Key, animList.Value.ToArray()));
@@ -226,7 +228,7 @@ namespace PixelComrades {
             var facing = _orientation;
             if (_facing.RequiresFlipping()) {
                 facing = _orientation.GetFlippedSide();
-                _renderer.Component.flipX = _orientation.IsFlipped();
+                _renderer.Value.flipX = _orientation.IsFlipped();
             }
             if (_currentAnimation == null) {
                 return;
@@ -235,9 +237,9 @@ namespace PixelComrades {
             if (sprite == null) {
                 return;
             }
-            _renderer.Component.sprite = sprite;
+            _renderer.Value.sprite = sprite;
             if (_spriteCollider != null) {
-                _spriteCollider.Component.UpdateCollider();
+                _spriteCollider.Value.UpdateCollider();
             }
         }
 
@@ -245,7 +247,7 @@ namespace PixelComrades {
             if (_renderer == null) {
                 return;
             }
-            _renderer.Component.enabled = status;
+            _renderer.Value.enabled = status;
         }
 
         public bool IsAnimationComplete(string clip) {
@@ -293,12 +295,12 @@ namespace PixelComrades {
             _blocks[0].SetTexture("_BumpMap", clipHolder.CurrentClip.NormalMap);
             _blocks[0].SetTexture("_EmissionMap", clipHolder.CurrentClip.EmissiveMap);
             if (clipHolder.CurrentClip.EmissiveMap != null) {
-                _renderer.Component.material.EnableKeyword("_EMISSION");
+                _renderer.Value.material.EnableKeyword("_EMISSION");
             }
             else {
-                _renderer.Component.material.DisableKeyword("_EMISSION");
+                _renderer.Value.material.DisableKeyword("_EMISSION");
             }
-            _renderer.Component.SetPropertyBlock(_blocks[0]);
+            _renderer.Value.SetPropertyBlock(_blocks[0]);
         }
 
         private bool CheckFrameUpdate(Entity entity) {

@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightPlayerInput : IComponent {
+    [System.Serializable]
+	public sealed class FlightPlayerInput : IComponent {
 
         public PlayerInput Input;
         public string Boost;

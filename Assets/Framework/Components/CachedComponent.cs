@@ -20,8 +20,8 @@ namespace PixelComrades {
         private int _index = -1;
         private int _entity = -1;
         private ManagedArray<T> _array;
-
-        public T c {
+        
+        public T Value {
             get {
                 if (_index < 0) {
                     var cref = EntityController.GetEntity(_entity).GetComponentReference(typeof(T));
@@ -33,18 +33,19 @@ namespace PixelComrades {
                 return _index < 0 ? default(T) : _array[_index];
             }
         }
+        
+        public bool IsValid { get { return _index >= 0; } }
 
         public CachedComponent(){}
 
         public CachedComponent(Entity owner) {
-            _entity = owner;
-            _array = EntityController.GetComponentArray<T>();
-            var arrRef = EntityController.GetEntity(_entity).GetComponentReference(typeof(T));
-            if (arrRef != null) {
-                _index = arrRef.Value.Index;
-            }
+            Set(owner);
         }
 
+        public CachedComponent(T owner) {
+            Set(owner.GetEntity());
+        }
+        
         public CachedComponent(Entity owner, SortedList<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
@@ -82,6 +83,14 @@ namespace PixelComrades {
                 _array = (ManagedArray<T>) cref.Array;
             }
         }
+        /// <summary>
+        /// This can null reference exception as there's no way to ref return null.
+        /// Check IsValid before accessing
+        /// </summary>
+        /// <returns></returns>
+        public ref T GetReference() {
+            return ref _array[_index];
+        }
 
         public override void Clear() {
             _array = null;
@@ -90,7 +99,7 @@ namespace PixelComrades {
         }
         
         public static implicit operator T(CachedComponent<T> reference) {
-            return reference.c;
+            return reference.Value;
         }
     }
 }

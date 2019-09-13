@@ -4,7 +4,8 @@ using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
-    public sealed class Equipment : IComponent, IReceive<DataDescriptionAdded> {
+    [System.Serializable]
+	public sealed class Equipment : IComponent, IReceive<DataDescriptionAdded> {
         
         public Equipment(SerializationInfo info, StreamingContext context) {
             EquipmentSlotType = info.GetValue(nameof(EquipmentSlotType), EquipmentSlotType);

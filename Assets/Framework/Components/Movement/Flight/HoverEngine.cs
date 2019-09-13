@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class HoverEngine : IComponent {
+    [System.Serializable]
+	public sealed class HoverEngine : IComponent {
 
         public bool IsOnGround;
         public float Height;

@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable, Priority(Priority.Lowest)]
-    public sealed class AnimatorData : IComponent {
+	public sealed class AnimatorData : IComponent {
         private CachedAnimator _animator;
-        public IAnimator Animator { get { return _animator.Animator; } }
+        public IAnimator Animator { get { return _animator.Value; } }
 
         public AnimatorData(IAnimator animator) {
             _animator = new CachedAnimator(animator);
@@ -22,7 +22,8 @@ namespace PixelComrades {
         }
     }
 
-    public sealed class HurtAnimation : IComponent, IReceive<DamageEvent> {
+    [System.Serializable]
+	public sealed class HurtAnimation : IComponent, IReceive<DamageEvent> {
 
         private string _animation;
         private CachedAnimator _animator;
@@ -34,7 +35,7 @@ namespace PixelComrades {
 
         public void Handle(DamageEvent arg) {
             if (arg.Amount > 0 && _animator != null) {
-                _animator.Animator.PlayAnimation(_animation, false, null);
+                _animator.Value.PlayAnimation(_animation, false, null);
             }
         }
 
@@ -47,7 +48,8 @@ namespace PixelComrades {
         }
     }
 
-    public sealed class DeathAnimation : IComponent, IReceive<DeathEvent> {
+    [System.Serializable]
+	public sealed class DeathAnimation : IComponent, IReceive<DeathEvent> {
 
         private string _animation;
         private CachedAnimator _animator;
@@ -59,7 +61,7 @@ namespace PixelComrades {
 
         public void Handle(DeathEvent arg) {
             if (_animator != null) {
-                _animator.Animator.PlayAnimation(_animation, true, null);
+                _animator.Value.PlayAnimation(_animation, true, null);
             }
         }
 

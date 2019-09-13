@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [KnownType(typeof(IActionImpact))]
+    [System.Serializable]
     [Priority(Priority.Lowest)]
     public class LeachImpact : IActionImpact {
 

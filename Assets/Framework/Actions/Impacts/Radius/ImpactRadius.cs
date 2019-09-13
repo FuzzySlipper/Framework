@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [KnownType(typeof(IActionImpact))]
+    [System.Serializable]
     public class ImpactRadius : IActionImpact, ISerializable {
         public ImpactRadiusTypes Radius { get; }
 

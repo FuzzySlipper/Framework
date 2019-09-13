@@ -97,19 +97,19 @@ namespace PixelComrades {
             for (int i = 0; i < _simpleNodeList.Count; i++) {
                 var node = _simpleNodeList[i];
                 var pathfinder = node.Pathfinder;
-                if (node.Debugging.c != null) {
-                    node.Debugging.c.UpdateStatus(pathfinder);
+                if (node.Debugging.Value != null) {
+                    node.Debugging.Value.UpdateStatus(pathfinder);
                 }
-                if (node.Target.c == null) {
+                if (node.Target.Value == null) {
                     node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
                     continue;
                 }
-                if (!node.Target.c.IsValidMove) {
+                if (!node.Target.Value.IsValidMove) {
                     node.Pathfinder.ReachedDestination();
                     node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
                     continue;
                 }
-                var currentMoveTarget = node.Target.c.GetTargetPosition.toPoint3();
+                var currentMoveTarget = node.Target.Value.GetTargetPosition.toPoint3();
                 if (pathfinder.End != currentMoveTarget) {
                     pathfinder.SetEnd(currentMoveTarget);
                     node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
@@ -129,8 +129,8 @@ namespace PixelComrades {
                     case PathfindingStatus.PathReceived:
                     case PathfindingStatus.WaitingOnNode:
                         if (pathfinder.CurrentStatus == PathfindingStatus.PathReceived) {
-                            if (node.Debugging.c != null) {
-                                node.Debugging.c.SetPath(pathfinder.CurrentNodePath);
+                            if (node.Debugging.Value != null) {
+                                node.Debugging.Value.SetPath(pathfinder.CurrentNodePath);
                             }
                             _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.GetEntity(), false);
                         }
@@ -161,9 +161,9 @@ namespace PixelComrades {
                 pathfinder.CurrentPos = pathfinder.GridTarget;
                 if (pathfinder.CurrentIndex >= pathfinder.CurrentNodePath.Count - 1) {
                     node.Pathfinder.ReachedDestination();
-                    node.Target.c.Complete();
-                    if (node.Debugging.c != null) {
-                        node.Debugging.c.ClearPath();
+                    node.Target.Value.Complete();
+                    if (node.Debugging.Value != null) {
+                        node.Debugging.Value.ClearPath();
                     }
                     continue;
                 }
@@ -187,19 +187,19 @@ namespace PixelComrades {
                 var node = _astarNodeList[i];
                 var nav = node;
                 nav.StartUpdate();
-                if (node.Debugging.c != null) {
-                    nav.UpdateDebug(node.Debugging.c);
+                if (node.Debugging.Value != null) {
+                    nav.UpdateDebug(node.Debugging.Value);
                 }
-                if (node.Target.c == null || node.Entity.Tags.Contain(EntityTags.CantMove)) {
+                if (node.Target.Value == null || node.Entity.Tags.Contain(EntityTags.CantMove)) {
                     nav.ProcessNoMove();
                     continue;
                 }
-                if (!node.Target.c.IsValidMove) {
+                if (!node.Target.Value.IsValidMove) {
                     nav.ReachedDestination();
                     nav.ProcessNoMove();
                     continue;
                 }
-                var currentMoveTarget = node.Target.c.GetTargetPosition;
+                var currentMoveTarget = node.Target.Value.GetTargetPosition;
                 if (nav.DestinationP3 != currentMoveTarget.toPoint3()) {
                     nav.SetDestination(currentMoveTarget);
                     nav.ProcessNoMove();
@@ -210,7 +210,7 @@ namespace PixelComrades {
                         nav.ProcessNoMove();
                         continue;
                     case PathfindingStatus.InvalidPath:
-                        node.Target.c.Complete();
+                        node.Target.Value.Complete();
                         nav.Stop();
                         continue;
                     case PathfindingStatus.Created:
@@ -228,7 +228,7 @@ namespace PixelComrades {
                 }
                 if (nav.IsPathFinished) {
                     nav.ReachedDestination();
-                    node.Target.c.Complete();
+                    node.Target.Value.Complete();
                     continue;
                 }
                 nav.UpdateMovement();

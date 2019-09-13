@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class ColliderComponent : IComponent {
+    [System.Serializable]
+	public sealed class ColliderComponent : IComponent {
         private CachedUnityComponent<Collider> _component;
-        public Collider Collider { get { return _component.Component; } }
+        public Collider Collider { get { return _component.Value; } }
 
         public ColliderComponent(Collider collider) {
             _component = new CachedUnityComponent<Collider>(collider);

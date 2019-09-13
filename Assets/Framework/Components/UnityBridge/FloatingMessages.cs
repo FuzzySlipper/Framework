@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class FloatingMessages : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
+    [System.Serializable]
+	public sealed class FloatingMessages : IComponent, IReceive<DamageEvent>, IReceive<HealEvent> {
         
         public FloatingMessages() {}
         public void GetObjectData(SerializationInfo info, StreamingContext context) {}

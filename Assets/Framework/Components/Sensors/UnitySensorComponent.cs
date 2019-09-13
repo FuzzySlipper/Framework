@@ -5,9 +5,10 @@ using System.Runtime.Serialization;
 using SensorToolkit;
 
 namespace PixelComrades {
-    public class UnitySensorComponent : IComponent {
+    [System.Serializable]
+	public sealed class UnitySensorComponent : IComponent {
         private CachedUnityComponent<Sensor> _sensor;
-        public Sensor Sensor { get { return _sensor.Component; } }
+        public Sensor Sensor { get { return _sensor.Value; } }
 
         public UnitySensorComponent(Sensor sensor) {
             _sensor = new CachedUnityComponent<Sensor>(sensor);

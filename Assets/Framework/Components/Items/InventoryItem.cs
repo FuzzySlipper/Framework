@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
+    [System.Serializable]
+	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -38,7 +39,7 @@ namespace PixelComrades {
         public bool Identified = true;
         
         private CachedComponent<ItemInventory> _inventory = new CachedComponent<ItemInventory>();
-        public ItemInventory Inventory { get { return _inventory.c; } }
+        public ItemInventory Inventory { get { return _inventory.Value; } }
 
         public void SetContainer(ItemInventory container) {
             if (container == null) {

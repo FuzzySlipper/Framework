@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightEngine : IComponent {
+    [System.Serializable]
+	public sealed class FlightEngine : IComponent {
 
         public Vector3 AvailableBoostForces;
         public Vector3 AvailableRotationForces;

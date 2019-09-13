@@ -1,33 +1,53 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class EquipmentSlots : GenericContainer<EquipmentSlot>,  IReceive<ContainerStatusChanged> {
-        public EquipmentSlots(IList<EquipmentSlot> values) : base(values) {}
+    [System.Serializable]
+    public sealed class EquipmentSlots : IComponent, IReceive<ContainerStatusChanged> {
 
+        private GenericContainer<EquipmentSlot> _list = new GenericContainer<EquipmentSlot>();
+        
+        public EquipmentSlots(IList<EquipmentSlot> values) {
+            if (values != null) {
+                _list.AddRange(values);                
+            }
+        }
+
+        public EquipmentSlots(SerializationInfo info, StreamingContext context) {
+            _list = info.GetValue(nameof(_list), _list);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_list), _list);
+        }
+
+        public int Count { get { return _list.Count; } }
+        public EquipmentSlot this[int index] { get { return _list[index]; } }
+        
         public EquipmentSlot GetSlot(string slotType) {
-            for (int i = 0; i < List.Count; i++) {
-                if (List[i].SlotIsCompatible(slotType)) {
-                    return List[i];
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].SlotIsCompatible(slotType)) {
+                    return _list[i];
                 }
             }
             return null;
         }
 
         public EquipmentSlot GetSlotExact(string slotType) {
-            for (int i = 0; i < List.Count; i++) {
-                if (List[i].TargetSlot == slotType) {
-                    return List[i];
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].TargetSlot == slotType) {
+                    return _list[i];
                 }
             }
             return null;
         }
 
         public EquipmentSlot GetSlotNameExact(string slotName) {
-            for (int i = 0; i < List.Count; i++) {
-                if (List[i].Name == slotName) {
-                    return List[i];
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].Name == slotName) {
+                    return _list[i];
                 }
             }
             return null;
@@ -48,27 +68,27 @@ namespace PixelComrades {
         }
 
         private bool TryEquip(Equipment equip, Entity entity, bool overrideCurrent) {
-            for (int i = 0; i < List.Count; i++) {
-                if (List[i].Item != null && !overrideCurrent) {
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].Item != null && !overrideCurrent) {
                     continue;
                 }
-                if (List[i].SlotIsCompatible(equip.EquipmentSlotType) && List[i].EquipItem(entity)) {
+                if (_list[i].SlotIsCompatible(equip.EquipmentSlotType) && _list[i].EquipItem(entity)) {
                     return true;
                 }
             }
             return false;
         }
 
-        public override void Add(EquipmentSlot slot){
-            base.Add(slot);
+        public void Add(EquipmentSlot slot){
+            _list.Add(slot);
             if (slot != null) {
                 slot.SlotOwner = this;
             }
         }
 
         public void Handle(ContainerStatusChanged arg) {
-            for (int i = 0; i < List.Count; i++) {
-                List[i].Handle(arg);
+            for (int i = 0; i < _list.Count; i++) {
+                _list[i].Handle(arg);
             }
         }
     }

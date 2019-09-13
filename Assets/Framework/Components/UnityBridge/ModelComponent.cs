@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class ModelComponent : IComponent {
+    [System.Serializable]
+	public sealed class ModelComponent : IComponent {
 
         private CachedGenericComponent<IModelComponent> _component;
-        public IModelComponent Model { get { return _component.Component; } }
+        public IModelComponent Model { get { return _component.Value; } }
 
         public ModelComponent(IModelComponent model) {
             _component = new CachedGenericComponent<IModelComponent>(model);

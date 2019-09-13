@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [KnownType(typeof(IActionImpact))]
+    [System.Serializable]
     public class HealImpact : IActionImpact, ISerializable {
 
         private string _targetVital;

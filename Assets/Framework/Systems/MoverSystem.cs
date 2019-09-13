@@ -87,9 +87,9 @@ namespace PixelComrades {
             }
             var targetPos = target.GetTargetPosition;
             var dir = targetPos - tr.position;
-            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.c.Speed * TimeManager.DeltaTime);
+            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Value.Speed * TimeManager.DeltaTime);
             var targetRotation = Quaternion.LookRotation(dir);
-            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.c.Speed * TimeManager.DeltaTime);
+            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.Value.Speed * TimeManager.DeltaTime);
             if (Vector3.Distance(targetPos, tr.position) < ReachedDestination) {
                 FinishMove(entity, targetPos);
             }

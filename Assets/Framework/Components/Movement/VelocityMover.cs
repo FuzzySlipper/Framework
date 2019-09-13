@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class VelocityMover : IComponent {
+    [System.Serializable]
+	public sealed class VelocityMover : IComponent {
 
         public float CurrentSpeed;
 

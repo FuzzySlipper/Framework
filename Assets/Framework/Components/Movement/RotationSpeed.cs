@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class RotationSpeed : IComponent {
+    [System.Serializable]
+	public sealed class RotationSpeed : IComponent {
         public float Speed;
 
         public RotationSpeed(float speed) {

@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Normal)]
-    public sealed class SensorTargetsComponent : IComponent, IReceive<DamageEvent> {
+    [System.Serializable]
+	public sealed class SensorTargetsComponent : IComponent, IReceive<DamageEvent> {
         
         public int MaxUpdatesNoContact = 150;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();

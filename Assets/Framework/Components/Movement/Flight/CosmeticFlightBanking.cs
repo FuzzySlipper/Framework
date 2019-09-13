@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CosmeticFlightBanking : IComponent {
+    [System.Serializable]
+	public sealed class CosmeticFlightBanking : IComponent {
 
         private CachedTransform _bankTransform;
         public Transform BankTransform { get { return _bankTransform; } }

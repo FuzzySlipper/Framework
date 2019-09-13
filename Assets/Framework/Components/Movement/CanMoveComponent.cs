@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CanMoveComponent : IComponent {
+    [System.Serializable]
+	public sealed class CanMoveComponent : IComponent {
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
 
         public bool CanMove { get { return _moveEnabled.Value; } }

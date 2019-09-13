@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class AmmoComponent : IComponent {
+    [System.Serializable]
+	public sealed class AmmoComponent : IComponent {
 
         private static GameOptions.CachedFloat _skillPercent = new GameOptions.CachedFloat("SkillAmmoReductionPerPoint");
         private static GameOptions.CachedFloat _skillMaxReduction = new GameOptions.CachedFloat("SkillAmmoMaxMultiplier");

@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightMoveInput : IComponent, IReceive<CanMoveStatusChanged>, IReceive<MoveInputMessage>, IReceive<ChangePositionEvent>, 
+    [System.Serializable]
+	public sealed class FlightMoveInput : IComponent, IReceive<CanMoveStatusChanged>, IReceive<MoveInputMessage>, IReceive<ChangePositionEvent>, 
     IReceive<PhysicsInputMessage>{
         
         public Vector3 LookInputVector { get; private set; }

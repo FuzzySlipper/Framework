@@ -35,17 +35,17 @@ namespace PixelComrades {
         }
 
         public void Setup(GameObject obj) {
-            Model.c.Set(obj.GetComponent<ModelWrapper>());
+            Model.Value.Set(obj.GetComponent<ModelWrapper>());
             Entity.Tr = obj.transform;
         }
 
         public void Clear() {
-            Model.c.Clear();
+            Model.Value.Clear();
             Entity.Tr = null;
         }
 
-        public Vector3 position { get { return Entity.Tr?.position ?? _position.c?.Position ?? Vector3.zero; } }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.c?.Rotation ?? Quaternion.identity; } }
+        public Vector3 position { get { return Entity.Tr?.position ?? _position.Value?.Position ?? Vector3.zero; } }
+        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.Value?.Rotation ?? Quaternion.identity; } }
 
         public void Dispose() {
             Model.Dispose();

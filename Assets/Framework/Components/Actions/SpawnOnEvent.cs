@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class SpawnOnEvent : IComponent, IReceive<ActionStateEvent> {
+    [System.Serializable]
+	public sealed class SpawnOnEvent : IComponent, IReceive<ActionStateEvent> {
 
         public ActionStateEvents StartEvent { get; }
         public ActionStateEvents EndEvent { get; }

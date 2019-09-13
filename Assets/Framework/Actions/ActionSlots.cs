@@ -1,24 +1,39 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ActionSlots : GenericContainer<ActionSlot> {
+    public class ActionSlots : IComponent {
+
+        private GenericContainer<ActionSlot> _list = new GenericContainer<ActionSlot>();
+        
         public ActionSlots(int amountPrimary, int amountSecondary, int amtHidden) {
             for (int i = 0; i <= amountPrimary; i++) {
-                Add(new ActionSlot(this, false, false));
+                _list.Add(new ActionSlot(this, false, false));
             }
             for (int i = 0; i <= amountSecondary; i++) {
-                Add(new ActionSlot(this, true,false));
+                _list.Add(new ActionSlot(this, true,false));
             }
             for (int i = 0; i <= amtHidden; i++) {
-                Add(new ActionSlot(this, true, true));
+                _list.Add(new ActionSlot(this, true, true));
             }
         }
 
+        public ActionSlots(SerializationInfo info, StreamingContext context) {
+            _list = info.GetValue(nameof(_list), _list);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_list), _list);
+        }
+
+        public int Count { get { return _list.Count; } }
+        public ActionSlot this[int index] { get { return _list[index]; } }
+
         public bool EquipToEmpty(Entity actionEntity, Action action) {
-            for (int i = 0; i < Count; i++) {
-                if (this[i].Item == null && this[i].EquipItem(actionEntity, action)) {
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].Item == null && _list[i].EquipItem(actionEntity, action)) {
                     return true;
                 }
             }
@@ -26,11 +41,11 @@ namespace PixelComrades {
         }
 
         public bool EquipToHidden(Entity actionEntity, Action action) {
-            for (int i = 0; i < Count; i++) {
-                if (!this[i].IsHidden) {
+            for (int i = 0; i < _list.Count; i++) {
+                if (!_list[i].IsHidden) {
                     continue;
                 }
-                if (this[i].Item == null && this[i].EquipItem(actionEntity, action)) {
+                if (_list[i].Item == null && _list[i].EquipItem(actionEntity, action)) {
                     return true;
                 }
             }

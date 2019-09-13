@@ -19,7 +19,7 @@ namespace PixelComrades {
 
         private bool _overrideEntityTr = false;
 
-        public IAnimator Animator { get { return _animator?.c.Animator; } }
+        public IAnimator Animator { get { return _animator?.Value.Animator; } }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {_animator};
 
         public static System.Type[] GetTypes() {

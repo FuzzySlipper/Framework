@@ -9,18 +9,18 @@ namespace PixelComrades {
 
         private int _serializedId = -1;
         private string _transformChild;
-        private T _component;
+        private T _value;
         
-        public T Component {
+        public T Value {
             get {
-                if (_component != null) {
-                    return _component;
+                if (_value != null) {
+                    return _value;
                 }
                 if (_serializedId < 0) {
                     return null;
                 }
                 TryRestore();
-                return _component;
+                return _value;
             }
         }
 
@@ -34,15 +34,15 @@ namespace PixelComrades {
                 targetTr = prefab.transform.Find(_transformChild);
             }
             if (targetTr != null) {
-                _component = targetTr.GetComponent<T>();
-                if (_component == null) {
-                    _component = prefab.GetComponentInChildren<T>();
+                _value = targetTr.GetComponent<T>();
+                if (_value == null) {
+                    _value = prefab.GetComponentInChildren<T>();
                 }
             }
         }
 
         public void Dispose() {
-            _component = null;
+            _value = null;
             _serializedId = -1;
         }
 
@@ -52,8 +52,8 @@ namespace PixelComrades {
         }
 
         public void Set(T component) {
-            _component = component;
-            if (_component == null) {
+            _value = component;
+            if (_value == null) {
                 _serializedId = -1;
                 _transformChild = null;
                 return;
@@ -61,7 +61,7 @@ namespace PixelComrades {
             if (_serializedId >= 0) {
                 return;
             }
-            SetPrefabEntity(PrefabEntity.FindPrefabRoot(_component.transform));
+            SetPrefabEntity(PrefabEntity.FindPrefabRoot(_value.transform));
         }
 
         public void SetPrefabEntity(PrefabEntity prefab) {
@@ -69,11 +69,11 @@ namespace PixelComrades {
                 return;
             }
             _serializedId = prefab.Metadata.SerializationId;
-            if (prefab.transform == _component.transform) {
+            if (prefab.transform == _value.transform) {
                 _transformChild = null;
                 return;
             }
-            _transformChild = _component.transform.GetPath();
+            _transformChild = _value.transform.GetPath();
         }
         
         public CachedUnityComponent(){}
@@ -96,7 +96,7 @@ namespace PixelComrades {
         }
 
         public static implicit operator T(CachedUnityComponent<T> reference) {
-            return reference.Component;
+            return reference.Value;
         }
     }
 }

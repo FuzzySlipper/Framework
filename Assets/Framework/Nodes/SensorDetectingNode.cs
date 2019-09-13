@@ -23,9 +23,9 @@ namespace PixelComrades {
         private CachedComponent<UnitySensorComponent> _sensor = new CachedComponent<UnitySensorComponent>();
         private CachedComponent<FactionComponent> _faction = new CachedComponent<FactionComponent>();
 
-        public SensorTargetsComponent Targets { get => _targets.c; }
-        public UnitySensorComponent Sensor { get => _sensor.c; }
-        public FactionComponent Faction { get => _faction.c; }
+        public SensorTargetsComponent Targets { get => _targets.Value; }
+        public UnitySensorComponent Sensor { get => _sensor.Value; }
+        public FactionComponent Faction { get => _faction.Value; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {_targets, _sensor, _faction};
 
         public static System.Type[] GetTypes() {

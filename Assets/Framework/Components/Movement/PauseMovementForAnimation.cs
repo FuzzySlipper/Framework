@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class PauseMovementForAnimation : IComponent, IReceive<DamageEvent> {
+    [System.Serializable]
+	public sealed class PauseMovementForAnimation : IComponent, IReceive<DamageEvent> {
 
         private string _damageClip;
 

@@ -91,9 +91,9 @@ namespace PixelComrades {
             var ls = World.Get<LineOfSightSystem>();
             for (int n = 0; n < _sensorNodes.Count; n++) {
                 var node = _sensorNodes[n];
-                var sensor = node.Sensor.c;
+                var sensor = node.Sensor.Value;
                 sensor.DetectedCells.Clear();
-                var start = node.Position.c.Position;
+                var start = node.Position.Value.Position;
                 sensor.LastDetectedCenter = start;
                 var fwd = node.Entity.Tr.ForwardDirection2D();
                 for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
@@ -108,7 +108,7 @@ namespace PixelComrades {
                     if (visible.Entity == node.Entity) {
                         continue;
                     }
-                    if (!sensor.DetectedCells.Contains(visible.Position.c)) {
+                    if (!sensor.DetectedCells.Contains(visible.Position.Value)) {
                         continue;
                     }
                     var isVision = true;

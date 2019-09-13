@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace PixelComrades {
 
-    public class ImpactRendererComponent : IComponent {
+    [System.Serializable]
+	public sealed class ImpactRendererComponent : IComponent {
         private CachedGenericComponent<IImpactRenderer> _renderer;
 
         public ImpactRendererComponent(IImpactRenderer renderer) {
@@ -11,7 +12,7 @@ namespace PixelComrades {
         }
 
         public void PlayAnimation(SpriteAnimation animation, Color color) {
-            _renderer.Component.PlayAnimation(animation, color);
+            _renderer.Value.PlayAnimation(animation, color);
         }
 
         public ImpactRendererComponent(SerializationInfo info, StreamingContext context) {

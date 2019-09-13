@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Low)]
-    public sealed class StatsContainer : IComponent, IReceive<HealEvent> {
+    [System.Serializable]
+	public sealed class StatsContainer : IComponent, IReceive<HealEvent> {
 
         private CachedEntity _owner;
 

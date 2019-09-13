@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SensorCellsComponent : IComponent {
+    [System.Serializable]
+	public sealed class SensorCellsComponent : IComponent {
         public System.Action OnUpdate;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public int MaxHearDistance { get; private set; }

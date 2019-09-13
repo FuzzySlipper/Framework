@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct TypeId : IComponent {
+    [System.Serializable]
+	public struct TypeId : IComponent {
         public string Id { get; }
 
         public TypeId(string id) {

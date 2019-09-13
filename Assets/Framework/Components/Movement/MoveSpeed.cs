@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class MoveSpeed : IComponent {
+    [System.Serializable]
+	public sealed class MoveSpeed : IComponent {
         public float Speed;
 
         public MoveSpeed(float speed) {

@@ -5,14 +5,16 @@ using System.Runtime.Serialization;
 using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
-    public struct ForwardMover : IComponent {
+    [System.Serializable]
+	public struct ForwardMover : IComponent {
         public ForwardMover(SerializationInfo info, StreamingContext context) {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
     }
-    //public struct ForwardTargetMover : IComponent {
+    //[System.Serializable]
+	//public struct ForwardTargetMover : IComponent {
     //    public int Owner { get; set; }
     //}
 }

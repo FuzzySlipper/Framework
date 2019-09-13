@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class TooltipComponent : IComponent {
+    [System.Serializable]
+	public sealed class TooltipComponent : IComponent {
         public Action<IComponent> OnTooltipDel;
 
         public void Tooltip() {

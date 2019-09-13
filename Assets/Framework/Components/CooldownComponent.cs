@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct CooldownComponent : IComponent {
+    [System.Serializable]
+	public struct CooldownComponent : IComponent {
         public Timer Cooldown;
 
         public CooldownComponent(float length, bool unscaled) : this() {

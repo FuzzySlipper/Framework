@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct Key : IComponent {
+    [System.Serializable]
+	public struct Key : IComponent {
         public string KeyId { get; }
 
         public Key(string keyId) : this() {

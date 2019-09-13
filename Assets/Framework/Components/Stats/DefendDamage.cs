@@ -6,7 +6,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Higher)]
-    public sealed class DefendDamageWithStats : IComponent, IReceiveRef<DamageEvent> {
+    [System.Serializable]
+	public sealed class DefendDamageWithStats : IComponent, IReceiveRef<DamageEvent> {
 
         private List<StatEntry> _stats = new List<StatEntry>();
 
@@ -66,7 +67,8 @@ namespace PixelComrades {
     }
 
     [Priority(Priority.Higher)]
-    public sealed class DefendDamageFlat : IComponent, IReceiveRef<DamageEvent> {
+    [System.Serializable]
+	public sealed class DefendDamageFlat : IComponent, IReceiveRef<DamageEvent> {
 
         private List<DefendType> _validTypes = new List<DefendType>();
 

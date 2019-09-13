@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class ItemInventory : IComponent, IEntityContainer {
+    [System.Serializable]
+	public sealed class ItemInventory : IComponent, IEntityContainer {
         
         public event System.Action OnRefreshItemList;
 

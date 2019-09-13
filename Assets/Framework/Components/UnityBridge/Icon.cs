@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class IconComponent : IComponent {
+    [System.Serializable]
+	public sealed class IconComponent : IComponent {
         public Sprite Sprite;
         public string IconLocation { get; }
 

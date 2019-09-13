@@ -27,19 +27,19 @@ namespace PixelComrades {
         }
 
         public void Setup(GameObject obj) {
-            Model.c.Set(obj.GetComponent<ModelWrapper>());
+            Model.Value.Set(obj.GetComponent<ModelWrapper>());
             Entity.Tr = obj.transform;
         }
 
         public Vector3 position {
             get {
                 if (Entity.Tr != null) {
-                    return Entity.Tr.position + Collider.c?.LocalCenter ?? new Vector3(0,1,0);
+                    return Entity.Tr.position + Collider.Value?.LocalCenter ?? new Vector3(0,1,0);
                 }
-                return _position.c?.Position ?? Vector3.zero;
+                return _position.Value?.Position ?? Vector3.zero;
             }
         }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.c?.Rotation ?? Quaternion.identity; } }
+        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.Value?.Rotation ?? Quaternion.identity; } }
 
     }
 }

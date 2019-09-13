@@ -6,6 +6,7 @@ using UnityEngine;
 namespace PixelComrades {
     [System.Serializable]
     public class SerializedSaveGame : ISerializable {
+        //TODO: need to make sure that any Actions in progress are cancelled when saved
         
         [SerializeField] private string _name;
         [SerializeField] private string _riftLocation;

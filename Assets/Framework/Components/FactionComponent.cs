@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct FactionComponent : IComponent {
+    [System.Serializable]
+	public struct FactionComponent : IComponent {
 
         private int _faction;
 

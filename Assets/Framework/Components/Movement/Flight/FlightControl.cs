@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FlightControl : IComponent {
+    [System.Serializable]
+	public sealed class FlightControl : IComponent {
         public Mode CurrentMode;
         public FlightControlConfig Config;
 

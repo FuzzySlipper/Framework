@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class RigidbodyComponent : IComponent, IDisposable {
+    [System.Serializable]
+	public sealed class RigidbodyComponent : IComponent, IDisposable {
 
         private CachedUnityComponent<Rigidbody> _component;
-        public Rigidbody Rb { get { return _component.Component; } }
+        public Rigidbody Rb { get { return _component.Value; } }
 
         public RigidbodySettings RigidbodySetup;
 

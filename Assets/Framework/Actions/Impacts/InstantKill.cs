@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace PixelComrades {
-    [KnownType(typeof(IActionImpact))]
+    [System.Serializable]
     public class InstantKill : IActionImpact {
 
         private float _chance;

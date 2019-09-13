@@ -67,17 +67,17 @@ namespace PixelComrades {
 
         private void HandleVelocityMover(RigidbodyMoverNode mover) {
             var dt = TimeManager.DeltaTime;
-            var rb = mover.Rb.c.Rb;
+            var rb = mover.Rb.Value.Rb;
             if (rb == null) {
                 return;
             }
-            var moveSpeed = mover.MoveSpeed.c;
-            mover.Mover.c.CurrentSpeed = Mathf.MoveTowards(mover.Mover.c.CurrentSpeed, moveSpeed , moveSpeed * 0.25f * dt);
-            var moveTarget = mover.Target.c.GetTargetPosition;
+            var moveSpeed = mover.MoveSpeed.Value;
+            mover.Mover.Value.CurrentSpeed = Mathf.MoveTowards(mover.Mover.Value.CurrentSpeed, moveSpeed , moveSpeed * 0.25f * dt);
+            var moveTarget = mover.Target.Value.GetTargetPosition;
             var dir = moveTarget - rb.position;
-            rb.AddForce(dir.normalized * mover.Mover.c.CurrentSpeed * dt);
+            rb.AddForce(dir.normalized * mover.Mover.Value.CurrentSpeed * dt);
             var targetRotation = Quaternion.LookRotation(dir);
-            rb.MoveRotation(Quaternion.RotateTowards(mover.Entity.Tr.rotation, targetRotation, mover.RotationSpeed.c.Speed * dt));
+            rb.MoveRotation(Quaternion.RotateTowards(mover.Entity.Tr.rotation, targetRotation, mover.RotationSpeed.Value.Speed * dt));
             if (Vector3.Distance(moveTarget, rb.position) < ReachedDestination) {
                 FinishMove(mover.Entity, moveTarget);
             }

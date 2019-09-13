@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ArcMover : IComponent {
+    [System.Serializable]
+	public sealed class ArcMover : IComponent {
 
         public float Angle;
 

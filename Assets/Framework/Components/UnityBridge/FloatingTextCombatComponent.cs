@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class FloatingTextCombatComponent : IComponent, IReceive<CombatStatusUpdate> {
+    [System.Serializable]
+	public sealed class FloatingTextCombatComponent : IComponent, IReceive<CombatStatusUpdate> {
         private CachedTransform _component;
         
         public Transform Tr { get { return _component.Tr; } }

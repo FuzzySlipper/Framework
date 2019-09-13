@@ -21,7 +21,8 @@ namespace PixelComrades {
     }
 
     [Priority(Priority.Highest)]
-    public class GodModeComponent : IComponent, IReceiveRef<DamageEvent> {
+    [System.Serializable]
+	public sealed class GodModeComponent : IComponent, IReceiveRef<DamageEvent> {
         public void Handle(ref DamageEvent arg) {
             arg.Amount = 0;
         }

@@ -6,11 +6,8 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
 
     [System.Serializable]
-    public class GenericContainer<T> : IComponent {
-        /// <summary>
-        /// Warning Add runs before derived class constructor
-        /// </summary>
-        /// <param name="values"></param>
+	public sealed class GenericContainer<T> : ISerializable {
+       
         public GenericContainer(IList<T> values) {
             if (values != null) {
                 AddRange(values);
@@ -18,20 +15,21 @@ namespace PixelComrades {
         }
         public GenericContainer(){}
 
-        protected List<T> List = new List<T>();
+        private List<T> _list = new List<T>();
 
-        public T this[int index] { get { return List[index]; } }
-        public int Count { get { return List.Count; } }
+        public T this[int index] { get { return _list[index]; } }
+        public int Count { get { return _list.Count; } }
+        public List<T> List { get { return _list; } }
 
-        public virtual void Add(T item) {
+        public void Add(T item) {
             if (item == null) {
                 return;
             }
-            List.Add(item);
+            _list.Add(item);
         }
 
-        public virtual void Remove(T item) {
-            List.Remove(item);
+        public void Remove(T item) {
+            _list.Remove(item);
         }
 
         public void AddRange(IList<T> values) {
@@ -44,11 +42,11 @@ namespace PixelComrades {
         }
 
         public GenericContainer(SerializationInfo info, StreamingContext context) {
-            List = info.GetValue(nameof(List), List);
+            _list = info.GetValue(nameof(_list), _list);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(List), List);
+            info.AddValue(nameof(_list), _list);
         }
     }
 }

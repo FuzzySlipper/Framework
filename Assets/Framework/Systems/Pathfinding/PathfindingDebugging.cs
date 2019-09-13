@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class PathfindingDebugging : IComponent, IDisposable {
+    [System.Serializable]
+	public sealed class PathfindingDebugging : IComponent, IDisposable {
         public CachedUnityComponent<LineRenderer> LineR;
         public CachedUnityComponent<TextMesh> Tm;
         public CachedTransform DebugObject;
@@ -37,23 +38,23 @@ namespace PixelComrades {
                 return;
             }
             _updateStatus = agent.CurrentStatus;
-            Tm.Component.text = string.Format("{0}{2}{1}", agent.GetEntity().Id, agent.CurrentStatus, System.Environment.NewLine);
+            Tm.Value.text = string.Format("{0}{2}{1}", agent.GetEntity().Id, agent.CurrentStatus, System.Environment.NewLine);
             if (_updateStatus == PathfindingStatus.NoPath || _updateStatus == PathfindingStatus.InvalidPath) {
-                LineR.Component.positionCount = 2;
-                LineR.Component.SetPosition(0, this.GetEntity().Tr.position);
-                LineR.Component.SetPosition(1, agent.End.toVector3());
+                LineR.Value.positionCount = 2;
+                LineR.Value.SetPosition(0, this.GetEntity().Tr.position);
+                LineR.Value.SetPosition(1, agent.End.toVector3());
             }
         }
 
         public void SetPath(List<Point3> path) {
-            LineR.Component.positionCount = path.Count;
+            LineR.Value.positionCount = path.Count;
             for (int n = 0; n < path.Count; n++) {
-                LineR.Component.SetPosition(n, path[n].toVector3());
+                LineR.Value.SetPosition(n, path[n].toVector3());
             }
         }
 
         public void ClearPath() {
-            LineR.Component.positionCount = 0;
+            LineR.Value.positionCount = 0;
         }
 
         public void Dispose() {

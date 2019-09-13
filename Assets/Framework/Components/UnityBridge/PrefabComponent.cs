@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class PrefabComponent : IComponent {
+	[System.Serializable]
+	public sealed class PrefabComponent : IComponent {
         private CachedUnityComponent<PrefabEntity> _component;
 
         public PrefabComponent(PrefabEntity entity) {

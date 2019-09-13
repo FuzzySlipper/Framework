@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct AmountDescriptionComponent : IComponent {
+	[System.Serializable]
+	public struct AmountDescriptionComponent : IComponent {
         public string Text;
 
         public AmountDescriptionComponent(string text = "") {

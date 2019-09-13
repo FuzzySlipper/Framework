@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [KnownType(typeof(IActionImpact))]
+    [System.Serializable]
     public sealed class AddModImpact : IActionImpact, ISerializable {
 
         private float _length;

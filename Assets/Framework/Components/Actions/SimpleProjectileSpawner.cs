@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class SimpleProjectileSpawner : IComponent {
+    [System.Serializable]
+	public sealed class SimpleProjectileSpawner : IComponent {
 
         public CachedTransform ShootPivot = new CachedTransform();
         public string ProjectileId;

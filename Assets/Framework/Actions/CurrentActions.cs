@@ -66,7 +66,8 @@ namespace PixelComrades {
         public Transform EquipTr { get { return null; } }
     }
 
-    public sealed class CurrentActions : IComponent {
+    [System.Serializable]
+	public sealed class CurrentActions : IComponent {
 
         private CurrentActionSlot[] _actions;
 

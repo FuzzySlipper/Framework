@@ -11,15 +11,15 @@ namespace PixelComrades {
         private int _entityId = -1;
         private System.Type _componentType;
         
-        private T _component;
+        private T _value;
         
-        public T Component {
+        public T Value {
             get {
-                if (_component != null) {
-                    return _component;
+                if (_value != null) {
+                    return _value;
                 }
                 TryRestore();
-                return _component;
+                return _value;
             }
         }
 
@@ -30,11 +30,11 @@ namespace PixelComrades {
                     if (!string.IsNullOrEmpty(_transformChild)) {
                         var targetTr = prefab.transform.Find(_transformChild);
                         if (targetTr != null) {
-                            _component = targetTr.GetComponent<T>();
+                            _value = targetTr.GetComponent<T>();
                         }
                     }
-                    if (_component == null) {
-                        _component = prefab.GetComponentInChildren<T>();
+                    if (_value == null) {
+                        _value = prefab.GetComponentInChildren<T>();
                     }
                 }
                 return;
@@ -48,7 +48,7 @@ namespace PixelComrades {
             }
             var cref = entity.GetComponentReference(_componentType);
             if (cref != null) {
-                _component = (T) cref.Value.Get();
+                _value = (T) cref.Value.Get();
             }
         }
 
@@ -63,8 +63,8 @@ namespace PixelComrades {
         }
 
         public void Set(T component) {
-            _component = component;
-            if (_component == null) {
+            _value = component;
+            if (_value == null) {
                 Clear();
                 return;
             }

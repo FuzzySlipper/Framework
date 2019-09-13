@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    
-    public class WaitForSpawnMovement : ActionLayer {
+    [Serializable]
+    public class WaitForSpawnMovement : ActionLayer, ISerializable {
 
         public string Data;
 
@@ -14,6 +16,15 @@ namespace PixelComrades {
             Data = data;
         }
 
+        public WaitForSpawnMovement(SerializationInfo info, StreamingContext context) : base(info, context) {
+            Data = info.GetValue(nameof(Data), Data);
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(Data), Data);
+        }
+        
         public override void Start(ActionUsingNode node) {
             base.Start(node);
             var entity = node.Entity;

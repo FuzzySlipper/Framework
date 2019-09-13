@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class FakeFlightEngine : IComponent {
+    [System.Serializable]
+	public sealed class FakeFlightEngine : IComponent {
 
         public FakeFlightEngineConfig Config { get; }
 

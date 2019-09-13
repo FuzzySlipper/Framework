@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class PlayerInputComponent : IComponent {
+    [System.Serializable]
+	public sealed class PlayerInputComponent : IComponent {
         public PlayerInput Input { get;}
 
         public PlayerInputComponent(PlayerInput input) {

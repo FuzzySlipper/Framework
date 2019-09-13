@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class ActionFxComponent : IComponent, IReceive<ActionStateEvent>, IReceive<EnvironmentCollisionEvent>, 
+    [System.Serializable]
+	public sealed class ActionFxComponent : IComponent, IReceive<ActionStateEvent>, IReceive<EnvironmentCollisionEvent>, 
     IReceive<PerformedCollisionEvent>, IReceive<CollisionEvent> {
         public ActionFx Fx { get; private set; }
 

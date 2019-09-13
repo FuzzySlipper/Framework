@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 
 namespace PixelComrades {
-    [System.Serializable, KnownType(typeof(BaseStat))]
+    [System.Serializable]
     public class BaseStat : IDisposable {
 
         public BaseStat() {}

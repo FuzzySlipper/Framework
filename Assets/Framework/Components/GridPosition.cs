@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public struct GridPosition : IComponent {
+    [System.Serializable]
+	public struct GridPosition : IComponent {
         public Point3 Position;
 
         public GridPosition(Point3 position) : this() {

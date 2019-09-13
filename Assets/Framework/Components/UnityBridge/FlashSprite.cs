@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SpriteColorComponent : IComponent, IReceive<DamageEvent>, IReceive<StunEvent>, IReceive<SlowEvent>, IReceive<ConfusionEvent> {
+    [System.Serializable]
+	public sealed class SpriteColorComponent : IComponent, IReceive<DamageEvent>, IReceive<StunEvent>, IReceive<SlowEvent>, IReceive<ConfusionEvent> {
 
         private const float Duration = 0.5f;
 
@@ -18,7 +19,7 @@ namespace PixelComrades {
         private MaterialPropertyBlock _matBlock;
         private bool _animatingColor = false;
         
-        private SpriteRenderer Renderer { get { return _spriteRender.Component; } }
+        private SpriteRenderer Renderer { get { return _spriteRender.Value; } }
         
         private static GameOptions.CachedColor _stunColor = new GameOptions.CachedColor("Stunned");
         private static GameOptions.CachedColor _confusedColor = new GameOptions.CachedColor("Confused");
@@ -41,7 +42,7 @@ namespace PixelComrades {
         private void Setup() {
             _scaleDmgTween = new TweenFloat(0, 1, Duration, EasingTypes.BounceInOut, false);
             _matBlock = new MaterialPropertyBlock();
-            _spriteRender.Component.GetPropertyBlock(_matBlock);
+            _spriteRender.Value.GetPropertyBlock(_matBlock);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

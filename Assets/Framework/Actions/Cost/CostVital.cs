@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace PixelComrades {
-    public class CostVital : CommandCost {
+    [Serializable]
+    public class CostVital : CommandCost, ISerializable {
 
         public static GameOptions.CachedFloat SkillPercent = new GameOptions.CachedFloat("SkillVitalCostReductionPerPoint");
         public static GameOptions.CachedFloat SkillMaxReduction = new GameOptions.CachedFloat("SkillVitalCostMaxMultiplier");
@@ -17,6 +20,18 @@ namespace PixelComrades {
             VitalAmount = vitalAmount;
             TargetVital = targetVital;
             _skill = skill;
+        }
+
+        public CostVital(SerializationInfo info, StreamingContext context) {
+            VitalAmount = info.GetValue(nameof(VitalAmount), VitalAmount);
+            TargetVital = info.GetValue(nameof(TargetVital), TargetVital);
+            _skill = info.GetValue(nameof(_skill), _skill);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(VitalAmount), VitalAmount);
+            info.AddValue(nameof(TargetVital), TargetVital);
+            info.AddValue(nameof(_skill), _skill);
         }
 
         public override void ProcessCost(Entity entity) {

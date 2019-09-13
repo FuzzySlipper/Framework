@@ -1,17 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public abstract class ActionLayer {
+    [System.Serializable]
+    public abstract class ActionLayer : ISerializable {
 
-        public Action Action { get; }
+        private CachedComponent<Action> _action;
         public List<IActionScriptedEvent> ScriptedEvents = new List<IActionScriptedEvent>();
         public Dictionary<string, IActionEvent> Events = new Dictionary<string, IActionEvent>();
         public bool IsMainLayer = false;
 
+        public Action Action { get { return _action.Value; } }
         protected ActionLayer(Action action) {
-            Action = action;
+            _action = new CachedComponent<Action>(action);
+        }
+
+        protected ActionLayer(SerializationInfo info, StreamingContext context) {
+            _action = info.GetValue(nameof(_action), _action);
+            ScriptedEvents = info.GetValue(nameof(ScriptedEvents), ScriptedEvents);
+            Events = info.GetValue(nameof(Events), Events);
+            IsMainLayer = info.GetValue(nameof(IsMainLayer), IsMainLayer);
+        }
+
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_action), _action);
+            info.AddValue(nameof(ScriptedEvents), ScriptedEvents);
+            info.AddValue(nameof(Events), Events);
+            info.AddValue(nameof(IsMainLayer), IsMainLayer);
         }
 
         public void PostAnimationEvent(ActionStateEvent stateEvent) {

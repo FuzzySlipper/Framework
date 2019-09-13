@@ -5,7 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [Priority(Priority.Lowest)]
-    public sealed class CameraShakeOnDamage : IComponent, IReceive<CollisionEvent> {
+    [System.Serializable]
+	public sealed class CameraShakeOnDamage : IComponent, IReceive<CollisionEvent> {
 
         private float _intensityMulti;
 

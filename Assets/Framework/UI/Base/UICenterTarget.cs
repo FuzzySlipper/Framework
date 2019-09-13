@@ -138,7 +138,7 @@ namespace PixelComrades {
                 return;
             }
             _main._textHolder.maxVisibleCharacters = 0;
-            _main._textHolder.text = _visible.Label.c.Text;
+            _main._textHolder.text = _visible.Label.Value.Text;
             if (_currentWriting != null) {
                 TimeManager.Cancel(_currentWriting);
             }

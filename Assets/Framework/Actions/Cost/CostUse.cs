@@ -1,13 +1,22 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CostUse : CommandCost {
+    [Serializable]
+    public class CostUse : CommandCost, ISerializable {
 
         public override void ProcessCost(Entity entity) {
             entity.Get<LimitedUses>(f => f.Use());
         }
+
+        public CostUse() {}
+
+        public CostUse(SerializationInfo info, StreamingContext context) {}
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {}
 
         public override bool CanAct(Entity entity) {
             var uses = entity.Get<LimitedUses>();

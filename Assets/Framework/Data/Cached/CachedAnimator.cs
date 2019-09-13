@@ -11,15 +11,15 @@ namespace PixelComrades {
         private int _entityId = -1;
         private System.Type _componentType;
         
-        private IAnimator _animator;
+        private IAnimator _value;
         
-        public IAnimator Animator {
+        public IAnimator Value {
             get {
-                if (_animator != null) {
-                    return _animator;
+                if (_value != null) {
+                    return _value;
                 }
                 TryRestore();
-                return _animator;
+                return _value;
             }
         }
 
@@ -30,11 +30,11 @@ namespace PixelComrades {
                     if (!string.IsNullOrEmpty(_transformChild)) {
                         var targetTr = prefab.transform.Find(_transformChild);
                         if (targetTr != null) {
-                            _animator = targetTr.GetComponent<IAnimator>();
+                            _value = targetTr.GetComponent<IAnimator>();
                         }
                     }
-                    if (_animator == null) {
-                        _animator = prefab.GetComponentInChildren<IAnimator>();
+                    if (_value == null) {
+                        _value = prefab.GetComponentInChildren<IAnimator>();
                     }
                 }
                 return;
@@ -48,29 +48,29 @@ namespace PixelComrades {
             }
             var cref = entity.GetComponentReference(_componentType);
             if (cref != null) {
-                _animator = cref.Value.Get() as IAnimator;
+                _value = cref.Value.Get() as IAnimator;
             }
         }
         
-        public CachedAnimator(IAnimator animator) {
-            _animator = animator;
-            if (animator is UnityEngine.Component unityComponent) {
+        public CachedAnimator(IAnimator value) {
+            _value = value;
+            if (value is UnityEngine.Component unityComponent) {
                 var prefab = PrefabEntity.FindPrefabRoot(unityComponent.transform);
                 if (prefab != null) {
                     _serializedId = prefab.PrefabId;
                     _transformChild = unityComponent.transform.GetPath();
                 }
                 else {
-                    Debug.LogErrorFormat("{0}: unable to find prefab root on {1}", animator.GetType(), unityComponent.gameObject.name);
+                    Debug.LogErrorFormat("{0}: unable to find prefab root on {1}", value.GetType(), unityComponent.gameObject.name);
                 }
                 return;
             }
-            if (animator is IComponent ecsComponent) {
+            if (value is IComponent ecsComponent) {
                 _entityId = ecsComponent.GetEntity();
-                _componentType = animator.GetType();
+                _componentType = value.GetType();
                 return;
             }
-            Debug.LogErrorFormat("{0} is not a valid type of animator", animator.GetType());
+            Debug.LogErrorFormat("{0} is not a valid type of animator", value.GetType());
         }
         
         public CachedAnimator(SerializationInfo info, StreamingContext context) {

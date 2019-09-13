@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class Unidentified : IComponent {
+    [System.Serializable]
+	public sealed class Unidentified : IComponent {
         public float Difficulty { get; }
         public int Skill { get; }
 

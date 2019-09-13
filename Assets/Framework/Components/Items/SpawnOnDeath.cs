@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class SpawnPrefabOnDeath : IComponent, IReceive<DeathEvent> {
+    [System.Serializable]
+	public sealed class SpawnPrefabOnDeath : IComponent, IReceive<DeathEvent> {
 
         private string _prefab;
         private IntRange _countRange;
@@ -61,7 +62,8 @@ namespace PixelComrades {
         }
     }
 
-    public class SpawnSimplePrefabOnDeath : IComponent, IReceive<DeathEvent> {
+    [System.Serializable]
+	public sealed class SpawnSimplePrefabOnDeath : IComponent, IReceive<DeathEvent> {
 
         private PrefabEntity _prefab;
         private int _count;
@@ -89,7 +91,8 @@ namespace PixelComrades {
     }
 
     [Priority(Priority.Lowest)]
-    public class DisableTrOnDeath : IComponent, IReceive<DeathEvent> {
+    [System.Serializable]
+	public sealed class DisableTrOnDeath : IComponent, IReceive<DeathEvent> {
 
         public void Handle(DeathEvent arg) {
             arg.Target.Tr.gameObject.SetActive(false);

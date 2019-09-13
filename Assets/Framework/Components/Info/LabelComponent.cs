@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class LabelComponent : IComponent {
+    [System.Serializable]
+	public sealed class LabelComponent : IComponent {
         public string Text;
 
         public LabelComponent(string text){

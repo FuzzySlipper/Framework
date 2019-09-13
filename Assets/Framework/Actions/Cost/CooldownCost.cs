@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class CooldownCost : CommandCost {
+    [Serializable]
+    public class CooldownCost : CommandCost, ISerializable {
 
         private Timer _cooldown;
         private bool _postUpdate;
@@ -13,6 +16,16 @@ namespace PixelComrades {
         public CooldownCost(float length, bool postUpdate) {
             _cooldown = new Timer(length, false);
             _postUpdate = postUpdate;
+        }
+
+        public CooldownCost(SerializationInfo info, StreamingContext context) {
+            _cooldown = info.GetValue(nameof(_cooldown), _cooldown);
+            _postUpdate = info.GetValue(nameof(_postUpdate), _postUpdate);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_cooldown), _cooldown);
+            info.AddValue(nameof(_postUpdate), _postUpdate);
         }
 
         public override void ProcessCost(Entity entity) {

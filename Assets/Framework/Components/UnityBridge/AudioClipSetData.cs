@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class AudioClipSetData : IComponent, ISignalReceiver {
+    [System.Serializable]
+	public sealed class AudioClipSetData : IComponent, ISignalReceiver {
 
         public AudioClipSet Set { get; }
 

@@ -10,7 +10,8 @@ namespace PixelComrades {
         void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent);
     }
 
-    public sealed class ActionImpacts : IComponent {
+    [System.Serializable]
+	public sealed class ActionImpacts : IComponent {
         public List<IActionImpact> Impacts;
 
         public ActionImpacts(List<IActionImpact> values) : base() {

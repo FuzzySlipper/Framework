@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class CurrencyItem : IComponent, IReceive<ContainerStatusChanged> {
+    [System.Serializable]
+	public sealed class CurrencyItem : IComponent, IReceive<ContainerStatusChanged> {
 
         public void Handle(ContainerStatusChanged arg) {
             this.GetEntity().Add(new LabelComponent(string.Format("{0} {1}", _count, GameText.DefaultCurrencyLabel)));

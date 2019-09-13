@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class FirstPersonAnimatorComponent : IComponent {
+    [System.Serializable]
+	public sealed class FirstPersonAnimatorComponent : IComponent {
         private CachedUnityComponent<PlayerWeaponAnimator> _component;
-        public PlayerWeaponAnimator Animator { get { return _component.Component; } }
+        public PlayerWeaponAnimator Animator { get { return _component.Value; } }
 
         public FirstPersonAnimatorComponent(PlayerWeaponAnimator animator) {
             _component = new CachedUnityComponent<PlayerWeaponAnimator>(animator);
