@@ -9,12 +9,7 @@ namespace PixelComrades {
 
         private GenericContainer<EquipmentSlot> _list = new GenericContainer<EquipmentSlot>();
         
-        public EquipmentSlots(IList<EquipmentSlot> values) {
-            if (values != null) {
-                _list.AddRange(values);                
-            }
-        }
-
+        public EquipmentSlots() {}
         public EquipmentSlots(SerializationInfo info, StreamingContext context) {
             _list = info.GetValue(nameof(_list), _list);
         }
@@ -79,11 +74,8 @@ namespace PixelComrades {
             return false;
         }
 
-        public void Add(EquipmentSlot slot){
-            _list.Add(slot);
-            if (slot != null) {
-                slot.SlotOwner = this;
-            }
+        public void Add(string targetSlot, string name, Transform equipTr){
+            _list.Add(new EquipmentSlot(this, targetSlot, name, equipTr));
         }
 
         public void Handle(ContainerStatusChanged arg) {

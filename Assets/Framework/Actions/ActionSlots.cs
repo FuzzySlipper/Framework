@@ -53,17 +53,20 @@ namespace PixelComrades {
         }
     }
 
-    public class ActionSlot : IReceive<ContainerStatusChanged>, IReceive<EntityDestroyed>, IReceive<EquipmentChanged>, IEquipmentHolder {
+    public class ActionSlot : IReceive<ContainerStatusChanged>, IReceive<EntityDestroyed>, IReceive<EquipmentChanged>, IEquipmentHolder, 
+    ISerializable {
         public System.Action<Entity> OnItemChanged { get; set; }
-        public ActionSlots SlotOwner;
-
-        private Entity _item;
+        
+        private CachedEntity _cachedItem = new CachedEntity();
         private string _lastEquipStatus = "";
         private bool _isSecondary;
         private bool _isHidden;
+        private CachedComponent<ActionSlots> _owner;
+        private CachedComponent<Action> _action = new CachedComponent<Action>();
 
-        public Entity Item { get { return _item; } }
-        public Action Action { get; private set; }
+        public ActionSlots SlotOwner { get { return _owner.Value; } }
+        public Entity Item { get { return _cachedItem.Entity; } }
+        public Action Action { get { return _action.Value; } }
         public string LastEquipStatus { get { return _lastEquipStatus; } }
         public string TargetSlot { get { return "Usable"; } }
         public Transform EquipTr { get { return null; } }
@@ -71,11 +74,28 @@ namespace PixelComrades {
         public bool IsHidden { get => _isHidden; }
 
         public ActionSlot(ActionSlots slotOwner, bool isSecondary, bool isHidden) {
-            SlotOwner = slotOwner;
+            _owner = new CachedComponent<ActionSlots>(slotOwner);
             _isSecondary = isSecondary;
             _isHidden = isHidden;
         }
 
+        public ActionSlot(SerializationInfo info, StreamingContext context) {
+            _isSecondary = info.GetValue(nameof(_isSecondary), _isSecondary);
+            _isHidden = info.GetValue(nameof(_isHidden), _isHidden);
+            _cachedItem = info.GetValue(nameof(_cachedItem), _cachedItem);
+            _owner = info.GetValue(nameof(_owner), _owner);
+            _action = info.GetValue(nameof(_action), _action);
+            _lastEquipStatus = info.GetValue(nameof(_lastEquipStatus), _lastEquipStatus);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_isSecondary), _isSecondary);
+            info.AddValue(nameof(_isHidden), _isHidden);
+            info.AddValue(nameof(_cachedItem), _cachedItem);
+            info.AddValue(nameof(_owner), _owner);
+            info.AddValue(nameof(_action), _action);
+            info.AddValue(nameof(_lastEquipStatus), _lastEquipStatus);
+        }
         public bool AddItem(Entity item) {
             if (item == null) {
                 _lastEquipStatus = "Item null";
@@ -97,23 +117,29 @@ namespace PixelComrades {
             if (actionEntity == Item) {
                 return false;
             }
+            InventoryItem containerItem = actionEntity.Get<InventoryItem>();
+            if (containerItem == null) {
+                return false;
+            }
             //var req = item.Get<SkillRequirement>();
             //if (req != null && (int) _owner.Stats.Get<SkillStat>(req.Skill).CurrentRank < 
             //    (int) req.Required) {
             //    _lastEquipStatus = "Skill too low";
             //    return false;
             //}
-            if (_item != null) {
+            if (Item != null) {
                 RemoveItemAddToOwnInventory();
             }
-            Action = action;
-            _item = actionEntity;
-            actionEntity.Get<InventoryItem>(i => i.Inventory?.Remove(actionEntity));
+            if (containerItem.Inventory != null) {
+                containerItem.Inventory.Remove(actionEntity);
+            }
+            _action.Set(action);
+            _cachedItem.Set(actionEntity);
             var owner = SlotOwner.GetEntity();
-            _item.ParentId = owner;
+            actionEntity.ParentId = owner;
             var msg = new EquipmentChanged(owner, this);
-            _item.Post(msg);
-            _item.AddObserver(this);
+            actionEntity.Post(msg);
+            actionEntity.AddObserver(this);
             if (OnItemChanged != null) {
                 OnItemChanged(Item);
             }
@@ -122,22 +148,22 @@ namespace PixelComrades {
         }
 
         public bool RemoveItemAddToOwnInventory() {
-            var item = _item;
+            var item = Item;
             ClearEquippedItem();
             if (item != null) {
-                SlotOwner.Get<ItemInventory>().Add(item);
+                SlotOwner.Get<ItemInventory>()?.Add(item);
             }
             return true;
         }
 
         private void ClearEquippedItem() {
-            if (_item != null) {
-                if (Action.EquippedSlot >= 0) {
+            if (Item != null) {
+                if (Action?.EquippedSlot >= 0) {
                     SlotOwner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
                 }
-                Action = null;
-                _item.RemoveObserver(this);
-                _item = null;
+                Item.RemoveObserver(this);
+                _action.Clear();
+                _cachedItem.Clear();
             }
             if (OnItemChanged != null) {
                 OnItemChanged(null);
@@ -145,13 +171,13 @@ namespace PixelComrades {
         }
 
         public void Handle(ContainerStatusChanged arg) {
-            if (arg.Entity == _item && arg.EntityContainer != null) {
+            if (arg.Entity == Item && arg.EntityContainer != null) {
                 ClearEquippedItem();
             }
         }
 
         public void Handle(EntityDestroyed arg) {
-            if (arg.Entity == _item) {
+            if (arg.Entity == Item) {
                 ClearEquippedItem();
             }
         }

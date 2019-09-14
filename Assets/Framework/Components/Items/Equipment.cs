@@ -102,8 +102,9 @@ namespace PixelComrades {
             if (slot == null) {
                 return;
             }
+            var slowOwner = _equip.SlotOwner.GetEntity();
             for (int i = 0; i < _mods.Length; i++) {
-                _mods[i].Attach(_equip.SlotOwner.GetEntity().Stats.Get(_mods[i].StatID));
+                _mods[i].Attach(slowOwner.Stats.Get(_mods[i].StatID));
             }
         }
 

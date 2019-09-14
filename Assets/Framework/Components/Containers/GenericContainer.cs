@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
 
     [System.Serializable]
-	public sealed class GenericContainer<T> : ISerializable {
+	public sealed class GenericContainer<T> : ISerializable where T : ISerializable {
        
         public GenericContainer(IList<T> values) {
             if (values != null) {

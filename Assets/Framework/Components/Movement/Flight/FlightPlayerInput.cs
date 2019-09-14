@@ -91,7 +91,7 @@ namespace PixelComrades {
             }
         }
 
-        protected Vector3 GetMousePosition() {
+        private Vector3 GetMousePosition() {
             Vector3 mousePos = UnityEngine.Input.mousePosition;
             mousePos.z = 1000f;
             return Camera.main.ScreenToWorldPoint(mousePos);

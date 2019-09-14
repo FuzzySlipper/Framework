@@ -97,7 +97,7 @@ namespace PixelComrades {
         }
     }
 
-    public interface IEntityContainer {
+    public interface IEntityContainer : IComponent {
         Entity this[int index] { get; }
         int Count { get; }
         bool Add(Entity item);

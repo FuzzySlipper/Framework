@@ -5,9 +5,10 @@ using System.Runtime.Serialization;
 using System;
 
 namespace PixelComrades {
+    [System.Serializable]
     public class CachedEntity : IDisposable, ISerializable {
 
-        private int _entityId;
+        private int _entityId = -1;
         private Entity _entity;
 
         public Entity Entity { 

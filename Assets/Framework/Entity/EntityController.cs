@@ -119,7 +119,6 @@ namespace PixelComrades {
                 }
             }
             array.Add(entity, newComponent);
-            
             if (newComponent is IReceive receive) {
                 if (type.IsValueType) {
                     Debug.LogErrorFormat("Error: cannot have event receivers on value type {0}", type.Name);
@@ -378,10 +377,6 @@ namespace PixelComrades {
             }
             var checkEntity = entity;
             while (checkEntity != null) {
-                var pc = checkEntity.Get<PositionComponent>();
-                if (pc != null) {
-                    return pc.Position;
-                }
                 if (checkEntity.Tr != null) {
                     return checkEntity.Tr.position;
                 }
@@ -394,7 +389,10 @@ namespace PixelComrades {
             if (entity == null) {
                 return Quaternion.identity;
             }
-            return entity.Find<RotationComponent>()?.Rotation ?? Quaternion.identity;
+            if (entity.Tr != null) {
+                return entity.Tr.rotation;
+            }
+            return Quaternion.identity;
         }
 
         public static float GetMoveSpeed(this Entity entity) {

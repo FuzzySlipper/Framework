@@ -46,6 +46,7 @@ namespace PixelComrades {
             DebugConsole.RegisterCommand("actionTest", RunActionDelTest);
             DebugConsole.RegisterCommand("messageTest", RunMessageTest);
             DebugConsole.RegisterCommand("timescale", ChangeTimeScale);
+            DebugConsole.RegisterCommand("saveEntity", SaveEntity);
             DebugConsole.RegisterCommand("heal", strings => {
                 Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Health"));
                 return Player.Party[0].Entity.Stats.GetVital("Vitals.Health").ToLabelString();
@@ -64,6 +65,22 @@ namespace PixelComrades {
             });
             //Minibuffer.Register(typeof(EcsDebug));
         }
+
+        private static string SaveEntity(string[] entityID) {
+            if (entityID == null) {
+                return "Didn't provide an Entity ID'";
+            }
+            if (int.TryParse(entityID[0], out var result)) {
+                var entity = EntityController.GetEntity(result);
+                if (entity != null) {
+                    SerializingUtility.SaveJson(new SerializedEntity(entity), string.Format("{0}/{1}.json", Application
+                    .persistentDataPath, entity.DebugId));
+                    return $"Saved {entity.DebugId}";
+                }
+            }
+            return "Didn't provide a valid Entity ID";
+        }
+        
 
         private static string ChangeTimeScale(string[] scale) {
             if (scale == null) {

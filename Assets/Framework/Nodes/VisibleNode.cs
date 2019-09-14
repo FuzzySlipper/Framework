@@ -11,11 +11,8 @@ namespace PixelComrades {
         public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
         public CachedComponent<ColliderComponent> Collider = new CachedComponent<ColliderComponent>();
 
-        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
-        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
-
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            Label, Model, Rb, _position, _rotation, Collider,
+            Label, Model, Rb, Collider,
         };
 
         public static System.Type[] GetTypes() {
@@ -36,10 +33,10 @@ namespace PixelComrades {
                 if (Entity.Tr != null) {
                     return Entity.Tr.position + Collider.Value?.LocalCenter ?? new Vector3(0,1,0);
                 }
-                return _position.Value?.Position ?? Vector3.zero;
+                return Vector3.zero;
             }
         }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.Value?.Rotation ?? Quaternion.identity; } }
+        public Quaternion rotation { get { return Entity.Tr?.rotation ?? Quaternion.identity; } }
 
     }
 }

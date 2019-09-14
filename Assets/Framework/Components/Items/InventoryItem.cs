@@ -39,9 +39,9 @@ namespace PixelComrades {
         public bool Identified = true;
         
         private CachedComponent<ItemInventory> _inventory = new CachedComponent<ItemInventory>();
-        public ItemInventory Inventory { get { return _inventory.Value; } }
+        public IEntityContainer Inventory { get { return _inventory.Value; } }
 
-        public void SetContainer(ItemInventory container) {
+        public void SetContainer(IEntityContainer container) {
             if (container == null) {
                 _inventory.Clear();
             }

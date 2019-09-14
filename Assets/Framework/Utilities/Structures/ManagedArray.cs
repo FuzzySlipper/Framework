@@ -341,7 +341,7 @@ namespace PixelComrades {
             else {
                 index = Add(newComponent);
                 _entityToIndex.Add(entity, index);
-                _componentToEntity.Add(newComponent, entity);
+                _componentToEntity.AddOrUpdate(newComponent, entity);
                 entity.AddReference(new ComponentReference(index, this));
             }
 //            if (newComponent is IComponentOnAttach attach) {
@@ -350,6 +350,9 @@ namespace PixelComrades {
         }
 
         public Entity GetEntity(T component) {
+            if (component == null) {
+                return null;
+            }
             if (_componentToEntity.TryGetValue(component, out var ent)) {
                 return EntityController.GetEntity(ent);
             }
@@ -375,6 +378,7 @@ namespace PixelComrades {
 
         public void Remove(Entity entity) {
             if (_entityToIndex.TryGetValue(entity, out var existing)) {
+                _componentToEntity.Remove(this[existing]);
                 Remove(existing);
                 _entityToIndex.Remove(entity);
                 entity.Remove(ArrayType);

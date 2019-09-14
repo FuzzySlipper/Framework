@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
+    [System.Serializable]
     public sealed class CachedUnityComponent<T> : ISerializable, IDisposable where T : UnityEngine.Component {
 
         private int _serializedId = -1;
@@ -96,6 +97,9 @@ namespace PixelComrades {
         }
 
         public static implicit operator T(CachedUnityComponent<T> reference) {
+            if (reference == null) {
+                return null;
+            }
             return reference.Value;
         }
     }

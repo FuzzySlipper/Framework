@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public sealed class CachedTransform : IDisposable  {
+    [System.Serializable]
+    public sealed class CachedTransform : IDisposable, ISerializable  {
 
         private int _serializedId = -1;
         private string _transformChild;
@@ -39,6 +40,12 @@ namespace PixelComrades {
             _transform = null;
         }
 
+        public void Clear() {
+            _serializedId = -1;
+            _transformChild = null;
+            _transform = null;
+        }
+
         public void Set(PrefabEntity prefab, Transform tr) {
             SetPrefabEntity(prefab);
             Set(tr);
@@ -47,8 +54,7 @@ namespace PixelComrades {
         public void Set(Transform tr) {
             _transform = tr;
             if (_transform == null) {
-                _serializedId = -1;
-                _transformChild = null;
+                Clear();
                 return;
             }
             if (_serializedId >= 0) {

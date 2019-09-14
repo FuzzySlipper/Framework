@@ -16,11 +16,12 @@ namespace PixelComrades {
         }
     }
 
+    [System.Serializable]
     public class CachedComponent<T> : CachedComponent, ISerializable where T: IComponent {
         private int _index = -1;
         private int _entity = -1;
         private ManagedArray<T> _array;
-        
+        private T _component;
         public T Value {
             get {
                 if (_index < 0) {
@@ -29,6 +30,9 @@ namespace PixelComrades {
                         _index = cref.Value.Index;
                         _array = (ManagedArray<T>) cref.Value.Array;
                     }
+                }
+                if (_index < 0 && _component != null) {
+                    Set(_component.GetEntity());
                 }
                 return _index < 0 ? default(T) : _array[_index];
             }
@@ -75,6 +79,11 @@ namespace PixelComrades {
             }
         }
 
+        public void Set(T component) {
+            _component = component;
+            Set(component.GetEntity());
+        }
+
         public override void Set(Entity owner, SortedList<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
@@ -99,6 +108,9 @@ namespace PixelComrades {
         }
         
         public static implicit operator T(CachedComponent<T> reference) {
+            if (reference == null) {
+                return default(T);
+            }
             return reference.Value;
         }
     }

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     public interface IEquipmentHolder {
@@ -13,26 +14,47 @@ namespace PixelComrades {
         Transform EquipTr { get; }
     }
 
-    public class EquipmentSlot: IEquipmentHolder {
+    [System.Serializable]
+    public class EquipmentSlot: IEquipmentHolder, ISerializable {
 
-        public EquipmentSlots SlotOwner;
         public Action<Entity> OnItemChanged { get;set; }
 
         private string _targetSlot;
-        private Transform _equipTr;
-
-        public EquipmentSlot(string targetSlot, string name, Transform equipTr) {
+        private CachedTransform _equipTr;
+        private CachedEntity _item = new CachedEntity();
+        private CachedComponent<EquipmentSlots> _slots;
+        private CachedComponent<Equipment> _equipment = new CachedComponent<Equipment>();
+        private string _lastEquipStatus = "";
+        
+        public EquipmentSlot(EquipmentSlots owner, string targetSlot, string name, Transform equipTr) {
             _targetSlot = targetSlot;
-            _equipTr = equipTr;
+            _equipTr = new CachedTransform(equipTr);
             Name = name;
+            _slots = new CachedComponent<EquipmentSlots>(owner);
         }
 
-        private Entity _item;
-        protected string _lastEquipStatus = "";
-        
-        public Equipment CurrentEquipment { get; private set; }
+        public EquipmentSlot(SerializationInfo info, StreamingContext context) {
+            _targetSlot = info.GetValue(nameof(_targetSlot), _targetSlot);
+            _equipTr = info.GetValue(nameof(_equipTr), _equipTr);
+            _item = info.GetValue(nameof(_item), _item);
+            _slots = info.GetValue(nameof(_slots), _slots);
+            _equipment = info.GetValue(nameof(_equipment), _equipment);
+            _lastEquipStatus = info.GetValue(nameof(_lastEquipStatus), _lastEquipStatus);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_targetSlot), _targetSlot);
+            info.AddValue(nameof(_equipTr), _equipTr);
+            info.AddValue(nameof(_item), _item);
+            info.AddValue(nameof(_slots), _slots);
+            info.AddValue(nameof(_equipment), _equipment);
+            info.AddValue(nameof(_lastEquipStatus), _lastEquipStatus);
+        }
+
+        public EquipmentSlots SlotOwner { get { return _slots.Value; } }
+        public Equipment CurrentEquipment { get { return _equipment.Value; } }
         public Entity Item { get { return _item; } }
-        public string LastEquipStatus { get { return _lastEquipStatus; } }
+        public string LastEquipStatus { get { return _lastEquipStatus; } set { _lastEquipStatus = value; } }
         public string TargetSlot { get { return _targetSlot; } }
         public string Name { get; }
         public Transform EquipTr { get => _equipTr; }
@@ -60,30 +82,30 @@ namespace PixelComrades {
                 _lastEquipStatus = "Wrong type";
                 return false;
             }
-            if (_item != null) {
+            if (Item != null) {
                 if (Player.MainInventory.IsFull) {
                     _lastEquipStatus = "Owner inventory full";
                     return false;
                 }
-                var oldItem = _item;
+                var oldItem = Item;
                 ClearEquippedItem(true);
                 if (oldItem != null) {
                     Player.MainInventory.TryAdd(oldItem);
                 }
             }
-            _item = item;
+            _item.Set(item);
             item.Get<InventoryItem>(i => i.Inventory?.Remove(item));
-            _item.ParentId = SlotOwner.GetEntity();
+            var owner = SlotOwner.GetEntity();
+            item.ParentId = owner;
             equip.Equip(this);
-            CurrentEquipment = equip;
+            _equipment.Set(item);
             SetStats();
             item.AddObserver(SlotOwner);
             if (OnItemChanged != null) {
                 OnItemChanged(_item);
             }
-            var owner = SlotOwner.GetEntity();
             var msg = new EquipmentChanged(owner, this);
-            _item.Post(msg);
+            item.Post(msg);
             owner.Post(msg);
             _lastEquipStatus = "";
             return true;
@@ -108,7 +130,7 @@ namespace PixelComrades {
         }
         
         public bool RemoveItemAddToOwnInventory() {
-            var item = _item;
+            var item = Item;
             ClearEquippedItem(false);
             if (item != null) {
                 Player.MainInventory.Add(item);
@@ -117,20 +139,23 @@ namespace PixelComrades {
         }
 
         private void ClearEquippedItem(bool isSwap) {
-            if (_item != null) {
+            if (Item != null) {
+                var item = Item;
+                var owner = SlotOwner.GetEntity();
                 ClearStats();
-                _item.ClearParent(SlotOwner.GetEntity());
-                _item.Get<Equipment>().UnEquip();
-                _item.RemoveObserver(SlotOwner);
-                _item.Post(new EquipmentChanged(null, null));
-                _item = null;
+                item.ClearParent(owner);
+                if (CurrentEquipment != null) {
+                    CurrentEquipment.UnEquip();                    
+                }
+                item.RemoveObserver(SlotOwner);
+                item.Post(new EquipmentChanged(null, null));
+                item = null;
                 if (!isSwap) {
-                    var owner = SlotOwner.GetEntity();
                     owner.Post(new EquipmentChanged(owner, this));
                     OnItemChanged?.Invoke(null);
                 }
             }
-            CurrentEquipment = null;
+            _equipment.Clear();
         }
 
         public void ClearContents() {
@@ -138,7 +163,7 @@ namespace PixelComrades {
         }
 
         public void Handle(ContainerStatusChanged arg) {
-            if (arg.Entity == _item) {
+            if (arg.Entity == Item) {
                 ClearEquippedItem(false);
             }
         }

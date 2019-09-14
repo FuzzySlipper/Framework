@@ -12,8 +12,8 @@ namespace PixelComrades {
         public CachedComponent<DataDescriptionComponent> DataDescription = new CachedComponent<DataDescriptionComponent>();
         public CachedComponent<IconComponent> Icon = new CachedComponent<IconComponent>();
 
-        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
-        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
+//        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
+//        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
 
 
         public UINode(Entity entity, SortedList<System.Type, ComponentReference> list) {
@@ -30,8 +30,8 @@ namespace PixelComrades {
             Description.Set(entity, list);
             DataDescription.Set(entity, list);
             Icon.Set(entity, list);
-            _position.Set(entity, list);
-            _rotation.Set(entity, list);
+//            _position.Set(entity, list);
+//            _rotation.Set(entity, list);
         }
 
         public void Setup(GameObject obj) {
@@ -44,14 +44,12 @@ namespace PixelComrades {
             Entity.Tr = null;
         }
 
-        public Vector3 position { get { return Entity.Tr?.position ?? _position.Value?.Position ?? Vector3.zero; } }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? _rotation.Value?.Rotation ?? Quaternion.identity; } }
+        public Vector3 position { get { return Entity.Tr?.position ?? Vector3.zero; } }
+        public Quaternion rotation { get { return Entity.Tr?.rotation ?? Quaternion.identity; } }
 
         public void Dispose() {
             Model.Dispose();
             Label.Dispose();
-            _position.Dispose();
-            _rotation.Dispose();
             Icon.Dispose();
             Description.Dispose();
             DataDescription.Dispose();
@@ -61,6 +59,7 @@ namespace PixelComrades {
             return new System.Type[] {
                 typeof(DescriptionComponent),
                 typeof(LabelComponent),
+                typeof(IconComponent),
             };
         }
     }

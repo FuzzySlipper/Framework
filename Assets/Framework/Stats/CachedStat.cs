@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
+    [System.Serializable]
     public class CachedStat<T> : IDisposable, ISerializable where T : BaseStat {
 
         private T _stat = null;
-        private int _entityId;
-        private string _statId;
+        private int _entityId = -1;
+        private string _statId = null;
 
         public CachedStat(int entity, string statId) {
             _entityId = entity;
@@ -18,6 +19,10 @@ namespace PixelComrades {
         }
 
         public CachedStat(T stat) {
+            if (stat == null) {
+                Clear();
+                return;
+            }
             _entityId = stat.Entity;
             _statId = stat.ID;
             _stat = EntityController.Get(_entityId)?.Get<StatsContainer>()?.Get<T>(_statId);
@@ -31,7 +36,7 @@ namespace PixelComrades {
 
         public T Stat {
             get {
-                if (_stat == null) {
+                if (_stat == null && _entityId >= 0) {
                     var entity = EntityController.Get(_entityId);
                     if (entity != null) {
                         if (entity is Actor actor) {
@@ -52,7 +57,16 @@ namespace PixelComrades {
             _stat = null;
         }
 
+        public void Clear() {
+            _stat = null;
+            _entityId = -1;
+            _statId = null;
+        }
+
         public static implicit operator T(CachedStat<T> reference) {
+            if (reference == null) {
+                return null;
+            }
             return reference.Stat;
         }
 

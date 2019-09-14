@@ -15,14 +15,14 @@ namespace PixelComrades {
         public string WeaponModel;
         public bool Primary;
         public int EquippedSlot = -1;
-        private CachedComponent<AmmoComponent> _ammo;
+        private CachedComponent<AmmoComponent> _ammo = new CachedComponent<AmmoComponent>();
 
         public AmmoComponent Ammo {
             get {
                 return _ammo;
             }
             set {
-                _ammo = new CachedComponent<AmmoComponent>(value);
+                _ammo.Set(value);
             }
         }
         public Entity Entity { get { return this.GetEntity(); } }
@@ -33,7 +33,6 @@ namespace PixelComrades {
             Sequence = info.GetValue(nameof(Sequence), Sequence);
             Costs = info.GetValue(nameof(Costs), Costs);
             Range = info.GetValue(nameof(Range), Range);
-            Fx = info.GetValue(nameof(Fx), Fx);
             WeaponModel = info.GetValue(nameof(WeaponModel), WeaponModel);
             Primary = info.GetValue(nameof(Primary), Primary);
             EquippedSlot = info.GetValue(nameof(EquippedSlot), EquippedSlot);
@@ -45,7 +44,6 @@ namespace PixelComrades {
             info.AddValue(nameof(Sequence), Sequence);
             info.AddValue(nameof(Costs), Costs);
             info.AddValue(nameof(Range), Range);
-            info.AddValue(nameof(Fx), Fx);
             info.AddValue(nameof(WeaponModel), WeaponModel);
             info.AddValue(nameof(Primary), Primary);
             info.AddValue(nameof(EquippedSlot), EquippedSlot);

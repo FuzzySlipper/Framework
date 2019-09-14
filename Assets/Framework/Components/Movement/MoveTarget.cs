@@ -12,24 +12,23 @@ namespace PixelComrades {
             LookOnly
         }
 
-        private Transform _targetTr;
-        private Transform _lookTr;
-
+        private CachedTransform _targetTr = new CachedTransform();
+        private CachedTransform _lookTr = new CachedTransform();
         private Vector3? _targetV3;
-        private PositionComponent _targetPosition;
-        private PositionComponent _lookPosition;
         private State _state;
 
         public MoveTarget(SerializationInfo info, StreamingContext context) {
-            _targetV3 = info.GetValue(nameof(_targetV3), _targetV3);
-            _targetPosition = info.GetValue(nameof(_targetPosition), _targetPosition);
-            _lookPosition = info.GetValue(nameof(_lookPosition), _lookPosition);
+            _targetV3 = ((SerializedV3) info.GetValue(nameof(_targetV3), typeof(SerializedV3))).Value;
+            _state = info.GetValue(nameof(_state), _state);
+            _targetTr = info.GetValue(nameof(_targetTr), _targetTr);
+            _lookTr = info.GetValue(nameof(_lookTr), _lookTr);
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            info.AddValue(nameof(_targetV3), new SerializedV3(_targetV3));
             info.AddValue(nameof(_targetV3), _targetV3);
-            info.AddValue(nameof(_targetPosition), _targetPosition);
-            info.AddValue(nameof(_lookPosition), _lookPosition);
+            info.AddValue(nameof(_targetTr), _targetTr);
+            info.AddValue(nameof(_lookTr), _lookTr);
         }
 
         public Vector3 GetTargetPosition {
@@ -37,8 +36,8 @@ namespace PixelComrades {
                 if (_targetV3 != null) {
                     return _targetV3.Value;
                 }
-                if (_targetTr != null) {
-                    return _targetTr.position;
+                if (_targetTr.Tr != null) {
+                    return _targetTr.Tr.position;
                 }
                 return Vector3.zero;
             }
@@ -48,32 +47,30 @@ namespace PixelComrades {
                 if (_state == State.None) {
                     return GetTargetPosition;
                 }
-                if (_lookTr != null) {
-                    return _lookTr.position;
+                if (_lookTr.Tr != null) {
+                    return _lookTr.Tr.position;
                 }
-                return _lookPosition?.Position ?? GetTargetPosition;
+                return GetTargetPosition;
             }
         }
 
         public bool IsValidMove {
-            get { return _state != State.LookOnly && (_targetV3 != null || _targetTr != null || _targetPosition != null); }
+            get { return _state != State.LookOnly && (_targetV3 != null || _targetTr.Tr != null); }
         }
 
         public bool HasValidLook {
-            get { return _state != State.None && (_lookPosition != null || _lookTr != null); }
+            get { return _state != State.None && (_lookTr.Tr != null); }
         }
 
         
 
         public void ClearMove() {
-            _targetTr = null;
+            _targetTr.Clear();
             _targetV3 = null;
-            _targetPosition = null;
         }
 
         public void ClearLook() {
-            _lookPosition = null;
-            _lookTr = null;
+            _lookTr.Clear();
             _state = State.None;
         }
 
@@ -82,18 +79,14 @@ namespace PixelComrades {
         }
 
         public MoveTarget() {
-            _targetTr = null;
+            _targetTr.Clear();
             _targetV3 = null;
         }
 
         private void ExtractMove(Entity target) {
-            _targetPosition = target.Find<PositionComponent>();
-            if (_targetPosition != null) {
-                return;
-            }
             var tr = target.Tr;
             if (tr != null) {
-                _targetTr = tr;
+                _targetTr.Set(tr);
             }
             else {
                 _targetV3 = target.GetPosition();
@@ -101,12 +94,8 @@ namespace PixelComrades {
         }
 
         private bool ExtractLook(Entity target) {
-            _lookPosition = target.Find<PositionComponent>();
-            if (_lookPosition != null) {
-                return true;
-            }
-            _lookTr = target.Tr;
-            return _lookTr != null;
+            _lookTr.Set(target.Tr);
+            return target.Tr != null;
         }
 
         public void SetLookOnlyTarget(Entity target) {
@@ -141,12 +130,12 @@ namespace PixelComrades {
 
         public void SetMoveTarget(Transform tr) {
             ClearMove();
-            _targetTr = tr;
+            _targetTr.Set(tr);
         }
 
         public void Handle(SetMoveTarget arg) {
             _targetV3 = arg.V3;
-            _targetTr = arg.Tr;
+            _targetTr.Set(arg.Tr);
         }
 
         public void Handle(SetLookTarget arg) {

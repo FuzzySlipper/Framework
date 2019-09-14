@@ -28,6 +28,7 @@ namespace PixelComrades {
             _entity = entity;
             _baseValue = baseValue;
             _label = label;
+            _id = label;
             _maxBaseValue = maxBaseValue;
         }
 
