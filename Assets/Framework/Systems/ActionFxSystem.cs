@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class ActionFxSystem : SystemBase, IReceiveGlobal<ActionStateEvent> {
 
         public void HandleGlobal(ActionStateEvent arg) {
-            var data = EntityController.GetEntity(arg.Origin).Find<ActionFxComponent>().Fx;
+            var data = arg.Origin.Entity.Find<ActionFxComponent>().Fx;
             if (data != null) {
                 data.TriggerEvent(arg);
             }

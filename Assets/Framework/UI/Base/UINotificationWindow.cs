@@ -75,10 +75,10 @@ namespace PixelComrades {
         }
 
         private void AddNewMessage(Msg message) {
-            AddMessage(message.Text, message.Color);
+            AddMessage(message.Text, message.Hover, message.Color);
         }
 
-        public void AddMessage(string message, Color color) {
+        public void AddMessage(string message, string hover, Color color) {
             if (string.IsNullOrEmpty(message)) {
                 return;
             }
@@ -88,7 +88,7 @@ namespace PixelComrades {
             //}
             var item = ItemPool.SpawnUIPrefab<UINotificationMsg>(_msgPrefab.gameObject, _container);
             //item.transform.SetSiblingIndex(0); // Move to the top of the list
-            item.Show(message, color, 0);
+            item.Show(message, hover,color, 0);
             if (_scrollRect != null) {
                 _scrollRect.verticalNormalizedPosition = 0.0f;
             }
@@ -104,11 +104,19 @@ namespace PixelComrades {
 
         public struct Msg {
             public string Text;
+            public string Hover;
             public Color Color;
 
             public Msg(string text, Color color) {
                 Text = text;
                 Color = color;
+                Hover = "";
+            }
+
+            public Msg(string text, string hover, Color color) {
+                Text = text;
+                Color = color;
+                Hover = hover;
             }
         }
     }

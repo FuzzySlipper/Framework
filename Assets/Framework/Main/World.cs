@@ -43,6 +43,7 @@ namespace PixelComrades {
             }
             NodeFilter<VisibleNode>.New(VisibleNode.GetTypes());
             NodeFilter<CharacterNode>.New(CharacterNode.GetTypes());
+            NodeFilter<CollidableNode>.New(CollidableNode.GetTypes());
             Get<AnimatorSystem>();
             Get<CommandSystem>();
             Get<CollisionCheckSystem>();
@@ -59,8 +60,18 @@ namespace PixelComrades {
             Get<SensorSystem>();
             Get<EntityUIPoolSystem>();
             Get<TagTimerSystem>();
+
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (int a = 0; a < assemblies.Length; a++) {
+                var types = assemblies[a].GetTypes();
+                for (int t = 0; t < types.Length; t++) {
+                    var type = types[t];
+                    if (type.IsDefined(typeof(AutoRegisterAttribute), false)) {
+                        CreateSystem(type);
+                    }
+                }
+            }
             EcsDebug.RegisterDebugCommands();
-            //TODO: default setup here
         }
 
         public static T Add<T>(Type type = null) where T : new() {
@@ -85,6 +96,17 @@ namespace PixelComrades {
             CheckUpdates(system, true);
             Add(system);
             return (T) system;
+        }
+
+        private static void CreateSystem(System.Type type) {
+            if (_systems.ContainsKey(type)) {
+                return;
+            }
+            var system = (SystemBase) Activator.CreateInstance(type);
+            _systems.Add(type, system);
+            _systemTypes.Add(type);
+            CheckUpdates(system, true);
+            Add(system);
         }
 
         public static T Get<T>() where T : SystemBase {

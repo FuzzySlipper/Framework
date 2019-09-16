@@ -25,7 +25,7 @@ namespace PixelComrades {
         public void Trigger(ActionUsingNode node, string eventName) {
             var model = ItemPool.Spawn(UnityDirs.Models, Data, Vector3.zero, Quaternion.identity);
             if (model != null) {
-                model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null? node.ActionEvent.SpawnPivot : node.Entity.Tr);
+                model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null? node.ActionEvent.SpawnPivot : node.Tr);
                 node.ActionEvent.Action.Entity.Add(new ModelComponent(model.GetComponent<IModelComponent>()));
             }
         }

@@ -3,10 +3,11 @@ using UnityEngine;
 using System.Collections;
 using PixelComrades;
 using TMPro;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UINotificationMsg : MonoBehaviour {
+    public class UINotificationMsg : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler  {
 
         [SerializeField] private float _hideLength = 0.5f;
         [SerializeField] private TextMeshProUGUI _text = null;
@@ -14,7 +15,10 @@ namespace PixelComrades {
         [SerializeField] private TweenFloat _hideTween = new TweenFloat();
         [SerializeField] private TweenFloat _revealTween = new TweenFloat();
         [SerializeField] private float _wordPause = 0.075f;
+        [SerializeField] private Image _backgroundImage = null;
 
+        private string _hoverMessage;
+        
         public float ExpireTime { get; set; }
 
         private Task _currentTask;
@@ -24,6 +28,14 @@ namespace PixelComrades {
                 _text.maxVisibleCharacters++;
                 yield return null;
             }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData) {
+            Game.DisplayData(_backgroundImage, null,_text.text, _hoverMessage, _hoverMessage);
+        }
+
+        public void OnPointerExit(PointerEventData eventData) {
+            UITooltip.main.HideTooltip();
         }
 
         IEnumerator RevealWords(TMP_Text textComponent) {
@@ -40,15 +52,15 @@ namespace PixelComrades {
 
                 // Get last character index for the current word.
                 if (currentWord == 0) // Display no words.
-{
+                {
                     visibleCount = 0;
                 }
                 else if (currentWord < totalWordCount) // Display all other words with the exception of the last one.
-{
+                {
                     visibleCount = textComponent.textInfo.wordInfo[currentWord - 1].lastCharacterIndex + 1;
                 }
                 else if (currentWord == totalWordCount) // Display last word and all remaining characters.
-{
+                {
                     visibleCount = totalVisibleCharacters;
                 }
 
@@ -83,7 +95,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Show(string message, Color color, float speed) {
+        public void Show(string message, string hover, Color color, float speed) {
             if (_currentTask != null) {
                 TimeManager.Cancel(_currentTask);
             }
@@ -96,6 +108,7 @@ namespace PixelComrades {
             _text.color = color;
             _text.text = message;
             _text.maxVisibleCharacters = 0;
+            _hoverMessage = hover;
             TimeManager.StartUnscaled(FadeIn());
             //TimeManager.StartUnscaled(RevealText(message.Length, speed), ()=> { _currentTask = null; });
             TimeManager.StartUnscaled(RevealWords(_text), () => { _currentTask = null; });

@@ -25,7 +25,8 @@ namespace PixelComrades {
             if (collisionEvent.Hit <= 0) {
                 return;
             }
-            collisionEvent.Target.Post(new DamageEvent(Power * CollisionExtensions.GetHitMultiplier(collisionEvent.Hit, collisionEvent.Origin), collisionEvent.Origin, collisionEvent.Target, _damageType, _targetVital));
+            collisionEvent.Target.Post(new DamageEvent(Power * CollisionExtensions.GetHitMultiplier(collisionEvent.Hit, stateEvent.Target), 
+                collisionEvent.Origin.Entity, collisionEvent.Target.Entity, _damageType, _targetVital));
         }
 
         public DamageImpact(SerializationInfo info, StreamingContext context) {

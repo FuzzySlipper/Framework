@@ -51,7 +51,7 @@ namespace PixelComrades {
             if (collisionEvent.Hit <= 0) {
                 return;
             }
-            var stat = collisionEvent.Target.Stats.Get(_targetStat);
+            var stat = stateEvent.Target.Stats.Get(_targetStat);
             if (stat == null) {
                 return;
             }
@@ -65,8 +65,9 @@ namespace PixelComrades {
             _fastString.Append(" ");
             _fastString.Append(stat.Label);
             var label = _fastString.ToString();
-            World.Get<ModifierSystem>().AddStatRemovalTimer(new RemoveStatModifier(stat, new ModEntry(label, label, _id, _length, collisionEvent.Origin, collisionEvent.Target, _icon)));
-            collisionEvent.Target.Post(new ModifiersChanged(collisionEvent.Target));
+            World.Get<ModifierSystem>().AddStatRemovalTimer(new RemoveStatModifier(stat, new ModEntry(label, label, _id, _length, 
+            collisionEvent.Origin.Entity, stateEvent.Target.Entity, _icon)));
+            collisionEvent.Target.Post(new ModifiersChanged(stateEvent.Target.Entity));
         }
     }
 }

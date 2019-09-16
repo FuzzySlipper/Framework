@@ -21,7 +21,7 @@ namespace PixelComrades {
                 return;
             }
             _actor.Entity.AddObserver(this);
-            var action = _actor.CurrentActions.Value.GetAction(_targetUsable);
+            var action = _actor.CurrentActions.GetAction(_targetUsable);
             if (action != null) {
                 _currentAmmo = action.Ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;

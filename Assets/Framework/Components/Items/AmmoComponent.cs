@@ -67,7 +67,7 @@ namespace PixelComrades {
                 return false;
             }
             var skillMulti = 1f;
-            if (!string.IsNullOrEmpty(_skill) && context.Stats.GetValue(_skill, out var skillValue)) {
+            if (!string.IsNullOrEmpty(_skill) && context.Get<StatsContainer>().GetValue(_skill, out var skillValue)) {
                 skillMulti = Mathf.Clamp(1 - (skillValue * _skillPercent.Value), _skillMaxReduction, 1);
             }
             for (int i = 0; i < Template.Cost.Count; i++) {

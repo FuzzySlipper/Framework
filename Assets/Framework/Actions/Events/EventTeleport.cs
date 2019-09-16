@@ -11,7 +11,7 @@ namespace PixelComrades {
         }
 
         public void Trigger(ActionUsingNode node, string eventName) {
-            node.Entity.Post(new ChangePositionEvent(FindPosition(node.Entity.Tr.position, node.Entity.Tr.forward, Distance)));
+            node.Entity.Post(new ChangePositionEvent(FindPosition(node.Tr.position, node.Tr.forward, Distance)));
             //Player.Controller.Teleport(FindPosition(msg.Owner.Tr.position, msg.Owner.Tr.forward, current.Distance));
         }
 

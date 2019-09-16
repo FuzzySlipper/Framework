@@ -9,7 +9,9 @@ namespace PixelComrades {
         
         public event System.Action OnRefreshItemList;
 
-        private ManagedArray<Entity> _array;
+        private ManagedArray<CachedEntity> _array;
+        private Dictionary<int, CachedEntity> _entityLookup = new Dictionary<int, CachedEntity>();
+        private static GenericPool<CachedEntity> _cachePool = new GenericPool<CachedEntity>(50, c => c.Clear());
         
         public bool IsFull { get { return _array.IsFull; } }
         public int Count { get { return _array.UsedCount; } }
@@ -22,13 +24,16 @@ namespace PixelComrades {
         }
 
         public ItemInventory(int size) {
-            _array = new ManagedArray<Entity>(size);
+            _array = new ManagedArray<CachedEntity>(size);
             Max = size;
         }
 
         public ItemInventory(SerializationInfo info, StreamingContext context) {
             _array = info.GetValue(nameof(_array), _array);
             Max = info.GetValue(nameof(Max), Max);
+            foreach (CachedEntity cachedEntity in _array) {
+                _entityLookup.AddOrUpdate(cachedEntity.EntityId, cachedEntity);
+            }
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
@@ -37,7 +42,7 @@ namespace PixelComrades {
         }
 
         public bool Contains(Entity item) {
-            return _array.Contains(item);
+            return _entityLookup.ContainsKey(item);
         }
 
         public bool Add(Entity entity) {
@@ -47,11 +52,20 @@ namespace PixelComrades {
             if (!SetupNewEntity(entity)) {
                 return false;
             }
-            entity.Get<InventoryItem>().Index = _array.Add(entity);
+            entity.Get<InventoryItem>().Index = _array.Add(GetCachedEntity(entity));
             OnRefreshItemList.SafeInvoke();
             return true;
         }
 
+        private CachedEntity GetCachedEntity(Entity entity) {
+            if (!_entityLookup.TryGetValue(entity, out var cached)) {
+                cached = _cachePool.New();
+                cached.Set(entity);
+                _entityLookup.Add(entity, cached);
+            }
+            return cached;
+        }
+        
         public bool Add(Entity entity, int index) {
             if (!CanAdd(entity)) {
                 return false;
@@ -62,7 +76,7 @@ namespace PixelComrades {
             if (!SetupNewEntity(entity)) {
                 return false;
             }
-            _array.Set(index, entity);
+            _array.Set(index, GetCachedEntity(entity));
             entity.Get<InventoryItem>().Index = index;
             OnRefreshItemList.SafeInvoke();
             return true;
@@ -89,10 +103,14 @@ namespace PixelComrades {
         }
 
         public bool Remove(Entity entity) {
-            if (!_array.Contains(entity)) {
+            if (!Contains(entity)) {
                 return false;
             }
             _array.Remove(entity);
+            if (_entityLookup.TryGetValue(entity, out var cached)) {
+                _cachePool.Store(cached);
+                _entityLookup.Remove(entity);
+            }
             ProcessEntityRemoval(entity);
             OnRefreshItemList.SafeInvoke();
             return true;
@@ -115,6 +133,10 @@ namespace PixelComrades {
 
         public void Clear() {
             _array.Clear();
+            foreach (var entry in _entityLookup) {
+                _cachePool.Store(entry.Value);
+            }
+            _entityLookup.Clear();
             OnRefreshItemList.SafeInvoke();
         }
 
@@ -146,8 +168,8 @@ namespace PixelComrades {
             }
             item1.Get<InventoryItem>().Index = index2;
             item2.Get<InventoryItem>().Index = index1;
-            _array[index1] = item2;
-            _array[index2] = item1;
+            _array[index1] = GetCachedEntity(item2);
+            _array[index2] = GetCachedEntity(item1);
             return true;
         }
 
@@ -157,7 +179,7 @@ namespace PixelComrades {
                 return false;
             }
             _array.Remove(indexOld);
-            _array.Set(indexNew, item1);
+            _array.Set(indexNew, GetCachedEntity(item1));
             item.Index = indexNew;
             return true;
         }
@@ -170,7 +192,7 @@ namespace PixelComrades {
                 return false;
             }
             ProcessEntityRemoval(this[index]);
-            _array[index] = entity;
+            _array[index] = GetCachedEntity(entity);
             return true;
         }
     }

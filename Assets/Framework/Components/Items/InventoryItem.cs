@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded> {
+	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded>, IDisposable {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -82,6 +83,12 @@ namespace PixelComrades {
             }
             FastString.Instance.AppendBoldLabelNewLine("Rarity", GameData.Enums[EnumTypes.ItemRarity].GetNameAt(Rarity));
             arg.Data.Text += FastString.Instance.ToString();
+        }
+
+        public void Dispose() {
+            if (_inventory.Value != null) {
+                _inventory.Value.Remove(this.GetEntity());
+            }
         }
     }
 }

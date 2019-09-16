@@ -133,6 +133,7 @@ public class EntityWindow : OdinEditorWindow {
             GUI.Label(arg1, "Null");
             return;
         }
+        var actor = entity.GetNode<CharacterNode>();
         switch (arg2) {
             case 0:
                 GUI.Label(arg1, entity.Id.ToString());
@@ -141,13 +142,13 @@ public class EntityWindow : OdinEditorWindow {
                 GUI.Label(arg1, entity.ParentId.ToString());
                 break;
             case 2:
-                GUI.Label(arg1, entity.Tr != null ? entity.Tr.name : "Null");
+                GUI.Label(arg1, actor.Tr != null ? actor.Tr.name : "Null");
                 break;
             case 3:
                 GUI.Label(arg1, entity.Components.Count.ToString());
                 break;
             case 4:
-                GUI.Label(arg1, entity.Stats.Count.ToString());
+                GUI.Label(arg1, actor != null? actor.Stats.Count.ToString() : "Not Actor");
                 break;
         }
     }

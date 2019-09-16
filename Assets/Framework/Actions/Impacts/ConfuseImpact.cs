@@ -18,10 +18,10 @@ namespace PixelComrades {
         }
 
         public void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent) {
-            if (collisionEvent.Hit <= 0 || collisionEvent.Target.Tags.Contain(EntityTags.Player) || !Game.DiceRollSuccess(_chance)) {
+            if (collisionEvent.Hit <= 0 || stateEvent.Target.Tags.Contain(EntityTags.Player) || !Game.DiceRollSuccess(_chance)) {
                 return;
             }
-            collisionEvent.Target.Post(new ConfusionEvent(collisionEvent.Target, _length, true));
+            collisionEvent.Target.Post(new ConfusionEvent(stateEvent.Target.Entity, _length, true));
         }
 
         public ConfuseImpact(SerializationInfo info, StreamingContext context) {

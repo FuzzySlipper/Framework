@@ -234,14 +234,6 @@ namespace PixelComrades {
         private Dictionary<int, List<System.Action>> _messageTable = new Dictionary<int, List<System.Action>>();
         private List<ISignalReceiver> _genericReceivers = new List<ISignalReceiver>();
 
-        public void addObserver(ISignalReceiver generic) {
-            _genericReceivers.Add(generic);
-        }
-
-        public void removeObserver(ISignalReceiver generic) {
-            _genericReceivers.Remove(generic);
-        }
-
         public void addObserver(int messageType, System.Action handler) {
             if (!_messageTable.TryGetValue(messageType, out var list)) {
                 list = new List<System.Action>();

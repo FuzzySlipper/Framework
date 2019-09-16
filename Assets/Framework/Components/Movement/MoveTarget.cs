@@ -84,8 +84,8 @@ namespace PixelComrades {
         }
 
         private void ExtractMove(Entity target) {
-            var tr = target.Tr;
-            if (tr != null) {
+            var tr = target.Get<TransformComponent>();
+            if (tr != null && tr.Value != null) {
                 _targetTr.Set(tr);
             }
             else {
@@ -94,8 +94,9 @@ namespace PixelComrades {
         }
 
         private bool ExtractLook(Entity target) {
-            _lookTr.Set(target.Tr);
-            return target.Tr != null;
+            var tr = target.Get<TransformComponent>();
+            _lookTr.Set(tr);
+            return tr != null;
         }
 
         public void SetLookOnlyTarget(Entity target) {

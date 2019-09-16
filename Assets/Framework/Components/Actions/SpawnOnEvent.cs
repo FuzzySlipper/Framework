@@ -27,8 +27,8 @@ namespace PixelComrades {
             }
             else if (arg.State == StartEvent && Prefab != null) {
                 var animData = this.GetEntity().Find<AnimatorData>();
-                var spawnPos = animData?.Animator?.GetEventPosition ?? (this.GetEntity().Tr != null ? this.GetEntity().Tr.position : Vector3.zero);
-                var spawnRot = animData?.Animator?.GetEventRotation ?? (this.GetEntity().Tr != null ? this.GetEntity().Tr.rotation : Quaternion.identity);
+                var spawnPos = animData?.Animator?.GetEventPosition ?? (arg.Origin.Tr != null ? arg.Origin.Tr.position : Vector3.zero);
+                var spawnRot = animData?.Animator?.GetEventRotation ?? (arg.Origin.Tr != null ? arg.Origin.Tr.rotation : Quaternion.identity);
                 _activeGameObject = ItemPool.Spawn(Prefab, spawnPos, spawnRot);
                 if (EndEvent == ActionStateEvents.None) {
                     _activeGameObject = null;

@@ -1,17 +1,41 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace PixelComrades {
-    [Serializable]
-    public class TagsComponent {
+    public sealed class TagsComponent {
 
         private Entity _entity;
 
-        public int Owner { get { return _entity.Id; } set { } }
-
         private int[] _tags = new int[EntityTags.MaxTagsLimit];
         public int[] Tags { get => _tags; }
+
+        private TagsComponent(Entity entity) {
+            _entity = entity;
+        }
+
+        public static TagsComponent New(Entity entity) {
+            return new TagsComponent(entity);
+        }
+//
+//        public TagsComponent(SerializationInfo info, StreamingContext context) {
+//            //_tags = info.GetValue(nameof(_tags), _tags);
+//            var changed = (List<KeyValuePair<int, int>>) info.GetValue(nameof(_tags), typeof(List<KeyValuePair<int, int>>));
+//            for (int i = 0; i < changed.Count; i++) {
+//                _tags[changed[i].Key] = changed[i].Value;
+//            }
+//        }
+//
+//        public void GetObjectData(SerializationInfo info, StreamingContext context) {
+//            List<KeyValuePair<int, int>> changedValues = new List<KeyValuePair<int, int>>();
+//            for (int i = 0; i < _tags.Length; i++) {
+//                if (_tags[i] != 0) {
+//                    changedValues.Add(new KeyValuePair<int, int>(i, _tags[i]));
+//                }
+//            }
+//            info.AddValue(nameof(_tags), changedValues);
+//        }
 
         public void Dispose() {
             _tags = null;
@@ -43,6 +67,10 @@ namespace PixelComrades {
         public void Set(int id, int value) {
             _tags[id] = value;
             _entity.Post(EntitySignals.TagsChanged);
+        }
+
+        public void Replace(int[] tags) {
+            _tags = tags;
         }
 
         /// <summary>
@@ -141,10 +169,6 @@ namespace PixelComrades {
             if (parent != null) {
                 parent.Tags.Remove(id);
             }
-        }
-
-        public TagsComponent(Entity owner) {
-            _entity = owner;
         }
 
         public bool IsConfused { get { return Contain(EntityTags.IsConfused); } }

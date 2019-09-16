@@ -8,22 +8,29 @@ namespace PixelComrades {
 
         private static EntityPool _pool = new EntityPool(100);
         private static List<Entity> _toDeleteList = new List<Entity>(25);
-
+        private static TypeComparer _typeComparer = new TypeComparer();
+        
         public int Id { get; private set;}
         public int ParentId = -1;
         public bool Pooled = false;
         public IEntityPool PoolOwner;
         public string Name;
-        public Transform Tr;
-        public TagsComponent Tags;
-        public StatsContainer Stats;
+//        public Transform Tr { get; set; }
+//        public StatsContainer Stats { get; set; }
 
-        //public List<ComponentReference> Components = new List<ComponentReference>();
         private SortedList<System.Type, ComponentReference> _components = new SortedList<Type, ComponentReference>(_typeComparer);
-        private EntityEventHub _eventHub;
-        private static TypeComparer _typeComparer = new TypeComparer();
+        private TagsComponent _tags; 
+        
         public SortedList<Type, ComponentReference> Components { get => _components; }
         public string DebugId { get { return Id + "_" + Name; } }
+        public TagsComponent Tags {
+            get {
+                if (_tags == null) {
+                    _tags = TagsComponent.New(this);
+                }
+                return _tags;
+            }
+        }
 
         public class TypeComparer : Comparer<System.Type> {
             public override int Compare(System.Type x, System.Type y) {
@@ -61,7 +68,6 @@ namespace PixelComrades {
         private static Entity InternalNew(string name) {
             var entity = _pool.New();
             entity.Name = name;
-            entity._eventHub.AddObserver(entity.Stats);
             return entity;
         }
 
@@ -72,9 +78,7 @@ namespace PixelComrades {
         }
 
         protected Entity() {
-            Tags = new TagsComponent(this);
             Stats = new StatsContainer(this);
-            _eventHub = new EntityEventHub();
         }
 
         public bool IsDestroyed() {
@@ -92,16 +96,15 @@ namespace PixelComrades {
         }
 
         private void Clear() {
-            Post(new EntityDisposed(this));
+            this.Post(new EntityDisposed(this));
             UnityToEntityBridge.Unregister(this);
             EntityController.FinishDeleteEntity(this);
             Id = -1;
             Name = "Destroyed";
             ClearParent();
-            Tr = null;
-            _eventHub.Clear();
-            Tags.Clear();
-            Stats.Clear();
+//            Tr = null;
+            _tags.Clear();
+//            Stats.Clear();
         }
 
         public void ClearParent() {
@@ -130,68 +133,6 @@ namespace PixelComrades {
             if (ParentId == matchId) {
                 ParentId = -1;
             }
-        }
-
-        public void Post(int msg) {
-#if DEBUGMSGS
-            if (msg > 0) {
-                DebugLog.Add(DebugId + " posted " + msg + " " + EntitySignals.GetNameAt(msg));
-            }
-#endif
-            _eventHub.PostSignal(msg);
-        }
-
-        public void Post<T>(T msg) where T : struct, IEntityMessage {
-#if DEBUGMSGS
-            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
-#endif
-            _eventHub.Post<T>(msg);
-            World.Enqueue(msg);
-        }
-
-        public void PostAll<T>(T msg) where T : struct, IEntityMessage {
-#if DEBUGMSGS
-            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
-#endif
-            _eventHub.Post<T>(msg);
-            World.Enqueue(msg);
-            var parent = this.GetParent();
-            while (parent != null) {
-                parent._eventHub.Post(msg);
-                parent = parent.GetParent();
-            }
-        }
-
-        public void AddObserver<T>(IReceive<T> handler) {
-            _eventHub.AddObserver(handler);
-        }
-
-        public void AddObserver(IReceive handler) {
-            _eventHub.AddObserver(handler);
-        }
-
-        public void AddObserver(int message,  System.Action handler) {
-            _eventHub.AddObserver(message, handler);
-        }
-
-        public void AddObserver(ISignalReceiver generic) {
-            _eventHub.AddObserver(generic);
-        }
-
-        public void RemoveObserver<T>(IReceive<T> handler) {
-            _eventHub.MessageReceivers.Remove(handler);
-        }
-
-        public void RemoveObserver(IReceive handler) {
-            _eventHub.MessageReceivers.Remove(handler);
-        }
-
-        public void RemoveObserver(int message, System.Action handler) {
-            _eventHub.RemoveObserver(message, handler);
-        }
-
-        public void RemoveObserver(ISignalReceiver generic) {
-            _eventHub.RemoveObserver(generic);
         }
 
         public static implicit operator int(Entity reference) {
@@ -246,7 +187,6 @@ namespace PixelComrades {
             }
 
             public void Store(Entity entity) {
-                entity.Post(new EntityDestroyed(entity));
                 entity.Clear();
                 _queue.Enqueue(entity);
             }

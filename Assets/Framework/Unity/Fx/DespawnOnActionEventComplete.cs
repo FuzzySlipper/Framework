@@ -15,7 +15,7 @@ namespace PixelComrades {
             var maxTime = TimeManager.Time + _maxTime;
             var minTime = TimeManager.Time + _minTime;
             while (true) {
-                if (TimeManager.Time > maxTime || actionEvent.Origin != null && actionEvent.Origin.IsDead()) {
+                if (TimeManager.Time > maxTime || actionEvent.Origin != null && actionEvent.Origin.Entity.IsDead()) {
                     break;
                 }
                 if (TimeManager.Time > minTime && actionEvent.State != ActionStateEvents.Activate) {

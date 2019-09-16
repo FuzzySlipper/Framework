@@ -108,10 +108,6 @@ namespace PixelComrades {
             _dictColor.AddOrUpdate(id, value);
         }
 
-        public static float GetDefenseAmount(float damage, float stat) {
-            return damage * ((stat / (damage * 10)) * 0.5f);
-        }
-
         public static int PriceEstimateSell(Entity item) {
             var inven = item.Get<InventoryItem>();
             if (inven == null) {

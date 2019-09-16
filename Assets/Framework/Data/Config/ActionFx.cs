@@ -67,8 +67,8 @@ namespace PixelComrades {
                             case ActionStateEvents.Collision:
                             case ActionStateEvents.CollisionOrImpact:
                             case ActionStateEvents.Impact:
-                                if (actionEvent.Focus != null) {
-                                    var impactRenderer = actionEvent.Focus.Get<ImpactRendererComponent>();
+                                if (actionEvent.Target != null) {
+                                    var impactRenderer = actionEvent.Target.Get<ImpactRendererComponent>();
                                     if (impactRenderer != null) {
                                         impactRenderer.PlayAnimation(_actionData[i].Particle.Animation, _actionData[i].Particle.Color);
                                         continue;
@@ -79,8 +79,8 @@ namespace PixelComrades {
                         //var spawn = ItemPool.SpawnScenePrefab(_actionPrefabs[i].Prefab, actionEvent.Position, actionEvent.Rotation);
                         //CheckObjectForListener(spawn, actionEvent);
                         var player = SpriteParticleSystem.PlayParticle(_actionData[i].Particle, actionEvent.Position, actionEvent.Rotation);
-                        if (_actionData[i].Parent && actionEvent.Focus != null) {
-                            var tr = actionEvent.Focus.FindTr();
+                        if (_actionData[i].Parent && actionEvent.Target != null) {
+                            var tr = actionEvent.Target.Tr;
                             if (tr != null) {
                                 player.Tr.SetParent(tr);
                             }

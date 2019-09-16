@@ -38,21 +38,23 @@ namespace PixelComrades {
     }
 
     public struct DeathEvent : IEntityMessage {
-        public Entity Caused { get; }
-        public Entity Target { get; }
+        public CharacterNode Caused { get; }
+        public CharacterNode Target { get; }
         public float OverKill { get; }
 
-        public DeathEvent(Entity caused, Entity target, float overKill) {
+        public DeathEvent(CharacterNode caused, CharacterNode target, float overKill) {
             Caused = caused;
             Target = target;
             OverKill = overKill;
         }
     }
 
-    public struct RaiseDead : IEntityMessage {
+    public struct RaiseDeadEvent : IEntityMessage {
+        public Entity Source { get; }
         public Entity Target { get; }
 
-        public RaiseDead(Entity target) {
+        public RaiseDeadEvent(Entity source, Entity target) {
+            Source = source;
             Target = target;
         }
     }

@@ -10,32 +10,24 @@ namespace PixelComrades {
         private static SortByPriorityReceiver _msgSorter = new SortByPriorityReceiver();
 
         private Dictionary<int, List<System.Action>> _simpleHub = new Dictionary<int, List<System.Action>>();
-        private List<ISignalReceiver> _genericReceivers = new List<ISignalReceiver>();
+        private BufferedList<IReceive> _messageReceivers = new BufferedList<IReceive>();
 
-        public BufferedList<IReceive> MessageReceivers = new BufferedList<IReceive>();
-
-        public void AddObserver(ISignalReceiver generic) {
-            _genericReceivers.Add(generic);
-        }
-
+        public int Count { get { return _simpleHub.Count + _messageReceivers.Count; } }
+        
         public void AddObserver<T>(IReceive<T> handler) {
-            if (MessageReceivers.CurrentList.Contains(handler)) {
+            if (_messageReceivers.CurrentList.Contains(handler)) {
                 return;
             }
-            MessageReceivers.CurrentList.Add(handler);
-            MessageReceivers.CurrentList.Sort(_msgSorter);
+            _messageReceivers.CurrentList.Add(handler);
+            _messageReceivers.CurrentList.Sort(_msgSorter);
         }
 
         public void AddObserver(IReceive handler) {
-            if (MessageReceivers.CurrentList.Contains(handler)) {
+            if (_messageReceivers.CurrentList.Contains(handler)) {
                 return;
             }
-            MessageReceivers.CurrentList.Add(handler);
-            MessageReceivers.CurrentList.Sort(_msgSorter);
-        }
-
-        public void RemoveObserver(ISignalReceiver generic) {
-            _genericReceivers.Remove(generic);
+            _messageReceivers.CurrentList.Add(handler);
+            _messageReceivers.CurrentList.Sort(_msgSorter);
         }
 
         public void AddObserver(int messageType, System.Action handler) {
@@ -54,10 +46,15 @@ namespace PixelComrades {
             }
         }
 
+        public void RemoveObserver<T>(IReceive<T> handler) {
+            _messageReceivers.Remove(handler);
+        }
+
+        public void RemoveObserver(IReceive handler) {
+            _messageReceivers.Remove(handler);
+        }
+
         public void PostSignal(int messageType) {
-            for (int i = 0; i < _genericReceivers.Count; i++) {
-                _genericReceivers[i].Handle(messageType);
-            }
             if (_simpleHub.TryGetValue(messageType, out var list)) {
                 for (var i = list.Count - 1; i >= 0; i--) {
                     list[i]();
@@ -66,8 +63,8 @@ namespace PixelComrades {
         }
 
         public void Post<T>(T msg) where T : IEntityMessage {
-            MessageReceivers.Swap();
-            var list = MessageReceivers.PreviousList;
+            _messageReceivers.Swap();
+            var list = _messageReceivers.PreviousList;
             for (int i = 0; i < list.Count; i++) {
                 if (list[i] == null) {
                     continue;
@@ -90,8 +87,7 @@ namespace PixelComrades {
 
         public void Clear() {
             _simpleHub.Clear();
-            _genericReceivers.Clear();
-            MessageReceivers.Clear();
+            _messageReceivers.Clear();
         }
     }
 }

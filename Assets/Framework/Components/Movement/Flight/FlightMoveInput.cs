@@ -30,7 +30,7 @@ namespace PixelComrades {
         }
 
         public void Handle(ChangePositionEvent arg) {
-            this.GetEntity().Tr.position = arg.Position;
+            this.GetEntity().GetNode<CollidableNode>().Tr.position = arg.Position;
         }
 
         public void Handle(PhysicsInputMessage arg) {

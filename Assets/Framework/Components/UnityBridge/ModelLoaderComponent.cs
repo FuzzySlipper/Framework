@@ -63,7 +63,7 @@ namespace PixelComrades {
             var entity = this.GetEntity();
             UnityToEntityBridge.RegisterToEntity(model.gameObject, entity);
             _loadedComponents.Add(entity.Add(new ModelComponent(_loadedModel.Value)).GetType());
-            entity.Tr = model.Transform;
+            _loadedComponents.Add(entity.Add(new TransformComponent(model.Transform)).GetType());
             _loadedComponents.Add(entity.Add(new FloatingTextStatusComponent(model.Transform, new Vector3(0, 1.5f, 0))).GetType());
             var rb = model.GetComponent<Rigidbody>();
             if (rb != null) {

@@ -297,7 +297,6 @@ namespace PixelComrades {
                 }
             }
         }
-
         public static Entity GetParentOrSelf(this Entity entity) {
             if (entity.ParentId < 0) {
                 return entity;
@@ -465,6 +464,26 @@ namespace PixelComrades {
                 currentEntity = currentEntity.GetParent();
             }
             return false;
+        }
+
+        public static T FindNode<T>(this Entity entity) where T : class, INode, new() {
+            var type = typeof(T);
+            if (!_filterHandler.TryGetValue(type, out var filter)) {
+                return null;
+            } 
+            var node = ((NodeFilter<T>) filter).GetNode(entity);
+            if (node != null) {
+                return node;
+            }
+            var parent = entity.GetParent();
+            while (parent != null) {
+                node = ((NodeFilter<T>) filter).GetNode(entity);
+                if (node != null) {
+                    return node;
+                }
+                parent = parent.GetParent();
+            }
+            return null;
         }
 
         //public static List<T> GetAll<T>(this Entity entity) where T : IComponent {

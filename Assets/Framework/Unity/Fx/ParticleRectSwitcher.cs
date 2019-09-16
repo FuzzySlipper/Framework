@@ -9,11 +9,11 @@ namespace PixelComrades {
         [SerializeField] private SimpleAnimation _animationUi = null;
 
         public void OnActionSpawn(ActionStateEvent state) {
-            var focus = state.Focus;
+            var focus = state.Target;
             if (focus == null) {
                 return;
             }
-            var rect = World.Get<CharacterRectSystem>().GetEntityRect(focus);
+            var rect = World.Get<CharacterRectSystem>().GetEntityRect(focus.Entity);
             //if (focus == null || !focus.HasComponent<PlayerComponent>()) {
             //    return;
             //}

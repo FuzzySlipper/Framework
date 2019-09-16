@@ -26,7 +26,6 @@ namespace PixelComrades {
             }
         }
         public Entity Entity { get { return this.GetEntity(); } }
-
         public Action() {}
 
         public Action(SerializationInfo info, StreamingContext context) {

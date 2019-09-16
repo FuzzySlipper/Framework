@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    public class ActionSlots : IComponent {
+    public class ActionSlots : IComponent, IEntityContainer {
 
         private GenericContainer<ActionSlot> _list = new GenericContainer<ActionSlot>();
         
@@ -29,8 +29,32 @@ namespace PixelComrades {
         }
 
         public int Count { get { return _list.Count; } }
-        public ActionSlot this[int index] { get { return _list[index]; } }
+        public Entity this[int index] { get { return _list[index].Item; } }
 
+        public ActionSlot GetSlot(int slot) {
+            return _list[slot];
+        }
+
+        public bool Add(Entity item) {
+            return EquipToEmpty(item, item.Get<Action>());
+        }
+
+        public bool Remove(Entity entity) {
+            for (int i = 0; i < Count; i++) {
+                if (this[i] == entity) {
+                    _list[i].ClearContents();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void Clear() {
+            for (int i = 0; i < _list.Count; i++) {
+                _list[i].ClearContents();
+            }
+        }
+        
         public bool EquipToEmpty(Entity actionEntity, Action action) {
             for (int i = 0; i < _list.Count; i++) {
                 if (_list[i].Item == null && _list[i].EquipItem(actionEntity, action)) {
@@ -53,8 +77,7 @@ namespace PixelComrades {
         }
     }
 
-    public class ActionSlot : IReceive<ContainerStatusChanged>, IReceive<EntityDestroyed>, IReceive<EquipmentChanged>, IEquipmentHolder, 
-    ISerializable {
+    public class ActionSlot : IEquipmentHolder, ISerializable {
         public System.Action<Entity> OnItemChanged { get; set; }
         
         private CachedEntity _cachedItem = new CachedEntity();
@@ -137,9 +160,9 @@ namespace PixelComrades {
             _cachedItem.Set(actionEntity);
             var owner = SlotOwner.GetEntity();
             actionEntity.ParentId = owner;
+            containerItem.SetContainer(SlotOwner);
             var msg = new EquipmentChanged(owner, this);
             actionEntity.Post(msg);
-            actionEntity.AddObserver(this);
             if (OnItemChanged != null) {
                 OnItemChanged(Item);
             }
@@ -149,42 +172,27 @@ namespace PixelComrades {
 
         public bool RemoveItemAddToOwnInventory() {
             var item = Item;
-            ClearEquippedItem();
+            ClearContents();
             if (item != null) {
                 SlotOwner.Get<ItemInventory>()?.Add(item);
             }
             return true;
         }
 
-        private void ClearEquippedItem() {
+        public void ClearContents() {
             if (Item != null) {
                 if (Action?.EquippedSlot >= 0) {
                     SlotOwner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
                 }
-                Item.RemoveObserver(this);
+                var container = Item.Get<InventoryItem>();
+                if (container != null && container.Inventory == SlotOwner) {
+                    container.SetContainer(null);
+                }
                 _action.Clear();
                 _cachedItem.Clear();
             }
             if (OnItemChanged != null) {
                 OnItemChanged(null);
-            }
-        }
-
-        public void Handle(ContainerStatusChanged arg) {
-            if (arg.Entity == Item && arg.EntityContainer != null) {
-                ClearEquippedItem();
-            }
-        }
-
-        public void Handle(EntityDestroyed arg) {
-            if (arg.Entity == Item) {
-                ClearEquippedItem();
-            }
-        }
-
-        public void Handle(EquipmentChanged arg) {
-            if (arg.Slot != this) {
-                ClearEquippedItem();
             }
         }
     }

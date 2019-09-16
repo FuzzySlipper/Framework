@@ -41,7 +41,7 @@ namespace PixelComrades {
             //watch.Stop();
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
             var start = this.Get<GridPosition>().Position;
-            var fwd = this.GetEntity()?.Tr.ForwardDirection2D();
+            var fwd = this.Get<TransformComponent>().Value.ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
                 var maxRowDistance = dir == fwd ? MaxVisionDistance : MaxHearDistance;
@@ -61,9 +61,8 @@ namespace PixelComrades {
             }
             var watcher = GetWatchTarget(entity);
             if (watcher == null) {
-                watcher = new WatchTarget();
+                watcher = new WatchTarget(entity);
                 WatchTargets.Add(watcher);
-                watcher.Target = entity;
             }
             watcher.LastSensedTurnCount = 0;
             watcher.LastSensedPos = entity.Get<GridPosition>();

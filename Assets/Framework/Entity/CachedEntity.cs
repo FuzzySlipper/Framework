@@ -11,6 +11,7 @@ namespace PixelComrades {
         private int _entityId = -1;
         private Entity _entity;
 
+        public int EntityId { get { return _entityId; } }
         public Entity Entity { 
             get {
                 if (_entityId < 0) {

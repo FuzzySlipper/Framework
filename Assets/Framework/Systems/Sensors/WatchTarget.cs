@@ -10,16 +10,19 @@ namespace PixelComrades {
         public int LastSensedTurnCount;
         public Point3 LastSensedPos;
         public bool Seen;
-        public Entity Target {
-            get { return EntityController.Get(_target); }
-            set { _target = value.Id; }
+        public CharacterNode Target {
+            get { return EntityController.Get(_target).GetNode<CharacterNode>(); }
+        }
+
+        public WatchTarget(Entity target) {
+            _target = target;
         }
     }
 
     public static class ActorWatchTargetExtension {
         public static bool ContainsUnit(this List<WatchTarget> list, Entity unit) {
             for (int i = 0; i < list.Count; i++) {
-                if (list[i].Target == unit) {
+                if (list[i].Target.Entity == unit) {
                     return true;
                 }
             }
@@ -28,7 +31,7 @@ namespace PixelComrades {
 
         public static WatchTarget GetUnit(this List<WatchTarget> list, Entity unit) {
             for (int i = 0; i < list.Count; i++) {
-                if (list[i].Target == unit) {
+                if (list[i].Target.Entity == unit) {
                     return list[i];
                 }
             }

@@ -46,7 +46,7 @@ namespace PixelComrades {
             base.Start(node);
             var model = ItemPool.Spawn(UnityDirs.Models, ModelData, Vector3.zero, Quaternion.identity);
             if (model != null) {
-                model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null ? node.ActionEvent.SpawnPivot : node.Entity.Tr);
+                model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null ? node.ActionEvent.SpawnPivot : node.Tr);
                 node.ActionEvent.Action.Entity.Add(new ModelComponent(model.GetComponent<IModelComponent>()));
             }
             if (!node.Entity.Tags.Contain(EntityTags.Player)) {
@@ -57,7 +57,7 @@ namespace PixelComrades {
                 return;
             }
             var blockDamageComponent = node.Entity.GetOrAdd<BlockDamageWithCostComponent>();
-            _vitalStat = node.Entity.Stats.GetVital(TargetVital);
+            _vitalStat = node.Stats.GetVital(TargetVital);
             var skillMulti = 1f;
             if (!string.IsNullOrEmpty(_skill)) {
                 var skillValue = node.Entity.FindStatValue(_skill);

@@ -39,12 +39,7 @@ namespace PixelComrades {
                 if (_stat == null && _entityId >= 0) {
                     var entity = EntityController.Get(_entityId);
                     if (entity != null) {
-                        if (entity is Actor actor) {
-                            _stat = actor.Stats.Get<T>(_statId);                            
-                        }
-                        else {
-                            _stat = entity.Get<StatsContainer>()?.Get<T>(_statId);
-                        }
+                        _stat = entity.Get<StatsContainer>()?.Get<T>(_statId);
                     }
                 }
                 return _stat;

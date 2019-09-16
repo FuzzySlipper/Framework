@@ -7,6 +7,9 @@ namespace PixelComrades {
     public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent> {
 
         public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
+        
+        private GameOptions.CachedBool _collisionMessage = new GameOptions.CachedBool("CollisionMessages");
+        private FastString _collisionString = new FastString();
 
         public void HandleGlobal(CollisionEvent msg) {
             if (msg.Hit < 0) {
@@ -18,9 +21,11 @@ namespace PixelComrades {
             if (msg.Hit <= 0) {
                 return;
             }
-            var actionStateEvent = new ActionStateEvent(msg.Origin, msg.Target, msg.HitPoint, Quaternion.LookRotation(msg.HitNormal), ActionStateEvents.Impact);
+            var actionStateEvent = new ActionStateEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint, Quaternion.LookRotation(msg
+            .HitNormal), 
+            ActionStateEvents.Impact);
             if (msg.Impacts == null) {
-                Debug.LogFormat("{0} had no impacts {1}", msg.Origin.Name, System.Environment.StackTrace);
+                Debug.LogFormat("{0} had no impacts {1}", msg.Origin.GetName(), System.Environment.StackTrace);
             }
             else {
                 for (int j = 0; j < msg.Impacts.Count; j++) {
@@ -28,14 +33,23 @@ namespace PixelComrades {
                 }
             }
             msg.Origin.Post(actionStateEvent);
+            if (!_collisionMessage) {
+                return;
+            }
+            _collisionString.Clear();
+            _collisionString.Append(msg.Origin.GetName());
+            _collisionString.Append(" struck ");
+            _collisionString.Append(msg.Target.GetName());
+            MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(
+                _collisionString.ToString(),"", Color.blue));
         }
     }
 
     [Priority(Priority.Higher)]
     public struct EnvironmentCollisionEvent : IEntityMessage {
-        public Entity EntityHit;
-        public Vector3 HitPoint;
-        public Vector3 HitNormal;
+        public Entity EntityHit { get; }
+        public Vector3 HitPoint { get; }
+        public Vector3 HitNormal { get; }
 
         public EnvironmentCollisionEvent(Entity entityHit, Vector3 hitPoint, Vector3 hitNormal) {
             EntityHit = entityHit;
@@ -47,14 +61,14 @@ namespace PixelComrades {
     [Priority(Priority.Higher)]
     public struct PerformedCollisionEvent : IEntityMessage {
 
-        public Entity Origin;
-        public Entity Target;
-        public Vector3 HitPoint;
-        public Vector3 HitNormal;
-        public int Hit;
-        public List<IActionImpact> Impacts;
+        public CollidableNode Origin { get; }
+        public CollidableNode Target { get; }
+        public Vector3 HitPoint { get; }
+        public Vector3 HitNormal { get; }
+        public int Hit { get; }
+        public List<IActionImpact> Impacts { get; }
 
-        public PerformedCollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts, int hit = -1) {
+        public PerformedCollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts, int hit = -1) {
             Impacts = impacts;
             Origin = origin;
             Target = target;
@@ -63,7 +77,7 @@ namespace PixelComrades {
             Hit = hit;
         }
 
-        public PerformedCollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
+        public PerformedCollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
             Impacts = impacts?.Impacts;
             Origin = origin;
             Target = target;
@@ -76,14 +90,15 @@ namespace PixelComrades {
     [Priority(Priority.Higher)]
     public struct CollisionEvent : IEntityMessage {
 
-        public Entity Origin;
-        public Entity Target;
+        public CollidableNode Origin;
+        public CollidableNode Target;
         public Vector3 HitPoint;
         public Vector3 HitNormal;
         public int Hit;
         public List<IActionImpact> Impacts;
 
-        public CollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts,  int hit = -1) {
+        public CollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts,  int hit = 
+        -1) {
             Impacts = impacts;
             Origin = origin;
             Target = target;
@@ -92,7 +107,7 @@ namespace PixelComrades {
             Hit = hit;
         }
 
-        public CollisionEvent(Entity origin, Entity target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
+        public CollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, ActionImpacts impacts, int hit = -1) {
             Impacts = impacts?.Impacts;
             Origin = origin;
             Target = target;

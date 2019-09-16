@@ -211,7 +211,7 @@ namespace PixelComrades {
                 return;
             }
             if (_cooldownImage != null) {
-                Data.RemoveObserver(EntitySignals.CooldownTimerChanged, CheckCooldown);
+                World.Get<EntityEventSystem>().RemoveObserver(Data, EntitySignals.CooldownTimerChanged, CheckCooldown);
             }
             Data.RemoveObserver(this);
             if (_currentAmmo != null) {

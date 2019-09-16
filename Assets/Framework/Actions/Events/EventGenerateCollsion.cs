@@ -24,14 +24,20 @@ namespace PixelComrades {
             else {
                 target = node.Entity;
             }
-            if (target != null) {
-                CollisionExtensions.GenerateHitLocDir(entity, target, out var hitPoint, out var dir);
-                var ce = new CollisionEvent(node.ActionEvent.Action.Entity, target, hitPoint, dir, Impacts);
-                target.Post(ce);
-                entity.Post(new PerformedCollisionEvent(entity, target, ce.HitPoint, ce.HitNormal, Impacts));
-                var stateEvent = new ActionStateEvent(node.Entity, ce.Target, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), StateEvent);
-                node.Entity.Post(stateEvent);
+            if (target == null) {
+                return;
             }
+            var sourceNode = entity.FindNode<CollidableNode>();
+            var targetNode = target.FindNode<CollidableNode>();
+            if (sourceNode == null || targetNode == null) {
+                return;
+            }
+            CollisionExtensions.GenerateHitLocDir(entity, target, out var hitPoint, out var dir);
+            var ce = new CollisionEvent(sourceNode, targetNode, hitPoint, dir, Impacts);
+            target.Post(ce);
+            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, ce.HitPoint, ce.HitNormal, Impacts));
+            var stateEvent = new ActionStateEvent(node.Entity, ce.Target.Entity, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), StateEvent);
+            node.Entity.Post(stateEvent);
         }
     }
 }

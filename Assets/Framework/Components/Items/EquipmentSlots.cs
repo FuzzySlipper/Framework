@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class EquipmentSlots : IComponent, IReceive<ContainerStatusChanged> {
+    public sealed class EquipmentSlots : IComponent, IEntityContainer {
 
         private GenericContainer<EquipmentSlot> _list = new GenericContainer<EquipmentSlot>();
         
@@ -19,8 +19,28 @@ namespace PixelComrades {
         }
 
         public int Count { get { return _list.Count; } }
-        public EquipmentSlot this[int index] { get { return _list[index]; } }
+        public Entity this[int index] { get { return _list[index].Item; } }
         
+        public bool Add(Entity item) {
+            return TryEquip(item);
+        }
+
+        public bool Remove(Entity entity) {
+            for (int i = 0; i < Count; i++) {
+                if (this[i] == entity) {
+                    _list[i].ClearContents();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void Clear() {
+            for (int i = 0; i < _list.Count; i++) {
+                _list[i].ClearContents();
+            }
+        }
+
         public EquipmentSlot GetSlot(string slotType) {
             for (int i = 0; i < _list.Count; i++) {
                 if (_list[i].SlotIsCompatible(slotType)) {
@@ -76,12 +96,6 @@ namespace PixelComrades {
 
         public void Add(string targetSlot, string name, Transform equipTr){
             _list.Add(new EquipmentSlot(this, targetSlot, name, equipTr));
-        }
-
-        public void Handle(ContainerStatusChanged arg) {
-            for (int i = 0; i < _list.Count; i++) {
-                _list[i].Handle(arg);
-            }
         }
     }
 

@@ -41,9 +41,8 @@ namespace PixelComrades {
             }
             var watcher = GetWatchTarget(entity);
             if (watcher == null) {
-                watcher = new WatchTarget();
+                watcher = new WatchTarget(entity);
                 WatchTargets.Add(watcher);
-                watcher.Target = entity;
             }
             watcher.LastSensedTurnCount = 0;
             watcher.LastSensedPos = entity.Get<GridPosition>();

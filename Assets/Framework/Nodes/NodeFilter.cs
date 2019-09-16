@@ -13,7 +13,7 @@ namespace PixelComrades {
         protected NodeFilter(System.Type[] types) {
             _requiredTypes = types;
         }
-        
+
         public bool TryAdd(Entity entity, SortedList<System.Type, ComponentReference> references) {
             if (ContainsEntity(entity)) {
                 return true;
@@ -43,6 +43,8 @@ namespace PixelComrades {
             }
         }
 
+        public abstract void RegisterType(System.Type[] types);
+
         protected abstract void AddEntity(Entity entity, SortedList<Type, ComponentReference> references);
         public abstract void RemoveEntity(Entity entity);
         public abstract bool ContainsEntity(Entity entity);
@@ -56,11 +58,15 @@ namespace PixelComrades {
 
         public List<T> AllNodes { get => _allNodes; }
 
-        public NodeFilter(System.Type[] types) : base(types) {
-        }
+        public NodeFilter(System.Type[] types) : base(types) {}
 
         public static void New(System.Type[] types) {
             EntityController.RegisterNodeFilter(new NodeFilter<T>(types), typeof(T));
+        }
+
+        public override void RegisterType(System.Type[] types) {
+            EntityController.RegisterNodeFilter(new NodeFilter<T>(types), typeof(T));
+            Debug.LogFormat("Registered {0} with {1}", typeof(T), types.Length);
         }
 
         public override bool ContainsEntity(Entity entity) {

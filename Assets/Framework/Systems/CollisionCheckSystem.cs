@@ -99,7 +99,7 @@ namespace PixelComrades {
                 else if (hitEntity != null) {
                     pointColor = Color.red;
                 }
-                DebugExtension.DebugPoint(_rayHits[i].point + (Vector3.up * hitIdex), pointColor, 0.5f, 2.5f );
+                DebugExtension.DebugPoint(_rayHits[i].point + (Vector3.up * hitIdex), pointColor, 0.25f, 2.5f );
 #endif
                 if (hit.transform.CompareTag(StringConst.TagInvalidCollider) || 
                     hit.transform.CompareTag(StringConst.TagSensor)) {
@@ -136,12 +136,18 @@ namespace PixelComrades {
                         }
                     }
                 }
+                var sourceNode = entity.FindNode<CollidableNode>();
+                var targetNode = hitEntity.FindNode<CollidableNode>();
+                if (sourceNode == null || targetNode == null) {
+                    continue;
+                }
                 if (impacts == null) {
                     impacts = entity.Get<ActionImpacts>()?.Impacts;
                 }
-                var ce = new CollisionEvent(entity, hitEntity, _rayHits[i].point, _rayHits[i].normal, impacts);
+                var ce = new CollisionEvent(sourceNode, targetNode, _rayHits[i].point, _rayHits[i].normal, impacts);
                 hitEntity.Post(ce);
-                entity.Post(new PerformedCollisionEvent(entity, hitEntity, _rayHits[i].point, _rayHits[i].normal, impacts));
+                entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, _rayHits[i].point, _rayHits[i].normal, impacts));
+                
                 return ce;
             }
             return null;
@@ -170,10 +176,15 @@ namespace PixelComrades {
                 if (impacts == null) {
                     impacts = entity.Get<ActionImpacts>()?.Impacts;
                 }
+                var sourceNode = entity.FindNode<CollidableNode>();
+                var targetNode = hitEntity.FindNode<CollidableNode>();
+                if (sourceNode == null || targetNode == null) {
+                    continue;
+                }
                 CollisionExtensions.GenerateHitLocDir(position, hitEntity, out var hitPnt, out var normal);
-                var ce = new CollisionEvent(entity, hitEntity, hitPnt, normal, impacts);
+                var ce = new CollisionEvent(sourceNode, targetNode, hitPnt, normal, impacts);
                 hitEntity.Post(ce);
-                entity.Post(new PerformedCollisionEvent(entity, hitEntity, hitPnt, normal, impacts));
+                entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, normal, impacts));
             }
         }
 

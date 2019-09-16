@@ -103,7 +103,6 @@ namespace PixelComrades {
         bool Add(Entity item);
         bool Remove(Entity entity);
         void Clear();
-        Entity Owner { get; }
     }
 
     public struct ContainerStatusChanged : IEntityMessage {

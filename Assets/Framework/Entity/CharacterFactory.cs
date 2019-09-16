@@ -6,13 +6,14 @@ namespace PixelComrades {
     public static class CharacterFactory {
         public static Entity GetBasicCharacterEntity(int faction) {
             var entity = Entity.New("Character");
-            StatExtensions.SetupVitalStats(entity);
-            StatExtensions.SetupBasicCharacterStats(entity);
-            StatExtensions.SetupDefenseStats(entity);
+            var stats = entity.Add(new StatsContainer());
+            StatExtensions.SetupVitalStats(stats);
+            StatExtensions.SetupBasicCharacterStats(stats);
+            StatExtensions.SetupDefenseStats(stats);
             entity.Add(new LabelComponent(""));
-            entity.Add(new DamageComponent());
             entity.Add(new StatusContainer());
             entity.Add(new StatusUpdateComponent());
+            entity.Add(new DamageComponent());
             entity.Add(new GridPosition());
             entity.Add(new CommandTarget());
             entity.Add(new FactionComponent(faction));

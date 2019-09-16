@@ -82,6 +82,10 @@ namespace PixelComrades {
                 _lastEquipStatus = "Wrong type";
                 return false;
             }
+            InventoryItem containerItem = item.Get<InventoryItem>();
+            if (containerItem == null) {
+                return false;
+            }
             if (Item != null) {
                 if (Player.MainInventory.IsFull) {
                     _lastEquipStatus = "Owner inventory full";
@@ -94,13 +98,15 @@ namespace PixelComrades {
                 }
             }
             _item.Set(item);
-            item.Get<InventoryItem>(i => i.Inventory?.Remove(item));
+            if (containerItem.Inventory != null) {
+                containerItem.Inventory.Remove(item);
+            }
             var owner = SlotOwner.GetEntity();
             item.ParentId = owner;
             equip.Equip(this);
             _equipment.Set(item);
             SetStats();
-            item.AddObserver(SlotOwner);
+            containerItem.SetContainer(SlotOwner);
             if (OnItemChanged != null) {
                 OnItemChanged(_item);
             }
@@ -147,9 +153,11 @@ namespace PixelComrades {
                 if (CurrentEquipment != null) {
                     CurrentEquipment.UnEquip();                    
                 }
-                item.RemoveObserver(SlotOwner);
+                var container = item.Get<InventoryItem>();
+                if (container != null && container.Inventory == SlotOwner) {
+                    container.SetContainer(null);
+                }
                 item.Post(new EquipmentChanged(null, null));
-                item = null;
                 if (!isSwap) {
                     owner.Post(new EquipmentChanged(owner, this));
                     OnItemChanged?.Invoke(null);
@@ -160,12 +168,6 @@ namespace PixelComrades {
 
         public void ClearContents() {
             ClearEquippedItem(false);
-        }
-
-        public void Handle(ContainerStatusChanged arg) {
-            if (arg.Entity == Item) {
-                ClearEquippedItem(false);
-            }
         }
     }
 

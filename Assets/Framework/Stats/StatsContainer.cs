@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -6,20 +7,15 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [Priority(Priority.Low)]
     [System.Serializable]
-	public sealed class StatsContainer : IComponent, IReceive<HealEvent> {
-
-        private CachedEntity _owner;
+	public sealed class StatsContainer : IComponent, IDisposable {
 
         private Dictionary<string, BaseStat> _dict = new Dictionary<string, BaseStat>();
         private Dictionary<string, VitalStat> _vitals = new Dictionary<string, VitalStat>();
         private List<BaseStat> _list = new List<BaseStat>();
 
-        public StatsContainer(Entity owner) {
-            _owner = new CachedEntity(owner);
-        }
+        public StatsContainer() {}
 
         public StatsContainer(SerializationInfo info, StreamingContext context) {
-            _owner = new CachedEntity(info.GetValue(nameof(_owner), -1));
             var stats = (List<BaseStat>) info.GetValue("Stats", typeof(List<BaseStat>));
             var vitals = (List<VitalStat>) info.GetValue("Vitals", typeof(List<VitalStat>));
             for (int i = 0; i < stats.Count; i++) {
@@ -31,7 +27,6 @@ namespace PixelComrades {
         }
                 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_owner), _owner.Entity.Id);
             var baseStats = new List<BaseStat>();
             var vitalStats = new List<VitalStat>();
             for (int i = 0; i < _list.Count; i++) {
@@ -133,18 +128,6 @@ namespace PixelComrades {
             return false;
         }
 
-        public void Handle(HealEvent msg) {
-            if (_vitals.TryGetValue(msg.TargetVital, out var vital)) {
-                vital.Current += msg.Amount;
-            }
-            else if (_vitals.TryGetValue(GameData.Vitals.GetID(msg.TargetVital), out vital)) {
-                vital.Current += msg.Amount;
-            }
-            if (msg.Amount > 0) {
-                _owner.Entity?.Post(new CombatStatusUpdate(msg.Amount.ToString("F1"), Color.green));
-            }
-        }
-
         public string DebugStats() {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             foreach (var stat in _dict) {
@@ -183,6 +166,10 @@ namespace PixelComrades {
             for (int i = 0; i < Count; i++) {
                 this[i].Reset();
             }
+        }
+
+        public void Dispose() {
+            Clear();
         }
     }
 }

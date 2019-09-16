@@ -14,15 +14,31 @@ namespace PixelComrades {
     }
 
     public struct ActionStateEvent: IEntityMessage {
-        public Entity Origin;
-        public Entity Focus;
+        public CharacterNode Origin;
+        public CharacterNode Target;
         public Vector3 Position;
         public Quaternion Rotation;
         public ActionStateEvents State;
 
-        public ActionStateEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+        public ActionStateEvent(CharacterNode origin, CharacterNode target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
             Origin = origin;
-            Focus = focus;
+            Target = target;
+            Position = position;
+            Rotation = rotation;
+            State = state;
+        }
+
+        public ActionStateEvent(BaseNode origin, BaseNode focus, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+            Origin = origin.Entity.FindNode<CharacterNode>();
+            Target = focus.Entity.FindNode<CharacterNode>();
+            Position = position;
+            Rotation = rotation;
+            State = state;
+        }
+
+        public ActionStateEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionStateEvents state) {
+            Origin = origin.FindNode<CharacterNode>();
+            Target = focus.FindNode<CharacterNode>();
             Position = position;
             Rotation = rotation;
             State = state;

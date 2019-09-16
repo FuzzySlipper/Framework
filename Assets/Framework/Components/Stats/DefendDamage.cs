@@ -5,141 +5,104 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [Priority(Priority.Higher)]
     [System.Serializable]
-	public sealed class DefendDamageWithStats : IComponent, IReceiveRef<DamageEvent> {
+	public sealed class DefendDamageWithStats : IComponent {
 
-        private List<StatEntry> _stats = new List<StatEntry>();
-
+        private List<StatEntry> _entries = new List<StatEntry>();
+        public StatEntry this[int index] { get { return _entries[index]; } }
+        public int Count { get { return _entries.Count; } }
         public DefendDamageWithStats() {}
 
         public DefendDamageWithStats(SerializationInfo info, StreamingContext context) {
-            _stats = info.GetValue(nameof(_stats), _stats);
+            _entries = info.GetValue(nameof(_entries), _entries);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_stats), _stats);
+            info.AddValue(nameof(_entries), _entries);
         }
         
         public void AddStat(string type, string id, BaseStat stat) {
-            var statEntry = FindStat(type);
-            if (statEntry == null) {
-                statEntry = new StatEntry(stat);
-                _stats.Add(statEntry);
-            }
-            statEntry.DamageType = type;
+            _entries.Add(new StatEntry(type, id, stat));
         }
 
-        private StatEntry FindStat(string type) {
-            for (int i = 0; i < _stats.Count; i++) {
-                if (_stats[i].DamageType == type) {
-                    return _stats[i];
+        public void Remove(string id) {
+            for (int i = 0; i < _entries.Count; i++) {
+                if (_entries[i].ID == id) {
+                    _entries.RemoveAt(i);
+                    break;
                 }
             }
-            return null;
         }
 
-        public void Handle(ref DamageEvent arg) {
-            if (arg.Amount <= 0) {
-                return;
-            }
-            var statEntry = FindStat(arg.DamageType);
-            if (statEntry == null) {
-                return;
-            }
-            if (statEntry.Stat == null || statEntry.Stat.Value <= 0) {
-                return;
-            }
-            var amtDefended = GameOptions.GetDefenseAmount(arg.Amount, statEntry.Stat.Value);
-            arg.Amount = MathEx.Max(0, arg.Amount - amtDefended);
-        }
 
         [System.Serializable]
         public class StatEntry {
-            public CachedStat<BaseStat> Stat;
-            public string DamageType;
-            public StatEntry(){}
+            [SerializeField] public CachedStat<BaseStat> Stat;
+            [SerializeField] public string DamageType;
+            [SerializeField] public string ID;
 
-            public StatEntry(BaseStat stat) {
+            public StatEntry(string damageType, string id, BaseStat stat) {
                 Stat = new CachedStat<BaseStat>(stat);
+                DamageType = damageType;
+                ID = id;
             }
         }
     }
 
-    [Priority(Priority.Higher)]
     [System.Serializable]
-	public sealed class DefendDamageFlat : IComponent, IReceiveRef<DamageEvent> {
+	public sealed class DamageAbsorb : IComponent {
 
-        private List<DefendType> _validTypes = new List<DefendType>();
+        private List<Entry> _entries = new List<Entry>();
+        
+        public Entry this[int index] { get { return _entries[index]; } }
+        public int Count { get { return _entries.Count; } }
+        
+        public DamageAbsorb() {}
 
-        public DefendDamageFlat() {
-        }
-
-        public DefendDamageFlat(SerializationInfo info, StreamingContext context) {
-            _validTypes = info.GetValue(nameof(_validTypes), _validTypes);
+        public DamageAbsorb(SerializationInfo info, StreamingContext context) {
+            _entries = info.GetValue(nameof(_entries), _entries);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_validTypes), _validTypes);
+            info.AddValue(nameof(_entries), _entries);
         }
 
-        public DefendDamageFlat(string[] validTypes, float amount, float limitAmount = -1f) {
-            if (validTypes != null) {
-                for (int i = 0; i < validTypes.Length; i++) {
-                    _validTypes.Add(new DefendType(validTypes[i], amount, limitAmount));
+        public string AddDefend(string source, string type, float amount, float limitAmount = -1) {
+            _entries.Add(new Entry(source, type, amount, limitAmount));
+            return _entries.LastElement().ID;
+        }
+
+        public void Remove(string id) {
+            for (int i = 0; i < _entries.Count; i++) {
+                if (_entries[i].ID == id) {
+                    _entries.RemoveAt(i);
+                    break;
                 }
             }
         }
 
-        public void AddDefend(string type, float amount, float limitAmount = -1) {
-            var defendType = GetType(type);
-            if (defendType == null) {
-                defendType = new DefendType(type, amount, limitAmount);
-                _validTypes.Add(defendType);
-            }
-            else {
-                defendType.Amount += amount;
-                if (limitAmount > 0 && defendType.DefendLimit >= 0) {
-                    defendType.DefendLimit += limitAmount;
+        public void CheckLimits() {
+            for (int i = _entries.Count - 1; i >= 0; i--) {
+                if (_entries[i].Remaining <= 0) {
+                    _entries.RemoveAt(i);
                 }
-            }
-        }
-
-        public DefendType GetType(string type) {
-            for (int i = 0; i < _validTypes.Count; i++) {
-                if (_validTypes[i].Type == type) {
-                    return _validTypes[i];
-                }
-            }
-            return null;
-        }
-
-        public void Handle(ref DamageEvent arg) {
-            var defendType = GetType(arg.DamageType);
-            if (defendType == null || Math.Abs(defendType.Amount) < 0.01f) {
-                return;
-            }
-            var amtDefended = GameOptions.GetDefenseAmount(arg.Amount, defendType.Amount);
-            arg.Amount = MathEx.Max(0, arg.Amount - amtDefended);
-            if (defendType.DefendLimit < 0) {
-                return;
-            }
-            defendType.DefendLimit -= amtDefended;
-            if (defendType.DefendLimit <= 0) {
-                defendType.Amount = 0;
             }
         }
 
         [System.Serializable]
-        public class DefendType {
-            public readonly string Type;
-            public float Amount;
-            public float DefendLimit;
+        public class Entry {
+            [SerializeField] public readonly string DamageType;
+            [SerializeField] public readonly string ID;
+            [SerializeField] public readonly string Source;
+            [SerializeField] public float Amount;
+            [SerializeField] public float Remaining;
 
-            public DefendType(string type, float amount, float defendLimit) {
-                Type = type;
+            public Entry(string source, string type, float amount, float defendLimit) {
+                Source = source;
+                DamageType = type;
                 Amount = amount;
-                DefendLimit = defendLimit;
+                Remaining = defendLimit;
+                ID = System.Guid.NewGuid().ToString();
             }
         }
     }

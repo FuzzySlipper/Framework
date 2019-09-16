@@ -27,7 +27,7 @@ namespace PixelComrades {
             }
             else {
                 var animData = entity.Find<AnimatorData>();
-                originPos = animData?.Animator?.GetEventPosition ?? (entity.Tr != null ? entity.Tr.position : Vector3.zero);
+                originPos = animData?.Animator?.GetEventPosition ?? (node.Tr != null ? node.Tr.position : Vector3.zero);
             }
             var target = node.ActionEvent.Target;
             var actionEntity = node.ActionEvent.Action.GetEntity();
@@ -37,7 +37,7 @@ namespace PixelComrades {
                 ce = CollisionCheckSystem.SphereCast(actionEntity, ray, RayDistance, RaySize, LimitToEnemy, Impacts);
             }
             if (ce != null) {
-                var stateEvent = new ActionStateEvent(node.Entity, ce.Value.Target, ce.Value.HitPoint, Quaternion.LookRotation(ce.Value.HitNormal), StateEvent);
+                var stateEvent = new ActionStateEvent(node.Entity, ce.Value.Target.Entity, ce.Value.HitPoint, Quaternion.LookRotation(ce.Value.HitNormal), StateEvent);
                 node.Entity.Post(stateEvent);
             }
         }

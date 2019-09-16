@@ -24,8 +24,8 @@ namespace PixelComrades {
             }
             else {
                 var animData = node.Animator;
-                var spawnPos = animData?.GetEventPosition ?? (node.Entity.Tr != null ? node.Entity.Tr.position : Vector3.zero);
-                var spawnRot = animData?.GetEventRotation ?? (node.Entity.Tr != null ? node.Entity.Tr.rotation : Quaternion.identity);
+                var spawnPos = animData?.GetEventPosition ?? (node.Tr != null ? node.Tr.position : Vector3.zero);
+                var spawnRot = animData?.GetEventRotation ?? (node.Tr != null ? node.Tr.rotation : Quaternion.identity);
                 spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.Entity, Data, node.ActionEvent.Target, spawnPos, spawnRot, Impacts);
             }
             if (spawnEntity != null) {
