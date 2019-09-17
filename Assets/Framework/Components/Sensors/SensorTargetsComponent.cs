@@ -89,7 +89,8 @@ namespace PixelComrades {
 
         public void Handle(DamageEvent arg) {
 #if DEBUG
-            DebugLog.Add(this.GetEntity().DebugId + " was attacked by " + arg.Origin?.DebugId + " parent " + arg.Origin?.ParentId + " is pooled " + arg.Origin?.Pooled);
+            DebugLog.Add(this.GetEntity().DebugId + " was attacked by " + arg.Origin?.Entity.DebugId + " parent " + 
+                         arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
 #endif
             AddWatch(arg.Origin, true);
         }

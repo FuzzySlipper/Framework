@@ -135,28 +135,6 @@ namespace PixelComrades {
             return newComponent;
         }
 
-        public static bool Find<T>(this Entity entity, Action<T> del) where T : IComponent {
-            if (entity == null) {
-                return false;
-            }
-            if (entity.HasComponent<T>()) {
-                return entity.Get<T>(del);
-            }
-            var parent = entity.GetParent();
-            _loopLimiter.Reset();
-            var type = typeof(T);
-            while (_loopLimiter.Advance()) {
-                if (parent == null) {
-                    break;
-                }
-                if (parent.Components.ContainsKey(type)) {
-                    return parent.Get<T>(del);
-                }
-                parent = parent.GetParent();
-            }
-            return false;
-        }
-
         public static T Find<T>(this Entity entity) where T : IComponent {
             if (entity == null) {
                 return default(T);
@@ -253,14 +231,6 @@ namespace PixelComrades {
         //    return returnList.Count > 0 ? returnList : null;
         //}
 
-        public static bool Get<T>(this Entity entity, Action<T> del) where T : IComponent {
-            if (!entity.Components.TryGetValue(typeof(T), out var cref)) {
-                return false;
-            }
-            del(((ManagedArray<T>) cref.Array)[cref.Index]);
-            return true;
-        }
-
         public static void Remove<T>(this Entity entity, T component) where T : IComponent {
             entity.Remove(typeof(T));
         }
@@ -353,31 +323,15 @@ namespace PixelComrades {
             return root;
         }
 
-        public static Transform FindTr(this Entity entity) {
-            if (entity == null) {
-                return null;
-            }
-            if (entity.Tr != null || entity.ParentId < 0) {
-                return entity.Tr;
-            }
-            _loopLimiter.Reset();
-            while (_loopLimiter.Advance()) {
-                entity = GetEntity(entity.ParentId);
-                if (entity.Tr != null) {
-                    return entity.Tr;
-                }
-            }
-            return null;
-        }
-
         public static Vector3 GetPosition(this Entity entity) {
             if (entity == null) {
                 return Vector3.zero;
             }
             var checkEntity = entity;
             while (checkEntity != null) {
-                if (checkEntity.Tr != null) {
-                    return checkEntity.Tr.position;
+                var tr = checkEntity.Get<TransformComponent>();
+                if (tr != null && tr.Value != null) {
+                    return tr.Value.position;
                 }
                 checkEntity = checkEntity.GetParent();
             }
@@ -388,8 +342,9 @@ namespace PixelComrades {
             if (entity == null) {
                 return Quaternion.identity;
             }
-            if (entity.Tr != null) {
-                return entity.Tr.rotation;
+            var tr = entity.Get<TransformComponent>();
+            if (tr != null && tr.Value != null) {
+                return tr.Value.rotation;
             }
             return Quaternion.identity;
         }
@@ -422,7 +377,8 @@ namespace PixelComrades {
                 if (currentEntity == null) {
                     return null;
                 }
-                var stat = currentEntity.Stats.Get<T>(statFullID);
+                var stats = currentEntity.Get<StatsContainer>();
+                var stat = stats.Get<T>(statFullID);
                 if (stat != null) {
                     return stat;
                 }
@@ -438,7 +394,8 @@ namespace PixelComrades {
                 if (currentEntity == null) {
                     return 0f;
                 }
-                var stat = currentEntity.Stats.Get(statFullID);
+                var stats = currentEntity.Get<StatsContainer>();
+                var stat = stats.Get(statFullID);
                 if (stat != null) {
                     return stat.Value;
                 }
@@ -454,8 +411,9 @@ namespace PixelComrades {
                 if (currentEntity == null) {
                     return false;
                 }
-                if (currentEntity.Stats.HasStat(statFullID)) {
-                    var stat = currentEntity.Stats.Get<T>(statFullID);
+                var stats = currentEntity.Get<StatsContainer>();
+                if (stats.HasStat(statFullID)) {
+                    var stat = stats.Get<T>(statFullID);
                     if (stat != null) {
                         del(stat);
                         return true;

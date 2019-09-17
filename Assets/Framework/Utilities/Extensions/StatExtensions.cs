@@ -65,12 +65,13 @@ namespace PixelComrades {
             }
         }
 
-        public static void AddStatList(Entity entity, DataList stats, Equipment equipment) {
-            if (stats == null) {
+        public static void AddStatList(Entity entity, DataList data, Equipment equipment) {
+            if (data == null) {
                 return;
             }
-            for (int i = 0; i < stats.Count; i++) {
-                var statEntry = stats[i];
+            var stats = entity.GetOrAdd<StatsContainer>();
+            for (int i = 0; i < data.Count; i++) {
+                var statEntry = data[i];
                 var statName = statEntry.GetValue<string>(DatabaseFields.Stat);
                 if (string.IsNullOrEmpty(statName)) {
                     continue;
@@ -83,10 +84,10 @@ namespace PixelComrades {
                     equipment.AddStat(statName);
                 }
                 if (Math.Abs(multiplier) < Comparison || Math.Abs(multiplier - 1) < Comparison) {
-                    entity.Stats.GetOrAdd(statName, label).AddToBase(amount);
+                    stats.GetOrAdd(statName, label).AddToBase(amount);
                     continue;
                 }
-                var stat = entity.Stats.Get(statName);
+                var stat = stats.Get(statName);
                 string id = "";
                 label = "";
                 float adjustedAmount = amount;
@@ -100,7 +101,7 @@ namespace PixelComrades {
                     }
                     id = stat.ID;
                     label = stat.Label;
-                    entity.Stats.Remove(stat);
+                    stats.Remove(stat);
                 }
                 if (string.IsNullOrEmpty(id)) {
                     var fakeEnum = GameData.Enums.GetEnumIndex(statName, out var index);
@@ -113,22 +114,23 @@ namespace PixelComrades {
                     }
                 }
                 rangeStat = new RangeStat(entity, label, id, adjustedAmount, adjustedAmount * multiplier);
-                entity.Stats.Add(rangeStat);
+                stats.Add(rangeStat);
             }
         }
 
-        public static void AddStatList(Entity entity, DataList stats, float multi) {
-            if (stats == null) {
+        public static void AddStatList(Entity entity, DataList data, float multi) {
+            if (data == null) {
                 return;
             }
-            for (int i = 0; i < stats.Count; i++) {
-                var statEntry = stats[i];
+            var stats = entity.GetOrAdd<StatsContainer>();
+            for (int i = 0; i < data.Count; i++) {
+                var statEntry = data[i];
                 var statName = statEntry.GetValue<string>(DatabaseFields.Stat);
                 if (string.IsNullOrEmpty(statName)) {
                     continue;
                 }
                 var amount = statEntry.GetValue<int>(DatabaseFields.Amount);
-                entity.Stats.GetOrAdd(statName).AddToBase(amount + (amount * multi));
+                stats.GetOrAdd(statName).AddToBase(amount + (amount * multi));
             }
         }
     }

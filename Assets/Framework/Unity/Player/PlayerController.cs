@@ -43,7 +43,7 @@ namespace PixelComrades {
 
         protected virtual void SetupControllerEntity(Entity entity) {
             Entity = entity;
-            entity.Tr = Tr;
+            entity.Add(new TransformComponent(Tr));
             Player.MainEntity = entity;
         }
 

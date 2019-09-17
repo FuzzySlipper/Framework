@@ -67,17 +67,17 @@ namespace PixelComrades {
 
         private void HandleVelocityMover(RigidbodyMoverNode mover) {
             var dt = TimeManager.DeltaTime;
-            var rb = mover.Rb.Value.Rb;
+            var rb = mover.Rb;
             if (rb == null) {
                 return;
             }
-            var moveSpeed = mover.MoveSpeed.Value;
-            mover.Mover.Value.CurrentSpeed = Mathf.MoveTowards(mover.Mover.Value.CurrentSpeed, moveSpeed , moveSpeed * 0.25f * dt);
-            var moveTarget = mover.Target.Value.GetTargetPosition;
+            var moveSpeed = mover.MoveSpeed;
+            mover.VelocityMover.CurrentSpeed = Mathf.MoveTowards(mover.VelocityMover.CurrentSpeed, moveSpeed , moveSpeed * 0.25f * dt);
+            var moveTarget = mover.Target.GetTargetPosition;
             var dir = moveTarget - rb.position;
-            rb.AddForce(dir.normalized * mover.Mover.Value.CurrentSpeed * dt);
+            rb.AddForce(dir.normalized * mover.VelocityMover.CurrentSpeed * dt);
             var targetRotation = Quaternion.LookRotation(dir);
-            rb.MoveRotation(Quaternion.RotateTowards(mover.Entity.Tr.rotation, targetRotation, mover.RotationSpeed.Value.Speed * dt));
+            rb.MoveRotation(Quaternion.RotateTowards(mover.Tr.rotation, targetRotation, mover.RotationSpeed.Speed * dt));
             if (Vector3.Distance(moveTarget, rb.position) < ReachedDestination) {
                 FinishMove(mover.Entity, moveTarget);
             }
@@ -86,7 +86,7 @@ namespace PixelComrades {
         private void FinishMove(Entity owner, Vector3 moveTarget) {
             owner.Tags.Remove(EntityTags.Moving);
             owner.Post(new MoveComplete(owner, moveTarget));
-            owner.Get<MoveTarget>(m => m.Complete());
+            owner.Get<MoveTarget>()?.Complete();
         }
 
         public void HandleGlobal(AddForceEvent arg) {

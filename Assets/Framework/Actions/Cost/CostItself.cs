@@ -9,7 +9,7 @@ namespace PixelComrades {
     public class CostItself : CommandCost, ISerializable {
 
         public override void ProcessCost(Entity entity) {
-            entity.Get<InventoryItem>(i => i.Inventory?.Remove(entity));
+            entity.Get<InventoryItem>()?.Inventory?.Remove(entity);
             entity.Destroy();
         }
 

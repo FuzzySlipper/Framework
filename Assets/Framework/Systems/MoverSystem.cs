@@ -3,25 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+
     public class MoverSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent> {
         private const float ReachedDestination = 0.1f;
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-        private ManagedArray<RotateToTarget> _rotateList;
-        private ManagedArray<RotateToTarget>.Delegate _rotateDel;
-        private ManagedArray<SimplerMover> _simpleMoveList;
-        private ManagedArray<SimplerMover>.Delegate _simpleMoveDel;
-        private ManagedArray<ArcMover> _arcMoverList;
-        private ManagedArray<ArcMover>.Delegate _arcMoveDel;
-        private ManagedArray<ForwardMover> _forwardMovers;
-        private ManagedArray<ForwardMover>.Delegate _forwardMoveDel;
+        private List<ForwardMoverNode> _forwardMovers = new List<ForwardMoverNode>();
+        private List<RotateToNode> _rotators = new List<RotateToNode>();
+        private List<SimpleMoverNode> _simpleMovers = new List<SimpleMoverNode>();
+        private List<ArcMoverNode> _arcMovers = new List<ArcMoverNode>();
 
         public MoverSystem() {
-            _rotateDel = HandleRotation;
-            _simpleMoveDel = HandleMoveSimple;
-            _arcMoveDel = HandleArcMovement;
-            _forwardMoveDel = HandleForwardMovement;
+            NodeFilter<ForwardMoverNode>.New(ForwardMoverNode.GetTypes());
+            NodeFilter<RotateToNode>.New(RotateToNode.GetTypes());
+            NodeFilter<SimpleMoverNode>.New(SimpleMoverNode.GetTypes());
+            NodeFilter<ArcMoverNode>.New(ArcMoverNode.GetTypes());
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
@@ -35,36 +32,44 @@ namespace PixelComrades {
                     _moveTweens.RemoveAt(i);
                 }
             }
-            if (_rotateList == null) {
-                _rotateList = EntityController.GetComponentArray<RotateToTarget>();
-            }
-            if (_rotateList != null) {
-                _rotateList.Run(_rotateDel);
-            }
-            if (_simpleMoveList == null) {
-                _simpleMoveList = EntityController.GetComponentArray<SimplerMover>();
-            }
-            if (_simpleMoveList != null) {
-                _simpleMoveList.Run(_simpleMoveDel);
-            }
-            if (_arcMoverList == null) {
-                _arcMoverList = EntityController.GetComponentArray<ArcMover>();
-            }
-            if (_arcMoverList != null) {
-                _arcMoverList.Run(_arcMoveDel);
-            }
             if (_forwardMovers == null) {
-                _forwardMovers = EntityController.GetComponentArray<ForwardMover>();
+                _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
             }
             if (_forwardMovers != null) {
-                _forwardMovers.Run(_forwardMoveDel);
+                for (int i = 0; i < _forwardMovers.Count; i++) {
+                    HandleForwardMovement(_forwardMovers[i]);
+                }
+            }
+            if (_rotators == null) {
+                _rotators = EntityController.GetNodeList<RotateToNode>();
+            }
+            if (_rotators != null) {
+                for (int i = 0; i < _rotators.Count; i++) {
+                    HandleRotation(_rotators[i]);
+                }
+            }
+            if (_simpleMovers == null) {
+                _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
+            }
+            if (_simpleMovers != null) {
+                for (int i = 0; i < _simpleMovers.Count; i++) {
+                    HandleMoveSimple(_simpleMovers[i]);
+                }
+            }
+            if (_arcMovers == null) {
+                _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
+            }
+            if (_arcMovers != null) {
+                for (int i = 0; i < _arcMovers.Count; i++) {
+                    HandleArcMovement(_arcMovers[i]);
+                }
             }
         }
         
         private void FinishMove(Entity owner, Vector3 moveTarget) {
             owner.Tags.Remove(EntityTags.Moving);
             owner.Post(new MoveComplete(owner, moveTarget));
-            owner.Get<MoveTarget>(m => m.Complete());
+            owner.Get<MoveTarget>()?.Complete();
         }
 
         private void RotateTowardsMoveTarget(Transform tr, Vector3 moveTarget, float speed) {
@@ -72,24 +77,24 @@ namespace PixelComrades {
             tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, speed * TimeManager.DeltaTime);
         }
 
-        private void HandleMoveSimple(SimplerMover mover) {
-            var entity = mover.GetEntity();
+        private void HandleMoveSimple(SimpleMoverNode mover) {
+            var entity = mover.Entity;
             if (!entity.Tags.Contain(EntityTags.Moving)) {
                 return;
             }
-            var target = entity.Get<MoveTarget>();
+            var target = mover.MoveTarget;
             if (target == null) {
                 return;
             }
-            var tr = entity.Tr;
+            var tr = mover.Tr;
             if (tr == null) {
                 return;
             }
             var targetPos = target.GetTargetPosition;
             var dir = targetPos - tr.position;
-            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Value.Speed * TimeManager.DeltaTime);
+            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Speed * TimeManager.DeltaTime);
             var targetRotation = Quaternion.LookRotation(dir);
-            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.Value.Speed * TimeManager.DeltaTime);
+            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.Speed * TimeManager.DeltaTime);
             if (Vector3.Distance(targetPos, tr.position) < ReachedDestination) {
                 FinishMove(entity, targetPos);
             }
@@ -118,35 +123,37 @@ namespace PixelComrades {
         //    }
         //}
 
-        private void HandleArcMovement(ArcMover mover) {
-            var entity = mover.GetEntity();
+        private void HandleArcMovement(ArcMoverNode mover) {
+            var entity = mover.Entity;
             if (!entity.Tags.Contain(EntityTags.Moving)) {
                 return;
             }
-            mover.ElapsedTime += TimeManager.DeltaTime;
-            entity.Tr.Translate(0, (mover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ElapsedTime)) * TimeManager.DeltaTime, mover.MoveVector.z * TimeManager.DeltaTime);
-            if (mover.ElapsedTime > mover.Duration) {
-                FinishMove(entity, entity.Tr.position);
+            mover.ArcMover.ElapsedTime += TimeManager.DeltaTime;
+            mover.Tr.Translate(0, (mover.ArcMover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ArcMover.ElapsedTime)) * TimeManager
+            .DeltaTime, mover.ArcMover.MoveVector.z * TimeManager.DeltaTime);
+            if (mover.ArcMover.ElapsedTime > mover.ArcMover.Duration) {
+                FinishMove(entity, mover.Tr.position);
             }
         }
 
-        private void HandleForwardMovement(ForwardMover mover) {
-            var entity = mover.GetEntity();
-            if (!entity.Tags.Contain(EntityTags.Moving) || !entity.Tr) {
+        private void HandleForwardMovement(ForwardMoverNode mover) {
+            var entity = mover.Entity;
+            if (!entity.Tags.Contain(EntityTags.Moving) || !mover.Tr) {
                 return;
             }
-            var ms = entity.Get<MoveSpeed>()?.Speed ?? 1;
-            entity.Tr.Translate(Vector3.forward * ms * TimeManager.DeltaTime, Space.Self); 
+            var ms = mover.MoveSpeed?.Speed ?? 1;
+            mover.Tr.Translate(Vector3.forward * ms * TimeManager.DeltaTime, Space.Self); 
         }
 
-        private void HandleRotation(RotateToTarget r) {
-            var targetRotation = Quaternion.LookRotation(r.Position - r.GetEntity().GetPosition());
-            var rb = r.Get<RigidbodyComponent>().Rb;
+        private void HandleRotation(RotateToNode r) {
+            var targetRotation = Quaternion.LookRotation(r.Rotate.Position - r.Tr.position);
+            var rb = r.Rb?.Rb;
             if (rb != null) {
-                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRotation, r.RotationSpeed * TimeManager.DeltaTime));
+                rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRotation, r.Rotate.RotationSpeed * TimeManager.DeltaTime));
             }
             else {
-                r.TargetTr.Tr.rotation = Quaternion.RotateTowards(r.TargetTr.Tr.rotation, targetRotation, r.RotationSpeed * TimeManager
+                r.Rotate.TargetTr.Tr.rotation = Quaternion.RotateTowards(r.Rotate.TargetTr.Tr.rotation, targetRotation, r.Rotate
+                                                                                                                            .RotationSpeed * TimeManager
                 .DeltaTime);
             }
         }
@@ -170,12 +177,12 @@ namespace PixelComrades {
                 moveEvent.Origin.Add(target);
             }
             target.SetMoveTarget(moveEvent.GetPosition);
-            moveEvent.Origin.Get<ArcMover>(m => CalculateFlight(m, moveEvent.GetPosition, m.Get<MoveSpeed>()));
+            CalculateFlight(moveEvent.Origin.Get<ArcMover>(), moveEvent.GetPosition, moveEvent.Origin.Get<MoveSpeed>());
         }
 
         private void CalculateFlight(ArcMover mover, Vector3 target, float speed) {
-            var entity = mover.GetEntity();
-            float targetDistance = Vector3.Distance(entity.Tr.position, target);
+            var tr = mover.Get<TransformComponent>().Value;
+            float targetDistance = Vector3.Distance(tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
             float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / speed);
             mover.MoveVector.z = Mathf.Sqrt(projectileVelocity) * Mathf.Cos(mover.Angle * Mathf.Deg2Rad);
@@ -183,7 +190,7 @@ namespace PixelComrades {
             // Calculate flight time.
             mover.Duration = targetDistance / mover.MoveVector.z;
             // Rotate projectile to face the target.
-            entity.Tr.rotation = Quaternion.LookRotation(target - entity.Tr.position);
+            tr.rotation = Quaternion.LookRotation(target - tr.position);
             mover.ElapsedTime = 0;
         }
     }
@@ -203,7 +210,7 @@ namespace PixelComrades {
 
         public StartMoveEvent(Entity origin, VisibleNode follow) {
             MoveTarget = follow.position;
-            Follow = follow.Entity.Tr;
+            Follow = follow.Tr;
             Origin = origin;
         }
     }
@@ -251,6 +258,101 @@ namespace PixelComrades {
         public AddForceEvent(Rigidbody rb, Vector3 moveTarget, float force) {
             Rb = rb;
             Force = (moveTarget - Rb.position).normalized * force;
+        }
+    }
+    public class ForwardMoverNode : BaseNode {
+
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        private CachedComponent<ForwardMover> _forward = new CachedComponent<ForwardMover>();
+        private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+
+        public Transform Tr { get => _tr.Value; }
+        public Collider Collider { get => _collider.Value.Collider; }
+        public ForwardMover ForwardMover { get => _forward; }
+        public MoveSpeed MoveSpeed { get => _moveSpeed; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _collider, _forward, _moveSpeed
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(TransformComponent),
+                typeof(ForwardMover),
+            };
+        }
+    }
+
+    public class RotateToNode : BaseNode {
+
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        private CachedComponent<RotateToTarget> _rotate = new CachedComponent<RotateToTarget>();
+        private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
+
+        public Transform Tr { get => _tr.Value; }
+        public Collider Collider { get => _collider.Value.Collider; }
+        public RotateToTarget Rotate { get => _rotate; }
+        public RigidbodyComponent Rb { get => _rb; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _collider,  _rotate, _rb
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(TransformComponent),
+                typeof(RotateToTarget),
+            };
+        }
+    }
+
+    public class ArcMoverNode : BaseNode {
+
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        private CachedComponent<ArcMover> _arcMover = new CachedComponent<ArcMover>();
+        private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+        
+        public Transform Tr { get => _tr.Value; }
+        public Collider Collider { get => _collider.Value.Collider; }
+        public ArcMover ArcMover { get => _arcMover; }
+        public MoveSpeed MoveSpeed { get => _moveSpeed; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _collider, _arcMover,_moveSpeed
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(TransformComponent),
+                typeof(ArcMover),
+            };
+        }
+    }
+
+    public class SimpleMoverNode : BaseNode {
+
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        private CachedComponent<SimplerMover> _simple = new CachedComponent<SimplerMover>();
+        private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+        private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
+        private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
+        
+        public Transform Tr { get => _tr.Value; }
+        public Collider Collider { get => _collider.Value.Collider; }
+        public SimplerMover Simple { get => _simple; }
+        public MoveSpeed MoveSpeed { get => _moveSpeed; }
+        public RotationSpeed RotationSpeed { get => _rotationSpeed; }
+        public MoveTarget MoveTarget { get => _moveTarget; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _collider, _simple, _moveSpeed, _moveTarget, _rotationSpeed
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(TransformComponent),
+                typeof(SimplerMover),
+            };
         }
     }
 }

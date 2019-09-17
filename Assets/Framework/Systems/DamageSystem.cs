@@ -19,8 +19,7 @@ namespace PixelComrades {
             if (msg.Amount <= 0) {
                 return;
             }
-            var entity = msg.Target;
-            var node = entity.GetNode<CharacterNode>();
+            var node = msg.Target;
             if (node == null) {
                 return;
             }
@@ -65,9 +64,10 @@ namespace PixelComrades {
             }
             
             float previousValue = 0;
-            var vital = entity.Stats.GetVital(msg.TargetVital);
+            var stats = node.Stats;
+            var vital = stats.GetVital(msg.TargetVital);
             if (vital == null) {
-                vital = entity.Stats.GetVital(GameData.Vitals.GetID(msg.TargetVital));
+                vital = stats.GetVital(GameData.Vitals.GetID(msg.TargetVital));
             }
             if (vital != null) {
                 _dmgHoverMsg.Append(vital.ToLabelString());
@@ -78,36 +78,37 @@ namespace PixelComrades {
                 vital.Current -= damageAmount;
                 _dmgHoverMsg.Append(vital.ToLabelString());
             }
-            var origin = msg.Origin.GetRoot().Name;
+            var origin = msg.Origin.GetName();
             _dmgMsg.Append(origin);
             _dmgMsg.Append(" hit ");
-            _dmgMsg.Append(msg.Target.Name);
+            _dmgMsg.Append(msg.Target.GetName());
             _dmgMsg.Append(" for ");
             _dmgMsg.Append(damageAmount.ToString("F1"));
             if (damageAmount > 0) {
-                entity.Post(new CombatStatusUpdate(damageAmount.ToString("F1"), Color.red));
+                node.Entity.Post(new CombatStatusUpdate(damageAmount.ToString("F1"), Color.red));
                 MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(_dmgMsg.ToString(), 
                 _dmgHoverMsg.ToString(), _damageColor));
             }
-            if (vital == null || vital != entity.Stats.HealthStat || vital.Current > 0.0001f) {
+            if (vital == null || vital != stats.HealthStat || vital.Current > 0.0001f) {
                 return;
             }
             _dmgMsg.Clear();
             _dmgMsg.Append(origin);
             _dmgMsg.Append(" killed ");
-            _dmgMsg.Append(msg.Target.Name);
+            _dmgMsg.Append(msg.Target.GetName());
             MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(_dmgMsg.ToString(), 
                 _dmgHoverMsg.ToString(), _deathColor));
-            entity.Tags.Add(EntityTags.IsDead);
-            entity.Tags.Add(EntityTags.CantMove);
-            entity.Post(new DeathEvent(msg.Origin, msg.Target, damageAmount - previousValue));
+            node.Entity.Tags.Add(EntityTags.IsDead);
+            node.Entity.Tags.Add(EntityTags.CantMove);
+            node.Entity.Post(new DeathEvent(msg.Origin, msg.Target, damageAmount - previousValue));
         }
 
         public void HandleGlobal(HealEvent arg) {
             var entity = arg.Target;
-            var vital = entity.Stats.GetVital(arg.TargetVital);
+            var stats = entity.Get<StatsContainer>();
+            var vital = stats.GetVital(arg.TargetVital);
             if (vital == null) {
-                vital = entity.Stats.GetVital(GameData.Vitals.GetID(arg.TargetVital));
+                vital = stats.GetVital(GameData.Vitals.GetID(arg.TargetVital));
             }
             if (vital != null) {
                 vital.Current += arg.Amount;

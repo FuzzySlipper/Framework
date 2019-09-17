@@ -36,7 +36,8 @@ namespace PixelComrades {
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb, _stats
+            _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
+            _collider, _stats, _tr
         };
 
         public VitalStat GetVital(int vital) {

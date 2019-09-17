@@ -57,14 +57,15 @@ namespace PixelComrades {
                 if (node.Targets.WatchTargets.Count == 0) {
                     _tempEnemyList.Clear();
                     World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, node.Faction.Faction);
-                    var nodePos = node.Entity.Tr.position.WorldToGenericGrid(HearingSectorSize);
+                    var nodePos = node.Tr.position.WorldToGenericGrid(HearingSectorSize);
                     for (int f = 0; f < _tempEnemyList.Count; f++) {
                         var enemy = _tempEnemyList[f];
-                        if (enemy.Tr == null) {
+                        var tr = enemy.Get<TransformComponent>()?.Value;
+                        if (tr == null) {
                             Debug.Log("Enemy has no TR " + enemy.DebugId);
                             continue;
                         }
-                        if (enemy.Tr.position.WorldToGenericGrid(HearingSectorSize) == nodePos) {
+                        if (tr.position.WorldToGenericGrid(HearingSectorSize) == nodePos) {
                             var hearingChance = HearingChance;
                             if (enemy.Tags.Contain(EntityTags.PerformingCommand)) {
                                 hearingChance *= 4;
@@ -73,7 +74,7 @@ namespace PixelComrades {
                                 hearingChance *= 2;
                             }
                             if (Game.Random.DiceRollSucess(hearingChance)) {
-                                if (!UnityEngine.Physics.Linecast(enemy.Tr.position, node.Entity.Tr.position, LayerMasks.Walls)) {
+                                if (!UnityEngine.Physics.Linecast(tr.position, node.Tr.position, LayerMasks.Walls)) {
                                     node.Targets.AddWatch(enemy, false);
                                     DebugText.Log(node.Entity.DebugId + " spotted " + enemy.DebugId);
                                 }
@@ -91,11 +92,11 @@ namespace PixelComrades {
             var ls = World.Get<LineOfSightSystem>();
             for (int n = 0; n < _sensorNodes.Count; n++) {
                 var node = _sensorNodes[n];
-                var sensor = node.Sensor.Value;
+                var sensor = node.Sensor;
                 sensor.DetectedCells.Clear();
-                var start = node.Position.Value.Position;
+                var start = node.Position.Position;
                 sensor.LastDetectedCenter = start;
-                var fwd = node.Entity.Tr.ForwardDirection2D();
+                var fwd = node.Tr.ForwardDirection2D();
                 for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                     var dir = (Directions) i;
                     var maxRowDistance = dir == fwd ? sensor.MaxVisionDistance : sensor.MaxHearDistance;
@@ -108,7 +109,7 @@ namespace PixelComrades {
                     if (visible.Entity == node.Entity) {
                         continue;
                     }
-                    if (!sensor.DetectedCells.Contains(visible.Position.Value)) {
+                    if (!sensor.DetectedCells.Contains(visible.Position)) {
                         continue;
                     }
                     var isVision = true;

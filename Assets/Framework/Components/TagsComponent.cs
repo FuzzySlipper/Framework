@@ -4,19 +4,21 @@ using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace PixelComrades {
-    public sealed class TagsComponent {
+    public sealed class TagsComponent : IDisposable {
 
         private Entity _entity;
 
         private int[] _tags = new int[EntityTags.MaxTagsLimit];
         public int[] Tags { get => _tags; }
 
-        private TagsComponent(Entity entity) {
+        public TagsComponent() {}
+
+        public void SetEntity(Entity entity) {
             _entity = entity;
         }
 
-        public static TagsComponent New(Entity entity) {
-            return new TagsComponent(entity);
+        public void ClearEntity() {
+            _entity = null;
         }
 //
 //        public TagsComponent(SerializationInfo info, StreamingContext context) {
@@ -38,7 +40,6 @@ namespace PixelComrades {
 //        }
 
         public void Dispose() {
-            _tags = null;
             _entity = null;
         }
 

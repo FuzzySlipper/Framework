@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditorInternal;
 
 namespace PixelComrades {
-    public class ProjectileSystem : SystemBase, IEntityPool {
+    public class ProjectileSystem : SystemBase, IEntityFactory {
         
         private static GameOptions.CachedFloat _defaultTimeout = new GameOptions.CachedFloat("ProjectileTimeout");
         private static GameOptions.CachedFloat _defaultSpeed = new GameOptions.CachedFloat("ProjectileSpeed");
@@ -25,7 +25,7 @@ namespace PixelComrades {
             return _poolDict.TryGetValue(typeID, out var stack) ? stack : null;
         }
 
-        public void Store(Entity entity) {
+        public bool TryStore(Entity entity) {
             UnityToEntityBridge.Unregister(entity);
             entity.Get<ModelComponent>().Clear();
             entity.Remove(typeof(SpriteAnimationComponent));
@@ -35,18 +35,35 @@ namespace PixelComrades {
                 if (!stack.IsFull) {
                     entity.Pooled = true;
                     entity.ClearParent();
-                    entity.Stats.ClearMods();
+                    entity.Get<StatsContainer>().ClearMods();
                     stack.Add(entity);
-                    return;
+                    return true;
                 }
             }
-            entity.Destroy();
+            //entity.Destroy();
+            return false;
         }
 
         public Entity SpawnProjectile(Entity owner, string id, ActionEvent msg, List<IActionImpact> impacts) {
             var animData = owner.Find<AnimatorData>();
-            var spawnPos = animData?.Animator?.GetEventPosition ?? (owner.Tr != null ? owner.Tr.position : Vector3.zero);
-            var spawnRot = animData?.Animator?.GetEventRotation ?? (owner.Tr != null ? owner.Tr.rotation : Quaternion.identity);
+            Vector3 spawnPos = Vector3.zero;
+            Quaternion spawnRot = Quaternion.identity;
+            if (animData?.Animator != null) {
+                spawnPos = animData.Animator.GetEventPosition;
+                spawnRot = animData.Animator.GetEventRotation;
+            }
+            else {
+                var tr = owner.Get<TransformComponent>()?.Value;
+                if (tr != null) {
+                    spawnPos = tr.position;
+                    spawnRot = tr.rotation;
+                }
+                else if (msg.SpawnPivot != null) {
+                    spawnPos = msg.SpawnPivot.position;
+                    spawnRot = msg.SpawnPivot.rotation;
+                }
+            }
+            
             return SpawnProjectile(owner, id, msg.Target, spawnPos, spawnRot, impacts);
         }
 
@@ -72,7 +89,7 @@ namespace PixelComrades {
                 return entity;
             }
             var spawn = prefab.GetComponent<IProjectile>();
-            entity.Tr = spawn.Tr;
+            entity.Add(new TransformComponent(spawn.Tr));
             switch (template.Type) {
                 default:
                 case "Simple":
@@ -92,7 +109,7 @@ namespace PixelComrades {
             switch (template.Movement) {
                 case "Forward":
                 case "Arc":
-                    entity.Tr.LookAt(target, entity.Tr.up);
+                    spawn.Tr.LookAt(target, spawn.Tr.up);
                     break;
                 case "Force":
                     //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
@@ -165,7 +182,7 @@ namespace PixelComrades {
 
         private Entity GetDefaultEntity(string name) {
             var entity = Entity.New(name);
-            entity.PoolOwner = this;
+            entity.Factory = this;
             //if it has a label component it'll get picked up by center target
             //entity.Add(new LabelComponent(name));
             entity.Add(new ModelComponent(null));
@@ -176,6 +193,7 @@ namespace PixelComrades {
             entity.Add(new RigidbodyComponent(null));
             entity.Add(new MoveTarget());
             entity.Add(new ActionImpacts(null));
+            entity.Add(new StatsContainer());
             return entity;
         }
 

@@ -52,8 +52,8 @@ namespace PixelComrades {
 
         public void NewGame() {
             _entity = Entity.New("Ship");
-            _entity.Tr = transform;
             Tr = transform;
+            _entity.Add(new TransformComponent(Tr));
             _rb = GetComponent<Rigidbody>();
             _flightControl = _entity.Add(new FlightControl(_controlConfig));
             _flightEngine = _entity.Add(new FlightEngine(_engineConfig));
@@ -63,7 +63,8 @@ namespace PixelComrades {
             _entity.Add(new RigidbodyComponent(_rb));
             _entity.Add(new PlayerInputComponent(PlayerInput.main));
             var dmgStat = new BaseStat(_entity, _damage, "Damage", 9999);
-            _entity.Stats.Add(dmgStat);
+            var stats = _entity.Add(new StatsContainer());
+            stats.Add(dmgStat);
             _entity.Add(
                 new SimpleProjectileSpawner(
                     _firePivot, "SpaceLaser", _shootCooldown, new List<IActionImpact>() {

@@ -6,13 +6,19 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class VisibleNode : BaseNode {
 
-        public CachedComponent<ModelComponent> Model = new CachedComponent<ModelComponent>();
-        public CachedComponent<LabelComponent> Label = new CachedComponent<LabelComponent>();
-        public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
-        public CachedComponent<ColliderComponent> Collider = new CachedComponent<ColliderComponent>();
-
+        private CachedComponent<ModelComponent> _model = new CachedComponent<ModelComponent>();
+        private CachedComponent<LabelComponent> _label = new CachedComponent<LabelComponent>();
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        
+        public Transform Tr { get => _tr.Value; }
+        public ModelComponent Model { get => _model; }
+        public LabelComponent Label { get => _label; }
+        public RigidbodyComponent Rb { get => _rb; }
+        public ColliderComponent Collider { get => _collider; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            Label, Model, Rb, Collider,
+            _label, _model, _tr, _rb,  _collider
         };
 
         public static System.Type[] GetTypes() {
@@ -24,19 +30,18 @@ namespace PixelComrades {
         }
 
         public void Setup(GameObject obj) {
-            Model.Value.Set(obj.GetComponent<ModelWrapper>());
-            Entity.Tr = obj.transform;
+            Model.Set(obj.GetComponent<ModelWrapper>());
         }
 
         public Vector3 position {
             get {
-                if (Entity.Tr != null) {
-                    return Entity.Tr.position + Collider.Value?.LocalCenter ?? new Vector3(0,1,0);
+                if (Tr != null) {
+                    return Tr.position + Collider?.LocalCenter ?? new Vector3(0,1,0);
                 }
                 return Vector3.zero;
             }
         }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? Quaternion.identity; } }
+        public Quaternion rotation { get { return  Tr != null ? Tr.rotation : Quaternion.identity; } }
 
     }
 }

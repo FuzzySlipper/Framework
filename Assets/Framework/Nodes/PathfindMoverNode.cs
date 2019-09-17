@@ -12,17 +12,18 @@ namespace PixelComrades {
         public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
-        
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         public SimplePathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
-
+        public Transform Tr { get => _tr.Value; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging
+            _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging, _tr
         };
         
         public static System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(SimplePathfindingAgent), 
                 typeof(MoveTarget),
+                typeof(TransformComponent)
             };
         }
 
@@ -35,14 +36,15 @@ namespace PixelComrades {
 #endif
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
-
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        public Transform Tr { get => _tr.Value; }
         public AstarPathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Point3 DestinationP3 { get { return Pathfinder.DestinationP3; } }
         public PathfindingStatus CurrentStatus { get { return Pathfinder.CurrentStatus; } }
         public bool IsPathFinished { get { return Pathfinder.Controller.ReachedEndOfPath; } }
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            Target, Debugging,
+            Target, Debugging, _tr,
 #if AStarPathfinding
             _pathfinder,
 #endif
@@ -54,6 +56,7 @@ namespace PixelComrades {
                 typeof(AstarPathfindingAgent),
 #endif
                 typeof(MoveTarget),
+                typeof(TransformComponent)
             };
         }
 

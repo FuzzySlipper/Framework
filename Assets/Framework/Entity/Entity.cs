@@ -7,16 +7,15 @@ namespace PixelComrades {
     public class Entity : IEquatable<Entity> {
 
         private static EntityPool _pool = new EntityPool(100);
+        private GenericPool<TagsComponent> _tagPool = new GenericPool<TagsComponent>(50, t => t.ClearEntity());
         private static List<Entity> _toDeleteList = new List<Entity>(25);
         private static TypeComparer _typeComparer = new TypeComparer();
         
         public int Id { get; private set;}
         public int ParentId = -1;
         public bool Pooled = false;
-        public IEntityPool PoolOwner;
+        public IEntityFactory Factory;
         public string Name;
-//        public Transform Tr { get; set; }
-//        public StatsContainer Stats { get; set; }
 
         private SortedList<System.Type, ComponentReference> _components = new SortedList<Type, ComponentReference>(_typeComparer);
         private TagsComponent _tags; 
@@ -26,7 +25,8 @@ namespace PixelComrades {
         public TagsComponent Tags {
             get {
                 if (_tags == null) {
-                    _tags = TagsComponent.New(this);
+                    _tags = _tagPool.New();
+                    _tags.SetEntity(this);
                 }
                 return _tags;
             }
@@ -43,11 +43,11 @@ namespace PixelComrades {
 
         public static void ProcessPendingDeletes() {
             for (int i = 0; i < _toDeleteList.Count; i++) {
-                if (_toDeleteList[i].PoolOwner != null) {
+                if (_toDeleteList[i].Factory != null) {
                     _toDeleteList[i].Post(new EntityDestroyed(_toDeleteList[i]));
-                    _toDeleteList[i].PoolOwner.Store(_toDeleteList[i]);
+                    _toDeleteList[i].Factory.TryStore(_toDeleteList[i]);
 #if DEBUG
-                    DebugLog.Add("Pooled " + _toDeleteList[i].Name + " to " + _toDeleteList[i].PoolOwner.GetType().Name);
+                    DebugLog.Add("Pooled " + _toDeleteList[i].Name + " to " + _toDeleteList[i].Factory.GetType().Name);
 #endif
                     continue;
                 }
@@ -77,9 +77,7 @@ namespace PixelComrades {
             return entity;
         }
 
-        protected Entity() {
-            Stats = new StatsContainer(this);
-        }
+        protected Entity() {}
 
         public bool IsDestroyed() {
             return Id < 0 || Pooled;
@@ -102,9 +100,10 @@ namespace PixelComrades {
             Id = -1;
             Name = "Destroyed";
             ClearParent();
-//            Tr = null;
-            _tags.Clear();
-//            Stats.Clear();
+            if (_tags != null) {
+                _tagPool.Store(_tags);
+                _tags = null;
+            }
         }
 
         public void ClearParent() {

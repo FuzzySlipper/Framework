@@ -20,6 +20,7 @@ namespace PixelComrades {
         private UnscaledTimer _statusTimer = new UnscaledTimer(0.25f);
         private float _minMainText = 3;
         private IntValueHolder _currentAmmo;
+        private TooltipComponent _tooltip;
         public InventoryItem InventoryItem { get; protected set; }
         
         public override void OnCreate(PrefabEntity entity) {
@@ -161,13 +162,13 @@ namespace PixelComrades {
                 _label.fontSizeMin = _minMainText;
             }
             Data = null;
-
+            _tooltip = null;
         }
 
         protected override void DisplayHoverData() {
             base.DisplayHoverData();
-            if (Data != null) {
-                Data.Get<TooltipComponent>()?.Tooltip();
+            if (Data != null && _tooltip != null) {
+                Data.Post(new TooltipDisplaying(_tooltip));
             }
         }
 
@@ -178,6 +179,7 @@ namespace PixelComrades {
                 return;
             }
             Data = item;
+            _tooltip = item.Get<TooltipComponent>();
             InventoryItem = Data.Get<InventoryItem>();
             SetSprite(item.Get<IconComponent>()?.Sprite);
             var action = item.Get<Action>();

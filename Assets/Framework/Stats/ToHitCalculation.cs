@@ -9,7 +9,7 @@ namespace PixelComrades {
         private const int GrazeMax = 50;
         private const int Critical = 100;
 
-        public static int Calculate(Entity origin, Entity target) {
+        public static int Calculate(CollidableNode origin, CollidableNode target) {
             if (origin == null || target == null || target == origin) {
                 return CollisionResult.Hit;
             }

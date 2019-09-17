@@ -103,7 +103,7 @@ namespace PixelComrades {
             }
             var owner = SlotOwner.GetEntity();
             item.ParentId = owner;
-            equip.Equip(this);
+            item.Post(new EquipItemEvent(equip, this));
             _equipment.Set(item);
             SetStats();
             containerItem.SetContainer(SlotOwner);
@@ -151,7 +151,7 @@ namespace PixelComrades {
                 ClearStats();
                 item.ClearParent(owner);
                 if (CurrentEquipment != null) {
-                    CurrentEquipment.UnEquip();                    
+                    item.Post(new UnEquipItemEvent(CurrentEquipment, this));
                 }
                 var container = item.Get<InventoryItem>();
                 if (container != null && container.Inventory == SlotOwner) {
@@ -171,19 +171,22 @@ namespace PixelComrades {
         }
     }
 
+    [System.Serializable]
     public abstract class StatModHolder {
         
         public abstract void Attach(BaseStat target);
         public abstract void Remove();
+        public abstract void Restore();
         public abstract string StatID { get;}
     }
 
+    [System.Serializable]
     public class BasicValueModHolder : StatModHolder {
-        private string _id;
-        private BaseStat _targetStat;
-        private float _amount;
+        [SerializeField] private string _id;
+        [SerializeField] private CachedStat<BaseStat> _targetStat;
+        [SerializeField] private float _amount;
 
-        public override string StatID { get { return _targetStat != null ? _targetStat.ID : ""; } }
+        public override string StatID { get { return _targetStat != null ? _targetStat.Stat.ID : ""; } }
 
         public BasicValueModHolder(float amount) {
             _amount = amount;
@@ -193,25 +196,30 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
-            _targetStat = target;
+            _targetStat = new CachedStat<BaseStat>(target);
             _id = target.AddValueMod(_amount);
         }
 
         public override void Remove() {
             if (_targetStat != null) {
-                _targetStat.RemoveMod(_id);
+                _targetStat.Stat.RemoveMod(_id);
             }
             _targetStat = null;
             _id = "";
         }
+
+        public override void Restore() {
+            Attach(_targetStat);
+        }
     }
 
+    [System.Serializable]
     public class BasicPercentModHolder : StatModHolder {
-        private string _id;
-        private BaseStat _targetStat;
-        private float _percent;
+        [SerializeField] private string _id;
+        [SerializeField] private CachedStat<BaseStat> _targetStat;
+        [SerializeField] private float _percent;
 
-        public override string StatID { get { return _targetStat != null ? _targetStat.ID : ""; } }
+        public override string StatID { get { return _targetStat != null ? _targetStat.Stat.ID : ""; } }
 
         public BasicPercentModHolder(float percent) {
             _percent = percent;
@@ -221,51 +229,62 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
-            _targetStat = target;
+            _targetStat = new CachedStat<BaseStat>(target);
             _id = target.AddPercentMod(_percent);
         }
 
         public override void Remove() {
             if (_targetStat != null) {
-                _targetStat.RemoveMod(_id);
+                _targetStat.Stat.RemoveMod(_id);
             }
             _targetStat = null;
             _id = "";
         }
+
+        public override void Restore() {
+            Attach(_targetStat);
+        }
     }
 
+    [System.Serializable]
     public class DerivedStatModHolder : StatModHolder {
 
-        private string _id;
-        private BaseStat _sourceStat;
-        private float _percent;
+        [SerializeField] private string _id;
+        [SerializeField] private CachedStat<BaseStat> _sourceStat;
+        [SerializeField] private CachedStat<BaseStat> _targetStat;
+        [SerializeField] private float _percent;
 
-        public override string StatID { get { return _sourceStat != null ? _sourceStat.ID : ""; } }
+        public override string StatID { get { return _sourceStat != null ? _sourceStat.Stat.ID : ""; } }
 
         public DerivedStatModHolder(BaseStat source, float percent) {
-            _sourceStat = source;
+            _sourceStat = new CachedStat<BaseStat>(source);
             _percent = percent;
         }
 
         public DerivedStatModHolder(BaseStat source, BaseStat target, float percent) {
-            _sourceStat = source;
+            _sourceStat = new CachedStat<BaseStat>(source);
+            _targetStat = new CachedStat<BaseStat>(target);
             _percent = percent;
-            Attach(target);
+            _id = _sourceStat.Stat.AddDerivedStat(_percent, target);
         }
 
         public override void Attach(BaseStat target) {
             if (target == null) {
                 return;
             }
-            _id = _sourceStat.AddDerivedStat(_percent, target);
+            _id = _sourceStat.Stat.AddDerivedStat(_percent, target);
         }
 
         public override void Remove() {
             if (_sourceStat == null) {
                 return;
             }
-            _sourceStat.RemoveDerivedStat(_id);
+            _sourceStat.Stat.RemoveDerivedStat(_id);
             _sourceStat = null;
+        }
+
+        public override void Restore() {
+            Attach(_targetStat);
         }
     }
 }

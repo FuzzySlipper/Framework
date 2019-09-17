@@ -14,9 +14,11 @@ namespace PixelComrades {
         private CachedComponent<FlightPlayerInput> _playerInput = new CachedComponent<FlightPlayerInput>();
         private CachedComponent<FlightMoveInput> _moveInput = new CachedComponent<FlightMoveInput>();
         private CachedComponent<SimpleProjectileSpawner> _projectile = new CachedComponent<SimpleProjectileSpawner>();
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         public FlightEngine Engine => _flight.Value;
         public FakeFlightEngine FakeFlight => _fakeFlight.Value;
         public HoverEngine Hover => _hover.Value;
+        public Transform Tr => _tr.Value;
         public FlightControl Control => _control.Value;
         public CosmeticFlightBanking Banking => _banking.Value;
         public Rigidbody Rigidbody => _rigidBody.Value.Rb;
@@ -25,7 +27,7 @@ namespace PixelComrades {
         public SimpleProjectileSpawner Projectile => _projectile.Value;
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _flight, _control, _rigidBody, _fakeFlight, _hover, _banking, _playerInput, _moveInput, _projectile
+            _flight, _control, _rigidBody, _fakeFlight, _hover, _banking, _playerInput, _moveInput, _projectile, _tr
         };
 
         public static System.Type[] GetTypes() {
@@ -80,8 +82,8 @@ namespace PixelComrades {
                 return true;
             }
             Chasing = false;
-            var position = World.Get<PathfindingSystem>().FindOpenPosition(Entity.Tr.position, WanderRadius);
-            if (position == Entity.Tr.position) {
+            var position = World.Get<PathfindingSystem>().FindOpenPosition(Tr.position, WanderRadius);
+            if (position == Tr.position) {
                 return false;
             }
             _wanderTimer.Restart();
@@ -94,7 +96,7 @@ namespace PixelComrades {
             Entity.Tags.Remove(EntityTags.Moving);
         }
 
-        public bool Chase(Entity target) {
+        public bool Chase(CharacterNode target) {
             //var gridPosition = target.Get<GridPosition>().Position;
             //if (gridPosition.IsNeighbor(Position.c.Position)) {
             //    return false;
@@ -106,7 +108,7 @@ namespace PixelComrades {
             Entity.Post(new SetMoveTarget(target.Tr, null));
             Entity.Post(new SetLookTarget(target, false));
 #if DEBUG
-            DebugLog.Add(Entity.DebugId + " chasing " + target.DebugId);
+            DebugLog.Add(Entity.DebugId + " chasing " + target.Entity.DebugId);
 #endif
             return true;
         }

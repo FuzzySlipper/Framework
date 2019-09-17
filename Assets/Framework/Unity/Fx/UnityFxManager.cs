@@ -311,9 +311,10 @@ namespace PixelComrades {
 
         private IEnumerator DissolveFx(Entity owner, CollisionEvent collisionEvent, SpriteRenderer sprite, float amt) {
             var power = Mathf.Clamp(amt, _minDamage, _maxDamage);
+            var tr = owner.Get<TransformComponent>()?.Value;
             sprite.GetPropertyBlock(_block);
             var hitPnt = collisionEvent.HitPoint;
-            var localPosition = owner.Tr != null ? owner.Tr.InverseTransformPoint(hitPnt) : hitPnt;
+            var localPosition = tr != null ? tr.InverseTransformPoint(hitPnt) : hitPnt;
             //DebugExtension.DebugWireSphere(hitPnt, power, 2.5f);
             _block.SetVector("_DissolveMaskPosition", hitPnt);
             _block.SetFloat("_DissolveMaskRadius", power);
@@ -354,7 +355,7 @@ namespace PixelComrades {
             }
             var timeOut = animator.CurrentAnimationLength * 2.5f;
             while (TimeManager.TimeUnscaled < start + timeOut) {
-                var worldPnt = owner.Tr != null ? owner.Tr.TransformPoint(localPosition) : hitPnt;
+                var worldPnt = tr != null ? tr.TransformPoint(localPosition) : hitPnt;
                 //DebugExtension.DebugWireSphere(worldPnt, power, 0.5f);
                 sprite.GetPropertyBlock(_block);
                 _block.SetVector("_DissolveMaskPosition", worldPnt);

@@ -56,9 +56,10 @@ namespace PixelComrades {
         }
 
         public void SetupPathfindEntity(Entity entity, bool isOversized) {
+            var tr = entity.Get<TransformComponent>().Value;
             if (_debugAgents) {
                 var spawned = ItemPool.Spawn(UnityDirs.System, "PathfindDebug", Vector3.zero, Quaternion.identity, false, false);
-                spawned.transform.SetParent(entity.Tr);
+                spawned.transform.SetParent(tr);
                 spawned.transform.localPosition = new Vector3(0, 2, 0);
                 spawned.transform.localRotation = Quaternion.Euler(90, 0 ,0);
                 entity.Add(new PathfindingDebugging(spawned.GetComponentInChildren<LineRenderer>(), spawned.GetComponentInChildren<TextMesh>()));
@@ -71,7 +72,7 @@ namespace PixelComrades {
                 simpleAgent.IsOversized = isOversized;
             }
             else {
-                entity.Add(new AstarPathfindingAgent(entity.Tr.GetComponent<AstarRvoController>()));
+                entity.Add(new AstarPathfindingAgent(tr.GetComponent<AstarRvoController>()));
             }
         }
 
@@ -149,8 +150,8 @@ namespace PixelComrades {
                 float progress = Mathf.Clamp01(pathfinder.MovementLerp / dst);
                 var pos = Vector3.Lerp(pathfinder.PreviousTarget, pathfinder.CurrentTarget, progress);
                 var dir = pathfinder.CurrentTarget - pathfinder.PreviousTarget;
-                var diff = (pos - node.Entity.Tr.position);
-                var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : pathfinder.GetEntity().Tr.rotation;
+                var diff = (pos - node.Tr.position);
+                var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : node.Tr.rotation;
                 //var rot = Quaternion.RotateTowards(pathfinder.Entity.Tr.rotation, nextRotation, _pathfinderRotationSpeed * dt);
                 Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
                 node.Entity.Post(new MoveInputMessage(diff.normalized, cameraPlanarDirection));
@@ -232,7 +233,7 @@ namespace PixelComrades {
                     continue;
                 }
                 nav.UpdateMovement();
-                var pos = node.Entity.Tr.position.toPoint3();
+                var pos = node.Tr.position.toPoint3();
                 if (pos != nav.Pathfinder.LastPosition) {
                     nav.Pathfinder.LastPosition = pos;
                     nav.Pathfinder.LastPositionTime = TimeManager.TimeUnscaled;
@@ -245,7 +246,7 @@ namespace PixelComrades {
                         }
                         else {
                             nav.ProcessNoMove();
-                            DebugExtension.DebugCircle(node.Entity.Tr.position, Color.red, 2f, 5f);
+                            DebugExtension.DebugCircle(node.Tr.position, Color.red, 2f, 5f);
                             node.Entity.Post(new SetMoveTarget(null, nav.GetWanderPoint()));
                         }
                     }

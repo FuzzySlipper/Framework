@@ -55,11 +55,12 @@ namespace PixelComrades {
                 if (equipment != null && addToEquip) {
                     equipment.AddStat(statName);
                 }
-                var stat = entity.Stats.Get(statName);
+                var stats = entity.Get<StatsContainer>();
+                var stat = stats.Get(statName);
                 if (stat == null) {
                     var baseValue = GameData.Enums.GetFakeEnum(statName).GetAssociatedValue(statName);
                     stat = new BaseStat(entity, statName, statName, baseValue * bonus);
-                    entity.Stats.Add(stat);
+                    stats.Add(stat);
                 }
                 else {
                     stat.AddToBase(stat.BaseValue * bonus);

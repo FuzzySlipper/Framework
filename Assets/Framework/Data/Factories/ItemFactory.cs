@@ -204,8 +204,9 @@ namespace PixelComrades {
             }
             entity.Add(new LabelComponent(sbName.ToString()));
             entity.Add(new DescriptionComponent(sbDescr.ToString()));
+            entity.Add(new TooltipComponent());
             var dataDescr = entity.Add(new DataDescriptionComponent());
-            entity.Post(new DataDescriptionAdded(dataDescr));
+            entity.Post(new DataDescriptionUpdating(dataDescr));
             return entity;
         }
 

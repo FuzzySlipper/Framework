@@ -5,12 +5,12 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public struct DamageEvent : IEntityMessage {
         public float Amount;
-        public Entity Origin { get; }
-        public Entity Target { get; }
+        public CharacterNode Origin { get; }
+        public CharacterNode Target { get; }
         public string DamageType { get; }
         public string TargetVital { get; }
 
-        public DamageEvent(float amount, Entity origin, Entity target, string damageType, string targetVital) {
+        public DamageEvent(float amount, CharacterNode origin, CharacterNode target, string damageType, string targetVital) {
             Amount = amount;
             Origin = origin;
             Target = target;

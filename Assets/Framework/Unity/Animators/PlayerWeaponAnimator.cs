@@ -150,7 +150,7 @@ namespace PixelComrades {
             if (!string.IsNullOrEmpty(usable.WeaponModel)) {
                 var weaponModel = ItemPool.Spawn(UnityDirs.Weapons, usable.WeaponModel, Vector3.zero, Quaternion.identity, false, false);
                 if (weaponModel != null) {
-                    usable.Entity.Tr = weaponModel.transform;
+                    usable.Entity.Add(new TransformComponent(weaponModel.transform));
                     SetWeaponModel(weaponModel.GetComponent<IWeaponModel>());
                 }
             }
@@ -158,8 +158,11 @@ namespace PixelComrades {
         }
 
         protected virtual void ClearWeaponModel() {
-            if (_primary != null && WeaponModel != null && _primary.Entity.Tr == WeaponModel.Tr) {
-                _primary.Entity.Tr = null;
+            if (_primary != null && WeaponModel != null) {
+                var primaryTr = _primary.Entity.Get<TransformComponent>()?.Value;
+                if (primaryTr == WeaponModel.Tr) {
+                    _primary.Entity.Remove<TransformComponent>();
+                }
             }
             if (_weaponModel != null) {
                 ItemPool.Despawn(_weaponModel.Tr.gameObject);

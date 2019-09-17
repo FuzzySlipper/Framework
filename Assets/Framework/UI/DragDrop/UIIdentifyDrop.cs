@@ -34,7 +34,7 @@ namespace PixelComrades {
             var price = GameOptions.IdentifyEstimate(UIDragDropHandler.CurrentData);
             UIFloatingText.Spawn(string.Format("Identified for {0} {1}", price, GameText.DefaultCurrencyLabel), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
             Player.DefaultCurrencyHolder.AddToValue(-price);
-            UIDragDropHandler.CurrentData.Get<InventoryItem>(i => i.Identified = true);
+            UIDragDropHandler.CurrentData.Get<InventoryItem>().Identified = true;
             UIDragDropHandler.Return();
         }
     }

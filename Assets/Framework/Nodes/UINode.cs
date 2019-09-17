@@ -4,17 +4,24 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class UINode : INode {
-        public Entity Entity;
-        public CachedComponent<ModelComponent> Model = new CachedComponent<ModelComponent>();
-        public CachedComponent<LabelComponent> Label = new CachedComponent<LabelComponent>();
-        public CachedComponent<DescriptionComponent> Description = new CachedComponent<DescriptionComponent>();
-        public CachedComponent<DataDescriptionComponent> DataDescription = new CachedComponent<DataDescriptionComponent>();
-        public CachedComponent<IconComponent> Icon = new CachedComponent<IconComponent>();
+    public class UINode : BaseNode {
+        
+        private CachedComponent<ModelComponent> _model = new CachedComponent<ModelComponent>();
+        private CachedComponent<LabelComponent> _label = new CachedComponent<LabelComponent>();
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<DescriptionComponent> _description = new CachedComponent<DescriptionComponent>();
+        private CachedComponent<DataDescriptionComponent> _dataDescription = new CachedComponent<DataDescriptionComponent>();
+        private CachedComponent<IconComponent> _icon = new CachedComponent<IconComponent>();
 
-//        private CachedComponent<RotationComponent> _rotation = new CachedComponent<RotationComponent>();
-//        private CachedComponent<PositionComponent> _position = new CachedComponent<PositionComponent>();
-
+        public Transform Tr { get => _tr.Value; }
+        public LabelComponent Label => _label.Value;
+        public DescriptionComponent Description { get => _description; }
+        public IconComponent Icon { get => _icon; }
+        public ModelComponent Model { get => _model; }
+        public DataDescriptionComponent DataDescription { get => _dataDescription; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _label, _model, _tr, _description, _dataDescription, _icon
+        };
 
         public UINode(Entity entity, SortedList<System.Type, ComponentReference> list) {
             Register(entity, list);
@@ -23,37 +30,18 @@ namespace PixelComrades {
         public UINode() {
         }
 
-        public void Register(Entity entity, SortedList<Type, ComponentReference> list) {
-            Entity = entity;
-            Model.Set(entity, list);
-            Label.Set(entity, list);
-            Description.Set(entity, list);
-            DataDescription.Set(entity, list);
-            Icon.Set(entity, list);
-//            _position.Set(entity, list);
-//            _rotation.Set(entity, list);
-        }
-
         public void Setup(GameObject obj) {
-            Model.Value.Set(obj.GetComponent<ModelWrapper>());
-            Entity.Tr = obj.transform;
+            _model.Value.Set(obj.GetComponent<ModelWrapper>());
+            
         }
 
         public void Clear() {
-            Model.Value.Clear();
-            Entity.Tr = null;
+            _model.Value.Clear();
+            _tr.Value.Set(null);
         }
 
-        public Vector3 position { get { return Entity.Tr?.position ?? Vector3.zero; } }
-        public Quaternion rotation { get { return Entity.Tr?.rotation ?? Quaternion.identity; } }
-
-        public void Dispose() {
-            Model.Dispose();
-            Label.Dispose();
-            Icon.Dispose();
-            Description.Dispose();
-            DataDescription.Dispose();
-        }
+        public Vector3 position { get { return Tr != null ? Tr.position : Vector3.zero; } }
+        public Quaternion rotation { get { return Tr != null ? Tr.rotation : Quaternion.identity; } }
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {

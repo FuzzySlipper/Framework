@@ -11,41 +11,37 @@ namespace PixelComrades {
         private static RaycastHit[] _rayHits = new RaycastHit[25];
         private static Collider[] _colliders = new Collider[25];
 
-        private ManagedArray<CollisionCheckForward> _list;
-        private ManagedArray<CollisionCheckForward>.Delegate _del;
+        private List<CollisionCheckForwardNode> _list;
+        
 
         public CollisionCheckSystem() {
-            _del = CheckRayFwd;
+            NodeFilter<CollisionCheckForwardNode>.New(CollisionCheckForwardNode.GetTypes());
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             if (_list == null) {
-                _list = EntityController.GetComponentArray<CollisionCheckForward>();
+                _list = EntityController.GetNodeList<CollisionCheckForwardNode>();
             }
-            if (_list != null) {
-                _list.Run(_del);
-            }
-        }
-
-        private void CheckRayFwd(CollisionCheckForward c) {
-            var entity = c.GetEntity();
-            if (entity == null) {
+            if (_list == null) {
                 return;
             }
-            if (!entity.Tr) {
-                c.LastPos = null;
-                return;
+            for (int i = 0; i < _list.Count; i++) {
+                var node = _list[i];
+                if (!node.Tr) {
+                    node.Forward.LastPos = null;
+                    return;
+                }
+                var tr = node.Tr;
+                if (Raycast(node.Entity, new Ray(tr.position, tr.forward), node.Forward.RayDistance, false) != null) {
+                    node.Forward.LastPos = tr.position;
+                    return;
+                }
+                if (node.Forward.LastPos != null) {
+                    var backwardDir = (tr.position - node.Forward.LastPos.Value);
+                    Raycast(node.Entity, new Ray(node.Forward.LastPos.Value, backwardDir.normalized), backwardDir.magnitude, false);
+                }
+                node.Forward.LastPos = tr.position;
             }
-            var tr = entity.Tr;
-            if (Raycast(entity, new Ray(tr.position, tr.forward), c.RayDistance, false) != null) {
-                c.LastPos = tr.position;
-                return;
-            }
-            if (c.LastPos != null) {
-                var backwardDir = (tr.position - c.LastPos.Value);
-                Raycast(entity, new Ray(c.LastPos.Value, backwardDir.normalized), backwardDir.magnitude, false);
-            }
-            c.LastPos = tr.position;
         }
 
         public static CollisionEvent? Raycast(Entity entity, Ray ray, float distance, bool limitCollision, List<IActionImpact> impacts = null) {
@@ -215,6 +211,27 @@ namespace PixelComrades {
             Radius = radius;
             Distance = distance;
             Owner = owner;
+        }
+    }
+
+    public class CollisionCheckForwardNode : BaseNode {
+
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
+        private CachedComponent<CollisionCheckForward> _forward = new CachedComponent<CollisionCheckForward>();
+
+        public Transform Tr { get => _tr.Value; }
+        public Collider Collider { get => _collider.Value.Collider; }
+        public CollisionCheckForward Forward => _forward.Value;
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _collider, _forward
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(TransformComponent),
+                typeof(CollisionCheckForward),
+            };
         }
     }
 }

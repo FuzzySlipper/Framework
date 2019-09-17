@@ -28,7 +28,7 @@ namespace PixelComrades {
             }
             var amt = stateEvent.Origin.Stats.GetValue(Stats.Power) * _damagePercent * CollisionExtensions.GetHitMultiplier(collisionEvent.Hit,
                           stateEvent.Origin);
-            collisionEvent.Target.Post(new DamageEvent(amt, collisionEvent.Origin, collisionEvent.Target, _damageType, _targetVital));
+            collisionEvent.Target.Post(new DamageEvent(amt, stateEvent.Origin, stateEvent.Target, _damageType, _targetVital));
             collisionEvent.Origin.Post(new HealEvent(amt, collisionEvent.Target, collisionEvent.Origin, _targetVital));
         }
 

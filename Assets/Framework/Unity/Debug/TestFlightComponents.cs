@@ -53,7 +53,7 @@ namespace PixelComrades {
 
         private void CreateEntity() {
             _entity = Entity.New("TestFlight");
-            _entity.Tr = transform;
+            _entity.Add(new TransformComponent(transform));
             _flightControl = _entity.Add(new FlightControl(_controlConfig));
             _flightEngine = _entity.Add(new FlightEngine(_engineConfig));
             _entity.Add(new FakeFlightEngine(_fakeFlightConfig));
@@ -61,7 +61,8 @@ namespace PixelComrades {
             _entity.Add(new RigidbodyComponent(GetComponent<Rigidbody>()));
             _entity.Add(new PlayerInputComponent(PlayerInput.main));
             var dmgStat = new BaseStat(_entity,_damage, "Damage", 9999);
-            _entity.Stats.Add(dmgStat);
+            var stats = _entity.Add(new StatsContainer());
+            stats.Add(dmgStat);
             _entity.Add(
                 new SimpleProjectileSpawner(
                     _bankTransform, "SpaceLaser", _shootCooldown, new List<IActionImpact>() {

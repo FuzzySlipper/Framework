@@ -21,8 +21,6 @@ namespace PixelComrades {
             Running
         }
 
-        private bool _overrideEntityTr = false;
-
         public IAnimator Animator { get { return _animator?.Value.Animator; } }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _animator, _stats, _tr
@@ -37,18 +35,10 @@ namespace PixelComrades {
         public void Start(ActionEvent actionEvent) {
             ActionEvent = actionEvent;
             ActionEvent.Current.Start(this);
-            if (actionEvent.Owner.Tr == null && actionEvent.SpawnPivot != null) {
-                _overrideEntityTr = true;
-                actionEvent.ActionEntity.Tr = actionEvent.SpawnPivot;
-            }
         }
 
         public void Stop() {
             CurrentState = State.Disabled;
-            if (_overrideEntityTr) {
-                _overrideEntityTr = false;
-                ActionEvent.ActionEntity.Tr = null;
-            }
         }
 
         public void AdvanceEvent() {

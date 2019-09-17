@@ -22,7 +22,8 @@ namespace PixelComrades {
             List<IActionImpact> impacts = new List<IActionImpact>();
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
             (DatabaseFields.PowerMax, 1f));
-            entity.Stats.Add(power);
+            var stats = entity.Get<StatsContainer>();
+            stats.Add(power);
             var animation = data.TryGetValue("Animation", "");
             bool generateCollision = false;
             var targeting = ParseUtilities.TryParseEnum(data.TryGetValue("TargetType", "Enemy"), TargetType.Enemy);

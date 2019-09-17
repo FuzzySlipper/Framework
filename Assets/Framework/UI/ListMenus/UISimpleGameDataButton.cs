@@ -23,8 +23,7 @@ namespace PixelComrades {
         [SerializeField] protected bool PlayAudio = true;
         [SerializeField] private bool _displayHoverData = true;
         [SerializeField] private bool _postStatusUpdates = true;
-
-        public bool PostStatusUpdates { get { return _postStatusUpdates; } }
+        
         private UnscaledTimer _statusTimer = new UnscaledTimer(0.25f);
         private RectTransform _rectTransform;
         private TooltipComponent _tooltip;
@@ -42,6 +41,7 @@ namespace PixelComrades {
         }
         public int Index { get { return _listIndex; } set { _listIndex = value; } }
         public Entity Data { get; protected set; }
+        public bool PostStatusUpdates { get { return _postStatusUpdates; } }
         public TextMeshProUGUI Amount { get { return _amount; } }
         public TextMeshProUGUI Label { get { return _label; } }
         public RectTransform RectTransform {
@@ -121,7 +121,7 @@ namespace PixelComrades {
         public virtual void DisplayData() {
             Game.DisplayData(_backgroundImage, Data);
             if (_tooltip != null) {
-                _tooltip.Tooltip();
+                Data.Post(new TooltipDisplaying(_tooltip));
             }
         }
 

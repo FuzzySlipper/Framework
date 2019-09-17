@@ -117,7 +117,7 @@ namespace PixelComrades {
         }
 
         private void ProcessEntityRemoval(Entity entity) {
-            entity.Get<InventoryItem>(e => e.SetContainer(null));
+            entity.Get<InventoryItem>()?.SetContainer(null);
             entity.ParentId = -1;
             var msg = new ContainerStatusChanged(null, entity);
             entity.Post(msg);

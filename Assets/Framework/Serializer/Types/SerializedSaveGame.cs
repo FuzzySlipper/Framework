@@ -120,6 +120,7 @@ namespace PixelComrades {
             //LevelController.Clear();
             //LoadList(LevelController.Root.gameObject, _level);
             //LoadList(ItemPool.ActiveSceneTr.gameObject, _activePooled);
+            World.Enqueue(new SaveGameLoaded());
         }
 
         private void LoadList(GameObject root, List<SerializedGameObject> list) {

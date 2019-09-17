@@ -49,11 +49,11 @@ namespace PixelComrades {
             DebugConsole.RegisterCommand("saveEntity", SaveEntity);
             DebugConsole.RegisterCommand("heal", strings => {
                 Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Health"));
-                return Player.Party[0].Entity.Stats.GetVital("Vitals.Health").ToLabelString();
+                return Player.Party[0].Stats.GetVital("Vitals.Health").ToLabelString();
             });
             DebugConsole.RegisterCommand("recover", strings => {
                 Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Energy"));
-                return Player.Party[0].Entity.Stats.GetVital("Vitals.Energy").ToLabelString();
+                return Player.Party[0].Stats.GetVital("Vitals.Energy").ToLabelString();
             });
             DebugConsole.RegisterCommand("godmode", strings => {
                 if (Player.Party[0].Entity.HasComponent<GodModeComponent>()){
@@ -176,7 +176,7 @@ namespace PixelComrades {
             var rb = entity.Get<RigidbodyComponent>().Rb;
             if (rb != null) {
                 UIGenericValueWatcher.Get(UIAnchor.TopLeft, 0.25f, () => string.Format("Velocity: {0:F1} / {1:F1}",  
-                    rb.velocity.magnitude, entity.Stats.GetValue("Attributes.Speed")));
+                    rb.velocity.magnitude, entity.Get<StatsContainer>().GetValue("Attributes.Speed")));
             }
         }
 

@@ -6,38 +6,26 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [System.Serializable]
 	public sealed class DataDescriptionComponent : IComponent {
-        private string _text;
-        public string Text {
-            get {
-                if (OnDataDescription != null) {
-                    return OnDataDescription(this);
-                }
-                return _text;
-            }
-            set { _text = value; }
-        }
-
-        public System.Func<IComponent, string> OnDataDescription;
-
+        public string Text;
         public DataDescriptionComponent(string text){
-            _text = text;
+            Text = text;
         }
         public DataDescriptionComponent(){}
 
         public DataDescriptionComponent(SerializationInfo info, StreamingContext context) {
-            _text = info.GetValue(nameof(_text), _text);
+            Text = info.GetValue(nameof(Text), Text);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_text), _text);
+            info.AddValue(nameof(Text), Text);
         }
 
     }
 
-    public struct DataDescriptionAdded : IEntityMessage {
+    public struct DataDescriptionUpdating : IEntityMessage {
         public DataDescriptionComponent Data;
 
-        public DataDescriptionAdded(DataDescriptionComponent data) {
+        public DataDescriptionUpdating(DataDescriptionComponent data) {
             Data = data;
         }
     }

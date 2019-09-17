@@ -13,6 +13,10 @@ namespace PixelComrades {
         public TransformComponent(Transform tr) {
             _cachedTransform = new CachedTransform(tr);
         }
+
+        public void Set(Transform tr) {
+            _cachedTransform.Set(tr);
+        }
         
         public TransformComponent(SerializationInfo info, StreamingContext context) {
             _cachedTransform = info.GetValue(nameof(_cachedTransform), _cachedTransform);

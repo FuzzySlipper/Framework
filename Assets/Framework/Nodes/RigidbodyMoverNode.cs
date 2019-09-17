@@ -4,44 +4,31 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class RigidbodyMoverNode : INode {
-        public Entity Entity { get; private set; }
-
-        public CachedComponent<RigidbodyComponent> Rb = new CachedComponent<RigidbodyComponent>();
-        public CachedComponent<MoveSpeed> MoveSpeed = new CachedComponent<MoveSpeed>();
-        public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
-        public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
-        public CachedComponent<VelocityMover> Mover = new CachedComponent<VelocityMover>();
-
-        public RigidbodyMoverNode(Entity entity, SortedList<System.Type, ComponentReference> list) {
-            Register(entity, list);
-        }
-
-        public RigidbodyMoverNode(){}
-
-        public void Register(Entity entity, SortedList<Type, ComponentReference> list) {
-            Entity = entity;
-            Rb.Set(entity, list);
-            MoveSpeed.Set(entity, list);
-            RotationSpeed.Set(entity, list);
-            Target.Set(entity, list);
-            Mover.Set(entity, list);
-        }
-
-        public void Dispose() {
-            Rb.Dispose();
-            MoveSpeed.Dispose();
-            RotationSpeed.Dispose();
-            Target.Dispose();
-            Mover.Dispose();
-        }
+    public class RigidbodyMoverNode : BaseNode {
+        
+        private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<VelocityMover> _velocityMover = new CachedComponent<VelocityMover>();
+        private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+        private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
+        private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
+        private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
+        public Transform Tr { get => _tr.Value; }
+        public VelocityMover VelocityMover { get => _velocityMover; }
+        public Rigidbody Rb { get => _rb.Value.Rb; }
+        public MoveSpeed MoveSpeed { get => _moveSpeed; }
+        public RotationSpeed RotationSpeed { get => _rotationSpeed; }
+        public MoveTarget Target { get => _moveTarget; }
+        
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _tr, _velocityMover, _rb, _moveSpeed, _moveTarget, _rotationSpeed
+        };
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {
+                typeof(TransformComponent),
                 typeof(RigidbodyComponent),
-                typeof(MoveSpeed),
-                typeof(VelocityMover),
                 typeof(MoveTarget),
+                typeof(VelocityMover)
             };
         }
     }

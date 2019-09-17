@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionAdded>, IDisposable {
+	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionUpdating>, IDisposable {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -63,7 +63,7 @@ namespace PixelComrades {
             var descr = this.Get<DataDescriptionComponent>();
             if (descr != null) {
                 descr.Text = "";
-                this.GetEntity().Post(new DataDescriptionAdded(descr));
+                this.GetEntity().Post(new DataDescriptionUpdating(descr));
             }
             return true;
         }
@@ -72,7 +72,7 @@ namespace PixelComrades {
             return Price * Count;
         }
 
-        public void Handle(DataDescriptionAdded arg) {
+        public void Handle(DataDescriptionUpdating arg) {
             FastString.Instance.Clear();
             FastString.Instance.AppendBoldLabelNewLine("Price", TotalPrice());
             if (Count > 1) {

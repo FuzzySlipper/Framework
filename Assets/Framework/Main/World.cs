@@ -94,7 +94,7 @@ namespace PixelComrades {
             _systems.Add(type, system);
             _systemTypes.Add(type);
             CheckUpdates(system, true);
-            Add(system);
+            RegisterReceivers(system);
             return (T) system;
         }
 
@@ -106,7 +106,7 @@ namespace PixelComrades {
             _systems.Add(type, system);
             _systemTypes.Add(type);
             CheckUpdates(system, true);
-            Add(system);
+            RegisterReceivers(system);
         }
 
         public static T Get<T>() where T : SystemBase {
@@ -176,7 +176,7 @@ namespace PixelComrades {
         //}
 
         
-        public static void Add(object obj) {
+        public static void RegisterReceivers(object obj) {
             var receiver = obj as IReceive;
             if (receiver == null) {
                 return;

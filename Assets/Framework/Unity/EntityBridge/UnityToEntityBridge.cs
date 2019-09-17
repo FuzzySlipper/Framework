@@ -52,7 +52,7 @@ namespace PixelComrades {
         }
 
         public static void Unregister(Entity entity) {
-            var tr = entity.Tr;
+            var tr = entity.Get<TransformComponent>()?.Value;
             if (tr == null) {
                 return;
             }
@@ -71,7 +71,7 @@ namespace PixelComrades {
                 _colliderToDictionary.Remove(_tempColliders[i]);
             }
             ItemPool.Despawn(tr.gameObject);
-            entity.Tr = null;
+            entity.Remove<TransformComponent>();
         }
     }
 

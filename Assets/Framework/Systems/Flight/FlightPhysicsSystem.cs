@@ -36,7 +36,7 @@ namespace PixelComrades {
             node.UpdateControl();
             //Calculate the current speed by using the dot product. This tells us
             //how much of the ship's velocity is in the "forward" direction 
-            node.Control.Speed = Vector3.Dot(node.Rigidbody.velocity, node.Entity.Tr.forward);
+            node.Control.Speed = Vector3.Dot(node.Rigidbody.velocity, node.Tr.forward);
             switch (node.Control.CurrentMode) {
                 case FlightControl.Mode.Flying:
                     if (node.Engine != null) {
@@ -100,17 +100,17 @@ namespace PixelComrades {
                 return;
             }
             if (node.Control.Config.AltOrient) {
-                var angleOffTarget = Vector3.Angle(node.Entity.Tr.forward, node.Control.GotoPos - node.Entity.Tr.position);
+                var angleOffTarget = Vector3.Angle(node.Tr.forward, node.Control.GotoPos - node.Tr.position);
                 var aggressiveRoll = Mathf.Clamp(node.Control.GotoPos.x, -1f, 1f);
-                var wingsLevelRoll = node.Entity.Tr.right.y;
+                var wingsLevelRoll = node.Tr.right.y;
                 // Blend between auto level and banking into the target.
                 var wingsLevelInfluence = Mathf.InverseLerp(0f, node.Control.Config.HorizonOrientAngle, angleOffTarget);
                 node.Control.Roll = -Mathf.Lerp(wingsLevelRoll, aggressiveRoll, wingsLevelInfluence);
             }
             else {
-                var flatForward = node.Entity.Tr.forward;
+                var flatForward = node.Tr.forward;
                 var flatRight = Vector3.Cross(Vector3.up, flatForward);
-                var localFlatRight = node.Entity.Tr.InverseTransformDirection(flatRight);
+                var localFlatRight = node.Tr.InverseTransformDirection(flatRight);
                 var rollAngle = Mathf.Atan2(localFlatRight.y, localFlatRight.x);
                 node.Control.Roll = -rollAngle * node.Control.Config.AutoRollSpeed;
             }
@@ -135,7 +135,7 @@ namespace PixelComrades {
             //Calculate the amount of pitch and roll the ship needs to match its orientation
             //with that of the ground. This is done by creating a projection and then calculating
             //the rotation needed to face that projection
-            Vector3 projection = Vector3.ProjectOnPlane(node.Entity.Tr.forward, node.Hover.GroundNormal);
+            Vector3 projection = Vector3.ProjectOnPlane(node.Tr.forward, node.Hover.GroundNormal);
             Quaternion rotation = Quaternion.LookRotation(projection, node.Hover.GroundNormal);
             if (node.Control.CurrentMode == FlightControl.Mode.Flying) {
                 rotation.x = node.Rigidbody.rotation.x;
@@ -154,8 +154,8 @@ namespace PixelComrades {
             }
             node.Rigidbody.AddRelativeTorque(pitchTorque, yawTorque, 0f, ForceMode.VelocityChange);
             node.Rigidbody.AddRelativeForce(new Vector3(node.Control.StrafeHorizontal * node.Hover.Config.StrafeForce, jumpForce, 0), ForceMode.Force);
-            float sidewaysSpeed = Vector3.Dot(node.Rigidbody.velocity, node.Entity.Tr.right);
-            Vector3 sideFriction = -node.Entity.Tr.right * (sidewaysSpeed / Time.fixedDeltaTime);
+            float sidewaysSpeed = Vector3.Dot(node.Rigidbody.velocity, node.Tr.right);
+            Vector3 sideFriction = -node.Tr.right * (sidewaysSpeed / Time.fixedDeltaTime);
             node.Rigidbody.AddForce(sideFriction, ForceMode.Acceleration);
             if (node.Control.Thrust <= 0f) {
                 node.Rigidbody.velocity *= node.Hover.Config.SlowingVelFactor;
@@ -167,11 +167,11 @@ namespace PixelComrades {
                 node.Rigidbody.velocity *= node.Hover.Config.BrakingVelFactor;
             }
             float propulsion = node.Hover.Config.DriveForce * node.Control.Thrust - node.Hover.Drag * Mathf.Clamp(node.Control.Speed, 0f, node.Hover.Config.MaxForwardSpeed);
-            node.Rigidbody.AddForce(node.Entity.Tr.forward * propulsion, ForceMode.Acceleration);
+            node.Rigidbody.AddForce(node.Tr.forward * propulsion, ForceMode.Acceleration);
         }
 
         private void FindGround(FlyingNode node, float distance) {
-            Ray ray = new Ray(node.Entity.Tr.position, -node.Entity.Tr.up);
+            Ray ray = new Ray(node.Tr.position, -node.Tr.up);
             node.Hover.IsOnGround = Physics.Raycast(ray, out var hitInfo, distance, node.Hover.Config.GroundLayer);
             var newGround = Vector3.MoveTowards(node.Hover.GroundNormal, node.Hover.IsOnGround ? hitInfo.normal.normalized : Vector3.up, node.Hover.Config.UpOrientationSpeed * Time.deltaTime);
             if (node.Hover.IsOnGround) {
@@ -182,7 +182,7 @@ namespace PixelComrades {
 
         private void CalculateCosmeticBanking(FlyingNode node) {
             var yawBank = node.Banking.Config.AngleOfRoll * -node.Control.Yaw;
-            Quaternion bodyRotation = node.Entity.Tr.rotation * Quaternion.Euler(0, 0f, yawBank);
+            Quaternion bodyRotation = node.Tr.rotation * Quaternion.Euler(0, 0f, yawBank);
             node.Banking.BankTransform.rotation = Quaternion.Lerp(node.Banking.BankTransform.rotation, bodyRotation, Time.deltaTime * node.Banking.Config.RollSpeed);
         }
 

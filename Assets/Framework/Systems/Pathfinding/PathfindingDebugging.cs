@@ -41,7 +41,7 @@ namespace PixelComrades {
             Tm.Value.text = string.Format("{0}{2}{1}", agent.GetEntity().Id, agent.CurrentStatus, System.Environment.NewLine);
             if (_updateStatus == PathfindingStatus.NoPath || _updateStatus == PathfindingStatus.InvalidPath) {
                 LineR.Value.positionCount = 2;
-                LineR.Value.SetPosition(0, this.GetEntity().Tr.position);
+                LineR.Value.SetPosition(0, DebugObject.Tr.position);
                 LineR.Value.SetPosition(1, agent.End.toVector3());
             }
         }

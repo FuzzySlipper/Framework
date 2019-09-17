@@ -32,7 +32,7 @@ namespace PixelComrades {
             if (spawnEntity != null) {
                 Vector3 target = node.ActionEvent.Target;
                 spawnEntity.ParentId = entity.Id;
-                spawnEntity.Add(new SimplerMover(spawnEntity));
+                spawnEntity.Add(new SimplerMover());
                 //spawnEntity.AddObserver(this);
                 spawnEntity.Post(new StartMoveEvent(spawnEntity, target, null));
             }

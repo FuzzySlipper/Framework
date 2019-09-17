@@ -9,7 +9,7 @@ namespace PixelComrades {
     public class CostUse : CommandCost, ISerializable {
 
         public override void ProcessCost(Entity entity) {
-            entity.Get<LimitedUses>(f => f.Use());
+            entity.Get<LimitedUses>()?.Use();
         }
 
         public CostUse() {}
