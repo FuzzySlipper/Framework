@@ -129,10 +129,16 @@ namespace PixelComrades {
         }
 
         public int Get() {
+            if (Min == Max) {
+                return Min;
+            }
             return Get(Game.Random);
         }
 
         public int Get(System.Random random) {
+            if (Min == Max) {
+                return Min;
+            }
             return random.Next(Min, Max);
         }
 

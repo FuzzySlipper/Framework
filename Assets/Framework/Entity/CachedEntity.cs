@@ -45,6 +45,9 @@ namespace PixelComrades {
         }
 
         public static implicit operator Entity(CachedEntity reference) {
+            if (reference == null) {
+                return null;
+            }
             return reference.Entity;
         }
 

@@ -80,8 +80,8 @@ namespace PixelComrades {
                 return;
             }
             if (component is IComponent ecsComponent) {
-                _entityId = ecsComponent.GetEntity();
                 _componentType = component.GetType();
+                _entityId = EntityController.GetComponentArray(_componentType).GetEntity(ecsComponent);
                 return;
             }
             Debug.LogErrorFormat("{0} is not a valid type of animator", component.GetType());

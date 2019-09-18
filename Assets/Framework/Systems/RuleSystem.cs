@@ -8,5 +8,9 @@ namespace PixelComrades {
         public static float GetDefenseAmount(float damage, float stat) {
             return damage * ((stat / (damage * 10)) * 0.5f);
         }
+
+        public static int TotalPrice(InventoryItem item) {
+            return item.Price * item.Count;
+        }
     }
 }

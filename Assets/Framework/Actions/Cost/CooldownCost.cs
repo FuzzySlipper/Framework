@@ -37,7 +37,7 @@ namespace PixelComrades {
                 return true;
             }
             if (_postUpdate) {
-                entity.PostAll(new StatusUpdate("Still Recovering", Color.yellow));
+                entity.PostAll(new StatusUpdate(entity,"Still Recovering", Color.yellow));
             }
             return false;
         }

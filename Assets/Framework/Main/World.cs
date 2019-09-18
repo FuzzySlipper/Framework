@@ -183,11 +183,6 @@ namespace PixelComrades {
             }
             var all = obj.GetType().GetInterfaces();
             foreach (var type in all) {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobalArray<>)) {
-                    var list = GetArrayList(type.GetGenericArguments()[0]);
-                    list.Add(receiver);
-                    list.Sort(_receiverSorter);
-                }
                 if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
                     var targetType = type.GetGenericArguments()[0];
                     if (!_msgLists.TryGetValue(targetType, out var queue)) {
@@ -209,18 +204,10 @@ namespace PixelComrades {
         }
 
         public void Add<T>(IReceive receive) {
-            if (receive is IReceiveGlobalArray<T>) {
-                var list = GetArrayList(typeof(T));
-                list.Add(receive);
-                list.Sort(_receiverSorter);
+            var queue = GetMessageQueueGeneric<T>();
+            if (queue != null) {
+                queue.AddReceiver(receive);
             }
-            else {
-                var queue = GetMessageQueueGeneric<T>();
-                if (queue != null) {
-                    queue.AddReceiver(receive);
-                }
-            }
-            
         }
 
         public static void RemoveSystem(SystemBase system) {
@@ -262,11 +249,6 @@ namespace PixelComrades {
             }
             var all = obj.GetType().GetInterfaces();
             foreach (var type in all) {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobalArray<>)) {
-                    var list = GetArrayList(type.GetGenericArguments()[0]);
-                    list.Remove(receiver);
-                    list.Sort(_receiverSorter);
-                }
                 if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IReceiveGlobal<>)) {
                     var targetType = type.GetGenericArguments()[0];
                     if (_msgLists.TryGetValue(targetType, out var queue)) {
@@ -277,16 +259,9 @@ namespace PixelComrades {
         }
         
         public void Remove<T>(IReceive receive) {
-            if (receive is IReceiveGlobalArray<T>) {
-                var list = GetArrayList(typeof(T));
-                list.Remove(receive);
-                list.Sort(_receiverSorter);
-            }
-            else {
-                var queue = GetMessageQueueGeneric<T>();
-                if (queue != null) {
-                    queue.RemoveReceiver(receive);
-                }
+            var queue = GetMessageQueueGeneric<T>();
+            if (queue != null) {
+                queue.RemoveReceiver(receive);
             }
         }
 
@@ -387,13 +362,6 @@ namespace PixelComrades {
 
             public override void Process(List<IReceive> list) {
                 _msgs.Advance();
-                if (list != null) {
-                    for (int i = 0; i < list.Count; i++) {
-                        if (list[i] is IReceiveGlobalArray<T> globalDel) {
-                            globalDel.HandleGlobal(_msgs.PreviousList);
-                        }
-                    }
-                }
                 for (int i = 0; i < _globalDel.Count; i++) {
                     _msgs.PreviousList.Run(_globalDel[i]);
                 }

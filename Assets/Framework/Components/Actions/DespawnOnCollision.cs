@@ -4,21 +4,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [Priority(Priority.Lowest)]
     [System.Serializable]
-	public sealed class DespawnOnCollision : IComponent, IReceive<CollisionEvent>, IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
-
-        public void Handle(CollisionEvent arg) {
-            this.GetEntity().Destroy();
-        }
-
-        public void Handle(EnvironmentCollisionEvent arg) {
-            this.GetEntity().Destroy();
-        }
-
-        public void Handle(PerformedCollisionEvent arg) {
-            this.GetEntity().Destroy();
-        }
+	public sealed class DespawnOnCollision : IComponent {
 
         public DespawnOnCollision() {}
 

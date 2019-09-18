@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PixelComrades {
     [Priority(Priority.Higher)]
-    public class SensorSystem : SystemBase, IPeriodicUpdate {
+    public class SensorSystem : SystemBase, IPeriodicUpdate, IReceive<DamageEvent> {
 
         public GameOptions.CachedInt MaxTurnsNpcVisible = new GameOptions.CachedInt("MaxTurnsNpcVisible");
         public bool CheckVision = false;
@@ -20,6 +20,7 @@ namespace PixelComrades {
         public SensorSystem() {
             NodeFilter<SensorDetectingNode>.New(SensorDetectingNode.GetTypes());
             NodeFilter<UnitySensorNode>.New(UnitySensorNode.GetTypes());
+            EntityController.RegisterReceiver<SensorTargetsComponent>(this);
         }
 
         public override void Dispose() {
@@ -150,5 +151,15 @@ namespace PixelComrades {
         //    }
         //    simple.UpdateWatchTargets();
         //}
+
+        public void Handle(DamageEvent arg) {
+            var sensorTargets = arg.Target.Entity.Find<SensorTargetsComponent>();
+#if DEBUG
+            DebugLog.Add(
+                sensorTargets.GetEntity().DebugId + " was attacked by " + arg.Origin?.Entity.DebugId + " parent " +
+                arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
+#endif
+            sensorTargets.AddWatch(arg.Origin, true);
+        }
     }
 }

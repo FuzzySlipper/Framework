@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class FloatingTextCombatComponent : IComponent, IReceive<CombatStatusUpdate> {
-        private CachedTransform _component;
+	public sealed class FloatingTextCombatComponent : IComponent {
         
+        private CachedTransform _component;
         public Transform Tr { get { return _component.Tr; } }
         public Vector3 Offset { get; }
 
@@ -24,10 +24,6 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_component), _component);
             info.AddValue(nameof(Offset), Offset);
-        }
-
-        public void Handle(CombatStatusUpdate arg) {
-            FloatingText.Message(arg.Update, Tr.position + Offset, arg.Color);
         }
     }
 }

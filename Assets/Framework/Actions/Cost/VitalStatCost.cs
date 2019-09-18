@@ -35,7 +35,7 @@ namespace PixelComrades {
                 return true;
             }
             //entity.Get<StatusUpdateComponent>(e => e.Status = string.Format("Not enough {0}", Vitals.GetDescriptionAt(TargetVital)));
-            entity.PostAll(new StatusUpdate("Not enough " + _stat.Stat.Label));
+            entity.PostAll(new StatusUpdate(entity,"Not enough " + _stat.Stat.Label));
             return false;
         }
     }

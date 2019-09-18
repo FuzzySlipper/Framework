@@ -315,7 +315,12 @@ namespace PixelComrades {
         public delegate void Delegate(T value);
     }
 
-    public class ComponentArray<T> : ManagedArray<T> where T : IComponent {
+    public interface IComponentArray {
+        Entity GetEntity(IComponent component);
+        void RemoveByEntity(Entity entity);
+    }
+
+    public class ComponentArray<T> : ManagedArray<T>, IComponentArray where T : IComponent {
 
         private Dictionary<int, int> _entityToIndex = new Dictionary<int, int>();
         private Dictionary<T, int> _componentToEntity = new Dictionary<T, int>();
@@ -341,12 +346,16 @@ namespace PixelComrades {
             else {
                 index = Add(newComponent);
                 _entityToIndex.Add(entity, index);
-                _componentToEntity.AddOrUpdate(newComponent, entity);
                 entity.AddReference(new ComponentReference(index, this));
             }
+            _componentToEntity.AddOrUpdate(newComponent, entity);
 //            if (newComponent is IComponentOnAttach attach) {
 //                attach.OnAttach(entity);
 //            }
+        }
+
+        public Entity GetEntity(IComponent component) {
+            return GetEntity((T) component);
         }
 
         public Entity GetEntity(T component) {
@@ -376,12 +385,17 @@ namespace PixelComrades {
 //            base.Remove(index);
 //        }
 
-        public void Remove(Entity entity) {
-            if (_entityToIndex.TryGetValue(entity, out var existing)) {
-                _componentToEntity.Remove(this[existing]);
-                Remove(existing);
-                _entityToIndex.Remove(entity);
-                entity.Remove(ArrayType);
+        public void RemoveByEntity(Entity entity) {
+            if (!_entityToIndex.TryGetValue(entity, out var existing)) {
+                return;
+            }
+            var component = this[existing];
+            _componentToEntity.Remove(this[existing]);
+            Remove(existing);
+            _entityToIndex.Remove(entity);
+            entity.Remove(ArrayType);
+            if (component != null && component is IDisposable dispose) {
+                dispose.Dispose();
             }
         }
 

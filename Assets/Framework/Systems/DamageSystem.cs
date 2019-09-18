@@ -25,6 +25,19 @@ namespace PixelComrades {
             }
             _dmgMsg.Clear();
             _dmgHoverMsg.Clear();
+            var blockDamage = node.Entity.Get<BlockDamage>();
+            if (blockDamage != null) {
+                for (int i = 0; i < blockDamage.Dels.Count; i++) {
+                    if (blockDamage.Dels[i](msg)) {
+                        _dmgMsg.Append(msg.Target.GetName());
+                        _dmgMsg.Append(" completely blocked damage from ");
+                        _dmgMsg.Append(msg.Origin.GetName());
+                        MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(_dmgMsg.ToString(),
+                            _dmgMsg.ToString(), _damageColor));
+                        return;
+                    }
+                }
+            }
             var damageAmount = msg.Amount;
             if (node.StatDefend != null) {
                 for (int i = 0; i < node.StatDefend.Count; i++) {
@@ -85,7 +98,7 @@ namespace PixelComrades {
             _dmgMsg.Append(" for ");
             _dmgMsg.Append(damageAmount.ToString("F1"));
             if (damageAmount > 0) {
-                node.Entity.Post(new CombatStatusUpdate(damageAmount.ToString("F1"), Color.red));
+                node.Entity.Post(new CombatStatusUpdate(node.Entity,damageAmount.ToString("F1"), Color.red));
                 MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(_dmgMsg.ToString(), 
                 _dmgHoverMsg.ToString(), _damageColor));
             }
@@ -114,7 +127,7 @@ namespace PixelComrades {
                 vital.Current += arg.Amount;
                 if (arg.Amount > 0) {
                     Color color = arg.TargetVital == Stats.Health ? Color.green : Color.yellow;
-                    entity.Post(new CombatStatusUpdate(arg.Amount.ToString("F1"), color));
+                    entity.Post(new CombatStatusUpdate(entity,arg.Amount.ToString("F1"), color));
                 }
             }
         }

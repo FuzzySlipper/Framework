@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class InventoryItem : IComponent, IReceive<DataDescriptionUpdating>, IDisposable {
+	public sealed class InventoryItem : IComponent, IDisposable {
         public InventoryItem(int maxStack, int price, int rarity) {
             MaxStack = maxStack;
             Price = price;
@@ -47,42 +47,8 @@ namespace PixelComrades {
                 _inventory.Clear();
             }
             else {
-                _inventory.Set(container.GetEntity());
+                _inventory.Set(container.Owner);
             }
-        }
-
-        public bool CanStack(Entity entity) {
-            if (Count >= MaxStack) {
-                return false;
-            }
-            if (this.Get<TypeId>().Id != entity.Get<TypeId>().Id) {
-                return false;
-            }
-            Count++;
-            entity.Destroy();
-            var descr = this.Get<DataDescriptionComponent>();
-            if (descr != null) {
-                descr.Text = "";
-                this.GetEntity().Post(new DataDescriptionUpdating(descr));
-            }
-            return true;
-        }
-
-        public int TotalPrice() {
-            return Price * Count;
-        }
-
-        public void Handle(DataDescriptionUpdating arg) {
-            FastString.Instance.Clear();
-            FastString.Instance.AppendBoldLabelNewLine("Price", TotalPrice());
-            if (Count > 1) {
-                FastString.Instance.AppendBoldLabelNewLine("Count", Count);
-            }
-            if (!Identified) {
-                FastString.Instance.AppendNewLine("Unidentified");
-            }
-            FastString.Instance.AppendBoldLabelNewLine("Rarity", GameData.Enums[EnumTypes.ItemRarity].GetNameAt(Rarity));
-            arg.Data.Text += FastString.Instance.ToString();
         }
 
         public void Dispose() {

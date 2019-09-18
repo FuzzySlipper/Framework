@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [Priority(Priority.Low)]
     [System.Serializable]
 	public sealed class StatsContainer : IComponent, IDisposable {
 

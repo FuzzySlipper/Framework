@@ -4,20 +4,20 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public static class CollisionExtensions {
-        public static void GenerateHitLocDir(CollidableNode origin, CollidableNode target, out Vector3 hitPnt, out Vector3 normal) {
+        public static void GenerateHitLocDir(Transform origin, Transform target, Collider targetCollider, 
+            out Vector3 hitPnt, out Vector3 normal) {
             if (origin == target) {
-                hitPnt = target.Tr.position;
-                normal = target.Tr.forward;
+                hitPnt = target.position;
+                normal = target.forward;
                 return;
             }
-            var collider = target.Get<ColliderComponent>();
-            var originPos = origin.Tr.position;
-            if (collider != null && collider.Collider != null) {
+            var originPos = origin.position;
+            if (targetCollider != null) {
                 //hitPnt += new Vector3(0, collider.Collider.bounds.size.y * 0.5f, 0);
-                hitPnt = collider.Collider.ClosestPointOnBounds(originPos);
+                hitPnt = targetCollider.ClosestPointOnBounds(originPos);
             }
             else {
-                hitPnt = target.Tr.position;
+                hitPnt = target.position;
             }
             normal = (originPos - hitPnt).normalized;
             //if (target == origin) {

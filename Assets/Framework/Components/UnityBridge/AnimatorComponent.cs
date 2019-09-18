@@ -5,15 +5,15 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable, Priority(Priority.Lowest)]
-	public sealed class AnimatorData : IComponent {
+	public sealed class AnimatorComponent : IComponent {
         private CachedAnimator _animator;
-        public IAnimator Animator { get { return _animator.Value; } }
+        public IAnimator Value { get { return _animator.Value; } }
 
-        public AnimatorData(IAnimator animator) {
+        public AnimatorComponent(IAnimator animator) {
             _animator = new CachedAnimator(animator);
         }
 
-        public AnimatorData(SerializationInfo info, StreamingContext context) {
+        public AnimatorComponent(SerializationInfo info, StreamingContext context) {
             _animator = info.GetValue(nameof(_animator), _animator);
         }
 
@@ -23,54 +23,46 @@ namespace PixelComrades {
     }
 
     [System.Serializable]
-	public sealed class HurtAnimation : IComponent, IReceive<DamageEvent> {
+	public sealed class HurtAnimation : IComponent {
 
-        private string _animation;
-        private CachedAnimator _animator;
+        public string Clip { get; }
+        public bool PauseDuring { get; }
 
-        public HurtAnimation(string animation, IAnimator animator) {
-            _animation = animation;
-            _animator = new CachedAnimator(animator);
-        }
-
-        public void Handle(DamageEvent arg) {
-            if (arg.Amount > 0 && _animator != null) {
-                _animator.Value.PlayAnimation(_animation, false, null);
-            }
+        public HurtAnimation(string clip, bool pauseDuring) {
+            Clip = clip;
+            PauseDuring = pauseDuring;
         }
 
         public HurtAnimation(SerializationInfo info, StreamingContext context) {
-            _animator = info.GetValue(nameof(_animator), _animator);
+            Clip = info.GetValue(nameof(Clip), Clip);
+            PauseDuring = info.GetValue(nameof(PauseDuring), PauseDuring);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_animator), _animator);
+            info.AddValue(nameof(Clip), Clip);
+            info.AddValue(nameof(PauseDuring), PauseDuring);
         }
     }
 
     [System.Serializable]
-	public sealed class DeathAnimation : IComponent, IReceive<DeathEvent> {
+	public sealed class DeathAnimation : IComponent {
 
-        private string _animation;
-        private CachedAnimator _animator;
+        public string Clip { get; }
+        public bool PauseDuring { get; }
 
-        public DeathAnimation(string animation, IAnimator animator) {
-            _animation = animation;
-            _animator =  new CachedAnimator(animator);
-        }
-
-        public void Handle(DeathEvent arg) {
-            if (_animator != null) {
-                _animator.Value.PlayAnimation(_animation, true, null);
-            }
+        public DeathAnimation(string clip, bool pauseDuring) {
+            Clip = clip;
+            PauseDuring = pauseDuring;
         }
 
         public DeathAnimation(SerializationInfo info, StreamingContext context) {
-            _animator = info.GetValue(nameof(_animator), _animator);
+            Clip = info.GetValue(nameof(Clip), Clip);
+            PauseDuring = info.GetValue(nameof(PauseDuring), PauseDuring);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_animator), _animator);
+            info.AddValue(nameof(Clip), Clip);
+            info.AddValue(nameof(PauseDuring), PauseDuring);
         }
     }
 
@@ -90,12 +82,12 @@ namespace PixelComrades {
     [Priority(Priority.Lowest)]
     public struct PlayAnimation : IEntityMessage {
         public Entity Target;
-        public AnimatorData Animator;
+        public AnimatorComponent Animator;
         public bool Override;
         public bool PostEvent;
         public string Clip;
 
-        public PlayAnimation(Entity target, AnimatorData anim, string clip, bool overrideAnim, bool postEvent) {
+        public PlayAnimation(Entity target, AnimatorComponent anim, string clip, bool overrideAnim, bool postEvent) {
             Target = target;
             Clip = clip;
             Animator = anim;
@@ -107,10 +99,10 @@ namespace PixelComrades {
     [Priority(Priority.Normal)]
     public struct AnimationComplete : IEntityMessage {
         public Entity Target;
-        public AnimatorData Animator;
+        public AnimatorComponent Animator;
         public string Animation;
 
-        public AnimationComplete(Entity target, AnimatorData animator, string animation) {
+        public AnimationComplete(Entity target, AnimatorComponent animator, string animation) {
             Target = target;
             Animator = animator;
             Animation = animation;
@@ -120,10 +112,10 @@ namespace PixelComrades {
     [Priority(Priority.Normal)]
     public struct AnimationEventComplete : IEntityMessage {
         public Entity Target;
-        public AnimatorData Animator;
+        public AnimatorComponent Animator;
         public string Animation;
 
-        public AnimationEventComplete(Entity target, AnimatorData animator, string animation) {
+        public AnimationEventComplete(Entity target, AnimatorComponent animator, string animation) {
             Target = target;
             Animator = animator;
             Animation = animation;

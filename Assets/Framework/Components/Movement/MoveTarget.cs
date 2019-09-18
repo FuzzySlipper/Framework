@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class MoveTarget : IComponent, IReceive<SetMoveTarget>, IReceive<SetLookTarget> {
+	public sealed class MoveTarget : IComponent {
         private enum State : byte {
             None,
             ForceLook,
@@ -62,8 +62,6 @@ namespace PixelComrades {
             get { return _state != State.None && (_lookTr.Tr != null); }
         }
 
-        
-
         public void ClearMove() {
             _targetTr.Clear();
             _targetV3 = null;
@@ -81,16 +79,6 @@ namespace PixelComrades {
         public MoveTarget() {
             _targetTr.Clear();
             _targetV3 = null;
-        }
-
-        private void ExtractMove(Entity target) {
-            var tr = target.Get<TransformComponent>();
-            if (tr != null && tr.Value != null) {
-                _targetTr.Set(tr);
-            }
-            else {
-                _targetV3 = target.GetPosition();
-            }
         }
 
         private bool ExtractLook(Entity target) {
@@ -119,41 +107,24 @@ namespace PixelComrades {
             }
         }
 
-        public void SetMoveTarget(Entity target) {
-            ClearMove();
-            ExtractMove(target);
+        public void SetMoveTarget(SetMoveTarget arg) {
+            _targetV3 = arg.V3;
+            _targetTr.Set(arg.Tr);
         }
 
         public void SetMoveTarget(Vector3 target) {
             ClearMove();
             _targetV3 = target;
         }
-
-        public void SetMoveTarget(Transform tr) {
-            ClearMove();
-            _targetTr.Set(tr);
-        }
-
-        public void Handle(SetMoveTarget arg) {
-            _targetV3 = arg.V3;
-            _targetTr.Set(arg.Tr);
-        }
-
-        public void Handle(SetLookTarget arg) {
-            if (arg.LookOnly) {
-                SetLookOnlyTarget(arg.Target);
-            }
-            else {
-                SetLookTarget(arg.Target);
-            }
-        }
     }
 
     public struct SetMoveTarget : IEntityMessage {
         public Transform Tr;
         public Vector3? V3;
-
-        public SetMoveTarget(Transform tr, Vector3? v3) {
+        public Entity Owner { get; }
+        
+        public SetMoveTarget(Entity owner, Transform tr, Vector3? v3) {
+            Owner = owner;
             Tr = tr;
             V3 = v3;
         }
@@ -162,10 +133,12 @@ namespace PixelComrades {
     }
 
     public struct SetLookTarget : IEntityMessage {
-        public Entity Target;
-        public bool LookOnly;
+        public Entity Target { get; }
+        public bool LookOnly { get; }
+        public Entity Owner { get; }
 
-        public SetLookTarget(Entity target, bool lookOnly) {
+        public SetLookTarget(Entity owner, Entity target, bool lookOnly) {
+            Owner = owner;
             Target = target;
             LookOnly = lookOnly;
         }

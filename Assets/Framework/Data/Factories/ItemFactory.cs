@@ -162,6 +162,7 @@ namespace PixelComrades {
         public static Entity CreateItem(ItemTemplate data, int level) {
             var entity = Entity.New(data.ID);
             entity.Add(new TypeId(data.ID));
+            entity.Add(new StatsContainer());
             if (!string.IsNullOrEmpty(data.Icon)) {
                 entity.Add(new IconComponent(UnityDirs.ItemIcons, data.Icon));
             }

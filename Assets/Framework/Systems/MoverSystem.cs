@@ -37,6 +37,9 @@ namespace PixelComrades {
             }
             if (_forwardMovers != null) {
                 for (int i = 0; i < _forwardMovers.Count; i++) {
+                    if (_forwardMovers[i].Entity.IsDestroyed()) {
+                        continue;
+                    }
                     HandleForwardMovement(_forwardMovers[i]);
                 }
             }
@@ -45,6 +48,9 @@ namespace PixelComrades {
             }
             if (_rotators != null) {
                 for (int i = 0; i < _rotators.Count; i++) {
+                    if (_rotators[i].Entity.IsDestroyed()) {
+                        continue;
+                    }
                     HandleRotation(_rotators[i]);
                 }
             }
@@ -53,6 +59,9 @@ namespace PixelComrades {
             }
             if (_simpleMovers != null) {
                 for (int i = 0; i < _simpleMovers.Count; i++) {
+                    if (_simpleMovers[i].Entity.IsDestroyed()) {
+                        continue;
+                    }
                     HandleMoveSimple(_simpleMovers[i]);
                 }
             }
@@ -61,6 +70,9 @@ namespace PixelComrades {
             }
             if (_arcMovers != null) {
                 for (int i = 0; i < _arcMovers.Count; i++) {
+                    if (_arcMovers[i].Entity.IsDestroyed()) {
+                        continue;
+                    }
                     HandleArcMovement(_arcMovers[i]);
                 }
             }
@@ -138,7 +150,7 @@ namespace PixelComrades {
 
         private void HandleForwardMovement(ForwardMoverNode mover) {
             var entity = mover.Entity;
-            if (!entity.Tags.Contain(EntityTags.Moving) || !mover.Tr) {
+            if (!entity.Tags.Contain(EntityTags.Moving) || mover.Tr == null) {
                 return;
             }
             var ms = mover.MoveSpeed?.Speed ?? 1;
@@ -181,7 +193,7 @@ namespace PixelComrades {
         }
 
         private void CalculateFlight(ArcMover mover, Vector3 target, float speed) {
-            var tr = mover.Get<TransformComponent>().Value;
+            var tr = mover.GetEntity().Get<TransformComponent>().Value;
             float targetDistance = Vector3.Distance(tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
             float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / speed);

@@ -13,8 +13,11 @@ namespace PixelComrades {
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
+        
         public SimplePathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Transform Tr { get => _tr.Value; }
+        public SteeringInput Steering => _moveInput.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging, _tr
         };
@@ -23,7 +26,8 @@ namespace PixelComrades {
             return new System.Type[] {
                 typeof(SimplePathfindingAgent), 
                 typeof(MoveTarget),
-                typeof(TransformComponent)
+                typeof(TransformComponent),
+                typeof(SteeringInput),
             };
         }
 
@@ -37,6 +41,9 @@ namespace PixelComrades {
         public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
         public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
+        
+        public SteeringInput SteeringInput => _moveInput.Value;
         public Transform Tr { get => _tr.Value; }
         public AstarPathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Point3 DestinationP3 { get { return Pathfinder.DestinationP3; } }
@@ -56,7 +63,8 @@ namespace PixelComrades {
                 typeof(AstarPathfindingAgent),
 #endif
                 typeof(MoveTarget),
-                typeof(TransformComponent)
+                typeof(TransformComponent),
+                typeof(SteeringInput),
             };
         }
 
@@ -68,7 +76,8 @@ namespace PixelComrades {
                 var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;
                 look = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
             }
-            Entity.Post(new MoveInputMessage(Vector3.zero, look));
+            SteeringInput.Look = look;
+            SteeringInput.Move = Vector3.zero;
             Pathfinder.LastPositionTime = 0;
             Pathfinder.LastPosition = Point3.zero;
             Pathfinder.StuckPathCount = 0;
@@ -156,7 +165,8 @@ namespace PixelComrades {
             var dir = position - Pathfinder.Controller.transform.position;
             var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;
             var look = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
-            Entity.Post(new MoveInputMessage(Pathfinder.DesiredVelocity.normalized, look));
+            SteeringInput.Look = look;
+            SteeringInput.Move = Pathfinder.DesiredVelocity.normalized;
         }
 
     }

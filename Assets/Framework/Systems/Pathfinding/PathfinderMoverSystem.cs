@@ -3,16 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public struct MoveInputMessage : IEntityMessage {
-        public Vector3 Move;
-        public Vector3 Look;
-
-        public MoveInputMessage(Vector3 move, Vector3 look) {
-            Move = move;
-            Look = look;
-        }
-    }
-
     public struct PhysicsInputMessage : IEntityMessage {
         public Vector3 Force;
 
@@ -20,7 +10,7 @@ namespace PixelComrades {
             Force = force;
         }
     }
-    public class PathfinderMoverSystem : SystemBase, IMainSystemUpdate {
+    public class PathfinderMoverSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ChangePositionEvent> {
 
         public static bool UseSimple = false;
 
@@ -102,18 +92,18 @@ namespace PixelComrades {
                     node.Debugging.Value.UpdateStatus(pathfinder);
                 }
                 if (node.Target.Value == null) {
-                    node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
+                    node.Steering.Reset();
                     continue;
                 }
                 if (!node.Target.Value.IsValidMove) {
                     node.Pathfinder.ReachedDestination();
-                    node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
+                    node.Steering.Reset();
                     continue;
                 }
                 var currentMoveTarget = node.Target.Value.GetTargetPosition.toPoint3();
                 if (pathfinder.End != currentMoveTarget) {
                     pathfinder.SetEnd(currentMoveTarget);
-                    node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
+                    node.Steering.Reset();
                     continue;
                 }
                 switch (pathfinder.CurrentStatus) {
@@ -121,7 +111,7 @@ namespace PixelComrades {
                         if (pathfinder.Redirected && pathfinder.CanRepath) {
                             pathfinder.SearchPath();
                         }
-                        node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
+                        node.Steering.Reset();
                         continue;
                     case PathfindingStatus.InvalidPath:
                     case PathfindingStatus.Created:
@@ -136,7 +126,7 @@ namespace PixelComrades {
                             _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.GetEntity(), false);
                         }
                         if (!node.Pathfinder.TryEnterNextNode()) {
-                            node.Entity.Post(new MoveInputMessage(Vector3.zero, Vector3.zero));
+                            node.Steering.Reset();
                             continue;
                         }
                         break;
@@ -154,7 +144,7 @@ namespace PixelComrades {
                 var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : node.Tr.rotation;
                 //var rot = Quaternion.RotateTowards(pathfinder.Entity.Tr.rotation, nextRotation, _pathfinderRotationSpeed * dt);
                 Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
-                node.Entity.Post(new MoveInputMessage(diff.normalized, cameraPlanarDirection));
+                node.Steering.Set(diff.normalized, cameraPlanarDirection);
                 if (progress < 1) {
                     continue;
                 }
@@ -247,10 +237,22 @@ namespace PixelComrades {
                         else {
                             nav.ProcessNoMove();
                             DebugExtension.DebugCircle(node.Tr.position, Color.red, 2f, 5f);
-                            node.Entity.Post(new SetMoveTarget(null, nav.GetWanderPoint()));
+                            node.Entity.Post(new SetMoveTarget(node.Entity,null, nav.GetWanderPoint()));
                         }
                     }
                 }
+            }
+        }
+
+        public void HandleGlobal(ChangePositionEvent arg) {
+            var astarPathfinding = arg.Target.Get<AstarPathfindingAgent>();
+            if (astarPathfinding != null) {
+                astarPathfinding.Controller.Teleport(arg.Position);
+                return;
+            }
+            var simple = arg.Target.Get<SimplePathfindingAgent>();
+            if (simple != null) {
+                simple.SetPosition(arg.Position.toPoint3());
             }
         }
     }

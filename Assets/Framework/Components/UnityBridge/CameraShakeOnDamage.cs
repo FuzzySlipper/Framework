@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-    [Priority(Priority.Lowest)]
     [System.Serializable]
-	public sealed class CameraShakeOnDamage : IComponent, IReceive<CollisionEvent> {
+	public sealed class CameraShakeOnDamage : IComponent {
 
-        private float _intensityMulti;
+        public float IntensityMulti { get; }
 
         public CameraShakeOnDamage(float intensityMulti = 2f) {
-            _intensityMulti = intensityMulti;
+            IntensityMulti = intensityMulti;
         }
 
         //public void Handle(DamageEvent arg) {
@@ -20,16 +19,13 @@ namespace PixelComrades {
         //        this.GetEntity().Post(new CameraShakeEvent(_intensityMulti));
         //    }
         //}
-        public void Handle(CollisionEvent arg) {
-            FirstPersonCamera.AddForce(-arg.HitNormal * _intensityMulti, true);
-        }
-
+        
         public CameraShakeOnDamage(SerializationInfo info, StreamingContext context) {
-            _intensityMulti = info.GetValue(nameof(_intensityMulti), _intensityMulti);
+            IntensityMulti = info.GetValue(nameof(IntensityMulti), IntensityMulti);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_intensityMulti), _intensityMulti);
+            info.AddValue(nameof(IntensityMulti), IntensityMulti);
         }
     }
 }

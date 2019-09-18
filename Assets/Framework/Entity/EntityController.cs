@@ -10,6 +10,7 @@ namespace PixelComrades {
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
         private static Dictionary<Type, List<NodeFilter>> _filtersToCheck = new Dictionary<Type, List<NodeFilter>>();
+        private static Dictionary<Type, List<IReceive>> _receiversToCheck = new Dictionary<Type, List<IReceive>>();
         private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
         private static System.Type[] _tempRemoveList = new Type[100];
 
@@ -42,7 +43,26 @@ namespace PixelComrades {
             if (_components.TryGetValue(typeof(T), out var list)) {
                 return (ComponentArray<T>) list;
             }
+            if (typeof(T).IsInterface) {
+                Debug.LogErrorFormat("Retrieve interface {0} instead of class ", typeof(T));
+            }
             return AddComponentArray<T>();
+        }
+
+        public static IComponentArray GetComponentArray(System.Type type) {
+            if (_components.TryGetValue(type, out var list)) {
+                return list as IComponentArray;
+            }
+            return null;
+        }
+
+        public static void RegisterReceiver<T>(IReceive receiver) {
+            var type = typeof(T);
+            if (!_receiversToCheck.TryGetValue(type, out var list)) {
+                list = new List<IReceive>();
+                _receiversToCheck.Add(type, list);
+            }
+            list.Add(receiver);
         }
 
         //public static T GetComponent<T>(this ComponentReference reference) where T : IComponent {
@@ -112,8 +132,7 @@ namespace PixelComrades {
             }
             var type = typeof(T);
             var array = GetComponentArray<T>();
-            if (array.TryGet(entity, out var cref)) {
-                var old = cref.Get<T>();
+            if (array.TryGet(entity, out var old)) {
                 if (!type.IsValueType && (old is IReceive receiveOld)) {
                     entity.RemoveObserver(receiveOld);
                 }
@@ -130,6 +149,11 @@ namespace PixelComrades {
             if (_filtersToCheck.TryGetValue(type, out var filterList)) {
                 for (int i = 0; i < filterList.Count; i++) {
                     filterList[i].TryAdd(entity, entity.Components);
+                }
+            }
+            if (_receiversToCheck.TryGetValue(type, out var receiverList)) {
+                for (int i = 0; i < receiverList.Count; i++) {
+                    entity.AddObserver(receiverList[i]);
                 }
             }
             return newComponent;
@@ -163,13 +187,6 @@ namespace PixelComrades {
                 return entity.Get<T>();
             }
             return !entity.Components.ContainsKey(typeof(T)) ? parent.Get<T>() : entity.Get<T>();
-        }
-
-        public static T Get<T>(this IComponent component) where T : IComponent {
-            if (component == null) {
-                return default(T);
-            }
-            return component.GetEntity().Get<T>();
         }
 
         public static System.Object GetComponent(Entity entity, string type) {
@@ -247,23 +264,20 @@ namespace PixelComrades {
         }
 
         private static void Remove(Entity entity, ComponentReference reference, System.Type type) {
-            if (!_components.TryGetValue(type, out var componentList)) {
+            var componentArray = GetComponentArray(type);
+            if (componentArray == null) {
                 return;
             }
-            if (!(componentList.Get(reference.Index) is IComponent component)) {
-                return;
-            }
-            componentList.Remove(reference.Index);
-            if (component is IReceive receive) {
-                entity.RemoveObserver(receive);
-            }
-            if (component is IDisposable dispose) {
-                dispose.Dispose();
-            }
+            componentArray.RemoveByEntity(entity);
             entity.RemoveReference(reference);
             if (_filtersToCheck.TryGetValue(type, out var filterList)) {
                 for (int f = 0; f < filterList.Count; f++) {
                     filterList[f].CheckRemove(entity, entity.Components);
+                }
+            }
+            if (_receiversToCheck.TryGetValue(type, out var receiverList)) {
+                for (int i = 0; i < receiverList.Count; i++) {
+                    entity.RemoveObserver(receiverList[i]);
                 }
             }
         }
@@ -276,28 +290,10 @@ namespace PixelComrades {
         }
 
         public static Entity GetParent(this Entity entity) {
-            return entity.ParentId < 0 ? null : GetEntity(entity.ParentId);
-        }
-
-        public static void TryRoot(this Entity entity, Action<Entity> del) {
-            var parent = entity.GetRoot();
-            if (parent != null) {
-                del(parent);
-            }
-        }
-
-        public static void TryParent(this Entity entity, Action<Entity> del) {
-            var parent = entity.GetParent();
-            if (parent != null) {
-                del(parent);
-            }
-        }
-
-        public static Entity GetRoot(this IComponent component) {
-            if (component == null) {
+            if (entity == null) {
                 return null;
             }
-            return component.GetEntity().GetRoot();
+            return entity.ParentId < 0 ? null : GetEntity(entity.ParentId);
         }
 
         private static WhileLoopLimiter _loopLimiter = new WhileLoopLimiter(5000);

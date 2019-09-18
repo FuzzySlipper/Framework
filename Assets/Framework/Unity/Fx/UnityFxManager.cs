@@ -325,7 +325,7 @@ namespace PixelComrades {
                 yield break;
             }
             var modelComponent = owner.Get<ModelComponent>();
-            var animator = owner.Get<AnimatorData>()?.Animator;
+            var animator = owner.Get<AnimatorComponent>()?.Value;
             if (animator == null) {
                 owner.Destroy();
                 yield break;

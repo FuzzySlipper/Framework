@@ -232,7 +232,6 @@ namespace PixelComrades {
 
     public class MessageKitLocal {
         private Dictionary<int, List<System.Action>> _messageTable = new Dictionary<int, List<System.Action>>();
-        private List<ISignalReceiver> _genericReceivers = new List<ISignalReceiver>();
 
         public void addObserver(int messageType, System.Action handler) {
             if (!_messageTable.TryGetValue(messageType, out var list)) {
@@ -256,9 +255,6 @@ namespace PixelComrades {
 
 
         public void post(int messageType) {
-            for (int i = 0; i < _genericReceivers.Count; i++) {
-                _genericReceivers[i].Handle(messageType);
-            }
             if (_messageTable.TryGetValue(messageType, out var list)) {
                 for (var i = list.Count - 1; i >= 0; i--) {
                     list[i]();

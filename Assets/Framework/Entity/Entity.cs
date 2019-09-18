@@ -12,10 +12,10 @@ namespace PixelComrades {
         private static TypeComparer _typeComparer = new TypeComparer();
         
         public int Id { get; private set;}
+        public string Name;
         public int ParentId = -1;
         public bool Pooled = false;
         public IEntityFactory Factory;
-        public string Name;
 
         private SortedList<System.Type, ComponentReference> _components = new SortedList<Type, ComponentReference>(_typeComparer);
         private TagsComponent _tags; 

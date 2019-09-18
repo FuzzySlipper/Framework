@@ -102,7 +102,7 @@ namespace PixelComrades {
             if (targeting.RequireLoS) {
                 if (target == null && !World.Get<LineOfSightSystem>().CanSee(owner, cmdTarget.GetPosition)) {
                     if (postUpdates) {
-                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                        owner.PostAll(new StatusUpdate(owner,"Can't see target", Color.yellow));
                     }
                     return false;
                 }
@@ -111,7 +111,7 @@ namespace PixelComrades {
                 var distance = DistanceSystem.GetDistance(owner, cmdTarget.GetPosition);
                 if (distance > targeting.Range) {
                     if (postUpdates) {
-                        owner.PostAll(new StatusUpdate(distance + " distance out of range", Color.yellow));
+                        owner.PostAll(new StatusUpdate(owner, distance + " distance out of range", Color.yellow));
                     }
                     return false;
                 }
@@ -130,7 +130,7 @@ namespace PixelComrades {
                 case TargetType.Enemy:
                     if (!World.Get<FactionSystem>().AreEnemies(owner, target)) {
                         if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Not an enemy", Color.yellow));
+                            owner.PostAll(new StatusUpdate(owner, "Not an enemy", Color.yellow));
                         }
                         return false;
                     }
@@ -138,7 +138,7 @@ namespace PixelComrades {
                 case TargetType.Friendly:
                     if (!World.Get<FactionSystem>().AreFriends(owner, target)) {
                         if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Not friendly", Color.yellow));
+                            owner.PostAll(new StatusUpdate(owner, "Not friendly", Color.yellow));
                         }
                         return false;
                     }
@@ -146,7 +146,7 @@ namespace PixelComrades {
                 case TargetType.Self:
                     if (target.Id != owner) {
                         if (postUpdates) {
-                            owner.PostAll(new StatusUpdate("Self only", Color.yellow));
+                            owner.PostAll(new StatusUpdate(owner, "Self only", Color.yellow));
                         }
                         return false;
                     }
@@ -155,7 +155,7 @@ namespace PixelComrades {
             if (targeting.RequireLoS) {
                 if (!World.Get<LineOfSightSystem>().CanSee(owner, target)) {
                     if (postUpdates) {
-                        owner.PostAll(new StatusUpdate("Can't see target", Color.yellow));
+                        owner.PostAll(new StatusUpdate(owner, "Can't see target", Color.yellow));
                     }
                     return false;
                 }

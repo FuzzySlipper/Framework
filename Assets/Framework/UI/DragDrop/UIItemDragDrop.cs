@@ -6,7 +6,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, IReceive<StatusUpdate>, IReceive<EquipmentChanged>, IPoolEvents {
+    public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, 
+        IReceive<StatusUpdate>, IReceive<EquipmentChanged>, IPoolEvents {
 
         [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
         [SerializeField] private TextMeshProUGUI _amount = null;
@@ -77,7 +78,7 @@ namespace PixelComrades {
             if (PlayAudio) {
                 AudioPool.PlayClip(StringConst.AudioDefaultItemClick, transform.position, 0, AudioVolume);
             }
-            if (Data.Get<InventoryItem>()?.Inventory?.GetEntity().HasComponent<PlayerComponent>() ?? false) {
+            if (Data.Get<InventoryItem>()?.Inventory?.Owner.HasComponent<PlayerComponent>() ?? false) {
                 UIDragDropHandler.SetItem(Data, StopDrag, StopDrag, Clear);
             }
             else {
@@ -118,7 +119,7 @@ namespace PixelComrades {
         }
 
         protected virtual void TrySwap() {
-            if (InventoryItem.CanStack(UIDragDropHandler.CurrentData)) {
+            if (InventorySystem.CanStack(InventoryItem, UIDragDropHandler.CurrentData)) {
                 UIDragDropHandler.Take();
                 return;
             }

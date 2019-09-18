@@ -35,7 +35,7 @@ namespace PixelComrades {
             if (_ammoComponent.Value.Amount > 0) {
                 return true;
             }
-            entity.PostAll(new StatusUpdate("Not enough " + _ammoComponent.Value.Template.Name));
+            entity.PostAll(new StatusUpdate(entity, "Not enough " + _ammoComponent.Value.Template.Name));
             return false;
         }
     }

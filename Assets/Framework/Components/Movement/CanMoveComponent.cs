@@ -30,8 +30,8 @@ namespace PixelComrades {
     }
 
     public struct CanMoveStatusChanged : IEntityMessage {
-        public bool CanMove;
-        public Entity Entity;
+        public bool CanMove { get; }
+        public Entity Entity { get; }
 
         public CanMoveStatusChanged(bool canMove, Entity entity) {
             CanMove = canMove;

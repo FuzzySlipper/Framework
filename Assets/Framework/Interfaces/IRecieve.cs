@@ -2,26 +2,14 @@ using System.Collections.Generic;
 using System;
 
 namespace PixelComrades {
+    public interface IReceive {}
+    
     public interface IReceive<in T> : IReceive {
         void Handle(T arg);
     }
 
-    public interface IReceiveRef<T> : IReceive {
-        void Handle(ref T arg);
-    }
-
-    public interface IReceiveGlobalArray<T> : IReceive {
-        void HandleGlobal(ManagedArray<T> arg);
-    }
-
     public interface IReceiveGlobal<in T> : IReceive {
         void HandleGlobal(T arg);
-    }
-
-    public interface IReceive {}
-
-    public interface ISignalReceiver {
-        void Handle(int signal);
     }
 
     //public interface IReceiveEvents<in T> : IReceiveEvents where T : IEntityMessage {

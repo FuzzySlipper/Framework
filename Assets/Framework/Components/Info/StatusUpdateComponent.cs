@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [Priority(Priority.Highest)]
     [System.Serializable]
-	public sealed class StatusUpdateComponent : IComponent, IReceive<StatusUpdate> {
+	public sealed class StatusUpdateComponent : IComponent {
 
         public string Status;
         public StatusUpdateComponent() {}
@@ -23,41 +23,40 @@ namespace PixelComrades {
             return comp?.Status;
         }
 
-        public void Handle(StatusUpdate arg) {
-#if DEBUG
-            DebugLog.Add(this.GetEntity() + " received status " + arg.Update);
-#endif
-            Status = arg.Update;
-        }
     }
 
     public struct StatusUpdate : IEntityMessage {
-        public string Update;
-        public Color Color;
+        public string Update { get; }
+        public Color Color { get; }
+        public Entity Target { get; }
 
-        public StatusUpdate(string update, Color color) {
+        public StatusUpdate(Entity target, string update, Color color) {
             Update = update;
             Color = color;
+            Target = target;
         }
 
-        public StatusUpdate(string update) {
+        public StatusUpdate(Entity target, string update) {
             Update = update;
             Color = Color.green;
+            Target = target;
         }
     }
 
     public struct CombatStatusUpdate : IEntityMessage {
-        public string Update;
-        public Color Color;
-
-        public CombatStatusUpdate(string update, Color color) {
+        public string Update { get; }
+        public Color Color { get; }
+        public Entity Target { get; }
+        public CombatStatusUpdate(Entity target, string update, Color color) {
             Update = update;
             Color = color;
+            Target = target;
         }
 
-        public CombatStatusUpdate(string update) {
+        public CombatStatusUpdate(Entity target, string update) {
             Update = update;
             Color = Color.green;
+            Target = target;
         }
     }
 }

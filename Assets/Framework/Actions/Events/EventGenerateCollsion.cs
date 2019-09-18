@@ -32,7 +32,7 @@ namespace PixelComrades {
             if (sourceNode == null || targetNode == null) {
                 return;
             }
-            CollisionExtensions.GenerateHitLocDir(sourceNode, targetNode, out var hitPoint, out var dir);
+            CollisionExtensions.GenerateHitLocDir(sourceNode.Tr, targetNode.Tr, targetNode.Collider, out var hitPoint, out var dir);
             var ce = new CollisionEvent(sourceNode, targetNode, hitPoint, dir, Impacts);
             target.Post(ce);
             entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, ce.HitPoint, ce.HitNormal, Impacts));

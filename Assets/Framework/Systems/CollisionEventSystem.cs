@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [Priority(Priority.High)]
-    public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent> {
+    public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent>, 
+        IReceiveGlobal<EnvironmentCollisionEvent>, IReceiveGlobal<PerformedCollisionEvent> {
 
         public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
         
@@ -42,6 +43,21 @@ namespace PixelComrades {
             _collisionString.Append(msg.Target.GetName());
             MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(
                 _collisionString.ToString(),"", Color.blue));
+            if (msg.Target.Entity.HasComponent<DespawnOnCollision>()) {
+                msg.Target.Entity.Destroy();
+            }
+        }
+
+        public void HandleGlobal(EnvironmentCollisionEvent msg) {
+            if (msg.EntityHit.HasComponent<DespawnOnCollision>()) {
+                msg.EntityHit.Destroy();
+            }
+        }
+
+        public void HandleGlobal(PerformedCollisionEvent msg) {
+            if (msg.Origin.Entity.HasComponent<DespawnOnCollision>()) {
+                msg.Origin.Entity.Destroy();
+            }
         }
     }
 

@@ -5,9 +5,8 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     
-    [Priority(Priority.Highest)]
     [System.Serializable]
-	public sealed class BlockDamage : IComponent, IReceiveRef<DamageEvent> {
+	public sealed class BlockDamage : IComponent {
 
         public List<Func<DamageEvent, bool>> Dels = new List<Func<DamageEvent, bool>>();
 

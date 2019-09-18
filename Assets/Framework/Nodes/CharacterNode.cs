@@ -18,7 +18,8 @@ namespace PixelComrades {
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
         private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
-
+        private CachedComponent<AnimatorComponent> _animator = new CachedComponent<AnimatorComponent>();
+        private CachedComponent<SteeringInput> _steering = new CachedComponent<SteeringInput>();
         public Transform Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public StatsContainer Stats => _stats.Value;
@@ -33,11 +34,13 @@ namespace PixelComrades {
         public LabelComponent Label => _label.Value;
         public CommandTarget Target => _target.Value;
         public TagsComponent Tags => Entity.Tags;
+        public AnimatorComponent Animator => _animator.Value;
+        public SteeringInput Steering => _steering.Value;
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
-            _collider, _stats, _tr
+            _collider, _stats, _tr, _animator, _steering
         };
 
         public VitalStat GetVital(int vital) {
@@ -51,6 +54,7 @@ namespace PixelComrades {
                 typeof(GridPosition),
                 typeof(FactionComponent),
                 typeof(CurrentActions),
+                typeof(StatsContainer),
             };
         }
     }

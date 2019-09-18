@@ -22,12 +22,13 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(DataDescriptionUpdating arg) {
-            var equipment = arg.Data.Get<Equipment>();
+            var equipEntity = arg.Data.GetEntity();
+            var equipment = equipEntity.Get<Equipment>();
             if (equipment == null) {
                 return;
             }
             FastString.Instance.Clear();
-            var stats = equipment.Get<StatsContainer>();
+            var stats = equipEntity.Get<StatsContainer>();
             for (int i = 0; i < equipment.StatsToEquip.Count; i++) {
                 FastString.Instance.AppendNewLine(stats.Get(equipment.StatsToEquip[i]).ToLabelString());
             }
@@ -36,15 +37,16 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(TooltipDisplaying arg) {
-            var equipment = arg.Target.Get<Equipment>();
+            var equipEntity = arg.Target.GetEntity();
+            var equipment = equipEntity.Get<Equipment>();
             if (equipment == null) {
                 return;
             }
-            var container = arg.Target.Get<InventoryItem>();
+            var container = equipEntity.Get<InventoryItem>();
             if (container?.Inventory == null) {
                 return;
             }
-            var equipSlots = container.Inventory.GetEntity().Get<EquipmentSlots>();
+            var equipSlots = container.Inventory.Owner.Get<EquipmentSlots>();
             if (equipSlots == null) {
                 return;
             }
@@ -63,9 +65,8 @@ namespace PixelComrades {
                 return;
             }
             arg.Equipment.ClearCurrentMods();
-            var itemStats = arg.Equipment.Get<StatsContainer>();
+            var itemStats = arg.Equipment.GetEntity().Get<StatsContainer>();
             if (arg.Equipment.Mods == null || arg.Equipment.Mods.Length != arg.Equipment.StatsToEquip.Count) {
-                var owner = arg.Equipment.GetEntity();
                 arg.Equipment.Mods = new StatModHolder[arg.Equipment.StatsToEquip.Count];
                 for (int i = 0; i < arg.Equipment.Mods.Length; i++) {
                     arg.Equipment.Mods[i] = new DerivedStatModHolder(itemStats.Get(arg.Equipment.StatsToEquip[i]), 1);

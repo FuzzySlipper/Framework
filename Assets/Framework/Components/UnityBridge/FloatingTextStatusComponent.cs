@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class FloatingTextStatusComponent : IComponent, IReceive<StatusUpdate> {
+	public sealed class FloatingTextStatusComponent : IComponent {
         private CachedTransform _component;
 
         public Transform Tr { get { return _component.Tr; } }
@@ -14,10 +14,6 @@ namespace PixelComrades {
         public FloatingTextStatusComponent(Transform tr, Vector3 offset) {
             _component = new CachedTransform(tr);
             Offset = offset;
-        }
-
-        public void Handle(StatusUpdate arg) {
-            FloatingText.Message(arg.Update, Tr.position + Offset, arg.Color);
         }
 
         public FloatingTextStatusComponent(SerializationInfo info, StreamingContext context) {

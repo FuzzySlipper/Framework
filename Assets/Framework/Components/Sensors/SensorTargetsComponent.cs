@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [Priority(Priority.Normal)]
     [System.Serializable]
-	public sealed class SensorTargetsComponent : IComponent, IReceive<DamageEvent> {
+	public sealed class SensorTargetsComponent : IComponent {
         
         public int MaxUpdatesNoContact = 150;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
@@ -87,12 +87,5 @@ namespace PixelComrades {
             WatchTargets.Sort(this.GetEntity().Get<GridPosition>());
         }
 
-        public void Handle(DamageEvent arg) {
-#if DEBUG
-            DebugLog.Add(this.GetEntity().DebugId + " was attacked by " + arg.Origin?.Entity.DebugId + " parent " + 
-                         arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
-#endif
-            AddWatch(arg.Origin, true);
-        }
     }
 }

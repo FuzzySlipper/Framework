@@ -19,7 +19,7 @@ namespace PixelComrades {
             }
             if (Game.DiceRollSuccess(_chance)) {
                 collisionEvent.Target.Post(new DeathEvent(stateEvent.Origin, stateEvent.Target, 100));
-                collisionEvent.Target.Post(new CombatStatusUpdate("Lethal Hit!", Color.red));
+                collisionEvent.Target.Post(new CombatStatusUpdate(collisionEvent.Target,"Lethal Hit!", Color.red));
             }
         }
 

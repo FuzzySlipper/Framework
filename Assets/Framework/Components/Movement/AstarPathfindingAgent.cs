@@ -10,7 +10,7 @@ using Pathfinding;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class AstarPathfindingAgent : IComponent, IDisposable, IReceive<ChangePositionEvent> {
+	public sealed class AstarPathfindingAgent : IComponent, IDisposable {
         
         public PathfindingStatus CurrentStatus = PathfindingStatus.Created;
         public Point3 LastPosition;
@@ -61,14 +61,6 @@ namespace PixelComrades {
                 CurrentStatus = PathfindingStatus.PathReceived;
             }
 
-        }
-
-        public void SetPosition(Vector3 pos) {
-            Controller.Teleport(pos);
-        }
-
-        public void Handle(ChangePositionEvent arg) {
-            SetPosition(arg.Position);
         }
     }
 }

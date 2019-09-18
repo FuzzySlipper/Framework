@@ -40,8 +40,9 @@ namespace PixelComrades {
             //ShadowFloodFill.GetVisiblePoints(Tr.position.ToCellGridP3(), MaxHearDistance, UpdateCellMapVisible, CurrentList.Contains);
             //watch.Stop();
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
-            var start = this.Get<GridPosition>().Position;
-            var fwd = this.Get<TransformComponent>().Value.ForwardDirection2D();
+            var owner = this.GetEntity();
+            var start = owner.Get<GridPosition>().Position;
+            var fwd = owner.Get<TransformComponent>().Value.ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
                 var maxRowDistance = dir == fwd ? MaxVisionDistance : MaxHearDistance;

@@ -19,25 +19,7 @@ namespace PixelComrades {
             OnDel.SafeInvoke(this);
         }
     }
-
-    [Priority(Priority.Highest)]
-    [System.Serializable]
-	public sealed class GodModeComponent : IComponent, IReceiveRef<DamageEvent> {
-        public void Handle(ref DamageEvent arg) {
-            arg.Amount = 0;
-        }
-
-        public GodModeComponent() {}
-
-        public GodModeComponent(SerializationInfo info, StreamingContext context) {
-            
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            
-        }
-    }
-
+    
     public static class EcsDebug {
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
         //DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
@@ -56,14 +38,19 @@ namespace PixelComrades {
                 return Player.Party[0].Stats.GetVital("Vitals.Energy").ToLabelString();
             });
             DebugConsole.RegisterCommand("godmode", strings => {
-                if (Player.Party[0].Entity.HasComponent<GodModeComponent>()){
-                    Player.Party[0].Entity.Remove<GodModeComponent>();
+                var block = Player.Party[0].Entity.GetOrAdd<BlockDamage>();
+                if (block.Dels.Contains(GodModeDamage)) {
+                    block.Dels.Remove(GodModeDamage);
                     return "Disabled god mode";
                 }
-                Player.Party[0].Entity.Add(new GodModeComponent());
+                block.Dels.Add(GodModeDamage);
                 return "Enabled god mode";
             });
             //Minibuffer.Register(typeof(EcsDebug));
+        }
+
+        private static bool GodModeDamage(DamageEvent dmg) {
+            return true;
         }
 
         private static string SaveEntity(string[] entityID) {

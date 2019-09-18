@@ -24,7 +24,7 @@ namespace PixelComrades {
     }
 
     public struct HealEvent : IEntityMessage {
-        public float Amount;
+        public float Amount { get; }
         public Entity Origin { get; }
         public Entity Target { get; }
         public string TargetVital { get; }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class ActionUsingNode : BaseNode {
 
-        private CachedComponent<AnimatorData> _animator = new CachedComponent<AnimatorData>();
+        private CachedComponent<AnimatorComponent> _animator = new CachedComponent<AnimatorComponent>();
         private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         public StatsContainer Stats => _stats.Value;
@@ -21,14 +21,14 @@ namespace PixelComrades {
             Running
         }
 
-        public IAnimator Animator { get { return _animator?.Value.Animator; } }
+        public IAnimator Animator { get { return _animator?.Value.Value; } }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _animator, _stats, _tr
         };
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {
-                typeof(AnimatorData),
+                typeof(AnimatorComponent),
             };
         }
 

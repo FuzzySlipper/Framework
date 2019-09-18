@@ -30,6 +30,7 @@ namespace PixelComrades {
 
         public int Count { get { return _list.Count; } }
         public Entity this[int index] { get { return _list[index].Item; } }
+        public Entity Owner { get { return this.GetEntity(); } }
 
         public ActionSlot GetSlot(int slot) {
             return _list[slot];
@@ -174,7 +175,7 @@ namespace PixelComrades {
             var item = Item;
             ClearContents();
             if (item != null) {
-                SlotOwner.Get<ItemInventory>()?.Add(item);
+                SlotOwner.GetEntity().Get<ItemInventory>()?.Add(item);
             }
             return true;
         }
@@ -182,7 +183,7 @@ namespace PixelComrades {
         public void ClearContents() {
             if (Item != null) {
                 if (Action?.EquippedSlot >= 0) {
-                    SlotOwner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
+                    SlotOwner.GetEntity().Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
                 }
                 var container = Item.Get<InventoryItem>();
                 if (container != null && container.Inventory == SlotOwner) {

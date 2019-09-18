@@ -20,6 +20,7 @@ namespace PixelComrades {
 
         public int Count { get { return _list.Count; } }
         public Entity this[int index] { get { return _list[index].Item; } }
+        public Entity Owner { get { return this.GetEntity(); } }
         
         public bool Add(Entity item) {
             return TryEquip(item);

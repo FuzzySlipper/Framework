@@ -16,6 +16,9 @@ namespace PixelComrades {
         private VitalStat _vitalStat;
         private string _skill;
         private bool _isWaiting;
+        private ActionFx _fxComponent;
+        private float _finalCost;
+        
         public BlockDamageLayer(Action action, string modelData, string targetVital, float cost, string skill, string chargeInput, float waitTime) : base(action) {
             ModelData = modelData;
             Cost = cost;
@@ -49,21 +52,22 @@ namespace PixelComrades {
                 model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null ? node.ActionEvent.SpawnPivot : node.Tr);
                 node.ActionEvent.Action.Entity.Add(new ModelComponent(model.GetComponent<IModelComponent>()));
             }
+            var dmgComponent = node.Entity.GetOrAdd<BlockDamage>();
             if (!node.Entity.Tags.Contain(EntityTags.Player)) {
-                var dmgComponent = node.Entity.GetOrAdd<BlockDamage>();
-                dmgComponent.Dels.Add(BlockDamage);
+                dmgComponent.Dels.Add(BlockDamageFlat);
                 _isWaiting = true;
                 _vitalStat = null;
                 return;
             }
-            var blockDamageComponent = node.Entity.GetOrAdd<BlockDamageWithCostComponent>();
             _vitalStat = node.Stats.GetVital(TargetVital);
             var skillMulti = 1f;
             if (!string.IsNullOrEmpty(_skill)) {
                 var skillValue = node.Entity.FindStatValue(_skill);
                 skillMulti = Mathf.Clamp(1 - (skillValue * CostVital.SkillPercent), CostVital.SkillMaxReduction, 1);
             }
-            blockDamageComponent.Assign(node.Entity, _vitalStat, Cost * skillMulti, node.ActionEvent.Action.Fx);
+            dmgComponent.Dels.Add(BlockDamageWithStats);
+            _fxComponent = node.ActionEvent.Action.Fx;
+            _finalCost = Cost * skillMulti;
         }
 
         public override void End(ActionUsingNode node) {
@@ -74,11 +78,14 @@ namespace PixelComrades {
                 ItemPool.Despawn(model.Model.Tr.gameObject);
                 node.ActionEvent.Action.Entity.Remove(model);
             }
-            if (_isWaiting) {
-                node.Entity.Remove<BlockDamage>();
-            }
-            else {
-                node.Entity.Remove<BlockDamageWithCostComponent>();
+            var blockDamage = node.Entity.Get<BlockDamage>();
+            if (blockDamage != null) {
+                if (_isWaiting) {
+                    blockDamage.Dels.Remove(BlockDamageFlat);
+                }
+                else {
+                    blockDamage.Dels.Remove(BlockDamageWithStats);
+                }
             }
         }
 
@@ -94,56 +101,25 @@ namespace PixelComrades {
             }
         }
 
-        private bool BlockDamage(DamageEvent dmgEvent) {
+        private bool BlockDamageFlat(DamageEvent dmgEvent) {
             return true;
         }
-    }
 
-    [System.Serializable]
-	public sealed class BlockDamageWithCostComponent : IComponent, IReceiveRef<DamageEvent>, IReceive<CollisionEvent> {
-
-        private CachedStat<VitalStat> _stat;
-        private float _cost;
-        private ActionFx _fxComponent;
-
-        public void Assign(Entity statOwner, VitalStat stat, float cost, ActionFx afx) {
-            _stat = new CachedStat<VitalStat>(statOwner, stat);
-            _cost = cost;
-            _fxComponent = afx;
-        }
-
-        public void Clear() {
-            _stat = null;
-            _fxComponent = null;
-        }
-
-        public void Handle(CollisionEvent arg) {
-            if (_stat == null || _fxComponent == null) {
-                return;
+        public bool BlockDamageWithStats(DamageEvent arg) {
+            if (_fxComponent != null) {
+                CollisionExtensions.GenerateHitLocDir(arg.Origin.Tr, arg.Target.Tr, arg.Target.Collider, 
+                    out var hitPoint, out var hitNormal);
+                _fxComponent.TriggerEvent(
+                    new ActionStateEvent(
+                        arg.Origin, arg.Target, hitPoint + (hitNormal * 0.1f), Quaternion.LookRotation(hitNormal),
+                        ActionStateEvents.Collision));                
             }
-            _fxComponent.TriggerEvent(new ActionStateEvent(arg.Origin, arg.Target, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal), ActionStateEvents.Collision));
-        }
-
-        public void Handle(ref DamageEvent arg) {
-            if (_stat == null || arg.Amount <= 0) {
-                return;
+            if (_vitalStat == null || arg.Amount <= 0) {
+                return false;
             }
             arg.Amount = 0;
-            _stat.Stat.Current -= _cost;
-        }
-        
-        public BlockDamageWithCostComponent(){}
-
-        public BlockDamageWithCostComponent(SerializationInfo info, StreamingContext context) {
-            _stat = info.GetValue(nameof(_stat), _stat);
-            _cost = info.GetValue(nameof(_cost), _cost);
-            _fxComponent = ItemPool.LoadAsset<ActionFx>(info.GetValue(nameof(_fxComponent), ""));
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_stat), _stat);
-            info.AddValue(nameof(_cost), _cost);
-            info.AddValue(nameof(_fxComponent), ItemPool.GetAssetLocation(_fxComponent));
+            _vitalStat.Current -= _finalCost;
+            return true;
         }
     }
 }

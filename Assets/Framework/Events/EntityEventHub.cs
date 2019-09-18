@@ -69,12 +69,6 @@ namespace PixelComrades {
                 if (list[i] == null) {
                     continue;
                 }
-                (list[i] as IReceiveRef<T>)?.Handle(ref msg);
-            }
-            for (int i = 0; i < list.Count; i++) {
-                if (list[i] == null) {
-                    continue;
-                }
                 (list[i] as IReceive<T>)?.Handle(msg);
             }
         }

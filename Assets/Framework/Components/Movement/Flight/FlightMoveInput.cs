@@ -5,37 +5,12 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public sealed class FlightMoveInput : IComponent, IReceive<CanMoveStatusChanged>, IReceive<MoveInputMessage>, IReceive<ChangePositionEvent>, 
-    IReceive<PhysicsInputMessage>{
+	public sealed class FlightMoveInput : IComponent {
         
-        public Vector3 LookInputVector { get; private set; }
-        public Vector3 MoveInputVector { get; private set; }
-        public Vector3 InternalVelocityAdd { get; private set; }
+        public Vector3 LookInputVector { get; set; }
+        public Vector3 MoveInputVector { get; set; }
 
-        private bool _canMove = true;
-
-        public void Handle(CanMoveStatusChanged arg) {
-            _canMove = arg.CanMove;
-            if (!_canMove) {
-                LookInputVector = MoveInputVector = Vector3.zero;
-            }
-        }
-
-        public void Handle(MoveInputMessage arg) {
-            if (!_canMove) {
-                return;
-            }
-            MoveInputVector = arg.Move;
-            LookInputVector = arg.Look;
-        }
-
-        public void Handle(ChangePositionEvent arg) {
-            this.GetEntity().GetNode<CollidableNode>().Tr.position = arg.Position;
-        }
-
-        public void Handle(PhysicsInputMessage arg) {
-            InternalVelocityAdd += arg.Force;
-        }
+        public bool CanMove = true;
 
         public void UpdateControl(FlightControl control) {
             control.Thrust = MoveInputVector.z;
@@ -48,11 +23,11 @@ namespace PixelComrades {
         public FlightMoveInput() {}
 
         public FlightMoveInput(SerializationInfo info, StreamingContext context) {
-            _canMove = info.GetValue(nameof(_canMove), _canMove);
+            CanMove = info.GetValue(nameof(CanMove), CanMove);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_canMove), _canMove);
+            info.AddValue(nameof(CanMove), CanMove);
         }
     }
 }

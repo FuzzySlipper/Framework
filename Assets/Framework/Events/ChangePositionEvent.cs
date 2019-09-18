@@ -7,12 +7,14 @@ namespace PixelComrades {
 
         public Vector3 Position { get; }
         public Quaternion? Rotation { get;}
-
-        public ChangePositionEvent(Vector3 position) {
+        public Entity Target { get; }
+        public ChangePositionEvent(Entity target, Vector3 position) {
+            Target = target;
             Position = position;
             Rotation = null;
         }
-        public ChangePositionEvent(Vector3 position, Quaternion rotation) {
+        public ChangePositionEvent(Entity target, Vector3 position, Quaternion rotation) {
+            Target = target;
             Position = position;
             Rotation = rotation;
         }

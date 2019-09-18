@@ -14,5 +14,13 @@ namespace PixelComrades {
             entity.Add(new CollisionCheckForward(data.TryGetValue<float>(DatabaseFields.CollisionDistance, 10f)));
         }
     }
+
+    public class CurrencyProvider : IDataFactory<CurrencyItem> {
+
+        public void AddComponent(Entity entity, DataEntry data) {
+            var currency = entity.Add(new CurrencyItem(data.TryGetValue("Count", 1)));
+            entity.Add(new LabelComponent(string.Format("{0} {1}", currency.Count, GameText.DefaultCurrencyLabel)));
+        }
+    }
     
 }

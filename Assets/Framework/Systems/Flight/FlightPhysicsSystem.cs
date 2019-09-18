@@ -91,7 +91,7 @@ namespace PixelComrades {
             var pitchRotation = Quaternion.Lerp(node.Rigidbody.rotation, Quaternion.Euler(pitchBank, 0f, 0), Time.deltaTime * node.FakeFlight.Config.PitchSpeed);
             //node.Rigidbody.MoveRotation(pitchRotation);
             //node.Entity.Tr.rotation = pitchRotation;
-            node.Entity.Post(new ChangePositionEvent(position, pitchRotation));
+            node.Entity.Post(new ChangePositionEvent(node.Entity, position, pitchRotation));
         }
 
         private void AutoLevel(FlyingNode node) {
