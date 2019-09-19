@@ -27,18 +27,24 @@ namespace PixelComrades {
         }
 
         public void Handle(DamageEvent arg) {
-            if (arg.Target.Entity.HasComponent<FloatingText>()) {
-                
+            if (!arg.Target.Entity.HasComponent<FloatingText>()) {
+                return;
             }
             UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.Tr.position, Color.red);
         }
 
         public void Handle(HealEvent arg) {
+            if (!arg.Target.HasComponent<FloatingText>()) {
+                return;
+            }
             UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.GetPosition(), Color.green);
         }
 
         public void Handle(CombatStatusUpdate arg) {
             var floatingText = arg.Target.Find<FloatingTextCombatComponent>();
+            if (floatingText == null) {
+                return;
+            }
             FloatingText.Message(arg.Update, floatingText.Tr.position + floatingText.Offset, arg.Color);
         }
     }
