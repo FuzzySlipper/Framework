@@ -8,7 +8,7 @@ namespace PixelComrades {
 	public struct GridPosition : IComponent {
         public Point3 Position;
 
-        public GridPosition(Point3 position) : this() {
+        public GridPosition(Point3 position) {
             Position = position;
         }
 

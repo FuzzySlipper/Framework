@@ -131,6 +131,20 @@ namespace PixelComrades {
                 }
             }
         }
+        
+        /*
+         * var amt = arg.Amount;
+            bool isCritical = false;
+            string source = arg.Origin.Get<LabelComponent>()?.Text;
+            if (string.IsNullOrEmpty(source)) {
+                var msg = isCritical ? CombatMessages.DamagedCritNoActor : CombatMessages.DamagedNoActor;
+                msg.Show(UIStyle.Damage.ToHex(), Name, amt.ToString("F0"));
+            }
+            else {
+                var msg = isCritical ? CombatMessages.DamagedCritActor : CombatMessages.DamageFromActor;
+                msg.Show(UIStyle.Damage.ToHex(), source, Name, amt.ToString("F0"));
+            }
+         */
 
         public void HandleGlobal(RaiseDeadEvent arg) {
             var entity = arg.Target;

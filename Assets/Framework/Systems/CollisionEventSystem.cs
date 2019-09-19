@@ -4,13 +4,17 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [Priority(Priority.High)]
-    public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent>, 
-        IReceiveGlobal<EnvironmentCollisionEvent>, IReceiveGlobal<PerformedCollisionEvent> {
+    public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent>,
+        IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
 
         public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
         
         private GameOptions.CachedBool _collisionMessage = new GameOptions.CachedBool("CollisionMessages");
         private FastString _collisionString = new FastString();
+
+        public CollisionEventSystem() {
+            EntityController.RegisterReceiver<DespawnOnCollision>(this);
+        }
 
         public void HandleGlobal(CollisionEvent msg) {
             if (msg.Hit < 0) {
@@ -48,13 +52,13 @@ namespace PixelComrades {
             }
         }
 
-        public void HandleGlobal(EnvironmentCollisionEvent msg) {
+        public void Handle(EnvironmentCollisionEvent msg) {
             if (msg.EntityHit.HasComponent<DespawnOnCollision>()) {
                 msg.EntityHit.Destroy();
             }
         }
 
-        public void HandleGlobal(PerformedCollisionEvent msg) {
+        public void Handle(PerformedCollisionEvent msg) {
             if (msg.Origin.Entity.HasComponent<DespawnOnCollision>()) {
                 msg.Origin.Entity.Destroy();
             }

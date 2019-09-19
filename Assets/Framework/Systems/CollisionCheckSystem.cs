@@ -79,6 +79,9 @@ namespace PixelComrades {
                 }
                 var hit = _rayHits[i];
                 var hitEntity = EntityController.GetEntity(UnityToEntityBridge.GetEntityId(_rayHits[i].collider));
+                if (hitEntity == entity) {
+                    continue;
+                }
 #if DEBUG_RAYCAST
                 Color pointColor = Color.white;
                 if (hitEntity == null) {
@@ -88,9 +91,6 @@ namespace PixelComrades {
                 }
                 if (hit.transform.CompareTag(StringConst.TagInvalidCollider)) {
                     pointColor = Color.magenta;
-                }
-                else if (hitEntity == entity) {
-                    pointColor = Color.blue;
                 }
                 else if (hitEntity != null) {
                     pointColor = Color.red;
@@ -111,7 +111,7 @@ namespace PixelComrades {
                     }
                     continue;
                 }
-                if (hitEntity == entity || !hitEntity.Tags.Contain(EntityTags.CanUnityCollide) || hitEntity.ParentId == entity.Id) {
+                if (!hitEntity.Tags.Contain(EntityTags.CanUnityCollide) || hitEntity.ParentId == entity.Id) {
                     continue;
                 }
                 if ((entity.ParentId >= 0) && (hitEntity.Id == entity.ParentId || hitEntity.ParentId == entity.ParentId)) {

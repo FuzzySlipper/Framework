@@ -17,7 +17,8 @@ namespace PixelComrades {
         public ManagedArray<T> CurrentList { get { return _list[_currentIndex]; } }
         public ManagedArray<T> PreviousList { get { return _list[_currentIndex == 0 ? 1 : 0]; } }
 
-        public T this[int index] { get { return CurrentList[index]; } }
+        //public T this[int index] { get { return CurrentList[index]; } }
+        public ref T this[int index] { get { return ref CurrentList[index]; } }
 
         public int Count { get { return CurrentList.Count; } }
 

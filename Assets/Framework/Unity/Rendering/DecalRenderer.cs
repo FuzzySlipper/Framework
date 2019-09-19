@@ -6,7 +6,7 @@ namespace PixelComrades {
     [ExecuteInEditMode]
     public class DecalRenderer : MonoBehaviour {
 
-        private const string _bufferBaseName = "Decalicious - ";
+        private const string _bufferBaseName = "Decal - ";
         private const string _bufferDeferredName = _bufferBaseName + "Deferred";
         private const string _bufferUnlitName = _bufferBaseName + "Unlit";
         private const string _bufferLimitToName = _bufferBaseName + "Limit To Game Objects";

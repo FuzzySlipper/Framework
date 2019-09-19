@@ -431,7 +431,7 @@ namespace PixelComrades {
             }
             var parent = entity.GetParent();
             while (parent != null) {
-                node = ((NodeFilter<T>) filter).GetNode(entity);
+                node = ((NodeFilter<T>) filter).GetNode(parent);
                 if (node != null) {
                     return node;
                 }

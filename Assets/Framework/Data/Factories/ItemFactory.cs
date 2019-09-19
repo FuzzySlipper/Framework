@@ -167,6 +167,8 @@ namespace PixelComrades {
                 entity.Add(new IconComponent(UnityDirs.ItemIcons, data.Icon));
             }
             entity.Add(new EntityLevelComponent(level));
+            entity.Add(new TooltipComponent());
+            var dataDescr = entity.Add(new DataDescriptionComponent());
             if (data.TypeComponents != null) {
                 World.Get<DataFactory>().AddComponentList(entity, data.Data, data.TypeComponents);
             }
@@ -205,8 +207,6 @@ namespace PixelComrades {
             }
             entity.Add(new LabelComponent(sbName.ToString()));
             entity.Add(new DescriptionComponent(sbDescr.ToString()));
-            entity.Add(new TooltipComponent());
-            var dataDescr = entity.Add(new DataDescriptionComponent());
             entity.Post(new DataDescriptionUpdating(dataDescr));
             return entity;
         }

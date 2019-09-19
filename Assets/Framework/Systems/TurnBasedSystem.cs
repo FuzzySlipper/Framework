@@ -29,8 +29,21 @@ namespace PixelComrades {
         bool TryStartTurn();
     }
 
-    public struct StartTurnEvent : IEntityMessage{}
-    public struct EndTurnEvent : IEntityMessage{}
+    public struct StartTurnEvent : IEntityMessage {
+        public Entity Entity { get; }
+
+        public StartTurnEvent(Entity entity) {
+            Entity = entity;
+        }
+    }
+
+    public struct EndTurnEvent : IEntityMessage {
+        public Entity Entity { get; }
+
+        public EndTurnEvent(Entity entity) {
+            Entity = entity;
+        }
+    }
 
     public class TurnBasedSystem : SystemBase, IMainSystemUpdate {
 

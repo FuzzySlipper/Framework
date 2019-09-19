@@ -4,13 +4,15 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public struct PhysicsInputMessage : IEntityMessage {
-        public Vector3 Force;
+        public Vector3 Force { get; }
+        public Entity Target { get; }
 
-        public PhysicsInputMessage(Vector3 force) {
+        public PhysicsInputMessage(Entity target,Vector3 force) {
             Force = force;
+            Target = target;
         }
     }
-    public class PathfinderMoverSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ChangePositionEvent> {
+    public class PathfinderMoverSystem : SystemBase, IMainSystemUpdate, IReceive<ChangePositionEvent> {
 
         public static bool UseSimple = false;
 
@@ -26,6 +28,8 @@ namespace PixelComrades {
         private IPathfindingGrid _grid;
 
         public PathfinderMoverSystem() {
+            EntityController.RegisterReceiver<AstarPathfindingAgent>(this);
+            EntityController.RegisterReceiver<SimplePathfindingAgent>(this);
             if (UseSimple) {
                 NodeFilter<SimplePathfindMoverNode>.New(SimplePathfindMoverNode.GetTypes());
             }
@@ -244,7 +248,7 @@ namespace PixelComrades {
             }
         }
 
-        public void HandleGlobal(ChangePositionEvent arg) {
+        public void Handle(ChangePositionEvent arg) {
             var astarPathfinding = arg.Target.Get<AstarPathfindingAgent>();
             if (astarPathfinding != null) {
                 astarPathfinding.Controller.Teleport(arg.Position);

@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class EquipmentSystem : SystemBase, IReceiveGlobal<SaveGameLoaded>, IReceiveGlobal<DataDescriptionUpdating>,
-    IReceiveGlobal<TooltipDisplaying>, IReceiveGlobal<EquipItemEvent>, IReceiveGlobal<UnEquipItemEvent> {
-        
-        public EquipmentSystem(){}
+    public sealed class EquipmentSystem : SystemBase, IReceiveGlobal<SaveGameLoaded>, IReceive<DataDescriptionUpdating>,
+        IReceive<TooltipDisplaying>, IReceiveGlobal<EquipItemEvent>, IReceiveGlobal<UnEquipItemEvent> {
+
+        public EquipmentSystem() {
+            EntityController.RegisterReceiver<Equipment>(this);
+        }
         
         public void HandleGlobal(SaveGameLoaded arg) {
             var equipArray = EntityController.GetComponentArray<Equipment>();
@@ -21,7 +23,7 @@ namespace PixelComrades {
             }
         }
 
-        public void HandleGlobal(DataDescriptionUpdating arg) {
+        public void Handle(DataDescriptionUpdating arg) {
             var equipEntity = arg.Data.GetEntity();
             var equipment = equipEntity.Get<Equipment>();
             if (equipment == null) {
@@ -36,7 +38,7 @@ namespace PixelComrades {
             arg.Data.Text += FastString.Instance.ToString();
         }
 
-        public void HandleGlobal(TooltipDisplaying arg) {
+        public void Handle(TooltipDisplaying arg) {
             var equipEntity = arg.Target.GetEntity();
             var equipment = equipEntity.Get<Equipment>();
             if (equipment == null) {

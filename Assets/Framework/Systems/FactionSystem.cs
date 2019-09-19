@@ -149,6 +149,7 @@ namespace PixelComrades {
         }
     }
 
+    [AutoRegister]
     public class TagTimerSystem : SystemBase, ISystemUpdate, IReceiveGlobal<ConfusionEvent>, IReceiveGlobal<SlowEvent>, IReceiveGlobal<StunEvent> {
 
         private ManagedArray<TagTimerEvent> _timerArray = new ManagedArray<TagTimerEvent>();

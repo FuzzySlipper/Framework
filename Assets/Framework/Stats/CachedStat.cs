@@ -25,7 +25,7 @@ namespace PixelComrades {
             }
             _entityId = stat.Entity;
             _statId = stat.ID;
-            _stat = EntityController.Get(_entityId)?.Get<StatsContainer>()?.Get<T>(_statId);
+            _stat = stat;
         }
 
         public CachedStat(int entity, T stat) {

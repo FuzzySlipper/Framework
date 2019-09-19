@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class InventorySystem : SystemBase, IReceiveGlobal<DataDescriptionUpdating> {
-        
-        public InventorySystem(){}
-        public void HandleGlobal(DataDescriptionUpdating arg) {
+    public sealed class InventorySystem : SystemBase, IReceive<DataDescriptionUpdating> {
+
+        public InventorySystem() {
+            EntityController.RegisterReceiver<InventoryItem>(this);
+        }
+        public void Handle(DataDescriptionUpdating arg) {
             var inventoryItem = arg.Data.GetEntity().Get<InventoryItem>();
             if (inventoryItem == null) {
                 return;

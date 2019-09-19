@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class CurrencySystem : SystemBase, IReceiveGlobal<ContainerStatusChanged> {
-        
-        public CurrencySystem(){}
-        public void HandleGlobal(ContainerStatusChanged arg) {
+    public sealed class CurrencySystem : SystemBase, IReceive<ContainerStatusChanged> {
+
+        public CurrencySystem() {
+            EntityController.RegisterReceiver<CurrencyItem>(this);
+        }
+        public void Handle(ContainerStatusChanged arg) {
             if (arg.Entity == null) {
                 return;
             }

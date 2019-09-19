@@ -10,6 +10,7 @@ namespace PixelComrades {
         
         public GridPosition Position { get => _position; }
         public Transform Tr { get => _tr.Value; }
+        public CachedComponent<GridPosition> PositionComponent { get => _position; }
         public override List<CachedComponent> GatherComponents =>
             new List<CachedComponent>() { _position, _tr};
 

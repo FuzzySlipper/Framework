@@ -9,10 +9,10 @@ namespace PixelComrades {
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-        private List<ForwardMoverNode> _forwardMovers = new List<ForwardMoverNode>();
-        private List<RotateToNode> _rotators = new List<RotateToNode>();
-        private List<SimpleMoverNode> _simpleMovers = new List<SimpleMoverNode>();
-        private List<ArcMoverNode> _arcMovers = new List<ArcMoverNode>();
+        private List<ForwardMoverNode> _forwardMovers;
+        private List<RotateToNode> _rotators;
+        private List<SimpleMoverNode> _simpleMovers;
+        private List<ArcMoverNode> _arcMovers;
 
         public MoverSystem() {
             NodeFilter<ForwardMoverNode>.New(ForwardMoverNode.GetTypes());
@@ -20,7 +20,9 @@ namespace PixelComrades {
             NodeFilter<SimpleMoverNode>.New(SimpleMoverNode.GetTypes());
             NodeFilter<ArcMoverNode>.New(ArcMoverNode.GetTypes());
         }
-
+        
+        private UnscaledTimer _textTimer = new UnscaledTimer(0.5f);
+        
         public void OnSystemUpdate(float dt, float unscaledDt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
                 _moveTweens[i].Tr.position = _moveTweens[i].Tween.Get();

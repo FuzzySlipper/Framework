@@ -47,7 +47,14 @@ namespace PixelComrades {
         public const string Currencies = "Currencies";
 
     }
-    
+
+    public enum ActionSource {
+        [Description("Melee")] Melee = 0,
+        [Description("Ranged")] Ranged = 1,
+        [Description("Magic")] Magic = 2,
+        [Description("Special")] Special = 3,
+    }
+
     public enum PlayerPronouns {
         [Description("he")] He,
         [Description("she")] She,

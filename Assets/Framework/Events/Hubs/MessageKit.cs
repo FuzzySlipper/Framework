@@ -62,27 +62,6 @@ namespace PixelComrades {
         Merchant = 3,
     }
 
-    [System.Serializable]
-	public sealed class MessageEventReceiver<T> : IComponent, IReceive<T> where T : IEntityMessage {
-
-        private int _messageKitMessage;
-        public MessageEventReceiver(int messageKitMessage) {
-            _messageKitMessage = messageKitMessage;
-        }
-
-        public void Handle(T arg) {
-            MessageKit.post(_messageKitMessage);
-        }
-
-        public MessageEventReceiver(SerializationInfo info, StreamingContext context) {
-            _messageKitMessage = info.GetValue(nameof(_messageKitMessage), _messageKitMessage);
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_messageKitMessage), _messageKitMessage);
-        }
-    }
-
     public static class MessageKit {
         private static Dictionary<int, List<System.Action>> _messageTable = new Dictionary<int, List<System.Action>>();
 

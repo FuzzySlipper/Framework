@@ -59,7 +59,6 @@ namespace PixelComrades {
             Get<CharacterRectSystem>();
             Get<SensorSystem>();
             Get<EntityUIPoolSystem>();
-            Get<TagTimerSystem>();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             for (int a = 0; a < assemblies.Length; a++) {

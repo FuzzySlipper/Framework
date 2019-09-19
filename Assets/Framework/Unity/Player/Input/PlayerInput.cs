@@ -192,6 +192,9 @@ namespace PixelComrades {
                 Cursor.lockState = Game.CursorUnlocked ? CursorLockMode.None : CursorLockMode.Locked;
                 UICursor.main.SetCursor(UICursor.CrossHair);
             }
+            if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) {
+                SourceConsole.UI.ConsolePanelController.Singleton.Toggle();
+            }
         }
 
         public static void SetCancelDel(System.Action onCancel, string target) {

@@ -20,9 +20,9 @@ namespace PixelComrades {
             action.Primary = type?.TargetID == "WeaponUsable";
             action.WeaponModel = data.TryGetValue("WeaponModel", "");
             List<IActionImpact> impacts = new List<IActionImpact>();
+            var stats = entity.Get<StatsContainer>();
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
             (DatabaseFields.PowerMax, 1f));
-            var stats = entity.Get<StatsContainer>();
             stats.Add(power);
             var animation = data.TryGetValue("Animation", "");
             bool generateCollision = false;

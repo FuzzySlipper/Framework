@@ -7,8 +7,8 @@ namespace PixelComrades {
     public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation>, IReceive<DamageEvent>,
         IReceive<DeathEvent> {
 
-        private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>();
-        private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>();
+        private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>(1);
+        private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>(1);
 
         public AnimatorSystem() {
             EntityController.RegisterReceiver<HurtAnimation>(this);
@@ -17,7 +17,7 @@ namespace PixelComrades {
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _animations.Swap();
-            for (int i = 0; i < _animations.PreviousList.Max; i++) {
+            for (int i = 0; i < _animations.PreviousList.Count; i++) {
                 if (_animations.PreviousList.IsInvalid(i)) {
                     continue;
                 }
@@ -36,9 +36,17 @@ namespace PixelComrades {
                 }
             }
             _moveClips.Swap();
-            for (int i = 0; i < _moveClips.Count; i++) {
-                if (_moveClips[i].Animator.Value.IsAnimationComplete(_moveClips[i].Clip)) {
-                    _moveClips[i].Animator.GetEntity().Tags.Remove(EntityTags.CantMove);
+            for (int i = 0; i < _moveClips.PreviousList.Count; i++) {
+                if (_moveClips.PreviousList.IsInvalid(i)) {
+                    continue;
+                }
+                var node = _moveClips.PreviousList[i];
+                if (node.Animator == null) {
+                    _moveClips.CurrentList.Remove(i);
+                    continue;
+                }
+                if (node.Animator.Value.IsAnimationComplete(node.Clip)) {
+                    node.Animator.GetEntity().Tags.Remove(EntityTags.CantMove);
                     _moveClips.CurrentList.Remove(i);
                 }
             }

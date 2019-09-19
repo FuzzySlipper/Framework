@@ -78,7 +78,6 @@ namespace PixelComrades {
                 return null;
             }
             var entity = GetProjectile(template);
-            entity.Get<DespawnTimer>().StartTimer();
             entity.Get<MoveTarget>().SetMoveTarget(target);
             entity.Get<ActionImpacts>().Impacts = impacts;
             if (template.ActionFx != null) {
@@ -162,7 +161,7 @@ namespace PixelComrades {
                     entity.Add(new ArcMover());
                     break;
             }
-            entity.Get<DespawnTimer>().Time = data.Timeout;
+            entity.Get<DespawnTimer>().Length = data.Timeout;
             entity.Get<MoveSpeed>().Speed = data.Speed;
             entity.Get<RotationSpeed>().Speed = data.Rotation;
             if (data.ActionFx != null) {
@@ -186,7 +185,7 @@ namespace PixelComrades {
             //if it has a label component it'll get picked up by center target
             //entity.Add(new LabelComponent(name));
             entity.Add(new ModelComponent(null));
-            entity.Add(new DespawnTimer(_defaultTimeout.Value, false, false));
+            entity.Add(new DespawnTimer(_defaultTimeout.Value, false));
             entity.Add(new DespawnOnCollision());
             entity.Add(new MoveSpeed(_defaultSpeed.Value));
             entity.Add(new RotationSpeed(_defaultRotation.Value));
