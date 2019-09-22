@@ -13,7 +13,7 @@ namespace PixelComrades {
         private static GameOptions.CachedColor _frozenColor = new GameOptions.CachedColor("Frozen");
 
         private GenericPool<TweenFloat> _floatPool = new GenericPool<TweenFloat>(0, null, SetupTween);
-        private BufferedList<SpriteColorWatch> _colorList = new BufferedList<SpriteColorWatch>(1);
+        private BufferedList<SpriteColorWatch> _colorList = new BufferedList<SpriteColorWatch>();
         
         private struct SpriteColorWatch {
             public SpriteColorComponent ColorComponent;
@@ -27,6 +27,13 @@ namespace PixelComrades {
                 Scale = scale;
                 Stage = 0;
             }
+
+            public SpriteColorWatch(SpriteColorComponent colorComponent, TweenFloat tween, Vector3 scale, int stage) {
+                ColorComponent = colorComponent;
+                Tween = tween;
+                Scale = scale;
+                Stage = stage;
+            }
         } 
         
         public SpriteSystem() {
@@ -34,34 +41,32 @@ namespace PixelComrades {
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _colorList.Swap();
-            for (int i = 0; i < _colorList.PreviousList.Count; i++) {
-                if (_colorList.PreviousList.IsInvalid(i)) {
-                    continue;
-                }
-                ref var colorStage = ref _colorList.PreviousList[i];
+            for (int i = 0; i < _colorList.Count; i++) {
+                ref var colorStage = ref _colorList[i];
                 if (colorStage.ColorComponent == null) {
-                    _colorList.CurrentList.Remove(i);
+                    _colorList.Remove(colorStage);
                     continue;
                 }
                 colorStage.ColorComponent.Renderer.transform.localScale = new Vector3(
                     colorStage.Scale.x * colorStage.Tween.Get(),
                     colorStage.Scale.y, colorStage.Scale.z);
                 if (colorStage.Stage == 1) {
-                    colorStage.ColorComponent.UpdateCurrentColor(Color.Lerp(Color.red, colorStage.ColorComponent.BaseColor,
-                        colorStage.Tween.Get()));
+                    colorStage.ColorComponent.UpdateCurrentColor(
+                        Color.Lerp(
+                            Color.red, colorStage.ColorComponent.BaseColor,
+                            colorStage.Tween.Get()));
                 }
                 if (colorStage.Tween.Active) {
                     continue;
                 }
                 if (colorStage.Stage == 0) {
-                    colorStage.Stage = 1;
                     colorStage.Tween.Restart(colorStage.ColorComponent.DmgMaxScale, 1);
+                    colorStage.Stage = 1;
                 }
                 else {
                     colorStage.ColorComponent.AnimatingColor = false;
                     colorStage.ColorComponent.UpdateBaseColor();
-                    _colorList.CurrentList.Remove(i);
+                    _colorList.Remove(colorStage);
                 }
             }
         }

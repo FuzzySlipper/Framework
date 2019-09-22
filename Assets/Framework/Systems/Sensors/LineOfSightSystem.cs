@@ -128,7 +128,7 @@ namespace PixelComrades {
         }
 
         public bool IsTargetVisible(Entity owner, Vector3 source, Entity unit, Vector3 forward, float maxVision) {
-            var targetTr = unit.Get<TransformComponent>().Value;
+            var targetTr = unit.Get<TransformComponent>();
             var targetDir = (targetTr.position - source);
             var targetDistance = targetDir.sqrMagnitude;
             var maxSquared = maxVision * maxVision;

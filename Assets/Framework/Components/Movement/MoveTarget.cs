@@ -12,8 +12,8 @@ namespace PixelComrades {
             LookOnly
         }
 
-        private CachedTransform _targetTr = new CachedTransform();
-        private CachedTransform _lookTr = new CachedTransform();
+        private CachedComponent<TransformComponent> _targetTr = new CachedComponent<TransformComponent>();
+        private CachedComponent<TransformComponent> _lookTr = new CachedComponent<TransformComponent>();
         private Vector3? _targetV3;
         private State _state;
 
@@ -36,8 +36,8 @@ namespace PixelComrades {
                 if (_targetV3 != null) {
                     return _targetV3.Value;
                 }
-                if (_targetTr.Tr != null) {
-                    return _targetTr.Tr.position;
+                if (_targetTr.Value != null && _targetTr.Value.IsValid) {
+                    return _targetTr.Value.position;
                 }
                 return Vector3.zero;
             }
@@ -47,19 +47,19 @@ namespace PixelComrades {
                 if (_state == State.None) {
                     return GetTargetPosition;
                 }
-                if (_lookTr.Tr != null) {
-                    return _lookTr.Tr.position;
+                if (_lookTr.Value != null && _lookTr.Value.IsValid) {
+                    return _lookTr.Value.position;
                 }
                 return GetTargetPosition;
             }
         }
 
         public bool IsValidMove {
-            get { return _state != State.LookOnly && (_targetV3 != null || _targetTr.Tr != null); }
+            get { return _state != State.LookOnly && (_targetV3 != null || (_targetTr.Value != null && _targetTr.Value.IsValid)); }
         }
 
         public bool HasValidLook {
-            get { return _state != State.None && (_lookTr.Tr != null); }
+            get { return _state != State.None && (_lookTr.Value != null && _lookTr.Value.IsValid); }
         }
 
         public void ClearMove() {
@@ -119,11 +119,11 @@ namespace PixelComrades {
     }
 
     public struct SetMoveTarget : IEntityMessage {
-        public Transform Tr;
+        public TransformComponent Tr;
         public Vector3? V3;
         public Entity Owner { get; }
         
-        public SetMoveTarget(Entity owner, Transform tr, Vector3? v3) {
+        public SetMoveTarget(Entity owner, TransformComponent tr, Vector3? v3) {
             Owner = owner;
             Tr = tr;
             V3 = v3;

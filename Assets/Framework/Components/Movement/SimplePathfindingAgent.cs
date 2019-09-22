@@ -102,12 +102,8 @@ namespace PixelComrades {
 
         public void SetPosition(Point3 pos) {
             CurrentPos = pos;
-            var tr = this.GetEntity().Get<TransformComponent>();
-            if (tr != null) {
-                tr.Value.position = pos.toVector3() + new Vector3(0, -(Game.MapCellSize * 0.5f), 0);
-            }
         }
-
+        
         public void SearchPath() {
             RepathTime = Mathf.Infinity;
             CurrentStatus = PathfindingStatus.WaitingOnPath;
@@ -137,9 +133,9 @@ namespace PixelComrades {
             CurrentTarget = _currentNodePath[1].toVector3() + moveOffset;
             MovementLerp = 0f;
             var tr = this.GetEntity().Get<TransformComponent>();
-            if (Vector3.Distance(PreviousTarget, tr.Value.position) > 0.1f) {
-                MovementLerp = Vector3.Distance(tr.Value.position, CurrentTarget) * (_moveSpeed.Value?.Speed ?? 1);
-                PreviousTarget = tr.Value.position;
+            if (Vector3.Distance(PreviousTarget, tr.position) > 0.1f) {
+                MovementLerp = Vector3.Distance(tr.position, CurrentTarget) * (_moveSpeed.Value?.Speed ?? 1);
+                PreviousTarget = tr.position;
             }
             GridTarget = _currentNodePath[1];
             CurrentStatus = PathfindingStatus.PathReceived;

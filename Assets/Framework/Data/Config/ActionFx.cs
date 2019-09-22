@@ -82,7 +82,7 @@ namespace PixelComrades {
                         if (_actionData[i].Parent && actionEvent.Target != null) {
                             var tr = actionEvent.Target.Tr;
                             if (tr != null) {
-                                player.Tr.SetParent(tr);
+                                tr.SetChild(player.Tr);
                             }
                         }
                     }

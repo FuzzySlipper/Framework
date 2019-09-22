@@ -49,8 +49,9 @@ namespace PixelComrades {
             base.Start(node);
             var model = ItemPool.Spawn(UnityDirs.Models, ModelData, Vector3.zero, Quaternion.identity);
             if (model != null) {
-                model.transform.SetParentResetPos(node.ActionEvent.SpawnPivot != null ? node.ActionEvent.SpawnPivot : node.Tr);
-                node.ActionEvent.Action.Entity.Add(new ModelComponent(model.GetComponent<IModelComponent>()));
+                node.ParentSpawn(model.Transform);
+                node.ActionEvent.Action.Entity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
+                node.ActionEvent.Action.Entity.Add(new TransformComponent(model.transform));
             }
             var dmgComponent = node.Entity.GetOrAdd<BlockDamage>();
             if (!node.Entity.Tags.Contain(EntityTags.Player)) {
@@ -73,10 +74,11 @@ namespace PixelComrades {
         public override void End(ActionUsingNode node) {
             base.End(node);
             _vitalStat = null;
-            var model = node.ActionEvent.Action.Entity.Get<ModelComponent>();
-            if (model != null) {
-                ItemPool.Despawn(model.Model.Tr.gameObject);
-                node.ActionEvent.Action.Entity.Remove(model);
+            var tr = node.ActionEvent.Action.Entity.Get<TransformComponent>();
+            if (tr != null) {
+                ItemPool.Despawn(tr.gameObject);
+                node.ActionEvent.Action.Entity.Remove(tr);
+                node.ActionEvent.Action.Entity.Remove<RenderingComponent>();
             }
             var blockDamage = node.Entity.Get<BlockDamage>();
             if (blockDamage != null) {

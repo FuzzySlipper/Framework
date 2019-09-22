@@ -10,7 +10,7 @@ namespace PixelComrades {
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         public GridPosition Position { get => _position; }
         public SensorComponent Sensor { get => _sensor; }
-        public Transform Tr { get => _tr?.Value; }
+        public TransformComponent Tr { get => _tr?.Value; }
         
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() { _position, _sensor, _tr };
 
@@ -30,7 +30,7 @@ namespace PixelComrades {
         public SensorTargetsComponent Targets { get => _targets.Value; }
         public UnitySensorComponent Sensor { get => _sensor.Value; }
         public FactionComponent Faction { get => _faction.Value; }
-        public Transform Tr { get => _tr?.Value; }
+        public TransformComponent Tr { get => _tr?.Value; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _targets, _sensor, _faction, _tr
         };

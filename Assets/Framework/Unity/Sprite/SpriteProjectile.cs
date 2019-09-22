@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
-    public interface IProjectile : IModelComponent {
+    public interface IProjectile : IRenderingComponent {
         void SetColor(Color main, Color offset);
         void SetSize(float size, float length);
         Rigidbody Rigidbody { get; }
@@ -31,8 +31,8 @@ namespace PixelComrades {
             _spriteRenderer.SetPropertyBlock(matBlocks[0]);
         }
 
-        public void SetVisible(bool status) {
-            _spriteRenderer.enabled = status;
+        public void SetRendering(RenderingMode status) {
+            _spriteRenderer.SetMode(status);
         }
 
         public void OnCreate(PrefabEntity entity) {

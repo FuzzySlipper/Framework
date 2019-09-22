@@ -34,7 +34,7 @@ namespace PixelComrades {
             if (_parentAnimTr && actionEvent.Origin != null) {
                 var parentTr = actionEvent.Origin.Tr;
                 if (parentTr != null) {
-                    transform.SetParent(parentTr);
+                    parentTr.SetChild(transform);
                 }
             }
             TimeManager.StartUnscaled(WaitForEventComplete(actionEvent));

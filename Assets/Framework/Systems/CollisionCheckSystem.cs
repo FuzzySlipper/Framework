@@ -27,11 +27,11 @@ namespace PixelComrades {
             }
             for (int i = 0; i < _list.Count; i++) {
                 var node = _list[i];
-                if (!node.Tr) {
+                var tr = node.Tr;
+                if (tr == null) {
                     node.Forward.LastPos = null;
                     return;
                 }
-                var tr = node.Tr;
                 if (Raycast(node.Entity, new Ray(tr.position, tr.forward), node.Forward.RayDistance, false) != null) {
                     node.Forward.LastPos = tr.position;
                     return;
@@ -220,7 +220,7 @@ namespace PixelComrades {
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
         private CachedComponent<CollisionCheckForward> _forward = new CachedComponent<CollisionCheckForward>();
 
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public CollisionCheckForward Forward => _forward.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {

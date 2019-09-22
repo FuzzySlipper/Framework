@@ -30,6 +30,9 @@ namespace PixelComrades {
         }
 
         public static T GetNode<T>(this Entity entity) where T : class, INode, new() {
+            if (entity == null) {
+                return null;
+            }
             var type = typeof(T);
             return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).GetNode(entity);
         }
@@ -326,8 +329,8 @@ namespace PixelComrades {
             var checkEntity = entity;
             while (checkEntity != null) {
                 var tr = checkEntity.Get<TransformComponent>();
-                if (tr != null && tr.Value != null) {
-                    return tr.Value.position;
+                if (tr != null && tr.IsValid) {
+                    return tr.position;
                 }
                 checkEntity = checkEntity.GetParent();
             }
@@ -339,8 +342,8 @@ namespace PixelComrades {
                 return Quaternion.identity;
             }
             var tr = entity.Get<TransformComponent>();
-            if (tr != null && tr.Value != null) {
-                return tr.Value.rotation;
+            if (tr != null && tr.IsValid) {
+                return tr.rotation;
             }
             return Quaternion.identity;
         }

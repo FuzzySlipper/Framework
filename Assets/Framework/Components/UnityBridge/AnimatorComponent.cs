@@ -81,11 +81,11 @@ namespace PixelComrades {
 
     [Priority(Priority.Lowest)]
     public struct PlayAnimation : IEntityMessage {
-        public Entity Target;
-        public AnimatorComponent Animator;
-        public bool Override;
+        public readonly Entity Target;
+        public readonly AnimatorComponent Animator;
+        public readonly bool Override;
         public bool PostEvent;
-        public string Clip;
+        public readonly string Clip;
 
         public PlayAnimation(Entity target, AnimatorComponent anim, string clip, bool overrideAnim, bool postEvent) {
             Target = target;
@@ -98,9 +98,9 @@ namespace PixelComrades {
 
     [Priority(Priority.Normal)]
     public struct AnimationComplete : IEntityMessage {
-        public Entity Target;
-        public AnimatorComponent Animator;
-        public string Animation;
+        public Entity Target { get; }
+        public AnimatorComponent Animator { get; }
+        public string Animation { get; }
 
         public AnimationComplete(Entity target, AnimatorComponent animator, string animation) {
             Target = target;

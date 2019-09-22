@@ -25,12 +25,16 @@ namespace PixelComrades {
         
         public void OnSystemUpdate(float dt, float unscaledDt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
-                _moveTweens[i].Tr.position = _moveTweens[i].Tween.Get();
-                if (_moveTweens[i].Owner.Tags.Contain(EntityTags.RotateToMoveTarget)) {
-                    RotateTowardsMoveTarget(_moveTweens[i].Tr, _moveTweens[i].Tween.EndValue, _moveTweens[i].Owner.Get<RotationSpeed>()?.Speed ?? 10);
+                _moveTweens[i].Entity.Post(new SetTransformPosition(_moveTweens[i].Tr, _moveTweens[i].Tween.Get()));
+                if (_moveTweens[i].Entity.Tags.Contain(EntityTags.RotateToMoveTarget)) {
+                    var speed = _moveTweens[i].Entity.Get<RotationSpeed>()?.Speed ?? 10;
+                    var targetRotation = Quaternion.LookRotation(_moveTweens[i].Tween.EndValue - _moveTweens[i].Tr.position);
+                    var rotation = Quaternion.RotateTowards(_moveTweens[i].Tr.rotation, targetRotation, speed * TimeManager.DeltaTime);
+                    _moveTweens[i].Entity.Post(new SetTransformRotation(_moveTweens[i].Tr, rotation));
+                    
                 }
                 if (!_moveTweens[i].Tween.Active) {
-                    FinishMove(_moveTweens[i].Owner, _moveTweens[i].Tween.EndValue);
+                    FinishMove(_moveTweens[i].Entity, _moveTweens[i].Tween.EndValue);
                     _moveTweens.RemoveAt(i);
                 }
             }
@@ -86,11 +90,6 @@ namespace PixelComrades {
             owner.Get<MoveTarget>()?.Complete();
         }
 
-        private void RotateTowardsMoveTarget(Transform tr, Vector3 moveTarget, float speed) {
-            var targetRotation = Quaternion.LookRotation(moveTarget - tr.position);
-            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, speed * TimeManager.DeltaTime);
-        }
-
         private void HandleMoveSimple(SimpleMoverNode mover) {
             var entity = mover.Entity;
             if (!entity.Tags.Contain(EntityTags.Moving)) {
@@ -106,9 +105,11 @@ namespace PixelComrades {
             }
             var targetPos = target.GetTargetPosition;
             var dir = targetPos - tr.position;
-            tr.position = Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Speed * TimeManager.DeltaTime);
+            mover.Entity.Post(new SetTransformPosition(mover.Tr,
+                Vector3.MoveTowards(tr.position, targetPos, mover.MoveSpeed.Speed * TimeManager.DeltaTime)));
             var targetRotation = Quaternion.LookRotation(dir);
-            tr.rotation = Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed.Speed * TimeManager.DeltaTime);
+            mover.Entity.Post(new SetTransformRotation(mover.Tr, Quaternion.RotateTowards(tr.rotation, targetRotation, mover.RotationSpeed
+            .Speed * TimeManager.DeltaTime)));
             if (Vector3.Distance(targetPos, tr.position) < ReachedDestination) {
                 FinishMove(entity, targetPos);
             }
@@ -143,8 +144,10 @@ namespace PixelComrades {
                 return;
             }
             mover.ArcMover.ElapsedTime += TimeManager.DeltaTime;
-            mover.Tr.Translate(0, (mover.ArcMover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ArcMover.ElapsedTime)) * TimeManager
-            .DeltaTime, mover.ArcMover.MoveVector.z * TimeManager.DeltaTime);
+            var dir = new Vector3(
+                0, (mover.ArcMover.MoveVector.y - (mover.Get<MoveSpeed>()?.Speed ?? 1 * mover.ArcMover.ElapsedTime)) * TimeManager
+                       .DeltaTime, mover.ArcMover.MoveVector.z * TimeManager.DeltaTime);
+            mover.Entity.Post(new MoveTransform(mover.Tr, dir));
             if (mover.ArcMover.ElapsedTime > mover.ArcMover.Duration) {
                 FinishMove(entity, mover.Tr.position);
             }
@@ -156,7 +159,7 @@ namespace PixelComrades {
                 return;
             }
             var ms = mover.MoveSpeed?.Speed ?? 1;
-            mover.Tr.Translate(Vector3.forward * ms * TimeManager.DeltaTime, Space.Self); 
+            mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * ms * TimeManager.DeltaTime));
         }
 
         private void HandleRotation(RotateToNode r) {
@@ -173,11 +176,11 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(MoveTweenEvent arg) {
-            if (arg.Owner == null) {
+            if (arg.Entity == null) {
                 return;
             }
             _moveTweens.Add(arg);
-            arg.Owner.Tags.Add(EntityTags.Moving);
+            arg.Entity.Tags.Add(EntityTags.Moving);
         }
 
         public void HandleGlobal(StartMoveEvent moveEvent) {
@@ -195,7 +198,7 @@ namespace PixelComrades {
         }
 
         private void CalculateFlight(ArcMover mover, Vector3 target, float speed) {
-            var tr = mover.GetEntity().Get<TransformComponent>().Value;
+            var tr = mover.GetEntity().Get<TransformComponent>();
             float targetDistance = Vector3.Distance(tr.position, target);
             // Calculate the velocity needed to throw the object to the target at specified angle.
             float projectileVelocity = targetDistance / (Mathf.Sin(2 * mover.Angle * Mathf.Deg2Rad) / speed);
@@ -204,19 +207,20 @@ namespace PixelComrades {
             // Calculate flight time.
             mover.Duration = targetDistance / mover.MoveVector.z;
             // Rotate projectile to face the target.
-            tr.rotation = Quaternion.LookRotation(target - tr.position);
+            var entity = mover.GetEntity();
+            entity.Post(new SetTransformRotation( entity.Get<TransformComponent>(), Quaternion.LookRotation(target - tr.position)));
             mover.ElapsedTime = 0;
         }
     }
 
     public struct StartMoveEvent : IEntityMessage {
         public Vector3 MoveTarget;
-        public Transform Follow;
+        public TransformComponent Follow;
         public Entity Origin;
 
         public Vector3 GetPosition => Follow != null ? Follow.position : MoveTarget;
 
-        public StartMoveEvent(Entity origin, Vector3 moveTarget, Transform follow) {
+        public StartMoveEvent(Entity origin, Vector3 moveTarget, TransformComponent follow) {
             MoveTarget = moveTarget;
             Follow = follow;
             Origin = origin;
@@ -230,22 +234,22 @@ namespace PixelComrades {
     }
 
     public struct MoveTweenEvent : IEntityMessage {
-        public TweenV3 Tween;
-        public Transform Tr;
-        public Entity Owner;
+        public TweenV3 Tween { get; }
+        public TransformComponent Tr { get; }
+        public Entity Entity { get; }
 
-        public MoveTweenEvent(TweenV3 tween, Transform tr, Entity owner) {
+        public MoveTweenEvent(TweenV3 tween, TransformComponent tr, Entity entity) {
             Tween = tween;
             Tr = tr;
-            Owner = owner;
+            Entity = entity;
         }
 
-        public MoveTweenEvent(Vector3 target, Transform tr, Entity owner) {
+        public MoveTweenEvent(Vector3 target, TransformComponent tr, Entity entity) {
             var distance = Vector3.Distance(tr.position, target);
-            var duration = distance / MathEx.Max(owner.GetMoveSpeed(), 1);
+            var duration = distance / MathEx.Max(entity.GetMoveSpeed(), 1);
             Tween = new TweenV3(tr.position, target, duration, EasingTypes.SinusoidalInOut);
             Tr = tr;
-            Owner = owner;
+            Entity = entity;
         }
     }
 
@@ -281,7 +285,7 @@ namespace PixelComrades {
         private CachedComponent<ForwardMover> _forward = new CachedComponent<ForwardMover>();
         private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
 
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public ForwardMover ForwardMover { get => _forward; }
         public MoveSpeed MoveSpeed { get => _moveSpeed; }
@@ -304,7 +308,7 @@ namespace PixelComrades {
         private CachedComponent<RotateToTarget> _rotate = new CachedComponent<RotateToTarget>();
         private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
 
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public RotateToTarget Rotate { get => _rotate; }
         public RigidbodyComponent Rb { get => _rb; }
@@ -327,7 +331,7 @@ namespace PixelComrades {
         private CachedComponent<ArcMover> _arcMover = new CachedComponent<ArcMover>();
         private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
         
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public ArcMover ArcMover { get => _arcMover; }
         public MoveSpeed MoveSpeed { get => _moveSpeed; }
@@ -352,7 +356,7 @@ namespace PixelComrades {
         private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
         private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
         
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public SimplerMover Simple { get => _simple; }
         public MoveSpeed MoveSpeed { get => _moveSpeed; }

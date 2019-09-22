@@ -16,7 +16,7 @@ namespace PixelComrades {
         private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
         
         public SimplePathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public SteeringInput Steering => _moveInput.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging, _tr
@@ -44,7 +44,7 @@ namespace PixelComrades {
         private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
         
         public SteeringInput SteeringInput => _moveInput.Value;
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public AstarPathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Point3 DestinationP3 { get { return Pathfinder.DestinationP3; } }
         public PathfindingStatus CurrentStatus { get { return Pathfinder.CurrentStatus; } }

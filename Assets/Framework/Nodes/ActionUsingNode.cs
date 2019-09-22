@@ -9,7 +9,7 @@ namespace PixelComrades {
         private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         public StatsContainer Stats => _stats.Value;
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         
         public string LastProcessedAnimationEvent;
         public State CurrentState;
@@ -43,6 +43,16 @@ namespace PixelComrades {
 
         public void AdvanceEvent() {
             World.Get<ActionSystem>().AdvanceEvent(this);
+        }
+
+        public void ParentSpawn(Transform spawn) {
+            if (ActionEvent.SpawnPivot != null) {
+                spawn.SetParentResetPos(ActionEvent.SpawnPivot);
+            }
+            else {
+                Tr.SetChild(spawn);
+                spawn.ResetPos();
+            }
         }
     }
 

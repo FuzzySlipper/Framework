@@ -126,7 +126,7 @@ namespace PixelComrades {
         /// </summary>
         /// <param name="actor"></param>
         public static void SetTargetActor(VisibleNode actor) {
-            if (_actorLock || _visible == actor || actor == null) {
+            if (_actorLock || _visible == actor) {
                 return;
             }
             _clearTextTimer.Triggered = false;
@@ -201,7 +201,9 @@ namespace PixelComrades {
                 _main._vitals[i].RemoveActor();
             }
             _sliderBackground.enabled = false;
-            _visible.Entity.RemoveObserver(_main);
+            if (_visible != null) {
+                _visible.Entity.RemoveObserver(_main);
+            }
             _visible = null;
             _actorLock = false;
             _textHolder.text = "";

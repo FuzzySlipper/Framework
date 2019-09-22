@@ -35,7 +35,7 @@ public class EntityWindow : OdinEditorWindow {
             _activeEntities.Add(e);
         }
         //_entityTable = GUITable.Create<Entity>(_activeEntities, "Entities");
-        _entityTable = GUITable.Create(_rows.Length, entities.Count, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels);
+        _entityTable = GUITable.Create(_rows.Length, entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels);
     }
 
     protected override void OnGUI() {
@@ -142,7 +142,7 @@ public class EntityWindow : OdinEditorWindow {
                 break;
             case 2:
                 var tr = entity.Get<TransformComponent>();
-                GUI.Label(arg1, tr?.Value != null ? tr.Value.name : "No Tr");
+                GUI.Label(arg1, tr?.gameObject != null ? tr.gameObject.name : "No Tr");
                 break;
             case 3:
                 GUI.Label(arg1, entity.Components.Count.ToString());

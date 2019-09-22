@@ -12,7 +12,7 @@ namespace PixelComrades {
         private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
         private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
         private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public VelocityMover VelocityMover { get => _velocityMover; }
         public Rigidbody Rb { get => _rb.Value.Rb; }
         public MoveSpeed MoveSpeed { get => _moveSpeed; }

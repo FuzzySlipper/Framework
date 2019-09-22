@@ -20,7 +20,7 @@ namespace PixelComrades {
         private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
         private CachedComponent<AnimatorComponent> _animator = new CachedComponent<AnimatorComponent>();
         private CachedComponent<SteeringInput> _steering = new CachedComponent<SteeringInput>();
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public StatsContainer Stats => _stats.Value;
         public DefendDamageWithStats StatDefend => _statDefend.Value;
@@ -49,9 +49,7 @@ namespace PixelComrades {
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {
-                typeof(LabelComponent),
                 typeof(DamageComponent),
-                typeof(GridPosition),
                 typeof(FactionComponent),
                 typeof(CurrentActions),
                 typeof(StatsContainer),

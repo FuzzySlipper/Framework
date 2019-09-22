@@ -12,13 +12,20 @@ namespace PixelComrades {
         private Dictionary<Point3, List<GameObject>> _levelObjects = new Dictionary<Point3, List<GameObject>>();
         private List<PrefabEntity> _entities = new List<PrefabEntity>();
         private UnscaledTimer _updateTimer = new UnscaledTimer(1);
-        private BufferedList<Point3> _list = new BufferedList<Point3>();
+        private BufferedList<Point3>[] _list;
         private Point3 _playerPosition = Point3.max;
+        private int _currentIndex = 0;
+        private BufferedList<Point3> CurrentList { get { return _list[_currentIndex]; } }
+        private BufferedList<Point3> PreviousList { get { return _list[_currentIndex == 0 ? 1 : 0]; } }
 
         public CullingSystem() {
             MessageKit.addObserver(Messages.LevelClear, ClearList);
             MessageKit.addObserver(Messages.PlayerReachedDestination, UpdatePlayerPosition);
             MessageKit.addObserver(Messages.PlayerTeleported, UpdatePlayerPosition);
+            _list = new[] {
+                new BufferedList<Point3>(),
+                new BufferedList<Point3>(),
+            };
         }
 
         private bool IsActive {
@@ -61,12 +68,12 @@ namespace PixelComrades {
                 return;
             }
             _playerPosition = playPos;
-            _list.Swap();
-            _list.CurrentList.Clear();
-            _list.CurrentList.Add(_playerPosition);
+            _currentIndex = _currentIndex == 0 ? 1 : 0;
+            CurrentList.Clear();
+            CurrentList.Add(_playerPosition);
             for (int i = 0; i < DirectionsExtensions.DiagonalLength; i++) {
                 var pos = _playerPosition + ((DirectionsEight) i).ToP3();
-                _list.CurrentList.Add(pos);
+                CurrentList.Add(pos);
             }
             SetList(true);
             SetList(false);
@@ -86,7 +93,7 @@ namespace PixelComrades {
             if (!IsActive) {
                 return;
             }
-            var active = _list.CurrentList.Contains(entity.SectorPosition);
+            var active = CurrentList.Contains(entity.SectorPosition);
             entity.SetActive(active);
         }
 
@@ -98,7 +105,7 @@ namespace PixelComrades {
 
         public void Add(Point3 pos, GameObject go) {
             GetLevelList(pos).Add(go);
-            go.SetActive(_list.CurrentList.Contains(pos));
+            go.SetActive(CurrentList.Contains(pos));
         }
 
         public void Remove(PrefabEntity entity) {
@@ -124,17 +131,18 @@ namespace PixelComrades {
         private void ClearList() {
             _sectorObjects.Clear();
             _levelObjects.Clear();
-            _list.Clear();
+            CurrentList.Clear();
+            PreviousList.Clear();
         }
 
         private void SetList(bool active) {
-            var list = active ? _list.CurrentList: _list.PreviousList;
+            var list = active ? CurrentList: PreviousList;
             for (int i = 0; i < list.Count; i++) {
                 var pos = list[i];
-                if (active && !_list.PreviousList.Contains(pos)) {
+                if (active && !PreviousList.Contains(pos)) {
                     SetSector(pos, true);
                 }
-                else if (!active && !_list.CurrentList.Contains(pos)) {
+                else if (!active && !CurrentList.Contains(pos)) {
                     SetSector(pos, false);
                 }
             }

@@ -24,6 +24,15 @@ namespace PixelComrades {
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
         //DebugLogConsole.AddCommandInstance("debugWorldControl", "ShowDebug", this);
 
+        [Command("ListCharacters")]
+        public static void ListCharacters() {
+            var characterNodes = EntityController.GetNodeList<CharacterNode>();
+            Console.Log("Character Count " + characterNodes.Count);
+            for (int i = 0; i < characterNodes.Count; i++) {
+                Console.Log(string.Format("Character {0}", characterNodes[i].Entity.DebugId));
+            }
+        }
+        
         public static void RegisterDebugCommands() {
             DebugConsole.RegisterCommand("actionTest", RunActionDelTest);
             DebugConsole.RegisterCommand("messageTest", RunMessageTest);

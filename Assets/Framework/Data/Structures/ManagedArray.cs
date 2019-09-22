@@ -87,39 +87,38 @@ namespace PixelComrades {
 
         private const int DefaultSize = 32;
 
-        protected T[] Array;
+        private T[] _array;
         private int _max = 0;
         private FastStack<int> _freeIndices = new FastStack<int>();
 
         public int Max { get { return _max; } }
-        public int Count { get { return _max; } }
         public int UsedCount { get { return _max - _freeIndices.Count; } }
-        public bool IsFull { get { return _max == Array.Length && _freeIndices.Count == 0; } }
+        public bool IsFull { get { return _max == _array.Length && _freeIndices.Count == 0; } }
         public override System.Type ArrayType { get { return typeof(T); } }
-        public ref T this[int index] { get { return ref Array[index]; } }
+        public ref T this[int index] { get { return ref _array[index]; } }
 
         public ManagedArray(int initialSize = DefaultSize) {
-            Array = new T[initialSize];
+            _array = new T[initialSize];
         }
 
         public ManagedArray(SerializationInfo info, StreamingContext context) {
-            Array = info.GetValue(nameof(Array), Array);
+            _array = info.GetValue(nameof(_array), _array);
             _max = info.GetValue(nameof(_max), _max);
             _freeIndices = info.GetValue(nameof(_freeIndices), _freeIndices);
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(Array), Array);
+            info.AddValue(nameof(_array), _array);
             info.AddValue(nameof(_max), _max);
             info.AddValue(nameof(_freeIndices), _freeIndices);
         }
 
         public override object Get(int index) {
-            return Array[index];
+            return _array[index];
         }
 
         public void Set(int index, T item) {
-            Array[index] = item;
+            _array[index] = item;
             _freeIndices.TryRemove(index);
         }
 
@@ -131,40 +130,54 @@ namespace PixelComrades {
         }
 
         public bool HasIndex(int index) {
-            return Array.HasIndex(index);
+            return _array.HasIndex(index);
         }
 
         public int Add(T newComponent) {
-            if (_max < Array.Length) {
-                Array[_max] = newComponent;
+            if (_max < _array.Length) {
+                _array[_max] = newComponent;
                 _max++;
                 return _max - 1;
             }
             if (_freeIndices.Count > 0) {
                 var index = _freeIndices.Pop();
-                Array[index] = newComponent;
+                _array[index] = newComponent;
                 return index;
             }
-            _max = Array.Length;
-            System.Array.Resize(ref Array, _max * 2);
-            Array[_max] = newComponent;
+            _max = _array.Length;
+            System.Array.Resize(ref _array, _max * 2);
+            _array[_max] = newComponent;
             _max++;
             return _max - 1;
         }
 
         public void Replace(ManagedArray<T> source) {
             Clear();
-            if (Array.Length < source.Count) {
-                System.Array.Resize(ref Array, source.Count * 2);
+            if (_array.Length < source.Max) {
+                System.Array.Resize(ref _array, source.Max * 2);
             }
-            for (int i = 0; i < source.Count; i++) {
-                Array[i] = source[i];
+            for (int i = 0; i < source.Max; i++) {
+                _array[i] = source[i];
             }
-            _max = source.Max;
+            _max = source._max;
+        }
+
+        public void CompressReplaceWith(ManagedArray<T> source) {
+            Clear();
+            if (_array.Length < source.UsedCount) {
+                System.Array.Resize(ref _array, source.Max * 2);
+            }
+            for (int i = 0; i < source.Max; i++) {
+                if (source.IsInvalid(i)) {
+                    continue;
+                }
+                _array[_max] = source[i];
+                _max++;
+            }
         }
 
         public void Remove(T component) {
-            var index = Array.FindIndex(component);
+            var index = _array.FindIndex(component);
             if (index >= 0) {
                 Remove(index);
             }
@@ -172,8 +185,8 @@ namespace PixelComrades {
 
         public T Pop() {
             for (int i = 0; i < _max; i++) {
-                if (Array[i] != null) {
-                    var value = Array[i];
+                if (_array[i] != null) {
+                    var value = _array[i];
                     Remove(i);
                     return value;
                 }
@@ -182,20 +195,20 @@ namespace PixelComrades {
         }
 
         public override void Remove(int index) {
-            Array[index] = default(T);
+            _array[index] = default(T);
             _freeIndices.TryAdd(index);
         }
 
         public void Clear() {
-            for (int i = 0; i < Array.Length; i++) {
-                Array[i] = default(T);
+            for (int i = 0; i < _array.Length; i++) {
+                _array[i] = default(T);
             }
             _max = 0;
             _freeIndices.Clear();
         }
 
         public void Reset() {
-            Array = new T[Array.Length];
+            _array = new T[_array.Length];
             _freeIndices.Clear();
             _max = 0;
         }
@@ -208,11 +221,11 @@ namespace PixelComrades {
             if (value == null) {
                 return false;
             }
-            for (int a = 0; a < Max; a++) {
-                if (Array[a] == null) {
+            for (int a = 0; a < _max; a++) {
+                if (_array[a] == null) {
                     continue;
                 }
-                if (Array[a].Equals(value)) {
+                if (_array[a].Equals(value)) {
                     return true;
                 }
             }
@@ -225,9 +238,9 @@ namespace PixelComrades {
         /// <param name="comparer"></param>
         public void Sort(IComparer<T> comparer) {
             _freeIndices.Clear();
-            System.Array.Sort(Array, comparer);
-            for (int i = 0; i < Array.Length; i++) {
-                if (Array[i] == null) {
+            System.Array.Sort(_array, comparer);
+            for (int i = 0; i < _array.Length; i++) {
+                if (_array[i] == null) {
                     _max = i;
                     break;
                 }
@@ -242,7 +255,7 @@ namespace PixelComrades {
                 if (_freeIndices.Contains(i)) {
                     continue;
                 }
-                del(Array[i]);
+                del(_array[i]);
             }
         }
 
@@ -281,13 +294,13 @@ namespace PixelComrades {
                     if (_position >= _array._max) {
                         return default(T);
                     }
-                    return _array[_position];
+                    return  _array[_position];
                 }
             }
             T IEnumerator<T>.Current {
                 get {
                     if (_position >= _array._max) {
-                        return default(T);
+                        return _array[_array._max-1];
                     }
                     return _array[_position];
                 }

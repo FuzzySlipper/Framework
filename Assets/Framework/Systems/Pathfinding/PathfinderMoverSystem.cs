@@ -12,6 +12,8 @@ namespace PixelComrades {
             Target = target;
         }
     }
+    
+    [AutoRegister]
     public class PathfinderMoverSystem : SystemBase, IMainSystemUpdate, IReceive<ChangePositionEvent> {
 
         public static bool UseSimple = false;
@@ -50,10 +52,10 @@ namespace PixelComrades {
         }
 
         public void SetupPathfindEntity(Entity entity, bool isOversized) {
-            var tr = entity.Get<TransformComponent>().Value;
+            var tr = entity.Get<TransformComponent>();
             if (_debugAgents) {
                 var spawned = ItemPool.Spawn(UnityDirs.System, "PathfindDebug", Vector3.zero, Quaternion.identity, false, false);
-                spawned.transform.SetParent(tr);
+                tr.SetChild(spawned.transform);
                 spawned.transform.localPosition = new Vector3(0, 2, 0);
                 spawned.transform.localRotation = Quaternion.Euler(90, 0 ,0);
                 entity.Add(new PathfindingDebugging(spawned.GetComponentInChildren<LineRenderer>(), spawned.GetComponentInChildren<TextMesh>()));
@@ -66,7 +68,7 @@ namespace PixelComrades {
                 simpleAgent.IsOversized = isOversized;
             }
             else {
-                entity.Add(new AstarPathfindingAgent(tr.GetComponent<AstarRvoController>()));
+                entity.Add(new AstarPathfindingAgent(tr.gameObject.GetComponent<AstarRvoController>()));
             }
         }
 
@@ -256,7 +258,9 @@ namespace PixelComrades {
             }
             var simple = arg.Target.Get<SimplePathfindingAgent>();
             if (simple != null) {
-                simple.SetPosition(arg.Position.toPoint3());
+                arg.Target.Post(new SetTransformPosition(arg.Target.Get<TransformComponent>(), arg.Position 
+                    + new Vector3(0, -(Game.MapCellSize * 0.5f))));
+                simple. SetPosition(arg.Position.toPoint3());
             }
         }
     }

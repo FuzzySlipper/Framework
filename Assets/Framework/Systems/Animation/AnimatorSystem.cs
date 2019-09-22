@@ -7,8 +7,8 @@ namespace PixelComrades {
     public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation>, IReceive<DamageEvent>,
         IReceive<DeathEvent> {
 
-        private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>(1);
-        private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>(1);
+        private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>();
+        private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>();
 
         public AnimatorSystem() {
             EntityController.RegisterReceiver<HurtAnimation>(this);
@@ -16,14 +16,10 @@ namespace PixelComrades {
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _animations.Swap();
-            for (int i = 0; i < _animations.PreviousList.Count; i++) {
-                if (_animations.PreviousList.IsInvalid(i)) {
-                    continue;
-                }
-                ref var anim = ref _animations.PreviousList[i];
+            for (int i = 0; i < _animations.Count; i++) {
+                ref var anim = ref _animations[i];
                 if (anim.Animator?.Value == null) {
-                    _animations.CurrentList.Remove(i);
+                    _animations.Remove(anim);
                     continue;
                 }
                 if (anim.PostEvent && anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
@@ -32,22 +28,21 @@ namespace PixelComrades {
                 }
                 if (anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
                     anim.Target.Post(new AnimationComplete(anim.Target, anim.Animator, anim.Clip));
-                    _animations.CurrentList.Remove(i);
+                    _animations.Remove(anim);
                 }
             }
-            _moveClips.Swap();
-            for (int i = 0; i < _moveClips.PreviousList.Count; i++) {
-                if (_moveClips.PreviousList.IsInvalid(i)) {
-                    continue;
-                }
-                var node = _moveClips.PreviousList[i];
+            for (int i = 0; i < _moveClips.Count; i++) {
+                var node = _moveClips[i];
                 if (node.Animator == null) {
-                    _moveClips.CurrentList.Remove(i);
+                    _moveClips.Remove(node);
                     continue;
                 }
                 if (node.Animator.Value.IsAnimationComplete(node.Clip)) {
-                    node.Animator.GetEntity().Tags.Remove(EntityTags.CantMove);
-                    _moveClips.CurrentList.Remove(i);
+                    var entity = node.Animator.GetEntity();
+                    if (entity != null && !entity.IsDestroyed()) {
+                        entity.Tags.Remove(EntityTags.CantMove);
+                    }
+                    _moveClips.Remove(node);
                 }
             }
         }

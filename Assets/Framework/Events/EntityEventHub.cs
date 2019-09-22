@@ -15,19 +15,19 @@ namespace PixelComrades {
         public int Count { get { return _simpleHub.Count + _messageReceivers.Count; } }
         
         public void AddObserver<T>(IReceive<T> handler) {
-            if (_messageReceivers.CurrentList.Contains(handler)) {
+            if (_messageReceivers.Contains(handler)) {
                 return;
             }
-            _messageReceivers.CurrentList.Add(handler);
-            _messageReceivers.CurrentList.Sort(_msgSorter);
+            _messageReceivers.Add(handler);
+            _messageReceivers.Sort(_msgSorter);
         }
 
         public void AddObserver(IReceive handler) {
-            if (_messageReceivers.CurrentList.Contains(handler)) {
+            if (_messageReceivers.Contains(handler)) {
                 return;
             }
-            _messageReceivers.CurrentList.Add(handler);
-            _messageReceivers.CurrentList.Sort(_msgSorter);
+            _messageReceivers.Add(handler);
+            _messageReceivers.Sort(_msgSorter);
         }
 
         public void AddObserver(int messageType, System.Action handler) {
@@ -63,13 +63,12 @@ namespace PixelComrades {
         }
 
         public void Post<T>(T msg) where T : IEntityMessage {
-            _messageReceivers.Swap();
-            var list = _messageReceivers.PreviousList;
-            for (int i = 0; i < list.Count; i++) {
-                if (list[i] == null) {
+            _messageReceivers.ForceAdd();
+            for (int i = 0; i < _messageReceivers.Count; i++) {
+                if (_messageReceivers[i] == null) {
                     continue;
                 }
-                (list[i] as IReceive<T>)?.Handle(msg);
+                (_messageReceivers[i] as IReceive<T>)?.Handle(msg);
             }
         }
 

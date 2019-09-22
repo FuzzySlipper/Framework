@@ -36,14 +36,14 @@ namespace PixelComrades {
                 if (parent != null) {
                     model.transform.SetParentResetPos(parent);
                 }
-                loader.LoadedModel = new CachedGenericComponent<IModelComponent>(model.GetComponent<IModelComponent>());
+                loader.LoadedModel = new CachedGenericComponent<IRenderingComponent>(model.GetComponent<IRenderingComponent>());
                 if (loader.LoadedModel == null) {
                     ItemPool.Despawn(model.gameObject);
                     return;
                 }
 
                 UnityToEntityBridge.RegisterToEntity(model.gameObject, entity);
-                loader.LoadedComponents.Add(entity.Add(new ModelComponent(loader.LoadedModel.Value)).GetType());
+                loader.LoadedComponents.Add(entity.Add(new RenderingComponent(loader.LoadedModel.Value)).GetType());
                 loader.LoadedComponents.Add(entity.Add(new TransformComponent(model.Transform)).GetType());
                 loader.LoadedComponents.Add(
                     entity.Add(new FloatingTextStatusComponent(model.Transform, new Vector3(0, 1.5f, 0))).GetType());

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class ModelWrapper : MonoBehaviour, IOnCreate, IModelComponent {
+    public class RenderingWrapper : MonoBehaviour, IOnCreate, IRenderingComponent {
 
         private PrefabEntity _entity;
 
@@ -34,8 +34,8 @@ namespace PixelComrades {
             }
         }
 
-        public void SetVisible(bool status) {
-            _entity.SetVisible(status);
+        public void SetRendering(RenderingMode status) {
+            _entity.SetVisible(status != RenderingMode.None);
         }
     }
 }

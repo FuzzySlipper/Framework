@@ -193,7 +193,8 @@ namespace PixelComrades {
                 UICursor.main.SetCursor(UICursor.CrossHair);
             }
             if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) {
-                SourceConsole.UI.ConsolePanelController.Singleton.Toggle();
+                //SourceConsole.UI.ConsolePanelController.Singleton.Toggle();
+                Console.Toggle();
             }
         }
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public static class CollisionExtensions {
-        public static void GenerateHitLocDir(Transform origin, Transform target, Collider targetCollider, 
+        public static void GenerateHitLocDir(TransformComponent origin, TransformComponent target, Collider targetCollider, 
             out Vector3 hitPnt, out Vector3 normal) {
             if (origin == target) {
                 hitPnt = target.position;

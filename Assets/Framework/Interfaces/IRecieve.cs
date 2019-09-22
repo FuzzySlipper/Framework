@@ -8,6 +8,10 @@ namespace PixelComrades {
         void Handle(T arg);
     }
 
+    public interface IReceiveGlobalArray<T> : IReceive {
+        void HandleGlobal(BufferedList<T> arg);
+    }
+
     public interface IReceiveGlobal<in T> : IReceive {
         void HandleGlobal(T arg);
     }

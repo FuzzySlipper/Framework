@@ -52,11 +52,11 @@ namespace PixelComrades {
         }
 
         public static void Unregister(Entity entity) {
-            var tr = entity.Get<TransformComponent>()?.Value;
+            var tr = entity.Get<TransformComponent>();
             if (tr == null) {
                 return;
             }
-            tr.GetComponentsInChildren(_tempIdentifiers);
+            tr.gameObject.GetComponentsInChildren(_tempIdentifiers);
             for (int i = 0; i < _tempIdentifiers.Count; i++) {
                 if (_tempIdentifiers[i] == null) {
                     continue;

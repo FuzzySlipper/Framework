@@ -46,7 +46,8 @@ namespace PixelComrades {
         }
 
         public void Handle(ChangePositionEvent arg) {
-            arg.Target.GetNode<CollidableNode>().Tr.position = arg.Position;
+            var node = arg.Target.GetNode<CollidableNode>();
+            node.Entity.Post(new SetTransformPosition(node.Tr, arg.Position));
         }
 
         

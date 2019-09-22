@@ -22,7 +22,7 @@ namespace PixelComrades {
             }
             else {
                 entity = Entity.New("UIPool");
-                entity.Add(new ModelComponent(null));
+                entity.Add(new RenderingComponent(null));
                 entity.Add(new LabelComponent(""));
                 entity.Add(new DescriptionComponent(""));
                 entity.Add(new DataDescriptionComponent(""));

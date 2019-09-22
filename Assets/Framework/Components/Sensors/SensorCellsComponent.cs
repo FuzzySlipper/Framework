@@ -42,17 +42,16 @@ namespace PixelComrades {
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
             var owner = this.GetEntity();
             var start = owner.Get<GridPosition>().Position;
-            var fwd = owner.Get<TransformComponent>().Value.ForwardDirection2D();
+            var fwd = owner.Get<TransformComponent>().ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
                 var maxRowDistance = dir == fwd ? MaxVisionDistance : MaxHearDistance;
                 var adjacent = dir.Adjacent();
                 ShadowFloodFill.CheckRow(
-                    start, start, maxRowDistance, UpdateCellMapVisible, Cells.CurrentList.Contains, new[] {
+                    start, start, maxRowDistance, UpdateCellMapVisible, Cells.Contains, new[] {
                         adjacent[0].ToPoint3(), adjacent[1].ToPoint3()
                     }, dir.ToPoint3());
             }
-            Cells.PreviousList.Clear();
             UpdateWatchTargets();
             OnUpdate?.Invoke();
         }
@@ -117,7 +116,7 @@ namespace PixelComrades {
         }
 
         public void UpdateCellMapVisible(BaseCell cell) {
-            if (Cells.CurrentList.Contains(cell)) {
+            if (Cells.Contains(cell)) {
                 return;
             }
             //if (cell.HasActor()) {
@@ -129,7 +128,7 @@ namespace PixelComrades {
             //    }
             //}
             cell.IsVisible = true;
-            Cells.CurrentList.Add(cell);
+            Cells.Add(cell);
         }
     }
 }

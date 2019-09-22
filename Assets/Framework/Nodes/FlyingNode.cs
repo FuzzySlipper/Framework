@@ -19,7 +19,7 @@ namespace PixelComrades {
         public FlightEngine Engine => _flight.Value;
         public FakeFlightEngine FakeFlight => _fakeFlight.Value;
         public HoverEngine Hover => _hover.Value;
-        public Transform Tr => _tr.Value;
+        public TransformComponent Tr => _tr.Value;
         public FlightControl Control => _control.Value;
         public CosmeticFlightBanking Banking => _banking.Value;
         public Rigidbody Rigidbody => _rigidBody.Value.Rb;

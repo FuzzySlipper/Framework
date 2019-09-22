@@ -27,7 +27,7 @@ namespace PixelComrades {
 
         public bool TryStore(Entity entity) {
             UnityToEntityBridge.Unregister(entity);
-            entity.Get<ModelComponent>().Clear();
+            entity.Get<RenderingComponent>().Clear();
             entity.Remove(typeof(SpriteAnimationComponent));
             entity.Tags.Clear();
             entity.Post(new ProjectileDespawned(entity));
@@ -53,7 +53,7 @@ namespace PixelComrades {
                 spawnRot = animData.Value.GetEventRotation;
             }
             else {
-                var tr = owner.Get<TransformComponent>()?.Value;
+                var tr = owner.Get<TransformComponent>();
                 if (tr != null) {
                     spawnPos = tr.position;
                     spawnRot = tr.rotation;
@@ -88,7 +88,7 @@ namespace PixelComrades {
                 return entity;
             }
             var spawn = prefab.GetComponent<IProjectile>();
-            entity.Add(new TransformComponent(spawn.Tr));
+            entity.Add(new TransformComponent(prefab.Transform));
             switch (template.Type) {
                 default:
                 case "Simple":
@@ -96,7 +96,7 @@ namespace PixelComrades {
                 case "SpriteAnimation":
                     spawn.SetColor(template.MainColor, Color.white * template.GlowPower);
                     if (template.Animation != null) {
-                        var spriteRenderer = spawn.Renderers[0] as SpriteRenderer;
+                        var spriteRenderer = prefab.Renderers[0] as SpriteRenderer;
                         entity.Add(new SpriteAnimationComponent(spriteRenderer, template.Animation, false, template.Billboard));
                     }
                     break;
@@ -108,7 +108,7 @@ namespace PixelComrades {
             switch (template.Movement) {
                 case "Forward":
                 case "Arc":
-                    spawn.Tr.LookAt(target, spawn.Tr.up);
+                    prefab.Transform.LookAt(target, prefab.Transform.up);
                     break;
                 case "Force":
                     //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
@@ -118,8 +118,8 @@ namespace PixelComrades {
                 entity.Get<RigidbodyComponent>().SetRb(spawn.Rigidbody);
             }
             entity.Tags.Add(EntityTags.Moving);
-            entity.Get<ModelComponent>().Set(spawn);
-            UnityToEntityBridge.RegisterToEntity(spawn.Tr.gameObject, entity);
+            entity.Get<RenderingComponent>().Set(spawn);
+            UnityToEntityBridge.RegisterToEntity(prefab.Transform.gameObject, entity);
             entity.ParentId = owner.Id;
             entity.Post(new ProjectileSpawned(template, entity));
             return entity;
@@ -184,7 +184,7 @@ namespace PixelComrades {
             entity.Factory = this;
             //if it has a label component it'll get picked up by center target
             //entity.Add(new LabelComponent(name));
-            entity.Add(new ModelComponent(null));
+            entity.Add(new RenderingComponent(null));
             entity.Add(new DespawnTimer(_defaultTimeout.Value, false));
             entity.Add(new DespawnOnCollision());
             entity.Add(new MoveSpeed(_defaultSpeed.Value));

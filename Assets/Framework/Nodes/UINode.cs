@@ -6,21 +6,21 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class UINode : BaseNode {
         
-        private CachedComponent<ModelComponent> _model = new CachedComponent<ModelComponent>();
+        private CachedComponent<RenderingComponent> _rendering = new CachedComponent<RenderingComponent>();
         private CachedComponent<LabelComponent> _label = new CachedComponent<LabelComponent>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<DescriptionComponent> _description = new CachedComponent<DescriptionComponent>();
         private CachedComponent<DataDescriptionComponent> _dataDescription = new CachedComponent<DataDescriptionComponent>();
         private CachedComponent<IconComponent> _icon = new CachedComponent<IconComponent>();
 
-        public Transform Tr { get => _tr.Value; }
+        public TransformComponent Tr { get => _tr.Value; }
         public LabelComponent Label => _label.Value;
         public DescriptionComponent Description { get => _description; }
         public IconComponent Icon { get => _icon; }
-        public ModelComponent Model { get => _model; }
+        public RenderingComponent Rendering { get => _rendering; }
         public DataDescriptionComponent DataDescription { get => _dataDescription; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _label, _model, _tr, _description, _dataDescription, _icon
+            _label, _rendering, _tr, _description, _dataDescription, _icon
         };
 
         public UINode(Entity entity, SortedList<System.Type, ComponentReference> list) {
@@ -31,12 +31,12 @@ namespace PixelComrades {
         }
 
         public void Setup(GameObject obj) {
-            _model.Value.Set(obj.GetComponent<ModelWrapper>());
+            _rendering.Value.Set(obj.GetComponent<RenderingWrapper>());
             
         }
 
         public void Clear() {
-            _model.Value.Clear();
+            _rendering.Value.Clear();
             _tr.Value.Set(null);
         }
 

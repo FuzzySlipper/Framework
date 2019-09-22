@@ -10,7 +10,7 @@ namespace PixelComrades {
         
         public bool OnlyActiveWhileEquipped;
         public string ModelName;
-        public CachedGenericComponent<IModelComponent> LoadedModel;
+        public CachedGenericComponent<IRenderingComponent> LoadedModel;
         public List<SerializableType> LoadedComponents = new List<SerializableType>();
 
         public ModelLoaderComponent(bool onlyActiveWhileEquipped, string modelName) {

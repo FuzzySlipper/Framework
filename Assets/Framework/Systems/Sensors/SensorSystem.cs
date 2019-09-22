@@ -53,33 +53,40 @@ namespace PixelComrades {
                 node.Sensor.Sensor.Pulse();
                 node.Targets.UpdateWatchTargets();
                 for (int i = 0; i < node.Sensor.Sensor.DetectedColliders.Count; i++) {
-                    node.Targets.AddWatch(UnityToEntityBridge.GetEntity(node.Sensor.Sensor.DetectedColliders[i]), true);
+                    var enemy = UnityToEntityBridge.GetEntity(node.Sensor.Sensor.DetectedColliders[i]);
+                    if (enemy == null || enemy == node.Entity) {
+                        continue;
+                    }
+                    node.Targets.AddWatch(enemy, true);
+                    Console.Log(node.Entity.DebugId + " heard " + enemy.DebugId);
                 }
-                if (node.Targets.WatchTargets.Count == 0) {
-                    _tempEnemyList.Clear();
-                    World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, node.Faction.Faction);
-                    var nodePos = node.Tr.position.WorldToGenericGrid(HearingSectorSize);
-                    for (int f = 0; f < _tempEnemyList.Count; f++) {
-                        var enemy = _tempEnemyList[f];
-                        var tr = enemy.Get<TransformComponent>()?.Value;
-                        if (tr == null) {
-                            Debug.Log("Enemy has no TR " + enemy.DebugId);
-                            continue;
-                        }
-                        if (tr.position.WorldToGenericGrid(HearingSectorSize) == nodePos) {
-                            var hearingChance = HearingChance;
-                            if (enemy.Tags.Contain(EntityTags.PerformingCommand)) {
-                                hearingChance *= 4;
-                            }
-                            else if (enemy.Tags.Contain(EntityTags.Moving)) {
-                                hearingChance *= 2;
-                            }
-                            if (Game.Random.DiceRollSucess(hearingChance)) {
-                                if (!UnityEngine.Physics.Linecast(tr.position, node.Tr.position, LayerMasks.Walls)) {
-                                    node.Targets.AddWatch(enemy, false);
-                                    DebugText.Log(node.Entity.DebugId + " spotted " + enemy.DebugId);
-                                }
-                            }
+                if (node.Targets.WatchTargets.Count != 0) {
+                    continue;
+                }
+                _tempEnemyList.Clear();
+                World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, node.Faction.Faction);
+                var nodePos = node.Tr.position.WorldToGenericGrid(HearingSectorSize);
+                for (int f = 0; f < _tempEnemyList.Count; f++) {
+                    var enemy = _tempEnemyList[f];
+                    var tr = enemy.Get<TransformComponent>();
+                    if (tr == null) {
+                        Debug.Log("Enemy has no TR " + enemy.DebugId);
+                        continue;
+                    }
+                    if (tr.position.WorldToGenericGrid(HearingSectorSize) != nodePos) {
+                        continue;
+                    }
+                    var hearingChance = HearingChance;
+                    if (enemy.Tags.Contain(EntityTags.PerformingCommand)) {
+                        hearingChance *= 4;
+                    }
+                    else if (enemy.Tags.Contain(EntityTags.Moving)) {
+                        hearingChance *= 2;
+                    }
+                    if (Game.Random.DiceRollSucess(hearingChance)) {
+                        if (!Physics.Linecast(tr.position, node.Tr.position, LayerMasks.Walls)) {
+                            node.Targets.AddWatch(enemy, false);
+                            Console.Log(node.Entity.DebugId + " saw " + enemy.DebugId);
                         }
                     }
                 }

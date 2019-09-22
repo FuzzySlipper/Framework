@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public abstract class PlayerWeaponAnimator : EntityIdentifier, IOnCreate, IAnimator, IModelComponent, ISystemUpdate {
+    public abstract class PlayerWeaponAnimator : EntityIdentifier, IOnCreate, IAnimator, IRenderingComponent, ISystemUpdate {
 
         public System.Action<PlayerWeaponAnimator, string> OnAnimatorEvent;
 
@@ -159,8 +159,8 @@ namespace PixelComrades {
 
         protected virtual void ClearWeaponModel() {
             if (_primary != null && WeaponModel != null) {
-                var primaryTr = _primary.Entity.Get<TransformComponent>()?.Value;
-                if (primaryTr == WeaponModel.Tr) {
+                var primaryTr = _primary.Entity.Get<TransformComponent>();
+                if (primaryTr.gameObject == WeaponModel.Tr.gameObject) {
                     _primary.Entity.Remove<TransformComponent>();
                 }
             }
@@ -170,8 +170,8 @@ namespace PixelComrades {
             _weaponModel = null;
         }
 
-        public void SetVisible(bool status) {
-            _entity.SetVisible(status);
+        public void SetRendering(RenderingMode status) {
+            _entity.SetVisible(status != RenderingMode.None);
         }
 
         public virtual void ClipEventTriggered() {
@@ -206,7 +206,7 @@ namespace PixelComrades {
 
         private IEnumerator RaiseWeapon() {
             //StopCurrentAnimation();
-            SetVisible(true);
+            SetRendering(RenderingMode.Normal);
             yield return RaiseArms();
             CheckFinish();
         }

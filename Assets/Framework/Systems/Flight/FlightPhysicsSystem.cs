@@ -198,7 +198,7 @@ namespace PixelComrades {
 
     public static class FlyingExtensions {
 
-        public static void TurnTowardsPoint(this FlightControl control, Transform nodeTr, Vector3 gotoPos) {
+        public static void TurnTowardsPoint(this FlightControl control, TransformComponent nodeTr, Vector3 gotoPos) {
             Vector3 localGotoPos = nodeTr.InverseTransformVector(gotoPos - nodeTr.position).normalized;
             control.Pitch = Mathf.Clamp(-localGotoPos.y * control.Config.PitchSensitivity, -1f, 1f);
             control.Yaw = Mathf.Clamp(localGotoPos.x * control.Config.YawSensitivity, -1f, 1f);

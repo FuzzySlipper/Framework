@@ -9,9 +9,8 @@ namespace PixelComrades {
         public Action Action { get; }
         public float TimeStart { get; }
         public int Index { get; }
-        public Transform SpawnPivot;
+        public Transform SpawnPivot { get; }
 
-        public Entity ActionEntity { get { return Action.GetEntity(); } }
         public bool IsLastIndex { get { return Action.Sequence.Count - 1 == Index; } }
         public ActionLayer Current { get { return Index >= 0 && Index < Action.Sequence.Count ? Action.Sequence[Index] : null; } }
 

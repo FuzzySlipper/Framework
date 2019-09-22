@@ -49,8 +49,8 @@ namespace PixelComrades {
 
         public void ApplyMaterialBlocks(MaterialPropertyBlock[] matBlocks) {}
 
-        public void SetVisible(bool status) {
-            if (status) {
+        public void SetRendering(RenderingMode status) {
+            if (status != RenderingMode.None) {
                 _lengthParticles.Play();
                 _glowParticles.Play();
             }

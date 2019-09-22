@@ -25,7 +25,7 @@ namespace PixelComrades {
                 if (originTr == null) {
                     var parent = arg.Origin.Entity.GetParent();
                     if (parent != null) {
-                        originTr = parent.Get<TransformComponent>()?.Value;
+                        originTr = parent.Get<TransformComponent>();
                     }
                 }
                 var origin = originTr != null ? originTr.position : arg.HitPoint + (arg.HitNormal * 2);

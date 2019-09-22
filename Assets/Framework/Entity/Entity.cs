@@ -10,7 +10,44 @@ namespace PixelComrades {
         private GenericPool<TagsComponent> _tagPool = new GenericPool<TagsComponent>(50, t => t.ClearEntity());
         private static List<Entity> _toDeleteList = new List<Entity>(25);
         private static TypeComparer _typeComparer = new TypeComparer();
+
+        public static Entity New(string name) {
+            var entity = InternalNew(name);
+            entity.Id = EntityController.AddEntityToMainList(entity);
+            return entity;
+        }
+
+        private static Entity InternalNew(string name) {
+            var entity = _pool.New();
+            entity.Name = name;
+            return entity;
+        }
+
+        public static Entity Restore(string name, int index) {
+            var entity = InternalNew(name);
+            entity.Id = EntityController.AddEntityToMainList(entity, index);
+            return entity;
+        }
+
+        public static void ProcessPendingDeletes() {
+            for (int i = 0; i < _toDeleteList.Count; i++) {
+                if (_toDeleteList[i].Factory != null && _toDeleteList[i].Factory.TryStore(_toDeleteList[i])) {
+#if DEBUG
+                    DebugLog.Add("Pooled " + _toDeleteList[i].Name + " to " + _toDeleteList[i].Factory.GetType().Name);
+#endif
+                    continue;
+                }
+                _toDeleteList[i].Post(new EntityDestroyed(_toDeleteList[i]));
+#if DEBUG
+                DebugLog.Add("Deleted " + _toDeleteList[i].Name);
+#endif
+                _pool.Store(_toDeleteList[i]);
+            }
+            _toDeleteList.Clear();
+        }
         
+        private Entity() {}
+
         public int Id { get; private set;}
         public string Name;
         public int ParentId = -1;
@@ -32,57 +69,10 @@ namespace PixelComrades {
             }
         }
 
-        public class TypeComparer : Comparer<System.Type> {
-            public override int Compare(System.Type x, System.Type y) {
-                if (ReferenceEquals(x, y) || (x == null || y == null)) {
-                    return 0;
-                }
-                return x.GetHashCode().CompareTo(y.GetHashCode());
-            }
-        }
-
-        public static void ProcessPendingDeletes() {
-            for (int i = 0; i < _toDeleteList.Count; i++) {
-                if (_toDeleteList[i].Factory != null) {
-                    _toDeleteList[i].Post(new EntityDestroyed(_toDeleteList[i]));
-                    _toDeleteList[i].Factory.TryStore(_toDeleteList[i]);
-#if DEBUG
-                    DebugLog.Add("Pooled " + _toDeleteList[i].Name + " to " + _toDeleteList[i].Factory.GetType().Name);
-#endif
-                    continue;
-                }
-#if DEBUG
-                DebugLog.Add("Deleted " + _toDeleteList[i].Name);
-#endif
-                _pool.Store(_toDeleteList[i]);
-            }
-            _toDeleteList.Clear();
-        }
-
-        public static Entity New(string name) {
-            var entity = InternalNew(name);
-            entity.Id = EntityController.AddEntityToMainList(entity);
-            return entity;
-        }
-
-        private static Entity InternalNew(string name) {
-            var entity = _pool.New();
-            entity.Name = name;
-            return entity;
-        }
-
-        public static Entity Restore(string name, int index) {
-            var entity = InternalNew(name);
-            entity.Id = EntityController.AddEntityToMainList(entity, index);
-            return entity;
-        }
-
-        protected Entity() {}
-
         public bool IsDestroyed() {
             return Id < 0 || Pooled;
         }
-
+        
         public void Destroy() {
             if (_toDeleteList.Contains(this) || IsDestroyed()) {
                 return;
@@ -172,6 +162,15 @@ namespace PixelComrades {
 
         public static bool operator !=(Entity entity, Entity other) {
             return !(entity == other);
+        }
+
+        private class TypeComparer : Comparer<System.Type> {
+            public override int Compare(System.Type x, System.Type y) {
+                if (ReferenceEquals(x, y) || (x == null || y == null)) {
+                    return 0;
+                }
+                return x.GetHashCode().CompareTo(y.GetHashCode());
+            }
         }
 
         private class EntityPool {
