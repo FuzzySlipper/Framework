@@ -11,39 +11,42 @@ namespace PixelComrades {
         private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>();
 
         public AnimatorSystem() {
-            EntityController.RegisterReceiver<HurtAnimation>(this);
-            EntityController.RegisterReceiver<DeathAnimation>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(DeathAnimation), typeof(HurtAnimation),
+            }));
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            for (int i = 0; i < _animations.Count; i++) {
-                ref var anim = ref _animations[i];
-                if (anim.Animator?.Value == null) {
-                    _animations.Remove(anim);
-                    continue;
-                }
-                if (anim.PostEvent && anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
-                    anim.PostEvent = false;
-                    anim.Target.Post(new AnimationEventComplete(anim.Target, anim.Animator, anim.Clip));
-                }
-                if (anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
-                    anim.Target.Post(new AnimationComplete(anim.Target, anim.Animator, anim.Clip));
-                    _animations.Remove(anim);
-                }
+            _animations.Run(CheckAnimations);
+            _moveClips.Run(CheckMoveClips);
+        }
+
+        private void CheckAnimations(ref PlayAnimation anim) {
+            if (anim.Animator?.Value == null) {
+                _animations.Remove(anim);
+                return;
             }
-            for (int i = 0; i < _moveClips.Count; i++) {
-                var node = _moveClips[i];
-                if (node.Animator == null) {
-                    _moveClips.Remove(node);
-                    continue;
+            if (anim.PostEvent && anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
+                anim.PostEvent = false;
+                anim.Target.Post(new AnimationEventComplete(anim.Target, anim.Animator, anim.Clip));
+            }
+            if (anim.Animator.Value.IsAnimationEventComplete(anim.Clip)) {
+                anim.Target.Post(new AnimationComplete(anim.Target, anim.Animator, anim.Clip));
+                _animations.Remove(anim);
+            }
+        }
+
+        private void CheckMoveClips(ref PauseMovementForClip node) {
+            if (node.Animator == null) {
+                _moveClips.Remove(node);
+                return;
+            }
+            if (node.Animator.Value.IsAnimationComplete(node.Clip)) {
+                var entity = node.Animator.GetEntity();
+                if (entity != null && !entity.IsDestroyed()) {
+                    entity.Tags.Remove(EntityTags.CantMove);
                 }
-                if (node.Animator.Value.IsAnimationComplete(node.Clip)) {
-                    var entity = node.Animator.GetEntity();
-                    if (entity != null && !entity.IsDestroyed()) {
-                        entity.Tags.Remove(EntityTags.CantMove);
-                    }
-                    _moveClips.Remove(node);
-                }
+                _moveClips.Remove(node);
             }
         }
 

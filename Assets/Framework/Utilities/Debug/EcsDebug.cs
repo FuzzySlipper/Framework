@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -27,41 +28,64 @@ namespace PixelComrades {
         [Command("ListCharacters")]
         public static void ListCharacters() {
             var characterNodes = EntityController.GetNodeList<CharacterNode>();
-            Console.Log("Character Count " + characterNodes.Count);
-            for (int i = 0; i < characterNodes.Count; i++) {
-                Console.Log(string.Format("Character {0}", characterNodes[i].Entity.DebugId));
-            }
+            Console.Log("Character Count " + characterNodes.UsedCount);
+            characterNodes.Run(
+                (ref CharacterNode node) => {
+                    Console.Log("Character " + node.Entity.DebugId);
+                });
+        }
+
+        [Command("WriteDebugLog")]
+        public static void WriteDebugLog() {
+            StreamWriter writer = new StreamWriter(string.Format("{0}/DebugLog_{1:MM-dd-yy hh-mm-ss}.txt", Application.persistentDataPath, System.DateTime
+            .Now), 
+            false);
+            writer.Write(DebugLog.Current);
+            writer.Close();
         }
         
-        public static void RegisterDebugCommands() {
-            DebugConsole.RegisterCommand("actionTest", RunActionDelTest);
-            DebugConsole.RegisterCommand("messageTest", RunMessageTest);
-            DebugConsole.RegisterCommand("timescale", ChangeTimeScale);
-            DebugConsole.RegisterCommand("saveEntity", SaveEntity);
-            DebugConsole.RegisterCommand("heal", strings => {
-                Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Health"));
-                return Player.Party[0].Stats.GetVital("Vitals.Health").ToLabelString();
-            });
-            DebugConsole.RegisterCommand("recover", strings => {
-                Player.Party[0].Entity.Post(new HealEvent(100, null, null, "Vitals.Energy"));
-                return Player.Party[0].Stats.GetVital("Vitals.Energy").ToLabelString();
-            });
-            DebugConsole.RegisterCommand("godmode", strings => {
-                var block = Player.Party[0].Entity.GetOrAdd<BlockDamage>();
+        [Command("GodMode")]
+        private static string GodMode() {
+            bool added = false;
+            for (int i = 0; i < Player.Party.Length; i++) {
+                var block = Player.Party[i].Entity.GetOrAdd<BlockDamage>();
                 if (block.Dels.Contains(GodModeDamage)) {
                     block.Dels.Remove(GodModeDamage);
-                    return "Disabled god mode";
                 }
-                block.Dels.Add(GodModeDamage);
-                return "Enabled god mode";
-            });
-            //Minibuffer.Register(typeof(EcsDebug));
+                else {
+                    added = true;
+                    block.Dels.Add(GodModeDamage);
+                }
+            }
+            return added ? "Enabled god mode" : "Disabled god mode";
+        }
+
+        [Command("RecoverEntity")]
+        private static string RecoverEntity(int entityId, int amount) {
+            var entity = EntityController.GetEntity(entityId);
+            if (entity == null) {
+                return "No Entity " + entityId;
+            }
+            entity.Post(new HealEvent(amount, null, null, "Vitals.Energy"));
+            return entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString();
+        }
+        
+
+        [Command("HealEntity")]
+        private static string HealEntity(int entityId, int amount) {
+            var entity = EntityController.GetEntity(entityId);
+            if (entity == null) {
+                return "No Entity " + entityId;
+            }
+            entity.Post(new HealEvent(amount, null, null, "Vitals.Health"));
+            return entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString();
         }
 
         private static bool GodModeDamage(DamageEvent dmg) {
             return true;
         }
 
+        [Command("SaveEntity")]
         private static string SaveEntity(string[] entityID) {
             if (entityID == null) {
                 return "Didn't provide an Entity ID'";
@@ -76,8 +100,8 @@ namespace PixelComrades {
             }
             return "Didn't provide a valid Entity ID";
         }
-        
 
+        [Command("timeScale")]
         private static string ChangeTimeScale(string[] scale) {
             if (scale == null) {
                 TimeManager.TimeScale = 1;
@@ -94,6 +118,7 @@ namespace PixelComrades {
             GameData.Init();
         }
 
+        [Command("RunMessageTest")]
         private static string RunMessageTest(string[] count) {
             ManagedArray<Entity> array = EntityController.EntitiesArray;
             int testCount = 5000;
@@ -113,6 +138,7 @@ namespace PixelComrades {
             }
         }
 
+        [Command("RunActionDelTest")]
         private static string RunActionDelTest(string[] count) {
             ManagedArray<Entity> array = EntityController.EntitiesArray;
             int testCount = 5000;
@@ -128,7 +154,7 @@ namespace PixelComrades {
             return "";
         }
 
-        private static ManagedArray<Entity>.Delegate _stored;
+        private static ManagedArray<Entity>.RefDelegate _stored;
 
         private static void RunImplicitActionTest(ManagedArray<Entity> array, int testCount) {
             for (int i = 0; i < testCount; i++) {
@@ -137,7 +163,7 @@ namespace PixelComrades {
         }
 
         private static void RunExplicitActionTest(ManagedArray<Entity> array, int testCount) {
-            ManagedArray<Entity>.Delegate del = TestEntity;
+            ManagedArray<Entity>.RefDelegate del = TestEntity;
             for (int i = 0; i < testCount; i++) {
                 array.Run(del);
             }
@@ -149,16 +175,19 @@ namespace PixelComrades {
             }
         }
 
-        private static void TestEntity(Entity entity) {}
+        private static void TestEntity(ref Entity entity) {}
 
+        [Command("Version")]
         public static void Version() {
             Debug.LogFormat("Game Version: {0}", Game.Version);
         }
 
+        [Command("TestTimers")]
         public static void TestTimers() {
             TimeManager.StartUnscaled(RunTimerTest(1));
         }
 
+        [Command("DebugStatus")]
         public static void DebugStatus(int entity) {
             DebugStatus(EntityController.GetEntity(entity));
         }
@@ -200,10 +229,12 @@ namespace PixelComrades {
             Debug.LogFormat("Stop Watch Seconds {0} Ms {1} Manual {2} Timer {3}", watch.Elapsed.TotalSeconds, watch.Elapsed.Milliseconds, TimeManager.TimeUnscaled - startTime, length);
         }
 
+        [Command("FlyCam")]
         public static void FlyCam() {
             PixelComrades.FlyCam.main.ToggleActive();
         }
-        
+
+        [Command("Screenshot")]
         public static void Screenshot() {
             ScreenCapture.CaptureScreenshot(
                 string.Format( "Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png", Game.Title, System.DateTime.Now));
@@ -212,7 +243,8 @@ namespace PixelComrades {
         public static void FPS() {
             UIFrameCounter.main.Toggle();
         }
-        
+
+        [Command("FixMouse")]
         public static void FixMouse() {
             if (GameOptions.MouseLook && !Game.CursorUnlocked) {
                 Cursor.lockState = CursorLockMode.Locked;
@@ -221,17 +253,18 @@ namespace PixelComrades {
                 Cursor.lockState = CursorLockMode.None;
             }
         }
-        
+
+        [Command("DebugMouseLock")]
         public static void DebugMouseLock() {
             Debug.LogFormat("MouseUnlocked {0}", Game.CursorUnlockedHolder.Debug());
         }
 
-        
+        [Command("DebugPause")]        
         public static void DebugPause() {
             Debug.LogFormat("DebugPause {0}", Game.PauseHolder.Debug());
         }
 
-        
+        [Command("DebugMenus")]
         public static void DebugMenus() {
             if (UIBasicMenu.OpenMenus.Count == 0) {
                 Debug.Log("DebugMenus: 0");
@@ -250,12 +283,12 @@ namespace PixelComrades {
             EntityController.GetEntity(entity)?.Post(message);
         }
 
-        
+        [Command("AddItem")]
         public static void AddItem(string template) {
             Player.MainInventory.Add(ItemFactory.GetItem(template));
         }
 
-        
+        [Command("ListUpdaters")]        
         public static void ListUpdaters() {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < SystemManager.EveryUpdate.Count; i++) {
@@ -272,7 +305,7 @@ namespace PixelComrades {
             Debug.Log(sb.ToString());
         }
 
-        
+        [Command("ListTurnUpdaters")]
         public static void ListTurnUpdaters() {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < SystemManager.TurnUpdates.Count; i++) {
@@ -289,7 +322,7 @@ namespace PixelComrades {
             Debug.Log(sb.ToString());
         }
 
-        
+        [Command("ListEntities")]
         public static void ListEntities() {
             StringBuilder sb = new StringBuilder();
             foreach (Entity e in EntityController.EntitiesArray) {
@@ -301,7 +334,7 @@ namespace PixelComrades {
             Debug.LogFormat("entities {0}", sb.ToString());
         }
 
-        
+        [Command("ListComponents")]
         public static void ListComponents(int id) {
             var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
@@ -318,7 +351,7 @@ namespace PixelComrades {
             Debug.Log(sb.ToString());
         }
 
-        
+        [Command("ListEntityContainer")]
         public static void ListEntityContainer(int id, string typeName) {
             var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
@@ -330,7 +363,7 @@ namespace PixelComrades {
             foreach (var cRef in dict) {
                 if (cRef.Key.Name == typeName) {
                     type = cRef.Key;
-                    instance = cRef.Value.Get() as EntityContainer;
+                    instance = cRef.Value.Get<EntityContainer>();
                 }
             }
             if (type == null || instance == null) {
@@ -343,7 +376,7 @@ namespace PixelComrades {
             }
         }
 
-        
+        [Command("DebugComponent")]
         public static void DebugComponent(int id, string typeName) {
             var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {
@@ -371,7 +404,7 @@ namespace PixelComrades {
             Debug.LogFormat("{0} {1}: {2}", id, typeName, sb.ToString());
         }
 
-        
+        [Command("TestSerializeComponent")]
         public static void TestSerializeComponent(int id, string typeName) {
             var dict = EntityController.GetEntity(id).Components;
             if (dict == null) {

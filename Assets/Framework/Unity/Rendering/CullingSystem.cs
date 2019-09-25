@@ -147,7 +147,7 @@ namespace PixelComrades {
                 }
             }
         }
-
+        
         private void SetSector(Point3 pos, bool active) {
             if (!_sectorObjects.TryGetValue(pos, out var list)) {
                 return;

@@ -8,9 +8,9 @@ namespace PixelComrades {
         private const float ReachedDestination = 0.1f;
         
         private bool _frozen = false;
-        private List<RigidbodyMoverNode> _moverList;
+        private NodeList<RigidbodyMoverNode> _moverList;
         private ManagedArray<RigidbodyComponent> _rbList;
-        private ManagedArray<RigidbodyComponent>.Delegate _rbDel;
+        private ManagedArray<RigidbodyComponent>.RefDelegate _rbDel;
 
         public PhysicsMoverSystem() {
             _rbDel = CheckPaused;
@@ -27,9 +27,7 @@ namespace PixelComrades {
                 _moverList = EntityController.GetNodeList<RigidbodyMoverNode>();
             }
             if (_moverList != null) {
-                for (int i = 0; i < _moverList.Count; i++) {
-                    HandleVelocityMover(_moverList[i]);
-                }
+                _moverList.Run(HandleVelocityMover);
             }
             if (_frozen) {
                 CheckRigidbodies();
@@ -53,7 +51,7 @@ namespace PixelComrades {
             }
         }
 
-        private void CheckPaused(RigidbodyComponent component) {
+        private void CheckPaused(ref RigidbodyComponent component) {
             if (component.RigidbodySetup.IsFrozen == _frozen) {
                 return;
             }
@@ -65,7 +63,7 @@ namespace PixelComrades {
             }
         }
 
-        private void HandleVelocityMover(RigidbodyMoverNode mover) {
+        private void HandleVelocityMover(ref RigidbodyMoverNode mover) {
             var dt = TimeManager.DeltaTime;
             var rb = mover.Rb;
             if (rb == null) {

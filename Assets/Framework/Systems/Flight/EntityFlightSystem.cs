@@ -6,10 +6,12 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class EntityFlightSystem : SystemBase, IMainSystemUpdate, IReceive<CanMoveStatusChanged>, IReceive<ChangePositionEvent>  {
 
-        private List<FlyingNode> _flyingList;
+        private NodeList<FlyingNode> _flyingList;
         
         public EntityFlightSystem() {
-            EntityController.RegisterReceiver<FlightMoveInput>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(FlightMoveInput)
+            }));
         }
 
         public override void Dispose() {
@@ -24,13 +26,14 @@ namespace PixelComrades {
                 _flyingList = EntityController.GetNodeList<FlyingNode>();
             }
             if (_flyingList != null) {
-                for (int i = 0; i < _flyingList.Count; i++) {
-                    var node = _flyingList[i];
-                    if (node.SteeringInput != null && node.FlightMoveInput.CanMove) {
-                        node.FlightMoveInput.LookInputVector = node.SteeringInput.Look;
-                        node.FlightMoveInput.MoveInputVector = node.SteeringInput.Move;
-                    }
-                }
+                _flyingList.Run(UpdateNode);
+            }
+        }
+
+        private void UpdateNode(ref FlyingNode node) {
+            if (node.SteeringInput != null && node.FlightMoveInput.CanMove) {
+                node.FlightMoveInput.LookInputVector = node.SteeringInput.Look;
+                node.FlightMoveInput.MoveInputVector = node.SteeringInput.Move;
             }
         }
         

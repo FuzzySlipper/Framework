@@ -8,7 +8,9 @@ namespace PixelComrades {
         IReceive<TooltipDisplaying>, IReceiveGlobal<EquipItemEvent>, IReceiveGlobal<UnEquipItemEvent> {
 
         public EquipmentSystem() {
-            EntityController.RegisterReceiver<Equipment>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(Equipment)
+            }));
         }
         
         public void HandleGlobal(SaveGameLoaded arg) {

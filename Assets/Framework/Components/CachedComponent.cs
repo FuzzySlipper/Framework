@@ -9,7 +9,7 @@ namespace PixelComrades {
     public abstract class CachedComponent : IDisposable {
 
         public abstract void Clear();
-        public abstract void Set(Entity owner, SortedList<Type, ComponentReference> list);
+        public abstract void Set(Entity owner, Dictionary<Type, ComponentReference> list);
 
         public void Dispose() {
             Clear();
@@ -50,7 +50,7 @@ namespace PixelComrades {
             Set(owner.GetEntity());
         }
         
-        public CachedComponent(Entity owner, SortedList<Type, ComponentReference> list) {
+        public CachedComponent(Entity owner, Dictionary<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
             if (list.TryGetValue(type, out var cref)) {
@@ -84,7 +84,7 @@ namespace PixelComrades {
             Set(component.GetEntity());
         }
 
-        public override void Set(Entity owner, SortedList<Type, ComponentReference> list) {
+        public override void Set(Entity owner, Dictionary<Type, ComponentReference> list) {
             _entity = owner;
             var type = typeof(T);
             if (list.TryGetValue(type, out var cref)) {

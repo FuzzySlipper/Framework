@@ -10,7 +10,6 @@ namespace PixelComrades {
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
         private bool _isMoving = false;
 
-        public SensorComponent Sensor { get; protected set; }
         public Entity Entity { get; protected set; }
         public ValueHolder<bool> MoveEnabledHolder { get { return _moveEnabled; } }
         public Transform Tr { get; private set; }

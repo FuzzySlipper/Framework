@@ -51,7 +51,7 @@ namespace PixelComrades {
             if (!Game.GameActive || _actorLock) {
                 return;
             }
-            if (_visible != null && _visible.Entity.Tags.Contain(EntityTags.IsDead)) {
+            if (_visible != null && (_visible.Disposed || _visible.Entity.Tags.Contain(EntityTags.IsDead))) {
                 RemoveActor();
                 return;
             }
@@ -201,7 +201,7 @@ namespace PixelComrades {
                 _main._vitals[i].RemoveActor();
             }
             _sliderBackground.enabled = false;
-            if (_visible != null) {
+            if (_visible != null && !_visible.Disposed) {
                 _visible.Entity.RemoveObserver(_main);
             }
             _visible = null;

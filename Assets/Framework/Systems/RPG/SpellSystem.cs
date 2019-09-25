@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class SpellSystem : SystemBase, IReceive<ContainerStatusChanged> {
 
         public SpellSystem() {
-            EntityController.RegisterReceiver<SpellsContainer>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(SpellsContainer)
+            }));
         }
 
         public void Handle(ContainerStatusChanged arg) {

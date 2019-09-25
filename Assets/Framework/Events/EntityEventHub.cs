@@ -63,15 +63,12 @@ namespace PixelComrades {
         }
 
         public void Post<T>(T msg) where T : IEntityMessage {
-            _messageReceivers.ForceAdd();
-            for (int i = 0; i < _messageReceivers.Count; i++) {
-                if (_messageReceivers[i] == null) {
-                    continue;
-                }
-                (_messageReceivers[i] as IReceive<T>)?.Handle(msg);
-            }
+            _messageReceivers.Run(
+                del => {
+                    (del as IReceive<T>)?.Handle(msg);
+                });
         }
-
+        
         public void ClearMessageTable(int messageType) {
             if (_simpleHub.ContainsKey(messageType)) {
                 _simpleHub.Remove(messageType);

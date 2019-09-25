@@ -7,9 +7,9 @@ namespace PixelComrades {
     public sealed class StatusUpdateSystem : SystemBase, IReceive<StatusUpdate>, IReceive<CombatStatusUpdate> {
 
         public StatusUpdateSystem() {
-            EntityController.RegisterReceiver<StatusUpdateComponent>(this);
-            EntityController.RegisterReceiver<FloatingTextStatusComponent>(this);
-            EntityController.RegisterReceiver<FloatingTextCombatComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(StatusUpdateComponent), typeof(FloatingTextStatusComponent), typeof(FloatingTextCombatComponent),
+            }));
         }
         
         public void Handle(StatusUpdate arg) {

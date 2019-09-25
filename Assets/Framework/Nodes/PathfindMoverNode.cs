@@ -8,18 +8,23 @@ namespace PixelComrades {
     public class SimplePathfindMoverNode : BaseNode {
 
         private CachedComponent<SimplePathfindingAgent> _pathfinder = new CachedComponent<SimplePathfindingAgent>();
-        public CachedComponent<MoveSpeed> MoveSpeed = new CachedComponent<MoveSpeed>();
-        public CachedComponent<RotationSpeed> RotationSpeed = new CachedComponent<RotationSpeed>();
-        public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
-        public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
+        private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+        private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
+        private CachedComponent<MoveTarget> _target = new CachedComponent<MoveTarget>();
+        private CachedComponent<PathfindingDebugging> _debugging = new CachedComponent<PathfindingDebugging>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
         
         public SimplePathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public TransformComponent Tr { get => _tr.Value; }
         public SteeringInput Steering => _moveInput.Value;
+        public MoveSpeed MoveSpeed { get => _moveSpeed; }
+        public RotationSpeed RotationSpeed { get => _rotationSpeed; }
+        public MoveTarget Target { get => _target; }
+        public PathfindingDebugging Debugging { get => _debugging; }
+        public SteeringInput MoveInput { get => _moveInput; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _pathfinder, MoveSpeed, RotationSpeed, Target, Debugging, _tr
+            _pathfinder, _moveSpeed, _rotationSpeed, _target, _debugging, _tr, _moveInput
         };
         
         public static System.Type[] GetTypes() {
@@ -31,15 +36,15 @@ namespace PixelComrades {
             };
         }
 
-        public float GetMoveSpeed { get { return MoveSpeed.Value?.Speed ?? 1; } }
+        public float GetMoveSpeed { get { return _moveSpeed.Value?.Speed ?? 1; } }
     }
 
     public class AstarPathfindMoverNode : BaseNode {
 #if AStarPathfinding
         private CachedComponent<AstarPathfindingAgent> _pathfinder = new CachedComponent<AstarPathfindingAgent>();
 #endif
-        public CachedComponent<MoveTarget> Target = new CachedComponent<MoveTarget>();
-        public CachedComponent<PathfindingDebugging> Debugging = new CachedComponent<PathfindingDebugging>();
+        private CachedComponent<MoveTarget> _target = new CachedComponent<MoveTarget>();
+        private CachedComponent<PathfindingDebugging> _debugging = new CachedComponent<PathfindingDebugging>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<SteeringInput> _moveInput = new CachedComponent<SteeringInput>();
         
@@ -48,10 +53,13 @@ namespace PixelComrades {
         public AstarPathfindingAgent Pathfinder { get { return _pathfinder.Value; } }
         public Point3 DestinationP3 { get { return Pathfinder.DestinationP3; } }
         public PathfindingStatus CurrentStatus { get { return Pathfinder.CurrentStatus; } }
+        public MoveTarget Target { get => _target; }
+        public PathfindingDebugging Debugging { get => _debugging; }
+        public SteeringInput MoveInput { get => _moveInput; }
         public bool IsPathFinished { get { return Pathfinder.Controller.ReachedEndOfPath; } }
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            Target, Debugging, _tr,
+            _target, _debugging, _tr, _moveInput,
 #if AStarPathfinding
             _pathfinder,
 #endif
@@ -71,8 +79,8 @@ namespace PixelComrades {
         
         public void ProcessNoMove() {
             var look = Vector3.zero;
-            if (Target.Value.HasValidLook) {
-                var dir = Target.Value.GetLookTarget - Pathfinder.Controller.transform.position;
+            if (_target.Value.HasValidLook) {
+                var dir = _target.Value.GetLookTarget - Pathfinder.Controller.transform.position;
                 var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;
                 look = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
             }
@@ -159,8 +167,8 @@ namespace PixelComrades {
 
         public void UpdateMovement() {
             Pathfinder.Controller.MovementUpdate(TimeManager.DeltaUnscaled, out var position);
-            if (Target.Value.HasValidLook) {
-                position = Target.Value.GetLookTarget;
+            if (_target.Value.HasValidLook) {
+                position = _target.Value.GetLookTarget;
             }
             var dir = position - Pathfinder.Controller.transform.position;
             var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : Pathfinder.Controller.transform.rotation;

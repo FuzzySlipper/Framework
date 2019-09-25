@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class ModelSystem : SystemBase, IReceive<EquipmentChanged> {
 
         public ModelSystem() {
-            EntityController.RegisterReceiver<ModelLoaderComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(ModelLoaderComponent)
+            }));
         }
 
         public void Handle(EquipmentChanged arg) {

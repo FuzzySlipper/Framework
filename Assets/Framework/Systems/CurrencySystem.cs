@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class CurrencySystem : SystemBase, IReceive<ContainerStatusChanged> {
 
         public CurrencySystem() {
-            EntityController.RegisterReceiver<CurrencyItem>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(CurrencyItem)
+            }));
         }
         public void Handle(ContainerStatusChanged arg) {
             if (arg.Entity == null) {

@@ -37,37 +37,40 @@ namespace PixelComrades {
         } 
         
         public SpriteSystem() {
-            EntityController.RegisterReceiver<SpriteColorComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(SpriteColorComponent)
+            }));
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            for (int i = 0; i < _colorList.Count; i++) {
-                ref var colorStage = ref _colorList[i];
-                if (colorStage.ColorComponent == null) {
-                    _colorList.Remove(colorStage);
-                    continue;
-                }
-                colorStage.ColorComponent.Renderer.transform.localScale = new Vector3(
-                    colorStage.Scale.x * colorStage.Tween.Get(),
-                    colorStage.Scale.y, colorStage.Scale.z);
-                if (colorStage.Stage == 1) {
-                    colorStage.ColorComponent.UpdateCurrentColor(
-                        Color.Lerp(
-                            Color.red, colorStage.ColorComponent.BaseColor,
-                            colorStage.Tween.Get()));
-                }
-                if (colorStage.Tween.Active) {
-                    continue;
-                }
-                if (colorStage.Stage == 0) {
-                    colorStage.Tween.Restart(colorStage.ColorComponent.DmgMaxScale, 1);
-                    colorStage.Stage = 1;
-                }
-                else {
-                    colorStage.ColorComponent.AnimatingColor = false;
-                    colorStage.ColorComponent.UpdateBaseColor();
-                    _colorList.Remove(colorStage);
-                }
+            _colorList.Run(UpdateSprite);
+        }
+
+        private void UpdateSprite(ref SpriteColorWatch colorStage) {
+            if (colorStage.ColorComponent == null) {
+                _colorList.Remove(colorStage);
+                return;
+            }
+            colorStage.ColorComponent.Renderer.transform.localScale = new Vector3(
+                colorStage.Scale.x * colorStage.Tween.Get(),
+                colorStage.Scale.y, colorStage.Scale.z);
+            if (colorStage.Stage == 1) {
+                colorStage.ColorComponent.UpdateCurrentColor(
+                    Color.Lerp(
+                        Color.red, colorStage.ColorComponent.BaseColor,
+                        colorStage.Tween.Get()));
+            }
+            if (colorStage.Tween.Active) {
+                return;
+            }
+            if (colorStage.Stage == 0) {
+                colorStage.Tween.Restart(colorStage.ColorComponent.DmgMaxScale, 1);
+                colorStage.Stage = 1;
+            }
+            else {
+                colorStage.ColorComponent.AnimatingColor = false;
+                colorStage.ColorComponent.UpdateBaseColor();
+                _colorList.Remove(colorStage);
             }
         }
 

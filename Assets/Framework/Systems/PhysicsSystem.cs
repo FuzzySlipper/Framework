@@ -9,7 +9,9 @@ namespace PixelComrades {
         private static GameOptions.CachedFloat _maxPhysicsDamage = new GameOptions.CachedFloat("MaxPhysicsDamage");
         
         public PhysicsSystem() {
-            EntityController.RegisterReceiver<PhysicsOnDamageComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(PhysicsOnDamageComponent)
+            }));
         }
 
         public void Handle(CollisionEvent arg) {

@@ -14,7 +14,7 @@ namespace PixelComrades {
             _requiredTypes = types;
         }
 
-        public bool TryAdd(Entity entity, SortedList<System.Type, ComponentReference> references) {
+        public bool TryAdd(Entity entity, Dictionary<System.Type, ComponentReference> references) {
             if (ContainsEntity(entity)) {
                 return true;
             }
@@ -27,7 +27,7 @@ namespace PixelComrades {
             return true;
         }
 
-        public void CheckRemove(Entity entity, SortedList<System.Type, ComponentReference> references) {
+        public void CheckRemove(Entity entity, Dictionary<System.Type, ComponentReference> references) {
             if (!ContainsEntity(entity)) {
                 return;
             }
@@ -45,7 +45,7 @@ namespace PixelComrades {
 
         public abstract void RegisterType(System.Type[] types);
 
-        protected abstract void AddEntity(Entity entity, SortedList<Type, ComponentReference> references);
+        protected abstract void AddEntity(Entity entity, Dictionary<Type, ComponentReference> references);
         public abstract void RemoveEntity(Entity entity);
         public abstract bool ContainsEntity(Entity entity);
     }
@@ -53,10 +53,10 @@ namespace PixelComrades {
     public class NodeFilter<T> : NodeFilter where T : class, INode, new() {
 
         private Dictionary<int, T> _nodes = new Dictionary<int, T>();
-        private List<T> _allNodes = new List<T>();
+        private NodeList<T> _allNodes = new NodeList<T>();
         private GenericPool<T> _pool = new GenericPool<T>(25, obj => obj.Dispose());
 
-        public List<T> AllNodes { get => _allNodes; }
+        public NodeList<T> AllNodes { get => _allNodes; }
 
         public NodeFilter(System.Type[] types) : base(types) {}
 
@@ -73,7 +73,7 @@ namespace PixelComrades {
             return _nodes.ContainsKey(entity);
         }
 
-        protected override void AddEntity(Entity entity, SortedList<Type, ComponentReference> references) {
+        protected override void AddEntity(Entity entity, Dictionary<Type, ComponentReference> references) {
             if (_nodes.ContainsKey(entity)) {
                 return;
             }
@@ -90,6 +90,7 @@ namespace PixelComrades {
             if (!_nodes.TryGetValue(entity, out var node)) {
                 return;
             }
+            node.Dispose();
             _allNodes.Remove(node);
             _nodes.Remove(entity);
             _pool.Store(node);

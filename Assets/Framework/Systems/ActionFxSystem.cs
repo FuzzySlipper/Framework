@@ -8,8 +8,9 @@ namespace PixelComrades {
         IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent>, IReceive<CollisionEvent> {
         
         public ActionFxSystem() {
-            EntityController.RegisterReceiver<SpawnPrefabOnDeath>(this);
-            EntityController.RegisterReceiver<ActionFxComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(ActionFxComponent), typeof(SpawnPrefabOnDeath),
+            }));
         }
 
         public void TriggerSpawn(SpawnOnEvent spawnEvent, ActionStateEvent arg) {

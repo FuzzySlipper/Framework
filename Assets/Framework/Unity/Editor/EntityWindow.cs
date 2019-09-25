@@ -106,7 +106,16 @@ public class EntityWindow : OdinEditorWindow {
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
         }
-        
+        EditorGUILayout.LabelField("Stats");
+        var stats = entity.Get<StatsContainer>();
+        if (stats == null) {
+            EditorGUILayout.LabelField("No Stats");
+            EditorGUILayout.EndVertical();
+            return;
+        }
+        for (int i = 0; i < stats.Count; i++) {
+            EditorGUILayout.LabelField(stats[i].ToString());
+        }
         EditorGUILayout.EndVertical();
     }
 

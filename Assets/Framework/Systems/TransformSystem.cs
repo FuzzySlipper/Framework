@@ -10,7 +10,7 @@ namespace PixelComrades {
     IReceiveGlobalArray<SetLocalTransformRotation> {
 
         public TransformSystem() {
-            EntityController.RegisterReceiver<DisableTrOnDeath>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new []{ typeof(DisableTrOnDeath)}));
         }
         
         public void Handle(DeathEvent arg) {
@@ -20,33 +20,43 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(BufferedList<MoveTransform> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Transform.SetPosition(arg[i].Transform.position + arg[i].Velocity);
-            }
+            arg.Run(RunUpdate);
+        }
+
+        private void RunUpdate(MoveTransform arg) {
+            arg.Transform.SetPosition(arg.Transform.position + arg.Velocity);
         }
 
         public void HandleGlobal(BufferedList<SetTransformPosition> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Transform.SetPosition(arg[i].Position);
-            }
+            arg.Run(RunUpdate);
+        }
+
+        private void RunUpdate(SetTransformPosition arg) {
+            arg.Transform.SetPosition(arg.Position);
         }
 
         public void HandleGlobal(BufferedList<SetTransformRotation> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Transform.SetRotation(arg[i].Rotation);
-            }
+            arg.Run(RunUpdate);
+        }
+
+        private void RunUpdate(SetTransformRotation arg) {
+            arg.Transform.SetRotation(arg.Rotation);
         }
 
         public void HandleGlobal(BufferedList<SetLocalTransformPosition> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Transform.SetLocalPosition(arg[i].Position);
-            }
+            arg.Run(RunUpdate);
         }
 
+        private void RunUpdate(SetLocalTransformPosition arg) {
+            arg.Transform.SetLocalPosition(arg.Position);
+        }
+        
         public void HandleGlobal(BufferedList<SetLocalTransformRotation> arg) {
-            for (int i = 0; i < arg.Count; i++) {
-                arg[i].Transform.SetLocalRotation(arg[i].Rotation);
-            }
+            arg.Run(RunUpdate);
+        }
+
+        private void RunUpdate(SetLocalTransformRotation arg) {
+            arg.Transform.SetLocalRotation(arg.Rotation);
         }
     }
 

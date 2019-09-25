@@ -11,7 +11,17 @@ namespace PixelComrades {
         private static bool _moveInputBlocked = false;
         public static bool MoveInputLocked { get { return _moveInputBlocked; } set { _moveInputBlocked = value; } }
         private static bool _allInputBlocked = false;
-        public static bool AllInputBlocked { get { return _allInputBlocked; } set { _allInputBlocked = value; } }
+        public static bool AllInputBlocked {
+            get {
+                return _allInputBlocked;
+            }
+            set {
+                _allInputBlocked = value;
+                if (!value) {
+                    LookInput = MoveInput = Vector2.zero;
+                }
+            }
+        }
 
 
         private event System.Action OnCancel;

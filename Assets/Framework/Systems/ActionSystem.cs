@@ -3,13 +3,14 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace PixelComrades {
 
     [Priority(Priority.Lower)]
     public class ActionSystem : SystemBase, IMainSystemUpdate {
 
-        private List<ActionUsingNode> _nodeList;
+        private NodeList<ActionUsingNode> _nodeList;
 
         public ActionSystem() {
             NodeFilter<ActionUsingNode>.New(ActionUsingNode.GetTypes());
@@ -26,18 +27,18 @@ namespace PixelComrades {
             if (_nodeList == null) {
                 _nodeList = EntityController.GetNodeList<ActionUsingNode>();
             }
-            if (_nodeList == null) {
+            if (_nodeList != null) {
+                _nodeList.Run(UpdateNode);
+            }
+        }
+
+        private void UpdateNode(ref ActionUsingNode node) {
+            if (node.CurrentState != ActionUsingNode.State.Disabled && node.Entity.IsDead()) {
+                StopEvent(node);
                 return;
             }
-            for (int i = 0; i < _nodeList.Count; i++) {
-                var node = _nodeList[i];
-                if (node.CurrentState != ActionUsingNode.State.Disabled && node.Entity.IsDead()) {
-                    StopEvent(node);
-                    continue;
-                }
-                if (node.CurrentState != ActionUsingNode.State.Disabled && node.ActionEvent.Current != null) {
-                    node.ActionEvent.Current.Evaluate(node);
-                }
+            if (node.CurrentState != ActionUsingNode.State.Disabled && node.ActionEvent.Current != null) {
+                node.ActionEvent.Current.Evaluate(node);
             }
         }
 

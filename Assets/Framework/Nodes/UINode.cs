@@ -23,10 +23,6 @@ namespace PixelComrades {
             _label, _rendering, _tr, _description, _dataDescription, _icon
         };
 
-        public UINode(Entity entity, SortedList<System.Type, ComponentReference> list) {
-            Register(entity, list);
-        }
-
         public UINode() {
         }
 

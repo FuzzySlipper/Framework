@@ -54,10 +54,10 @@ namespace PixelComrades {
         public bool Pooled = false;
         public IEntityFactory Factory;
 
-        private SortedList<System.Type, ComponentReference> _components = new SortedList<Type, ComponentReference>(_typeComparer);
+        private Dictionary<System.Type, ComponentReference> _components = new Dictionary<Type, ComponentReference>();
         private TagsComponent _tags; 
         
-        public SortedList<Type, ComponentReference> Components { get => _components; }
+        public Dictionary<Type, ComponentReference> Components { get => _components; }
         public string DebugId { get { return Id + "_" + Name; } }
         public TagsComponent Tags {
             get {

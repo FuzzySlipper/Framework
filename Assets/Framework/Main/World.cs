@@ -70,7 +70,6 @@ namespace PixelComrades {
                     }
                 }
             }
-            EcsDebug.RegisterDebugCommands();
         }
 
         public static T Add<T>(Type type = null) where T : new() {
@@ -394,10 +393,8 @@ namespace PixelComrades {
                 }
                 for (int d = 0; d < _globalDel.Count; d++) {
                     var del = _globalDel[d];
+                    _msgs.Run(del);
                     //_msgs.PreviousList.Run(_globalDel[i]);
-                    for (int i = 0; i < _msgs.Count; i++) {
-                        del(_msgs[i]);
-                    }
                 }
                 _msgs.ClearCurrentAndDeletes();
             }

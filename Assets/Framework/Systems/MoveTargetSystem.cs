@@ -6,7 +6,9 @@ namespace PixelComrades {
     [AutoRegister]
     public class MoveTargetSystem : SystemBase, IReceive<SetMoveTarget>, IReceive<SetLookTarget> {
         public MoveTargetSystem() {
-            EntityController.RegisterReceiver<MoveTarget>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(MoveTarget)
+            }));
         }
 
         public void Handle(SetMoveTarget arg) {

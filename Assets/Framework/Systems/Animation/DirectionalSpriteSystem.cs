@@ -6,7 +6,7 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class DirectionalSpriteSystem : SystemBase, IMainSystemUpdate {
 
-        private List<DirectionalSpriteNode> _directionalComponents;
+        private NodeList<DirectionalSpriteNode> _directionalComponents;
         
         public DirectionalSpriteSystem() {
             NodeFilter<DirectionalSpriteNode>.New(DirectionalSpriteNode.GetTypes());
@@ -14,35 +14,40 @@ namespace PixelComrades {
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            for (int i = 0; i < _directionalComponents.Count; i++) {
-                var node = _directionalComponents[i];
-                if (node.Animator.Requests.Count > 0) {
-                    var request = node.Animator.Requests[0];
-                    if (node.Animator.Requests.Count > 1) {
-                        for (int r = 1; r < node.Animator.Requests.Count; r++) {
-                            if (!request.OverrideClip && node.Animator.Requests[r].OverrideClip) {
-                                request = node.Animator.Requests[r];
-                            }
+            _directionalComponents.Run(UpdateNode);
+        }
+
+        private void UpdateNode(ref DirectionalSpriteNode node) {
+            if (node.Animator.Requests.Count > 0) {
+                var request = node.Animator.Requests[0];
+                if (node.Animator.Requests.Count > 1) {
+                    for (int r = 1; r < node.Animator.Requests.Count; r++) {
+                        if (!request.OverrideClip && node.Animator.Requests[r].OverrideClip) {
+                            request = node.Animator.Requests[r];
                         }
-                        node.PlayAnimation(request.Clip, request.OverrideClip);
                     }
-                    node.Animator.Requests.Clear();
                 }
-                if (node.Animator.CurrentClipHolder == null || node.Animator.IsSimpleClip) {
-                    node.CheckMoving();
-                }
-                node.Animator.Billboard.Apply(node.Renderer.SpriteTr, node.Animator.Backwards, ref node.Animator.LastAngleHeight);
-                var orientation = SpriteFacingControl.GetCameraSide(node.Animator.Facing, node.Renderer.SpriteTr,
-                    node.Renderer.BaseTr, 5, out var inMargin);
-                if (node.Animator.Orientation == orientation || (inMargin && (orientation.IsAdjacent(node.Animator.Orientation)))) {
-                    if (node.CheckFrameUpdate()) {
-                        node.UpdateSpriteFrame();
-                    }
-                    continue;
-                }
-                node.Animator.Orientation = orientation;
-                node.UpdateSpriteFrame();
+#if DEBUG
+                DebugLog.Add("Playing " + request.Clip + " for " + node.Entity.DebugId);
+#endif
+                node.PlayAnimation(request.Clip, request.OverrideClip);
+                node.Animator.Requests.Clear();
             }
+            if (node.Animator.CurrentClipHolder == null || node.Animator.IsSimpleClip) {
+                node.CheckMoving();
+            }
+            node.Animator.Billboard.Apply(node.Renderer.SpriteTr, node.Animator.Backwards, ref node.Animator.LastAngleHeight);
+            var orientation = SpriteFacingControl.GetCameraSide(
+                node.Animator.Facing, node.Renderer.SpriteTr,
+                node.Renderer.BaseTr, 5, out var inMargin);
+            if (node.Animator.Orientation == orientation || (inMargin && (orientation.IsAdjacent(node.Animator.Orientation)))) {
+                if (node.CheckFrameUpdate()) {
+                    node.UpdateSpriteFrame();
+                }
+                return;
+            }
+            node.Animator.Orientation = orientation;
+            node.UpdateSpriteFrame();
         }
 
     }

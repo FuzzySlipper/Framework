@@ -45,17 +45,15 @@ namespace PixelComrades {
             return null;
         }
 
-        public void OnSystemUpdate(float dt, float unscaledDt) {
-            for (int i = 0; i < _commands.Count; i++) {
-                var node = _commands[i];
-                if (node == null) {
-                    continue;
-                }
-                if (node.TryComplete()) {
-                    node.Complete();
-                    _commands.Remove(node);
-                }
+        private void Update(ref Command node) {
+            if (node.TryComplete()) {
+                node.Complete();
+                _commands.Remove(node);
             }
+        }
+
+        public void OnSystemUpdate(float dt, float unscaledDt) {
+            _commands.Run(Update);
         }
     }
 }

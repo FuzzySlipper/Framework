@@ -48,7 +48,7 @@ namespace PixelComrades {
             }
             var cref = entity.GetComponentReference(_componentType);
             if (cref != null) {
-                _value = (T) cref.Value.Get();
+                _value = cref.Value.Get<T>();
             }
         }
 

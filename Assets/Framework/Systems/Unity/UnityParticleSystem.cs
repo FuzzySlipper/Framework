@@ -8,9 +8,9 @@ namespace PixelComrades {
         IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent>, IReceive<ProjectileSpawned>, IReceive<ProjectileDespawned> {
         
         public UnityParticleSystem() {
-            EntityController.RegisterReceiver<SpriteDissolveParticlesComponent>(this);
-            EntityController.RegisterReceiver<HitParticlesComponent>(this);
-            EntityController.RegisterReceiver<ParticleTrailComponent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(SpriteDissolveParticlesComponent), typeof(HitParticlesComponent), typeof(ParticleTrailComponent),
+            }));
         }
 
         private List<ParticleTrailComponent> _trailComponents = new List<ParticleTrailComponent>();

@@ -9,19 +9,21 @@ namespace PixelComrades {
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-        private List<ForwardMoverNode> _forwardMovers;
-        private List<RotateToNode> _rotators;
-        private List<SimpleMoverNode> _simpleMovers;
-        private List<ArcMoverNode> _arcMovers;
+        private NodeList<ForwardMoverNode> _forwardMovers;
+        private NodeList<RotateToNode> _rotators;
+        private NodeList<SimpleMoverNode> _simpleMovers;
+        private NodeList<ArcMoverNode> _arcMovers;
 
         public MoverSystem() {
             NodeFilter<ForwardMoverNode>.New(ForwardMoverNode.GetTypes());
+            _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
             NodeFilter<RotateToNode>.New(RotateToNode.GetTypes());
+            _rotators = EntityController.GetNodeList<RotateToNode>();
             NodeFilter<SimpleMoverNode>.New(SimpleMoverNode.GetTypes());
+            _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
             NodeFilter<ArcMoverNode>.New(ArcMoverNode.GetTypes());
+            _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
         }
-        
-        private UnscaledTimer _textTimer = new UnscaledTimer(0.5f);
         
         public void OnSystemUpdate(float dt, float unscaledDt) {
             for (int i = _moveTweens.Count - 1; i >= 0; i--) {
@@ -38,50 +40,10 @@ namespace PixelComrades {
                     _moveTweens.RemoveAt(i);
                 }
             }
-            if (_forwardMovers == null) {
-                _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
-            }
-            if (_forwardMovers != null) {
-                for (int i = 0; i < _forwardMovers.Count; i++) {
-                    if (_forwardMovers[i].Entity.IsDestroyed()) {
-                        continue;
-                    }
-                    HandleForwardMovement(_forwardMovers[i]);
-                }
-            }
-            if (_rotators == null) {
-                _rotators = EntityController.GetNodeList<RotateToNode>();
-            }
-            if (_rotators != null) {
-                for (int i = 0; i < _rotators.Count; i++) {
-                    if (_rotators[i].Entity.IsDestroyed()) {
-                        continue;
-                    }
-                    HandleRotation(_rotators[i]);
-                }
-            }
-            if (_simpleMovers == null) {
-                _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
-            }
-            if (_simpleMovers != null) {
-                for (int i = 0; i < _simpleMovers.Count; i++) {
-                    if (_simpleMovers[i].Entity.IsDestroyed()) {
-                        continue;
-                    }
-                    HandleMoveSimple(_simpleMovers[i]);
-                }
-            }
-            if (_arcMovers == null) {
-                _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
-            }
-            if (_arcMovers != null) {
-                for (int i = 0; i < _arcMovers.Count; i++) {
-                    if (_arcMovers[i].Entity.IsDestroyed()) {
-                        continue;
-                    }
-                    HandleArcMovement(_arcMovers[i]);
-                }
-            }
+            _forwardMovers.Run(HandleForwardMovement);
+            _rotators.Run(HandleRotation);
+            _simpleMovers.Run(HandleMoveSimple);
+            _arcMovers.Run(HandleArcMovement);
         }
         
         private void FinishMove(Entity owner, Vector3 moveTarget) {
@@ -90,9 +52,9 @@ namespace PixelComrades {
             owner.Get<MoveTarget>()?.Complete();
         }
 
-        private void HandleMoveSimple(SimpleMoverNode mover) {
+        private void HandleMoveSimple(ref SimpleMoverNode mover) {
             var entity = mover.Entity;
-            if (!entity.Tags.Contain(EntityTags.Moving)) {
+            if (entity.IsDestroyed() || !entity.Tags.Contain(EntityTags.Moving)) {
                 return;
             }
             var target = mover.MoveTarget;
@@ -138,9 +100,9 @@ namespace PixelComrades {
         //    }
         //}
 
-        private void HandleArcMovement(ArcMoverNode mover) {
+        private void HandleArcMovement(ref ArcMoverNode mover) {
             var entity = mover.Entity;
-            if (!entity.Tags.Contain(EntityTags.Moving)) {
+            if (entity.IsDestroyed() || !entity.Tags.Contain(EntityTags.Moving)) {
                 return;
             }
             mover.ArcMover.ElapsedTime += TimeManager.DeltaTime;
@@ -153,7 +115,7 @@ namespace PixelComrades {
             }
         }
 
-        private void HandleForwardMovement(ForwardMoverNode mover) {
+        private void HandleForwardMovement(ref ForwardMoverNode mover) {
             var entity = mover.Entity;
             if (!entity.Tags.Contain(EntityTags.Moving) || mover.Tr == null) {
                 return;
@@ -162,7 +124,10 @@ namespace PixelComrades {
             mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * ms * TimeManager.DeltaTime));
         }
 
-        private void HandleRotation(RotateToNode r) {
+        private void HandleRotation(ref RotateToNode r) {
+            if (r.Entity.IsDestroyed()) {
+                return;
+            }
             var targetRotation = Quaternion.LookRotation(r.Rotate.Position - r.Tr.position);
             var rb = r.Rb?.Rb;
             if (rb != null) {

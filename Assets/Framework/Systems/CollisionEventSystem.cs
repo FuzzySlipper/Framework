@@ -13,7 +13,9 @@ namespace PixelComrades {
         private FastString _collisionString = new FastString();
 
         public CollisionEventSystem() {
-            EntityController.RegisterReceiver<DespawnOnCollision>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(DespawnOnCollision)
+            }));
         }
 
         public void HandleGlobal(CollisionEvent msg) {

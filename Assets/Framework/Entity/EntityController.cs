@@ -9,8 +9,8 @@ namespace PixelComrades {
     public static class EntityController {
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
-        private static Dictionary<Type, List<NodeFilter>> _filtersToCheck = new Dictionary<Type, List<NodeFilter>>();
-        private static Dictionary<Type, List<IReceive>> _receiversToCheck = new Dictionary<Type, List<IReceive>>();
+        private static Dictionary<Type, List<NodeFilter>> _nodeFilters = new Dictionary<Type, List<NodeFilter>>();
+        private static Dictionary<Type, List<EventReceiverFilter>> _eventFilters = new Dictionary<Type, List<EventReceiverFilter>>();
         private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
         private static System.Type[] _tempRemoveList = new Type[100];
 
@@ -19,7 +19,7 @@ namespace PixelComrades {
         public static void RegisterNodeFilter(NodeFilter filter, System.Type handleType) {
             for (int i = 0; i < filter.RequiredTypes.Length; i++) {
                 var type = filter.RequiredTypes[i];
-                _filtersToCheck.GetOrAdd(type).Add(filter);
+                _nodeFilters.GetOrAdd(type).Add(filter);
             }
             if (_filterHandler.ContainsKey(handleType)) {
                 _filterHandler[handleType] = filter;
@@ -37,7 +37,7 @@ namespace PixelComrades {
             return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).GetNode(entity);
         }
 
-        public static List<T> GetNodeList<T>() where T : class, INode, new() {
+        public static NodeList<T> GetNodeList<T>() where T : class, INode, new() {
             var type = typeof(T);
             return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).AllNodes;
         }
@@ -59,13 +59,15 @@ namespace PixelComrades {
             return null;
         }
 
-        public static void RegisterReceiver<T>(IReceive receiver) {
-            var type = typeof(T);
-            if (!_receiversToCheck.TryGetValue(type, out var list)) {
-                list = new List<IReceive>();
-                _receiversToCheck.Add(type, list);
+        public static void RegisterReceiver(EventReceiverFilter filter) {
+            for (int i = 0; i < filter.Types.Length; i++) {
+                var type = filter.Types[i];
+                if (!_eventFilters.TryGetValue(type, out var list)) {
+                    list = new List<EventReceiverFilter>();
+                    _eventFilters.Add(type, list);
+                }
+                list.Add(filter);
             }
-            list.Add(receiver);
         }
 
         //public static T GetComponent<T>(this ComponentReference reference) where T : IComponent {
@@ -135,28 +137,15 @@ namespace PixelComrades {
             }
             var type = typeof(T);
             var array = GetComponentArray<T>();
-            if (array.TryGet(entity, out var old)) {
-                if (!type.IsValueType && (old is IReceive receiveOld)) {
-                    entity.RemoveObserver(receiveOld);
-                }
-            }
             array.Add(entity, newComponent);
-            if (newComponent is IReceive receive) {
-                if (type.IsValueType) {
-                    Debug.LogErrorFormat("Error: cannot have event receivers on value type {0}", type.Name);
-                }
-                else {
-                    entity.AddObserver(receive);
-                }
-            }
-            if (_filtersToCheck.TryGetValue(type, out var filterList)) {
+            if (_nodeFilters.TryGetValue(type, out var filterList)) {
                 for (int i = 0; i < filterList.Count; i++) {
                     filterList[i].TryAdd(entity, entity.Components);
                 }
             }
-            if (_receiversToCheck.TryGetValue(type, out var receiverList)) {
+            if (_eventFilters.TryGetValue(type, out var receiverList)) {
                 for (int i = 0; i < receiverList.Count; i++) {
-                    entity.AddObserver(receiverList[i]);
+                    receiverList[i].CheckAdd(entity);
                 }
             }
             return newComponent;
@@ -215,12 +204,15 @@ namespace PixelComrades {
             if (entity == null) {
                 return default(T);
             }
-            if (_components.TryGetValue(typeof(T), out var array)) {
-                var typeArray = ((ComponentArray<T>) array);
-                if (typeArray.TryGet(entity, out var value)) {
-                    return value;
-                }
+            if (entity.Components.TryGetValue(typeof(T), out var cref)) {
+                return cref.Get<T>();
             }
+//            if (_components.TryGetValue(typeof(T), out var array)) {
+//                var typeArray = ((ComponentArray<T>) array);
+//                if (typeArray.TryGet(entity, out var value)) {
+//                    return value;
+//                }
+//            }
             return default(T);
         }
 
@@ -228,9 +220,12 @@ namespace PixelComrades {
             if (entity == null) {
                 return default(T); 
             }
-            var array = GetComponentArray<T>();
-            if (array.HasComponent(entity)) {
-                return array.Get(entity);
+//            var array = GetComponentArray<T>();
+//            if (array.HasComponent(entity)) {
+//                return array.Get(entity);
+//            }    
+            if (entity.Components.TryGetValue(typeof(T), out var cref)) {
+                return cref.Get<T>();
             }
             return entity.Add(new T());
         }
@@ -273,14 +268,14 @@ namespace PixelComrades {
             }
             componentArray.RemoveByEntity(entity);
             entity.RemoveReference(reference);
-            if (_filtersToCheck.TryGetValue(type, out var filterList)) {
+            if (_nodeFilters.TryGetValue(type, out var filterList)) {
                 for (int f = 0; f < filterList.Count; f++) {
                     filterList[f].CheckRemove(entity, entity.Components);
                 }
             }
-            if (_receiversToCheck.TryGetValue(type, out var receiverList)) {
+            if (_eventFilters.TryGetValue(type, out var receiverList)) {
                 for (int i = 0; i < receiverList.Count; i++) {
-                    entity.RemoveObserver(receiverList[i]);
+                    receiverList[i].CheckRemove(entity);
                 }
             }
         }

@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class InventorySystem : SystemBase, IReceive<DataDescriptionUpdating> {
 
         public InventorySystem() {
-            EntityController.RegisterReceiver<InventoryItem>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(InventoryItem)
+            }));
         }
         public void Handle(DataDescriptionUpdating arg) {
             var inventoryItem = arg.Data.GetEntity().Get<InventoryItem>();

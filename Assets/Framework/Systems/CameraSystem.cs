@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class CameraSystem : SystemBase, IReceive<CollisionEvent> {
 
         public CameraSystem() {
-            EntityController.RegisterReceiver<CameraShakeOnDamage>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(CameraShakeOnDamage)
+            }));
         }
 
         public void Handle(CollisionEvent arg) {

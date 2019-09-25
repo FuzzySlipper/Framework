@@ -5,10 +5,11 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class FlightPhysicsSystem : SystemBase, IMainFixedUpdate {
 
-        private List<FlyingNode> _flyingList;
+        private NodeList<FlyingNode> _flyingList;
         
         public FlightPhysicsSystem() {
             NodeFilter<FlyingNode>.New(FlyingNode.GetTypes());
+            _flyingList = EntityController.GetNodeList<FlyingNode>();
         }
 
         public override void Dispose() {
@@ -19,17 +20,12 @@ namespace PixelComrades {
         }
 
         public void OnFixedSystemUpdate(float dt) {
-            if (_flyingList == null) {
-                _flyingList = EntityController.GetNodeList<FlyingNode>();
-            }
             if (_flyingList != null) {
-                for (int i = 0; i < _flyingList.Count; i++) {
-                    UpdateNode(_flyingList[i]);
-                }
+                _flyingList.Run(UpdateNode);
             }
         }
 
-        private void UpdateNode(FlyingNode node) {
+        private void UpdateNode(ref FlyingNode node) {
             if (node.Control.CurrentMode == FlightControl.Mode.Disabled) {
                 return;
             }

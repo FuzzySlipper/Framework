@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class SpawnSystem : SystemBase, IMainSystemUpdate, IReceive<ProjectileSpawned>, IReceive<ProjectileDespawned> {
 
         public SpawnSystem() {
-            EntityController.RegisterReceiver<DespawnTimer>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(DespawnTimer)
+            }));
         }
 
         private ComponentArray<DespawnTimer> _despawnArray;

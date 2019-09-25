@@ -7,7 +7,9 @@ namespace PixelComrades {
     public sealed class SkillSystem : SystemBase, IReceive<DataDescriptionUpdating> {
 
         public SkillSystem() {
-            EntityController.RegisterReceiver<SkillRequirement>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(SkillRequirement)
+            }));
         }
 
         public void Handle(DataDescriptionUpdating arg) {

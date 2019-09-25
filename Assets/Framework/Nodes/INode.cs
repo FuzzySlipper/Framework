@@ -5,17 +5,20 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface INode {
-        void Register(Entity entity, SortedList<Type, ComponentReference> list);
+        void Register(Entity entity, Dictionary<Type, ComponentReference> list);
         void Dispose();
+        bool Disposed { get; }
     }
 
     public abstract class BaseNode : INode, IEquatable<Entity> {
         public Entity Entity { get; private set; }
 
         public abstract List<CachedComponent> GatherComponents { get; }
+        public bool Disposed { get; private set; }
 
-        public void Register(Entity entity, SortedList<Type, ComponentReference> list) {
+        public void Register(Entity entity, Dictionary<Type, ComponentReference> list) {
             Entity = entity;
+            Disposed = false;
             var components = GatherComponents;
             for (int i = 0; i < components.Count; i++) {
                 components[i].Set(entity, list);
@@ -23,6 +26,7 @@ namespace PixelComrades {
         }
 
         public void Dispose() {
+            Disposed = true;
             var components = GatherComponents;
             for (int i = 0; i < components.Count; i++) {
                 components[i].Dispose();

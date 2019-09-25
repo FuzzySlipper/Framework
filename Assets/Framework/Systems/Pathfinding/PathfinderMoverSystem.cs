@@ -25,20 +25,22 @@ namespace PixelComrades {
 
         private const float MaxStuckTime = 1.5f;
 
-        private List<SimplePathfindMoverNode> _simpleNodeList;
-        private List<AstarPathfindMoverNode> _astarNodeList;
+        private NodeList<SimplePathfindMoverNode> _simpleNodeList;
+        private NodeList<AstarPathfindMoverNode> _astarNodeList;
         private IPathfindingGrid _grid;
 
         public PathfinderMoverSystem() {
-            EntityController.RegisterReceiver<AstarPathfindingAgent>(this);
-            EntityController.RegisterReceiver<SimplePathfindingAgent>(this);
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(AstarPathfindingAgent), typeof(SimplePathfindingAgent),
+            }));
             if (UseSimple) {
                 NodeFilter<SimplePathfindMoverNode>.New(SimplePathfindMoverNode.GetTypes());
+                _simpleNodeList = EntityController.GetNodeList<SimplePathfindMoverNode>();
             }
             else {
                 NodeFilter<AstarPathfindMoverNode>.New(AstarPathfindMoverNode.GetTypes());
+                _astarNodeList = EntityController.GetNodeList<AstarPathfindMoverNode>();
             }
-            
         }
 
         public override void Dispose() {
@@ -82,169 +84,170 @@ namespace PixelComrades {
         }
 
         private void UpdateSimpleNodeList(float dt) {
-            if (_simpleNodeList == null) {
-                _simpleNodeList = EntityController.GetNodeList<SimplePathfindMoverNode>();
-            }
             if (_grid == null) {
                 _grid = World.Get<PathfindingSystem>().Grid;
             }
-            if (_simpleNodeList == null || Game.Paused) {
+            if (Game.Paused) {
                 return;
             }
-            for (int i = 0; i < _simpleNodeList.Count; i++) {
-                var node = _simpleNodeList[i];
-                var pathfinder = node.Pathfinder;
-                if (node.Debugging.Value != null) {
-                    node.Debugging.Value.UpdateStatus(pathfinder);
-                }
-                if (node.Target.Value == null) {
-                    node.Steering.Reset();
-                    continue;
-                }
-                if (!node.Target.Value.IsValidMove) {
-                    node.Pathfinder.ReachedDestination();
-                    node.Steering.Reset();
-                    continue;
-                }
-                var currentMoveTarget = node.Target.Value.GetTargetPosition.toPoint3();
-                if (pathfinder.End != currentMoveTarget) {
-                    pathfinder.SetEnd(currentMoveTarget);
-                    node.Steering.Reset();
-                    continue;
-                }
-                switch (pathfinder.CurrentStatus) {
-                    case PathfindingStatus.NoPath:
-                        if (pathfinder.Redirected && pathfinder.CanRepath) {
-                            pathfinder.SearchPath();
-                        }
-                        node.Steering.Reset();
-                        continue;
-                    case PathfindingStatus.InvalidPath:
-                    case PathfindingStatus.Created:
-                    case PathfindingStatus.WaitingOnPath:
-                        continue;
-                    case PathfindingStatus.PathReceived:
-                    case PathfindingStatus.WaitingOnNode:
-                        if (pathfinder.CurrentStatus == PathfindingStatus.PathReceived) {
-                            if (node.Debugging.Value != null) {
-                                node.Debugging.Value.SetPath(pathfinder.CurrentNodePath);
-                            }
-                            _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.GetEntity(), false);
-                        }
-                        if (!node.Pathfinder.TryEnterNextNode()) {
-                            node.Steering.Reset();
-                            continue;
-                        }
-                        break;
-                }
-                var moveSpeed = node.GetMoveSpeed;
-                if (pathfinder.IsLastIndex) {
-                    moveSpeed *= 0.5f;
-                }
-                pathfinder.MovementLerp += dt * moveSpeed;
-                float dst = pathfinder.GetCurrentDistance();
-                float progress = Mathf.Clamp01(pathfinder.MovementLerp / dst);
-                var pos = Vector3.Lerp(pathfinder.PreviousTarget, pathfinder.CurrentTarget, progress);
-                var dir = pathfinder.CurrentTarget - pathfinder.PreviousTarget;
-                var diff = (pos - node.Tr.position);
-                var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : node.Tr.rotation;
-                //var rot = Quaternion.RotateTowards(pathfinder.Entity.Tr.rotation, nextRotation, _pathfinderRotationSpeed * dt);
-                Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
-                node.Steering.Set(diff.normalized, cameraPlanarDirection);
-                if (progress < 1) {
-                    continue;
-                }
-                _grid.Exit(node.Entity, pathfinder.GridTarget);
-                pathfinder.CurrentPos = pathfinder.GridTarget;
-                if (pathfinder.CurrentIndex >= pathfinder.CurrentNodePath.Count - 1) {
-                    node.Pathfinder.ReachedDestination();
-                    node.Target.Value.Complete();
-                    if (node.Debugging.Value != null) {
-                        node.Debugging.Value.ClearPath();
-                    }
-                    continue;
-                }
-                pathfinder.AdvancePath();
-                if (pathfinder.CanRepath) {
-                    pathfinder.SearchPath();
-                    continue;
-                }
-                pathfinder.TryEnterNextNode();
+            _simpleNodeList.Run(UpdateNodeList);
+        }
+
+        private void UpdateNodeList(ref SimplePathfindMoverNode node) {
+            var pathfinder = node.Pathfinder;
+            if (node.Debugging != null) {
+                node.Debugging.UpdateStatus(pathfinder);
             }
+            if (node.Target == null) {
+                node.Steering.Reset();
+                return;
+            }
+            if (!node.Target.IsValidMove) {
+                node.Pathfinder.ReachedDestination();
+                node.Steering.Reset();
+                return;
+            }
+            var currentMoveTarget = node.Target.GetTargetPosition.toPoint3();
+            if (pathfinder.End != currentMoveTarget) {
+                pathfinder.SetEnd(currentMoveTarget);
+                node.Steering.Reset();
+                return;
+            }
+            switch (pathfinder.CurrentStatus) {
+                case PathfindingStatus.NoPath:
+                    if (pathfinder.Redirected && pathfinder.CanRepath) {
+                        pathfinder.SearchPath();
+                    }
+                    node.Steering.Reset();
+                    return;
+                case PathfindingStatus.InvalidPath:
+                case PathfindingStatus.Created:
+                case PathfindingStatus.WaitingOnPath:
+                    return;
+                case PathfindingStatus.PathReceived:
+                case PathfindingStatus.WaitingOnNode:
+                    if (pathfinder.CurrentStatus == PathfindingStatus.PathReceived) {
+                        if (node.Debugging != null) {
+                            node.Debugging.SetPath(pathfinder.CurrentNodePath);
+                        }
+                        _grid.SetStationaryAgent(pathfinder.CurrentPos, pathfinder.GetEntity(), false);
+                    }
+                    if (!node.Pathfinder.TryEnterNextNode()) {
+                        node.Steering.Reset();
+                        return;
+                    }
+                    break;
+            }
+            var moveSpeed = node.GetMoveSpeed;
+            if (pathfinder.IsLastIndex) {
+                moveSpeed *= 0.5f;
+            }
+            pathfinder.MovementLerp += TimeManager.DeltaTime * moveSpeed;
+            float dst = pathfinder.GetCurrentDistance();
+            float progress = Mathf.Clamp01(pathfinder.MovementLerp / dst);
+            var pos = Vector3.Lerp(pathfinder.PreviousTarget, pathfinder.CurrentTarget, progress);
+            var dir = pathfinder.CurrentTarget - pathfinder.PreviousTarget;
+            var diff = (pos - node.Tr.position);
+            var nextRotation = dir != Vector3.zero ? Quaternion.LookRotation(dir, Vector3.up) : node.Tr.rotation;
+            //var rot = Quaternion.RotateTowards(pathfinder.Entity.Tr.rotation, nextRotation, _pathfinderRotationSpeed * dt);
+            Vector3 cameraPlanarDirection = Vector3.ProjectOnPlane(nextRotation * Vector3.forward, Vector3.up).normalized;
+            node.Steering.Set(diff.normalized, cameraPlanarDirection);
+            if (progress < 1) {
+                return;
+            }
+            _grid.Exit(node.Entity, pathfinder.GridTarget);
+            pathfinder.CurrentPos = pathfinder.GridTarget;
+            if (pathfinder.CurrentIndex >= pathfinder.CurrentNodePath.Count - 1) {
+                node.Pathfinder.ReachedDestination();
+                node.Target.Complete();
+                if (node.Debugging != null) {
+                    node.Debugging.ClearPath();
+                }
+                return;
+            }
+            pathfinder.AdvancePath();
+            if (pathfinder.CanRepath) {
+                pathfinder.SearchPath();
+                return;
+            }
+            pathfinder.TryEnterNextNode();
         }
 
         private void UpdateAstarNodeList(float dt) {
-            if (_astarNodeList == null) {
-                _astarNodeList = EntityController.GetNodeList<AstarPathfindMoverNode>();
-            }
-            if (_astarNodeList == null || Game.Paused) {
+            if (Game.Paused) {
                 return;
             }
-            for (int i = 0; i < _astarNodeList.Count; i++) {
-                var node = _astarNodeList[i];
-                var nav = node;
-                nav.StartUpdate();
-                if (node.Debugging.Value != null) {
-                    nav.UpdateDebug(node.Debugging.Value);
-                }
-                if (node.Target.Value == null || node.Entity.Tags.Contain(EntityTags.CantMove)) {
+            _astarNodeList.Run(UpdateNodeList);
+        }
+
+        private void UpdateNodeList(ref AstarPathfindMoverNode node) {
+            var nav = node;
+            nav.StartUpdate();
+            if (node.Debugging != null) {
+                nav.UpdateDebug(node.Debugging);
+            }
+            if (node.Target == null || node.Entity.Tags.Contain(EntityTags.CantMove)) {
+                nav.ProcessNoMove();
+                return;
+            }
+            if (!node.Target.IsValidMove) {
+                nav.ReachedDestination();
+                nav.ProcessNoMove();
+                return;
+            }
+            var currentMoveTarget = node.Target.GetTargetPosition;
+            if (nav.DestinationP3 != currentMoveTarget.toPoint3()) {
+                nav.SetDestination(currentMoveTarget);
+                nav.ProcessNoMove();
+                return;
+            }
+            switch (nav.CurrentStatus) {
+                case PathfindingStatus.NoPath:
                     nav.ProcessNoMove();
-                    continue;
-                }
-                if (!node.Target.Value.IsValidMove) {
-                    nav.ReachedDestination();
+                    return;
+                case PathfindingStatus.InvalidPath:
+                    node.Target.Complete();
+                    nav.Stop();
+                    return;
+                case PathfindingStatus.Created:
+                case PathfindingStatus.WaitingOnPath:
                     nav.ProcessNoMove();
-                    continue;
-                }
-                var currentMoveTarget = node.Target.Value.GetTargetPosition;
-                if (nav.DestinationP3 != currentMoveTarget.toPoint3()) {
-                    nav.SetDestination(currentMoveTarget);
-                    nav.ProcessNoMove();
-                    continue;
-                }
-                switch (nav.CurrentStatus) {
-                    case PathfindingStatus.NoPath:
+                    return;
+                case PathfindingStatus.PathReceived:
+                case PathfindingStatus.WaitingOnNode:
+                    nav.CheckPathWaiting();
+                    break;
+            }
+            if (nav.CurrentStatus != PathfindingStatus.Moving) {
+                nav.ProcessNoMove();
+                return;
+            }
+            if (nav.IsPathFinished) {
+                nav.ReachedDestination();
+                node.Target.Complete();
+                return;
+            }
+            nav.UpdateMovement();
+            if (node.Tr == null) {
+                Debug.LogWarningFormat("Entity {0} has no TR but has a pathfinding node {1}", node.Entity.DebugId, EntityController.GetNode<
+                    AstarPathfindMoverNode>(node.Entity) != null);
+                return;
+            }
+            var pos = node.Tr.position.toPoint3();
+            if (pos != nav.Pathfinder.LastPosition) {
+                nav.Pathfinder.LastPosition = pos;
+                nav.Pathfinder.LastPositionTime = TimeManager.TimeUnscaled;
+            }
+            else {
+                if (TimeManager.TimeUnscaled - nav.Pathfinder.LastPositionTime > MaxStuckTime) {
+                    nav.Pathfinder.StuckPathCount++;
+                    if (nav.Pathfinder.StuckPathCount < 4) {
+                        nav.SetDestination(nav.Pathfinder.Destination);
+                    }
+                    else {
                         nav.ProcessNoMove();
-                        continue;
-                    case PathfindingStatus.InvalidPath:
-                        node.Target.Value.Complete();
-                        nav.Stop();
-                        continue;
-                    case PathfindingStatus.Created:
-                    case PathfindingStatus.WaitingOnPath:
-                        nav.ProcessNoMove();
-                        continue;
-                    case PathfindingStatus.PathReceived:
-                    case PathfindingStatus.WaitingOnNode:
-                        nav.CheckPathWaiting();
-                        break;
-                }
-                if (nav.CurrentStatus != PathfindingStatus.Moving) {
-                    nav.ProcessNoMove();
-                    continue;
-                }
-                if (nav.IsPathFinished) {
-                    nav.ReachedDestination();
-                    node.Target.Value.Complete();
-                    continue;
-                }
-                nav.UpdateMovement();
-                var pos = node.Tr.position.toPoint3();
-                if (pos != nav.Pathfinder.LastPosition) {
-                    nav.Pathfinder.LastPosition = pos;
-                    nav.Pathfinder.LastPositionTime = TimeManager.TimeUnscaled;
-                }
-                else {
-                    if (TimeManager.TimeUnscaled - nav.Pathfinder.LastPositionTime > MaxStuckTime) {
-                        nav.Pathfinder.StuckPathCount++;
-                        if (nav.Pathfinder.StuckPathCount < 4) {
-                            nav.SetDestination(nav.Pathfinder.Destination);
-                        }
-                        else {
-                            nav.ProcessNoMove();
-                            DebugExtension.DebugCircle(node.Tr.position, Color.red, 2f, 5f);
-                            node.Entity.Post(new SetMoveTarget(node.Entity,null, nav.GetWanderPoint()));
-                        }
+                        DebugExtension.DebugCircle(node.Tr.position, Color.red, 2f, 5f);
+                        node.Entity.Post(new SetMoveTarget(node.Entity,null, nav.GetWanderPoint()));
                     }
                 }
             }

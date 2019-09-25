@@ -14,11 +14,12 @@ namespace PixelComrades {
         
         public static void UpdateAllLists() {
             _allLists.Update();
-            for (int i = 0; i < _allLists.Count; i++) {
-                _allLists[i].Update();
-            }
+            _allLists.Run(UpdateList);
         }
-        
+
+        private static void UpdateList(ref BufferedList list) {
+            list.Update();
+        }
 
         protected BufferedList(bool addToGlobalList) {
             _addToGlobalList = addToGlobalList;
@@ -37,15 +38,13 @@ namespace PixelComrades {
     }
     
     [System.Serializable]
-    public class BufferedList<T> : BufferedList {
+    public class BufferedList<T> : BufferedList, IEnumerable<T> {
 
         [SerializeField] private int _currentIndex = 0;
         [SerializeField] private ManagedArray<T>[] _list = new ManagedArray<T>[2];
         [SerializeField] private List<T> _pendingDeletes = new List<T>();
-        [SerializeField] private List<T> _pendingAdds = new List<T>();
         
         public BufferedList(int size = 10, bool addToLists = true) : base(addToLists) {
-            //todo use 2 managed arrays, add function trimcopy, add bufferedlist system to update all bufferedlists 
             _list[0] = new ManagedArray<T>(size);
             _list[1] = new ManagedArray<T>(size);
         }
@@ -55,9 +54,10 @@ namespace PixelComrades {
         
         public ref T this[int index] { get { return ref CurrentList[index]; } }
         public int Count { get { return CurrentList.Max; } }
+        public int UsedCount { get { return CurrentList.UsedCount; } }
 
         public void Add(T newVal) {
-            _pendingAdds.Add(newVal);
+            CurrentList.Add(newVal);
         }
 
         public void Remove(T newVal) {
@@ -76,23 +76,12 @@ namespace PixelComrades {
             return CurrentList.Contains(obj);
         }
 
-        public void ForceAdd() {
-            for (int i = 0; i < _pendingAdds.Count; i++) {
-                CurrentList.Add(_pendingAdds[i]);
-            }
-            _pendingAdds.Clear();
-        }
-
         protected override void Update() {
             for (int i = 0; i < _pendingDeletes.Count; i++) {
                 CurrentList.Remove(_pendingDeletes[i]);
             }
             _currentIndex = _currentIndex == 0 ? 1 : 0;
             CurrentList.CompressReplaceWith(PreviousList);
-            for (int i = 0; i < _pendingAdds.Count; i++) {
-                CurrentList.Add(_pendingAdds[i]);
-            }
-            _pendingAdds.Clear();
             _pendingDeletes.Clear();
         }
 
@@ -109,6 +98,22 @@ namespace PixelComrades {
         public void ClearCurrentAndDeletes() {
             CurrentList.Clear();
             _pendingDeletes.Clear();
+        }
+
+        public void Run(ManagedArray<T>.RefDelegate del) {
+            CurrentList.Run(del);
+        }
+
+        public void Run(ManagedArray<T>.Delegate del) {
+            CurrentList.Run(del);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return CurrentList.GetEnumerator();
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            return CurrentList.GetEnumerator();
         }
     }
 }
