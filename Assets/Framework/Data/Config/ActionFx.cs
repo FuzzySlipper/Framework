@@ -62,29 +62,38 @@ namespace PixelComrades {
                     if (_actionData[i].Sound != null) {
                         AudioPool.PlayClip(_actionData[i].Sound, actionEvent.Position, 0.5f);
                     }
-                    if (_actionData[i].Particle.Animation != null) {
-                        switch (_actionData[i].Event) {
-                            case ActionStateEvents.Collision:
-                            case ActionStateEvents.CollisionOrImpact:
-                            case ActionStateEvents.Impact:
-                                if (actionEvent.Target != null) {
-                                    var impactRenderer = actionEvent.Target.Get<ImpactRendererComponent>();
-                                    if (impactRenderer != null) {
-                                        impactRenderer.PlayAnimation(_actionData[i].Particle.Animation, _actionData[i].Particle.Color);
-                                        continue;
-                                    }
+                    if (_actionData[i].Particle.Animation == null) {
+                        
+                        continue;
+                    }
+                    switch (_actionData[i].Event) {
+                        case ActionStateEvents.Collision:
+                        case ActionStateEvents.CollisionOrImpact:
+                        case ActionStateEvents.Impact:
+                            if (actionEvent.Target != null) {
+                                var impactRenderer = actionEvent.Target.Get<ImpactRendererComponent>();
+                                if (impactRenderer != null) {
+                                    impactRenderer.PlayAnimation(_actionData[i].Particle.Animation, _actionData[i].Particle.Color);
+                                    continue;
                                 }
-                                break;
-                        }
-                        //var spawn = ItemPool.SpawnScenePrefab(_actionPrefabs[i].Prefab, actionEvent.Position, actionEvent.Rotation);
-                        //CheckObjectForListener(spawn, actionEvent);
-                        var player = SpriteParticleSystem.PlayParticle(_actionData[i].Particle, actionEvent.Position, actionEvent.Rotation);
-                        if (_actionData[i].Parent && actionEvent.Target != null) {
-                            var tr = actionEvent.Target.Tr;
-                            if (tr != null) {
-                                tr.SetChild(player.Tr);
                             }
-                        }
+                            break;
+                    }
+                    //var spawn = ItemPool.SpawnScenePrefab(_actionPrefabs[i].Prefab, actionEvent.Position, actionEvent.Rotation);
+                    //CheckObjectForListener(spawn, actionEvent);
+                    var particle = SpriteParticleSystem.PlayParticle(_actionData[i].Particle, actionEvent.Position, actionEvent.Rotation);
+                    if (!_actionData[i].Parent) {
+                        continue;
+                    }
+                    TransformComponent tr = null;
+                    if (actionEvent.Target == null) {
+                        tr = actionEvent.Origin.Tr;
+                    }
+                    else {
+                        tr = actionEvent.Target.Tr;
+                    }
+                    if (tr != null) {
+                        tr.SetChild(particle.Tr);
                     }
                 }
             }

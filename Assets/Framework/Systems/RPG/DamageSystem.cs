@@ -14,8 +14,23 @@ namespace PixelComrades {
         
         private StringBuilder _dmgMsg = new StringBuilder(100);
         private StringBuilder _dmgHoverMsg = new StringBuilder(100);
+        private CircularBuffer<DamageEvent> _eventLog = new CircularBuffer<DamageEvent>(10, true);
+
+        [Command("PrintDamageEventLog")]
+        public static void PrintLog() {
+            var log = World.Get<DamageSystem>()._eventLog;
+            foreach (var msg in log.InOrder()) {
+                Console.Log(
+                    string.Format(
+                        "{5}: Damage {0} hit {1} Amount {2} Type {3} Vital {4}",
+                        msg.Origin?.Entity.DebugId ?? "null",
+                        msg.Target?.Entity.DebugId ?? "null",
+                        msg.Amount, msg.DamageType, msg.TargetVital, log.GetTime(msg)));
+            }
+        }
         
         public void HandleGlobal(DamageEvent msg) {
+            _eventLog.Add(msg);
             if (msg.Amount <= 0) {
                 return;
             }

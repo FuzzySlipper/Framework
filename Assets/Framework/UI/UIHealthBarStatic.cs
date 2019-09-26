@@ -34,7 +34,12 @@ namespace PixelComrades {
 
         public void RemoveActor() {
             if (_actor != null) {
-                _actor.GetVital(_targetStat).OnStatChanged -= CheckStat;
+                if (!_actor.Disposed) {
+                    var vital = _actor.GetVital(_targetStat);
+                    if (vital != null) {
+                        vital.OnStatChanged -= CheckStat;
+                    }
+                }
                 _actor.Entity.RemoveObserver(this);
             }
             _statSlider.value = 0;

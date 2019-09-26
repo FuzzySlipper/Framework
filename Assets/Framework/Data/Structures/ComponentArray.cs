@@ -78,11 +78,10 @@ namespace PixelComrades {
                 return;
             }
             var component = this[existing];
-            _componentToEntity.Remove(this[existing]);
+            _componentToEntity.Remove(component);
             Remove(existing);
             _entityToIndex.Remove(entity);
-            entity.Remove(ArrayType);
-            if (component != null && component is IDisposable dispose) {
+            if (component is IDisposable dispose) {
                 dispose.Dispose();
             }
         }

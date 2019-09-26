@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace PixelComrades {
@@ -57,7 +58,6 @@ namespace PixelComrades {
         private Dictionary<System.Type, ComponentReference> _components = new Dictionary<Type, ComponentReference>();
         private TagsComponent _tags; 
         
-        public Dictionary<Type, ComponentReference> Components { get => _components; }
         public string DebugId { get { return Id + "_" + Name; } }
         public TagsComponent Tags {
             get {
@@ -68,6 +68,8 @@ namespace PixelComrades {
                 return _tags;
             }
         }
+        
+        public int ComponentCount { get { return _components.Count; } }
 
         public bool IsDestroyed() {
             return Id < 0 || Pooled;
@@ -87,6 +89,7 @@ namespace PixelComrades {
             this.Post(new EntityDisposed(this));
             UnityToEntityBridge.Unregister(this);
             EntityController.FinishDeleteEntity(this);
+            _components.Clear();
             Id = -1;
             Name = "Destroyed";
             ClearParent();
@@ -100,6 +103,41 @@ namespace PixelComrades {
             ParentId = -1;
         }
 
+        public bool TryGetReference<T>(out ComponentReference val) {
+            if (_components.TryGetValue(typeof(T), out val)) {
+                return true;
+            }
+            val = default(ComponentReference);
+            return false;
+        }
+
+        public bool TryGetReference(System.Type type, out ComponentReference val) {
+            if (_components.TryGetValue(type, out val)) {
+                return true;
+            }
+            val = default(ComponentReference);
+            return false;
+        }
+        
+        public bool HasReference<T>() {
+            return _components.ContainsKey(typeof(T));
+        }
+
+        public bool HasReference(System.Type type) {
+            return _components.ContainsKey(type);
+        }
+
+        public void CopyKeys(ref System.Type[] array) {
+            _components.Keys.CopyTo(array, 0);
+        }
+
+        public IEnumerable<ComponentReference> GetAllComponents() {
+//            var list = new ComponentReference[_components.Count];
+//            _components.Values.CopyTo(list, 0);
+//            return list;
+            return _components.Values;
+        }
+        
         public void AddReference(ComponentReference reference) {
             var type = reference.Array.ArrayType;
             if (_components.ContainsKey(type)) {

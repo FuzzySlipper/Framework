@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-
 /// <summary>
 ///     Implementation of the Disruptor pattern
 /// </summary>

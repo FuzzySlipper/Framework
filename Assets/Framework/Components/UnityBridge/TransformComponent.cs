@@ -24,11 +24,6 @@ namespace PixelComrades {
         public TransformComponent(Transform tr) {
             _cachedTransform = new CachedTransform(tr);
         }
-
-        public void Set(Transform tr) {
-            _cachedTransform.Set(tr);
-        }
-
         public Vector3 InverseTransformPoint(Vector3 pos) {
             return Value.InverseTransformPoint(pos);
         }

@@ -20,6 +20,33 @@ namespace PixelComrades {
             OnDel.SafeInvoke(this);
         }
     }
+
+    [AutoRegister]
+    public class TransformProblemDebug : SystemBase, IPeriodicUpdate {
+
+        private ComponentArray<TransformComponent> _trList;
+        
+        public TransformProblemDebug() {
+            _trList = EntityController.GetComponentArray<TransformComponent>();
+        }
+
+        public void OnPeriodicUpdate() {
+            for (int i = 0; i < _trList.Max; i++) {
+                if (_trList.IsInvalid(i)) {
+                    continue;
+                }
+                if (_trList[i] == null || !_trList[i].IsValid) {
+                    if (_trList[i] == null) {
+                        Debug.LogFormat("Index {0} is null but not listed as invalid", i);
+                    }
+                    else {
+                        var entity = _trList.GetEntity(_trList[i]);
+                        Debug.LogFormat("Index {0}'s entity {1} is invalid", i, entity.DebugId);
+                    }
+                }
+            }
+        }
+    }
     
     public static class EcsDebug {
         //DebugLogConsole.AddCommandStatic("debugStats", "Toggle", typeof(DebugText));
@@ -336,7 +363,7 @@ namespace PixelComrades {
 
         [Command("ListComponents")]
         public static void ListComponents(int id) {
-            var dict = EntityController.GetEntity(id).Components;
+            var dict = EntityController.GetEntity(id).GetAllComponents();
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -345,7 +372,7 @@ namespace PixelComrades {
             sb.Append(EntityController.GetEntity(id).Name);
             sb.AppendNewLine(" Components");
             foreach (var cRef in dict) {
-                sb.AppendNewLine(string.Format("Type {0} Index {1}", cRef.Key, cRef.Value.Index));
+                sb.AppendNewLine(string.Format("Type {0} Index {1}", cRef.Array.ArrayType.Name, cRef.Index));
             }
             
             Debug.Log(sb.ToString());
@@ -353,7 +380,7 @@ namespace PixelComrades {
 
         [Command("ListEntityContainer")]
         public static void ListEntityContainer(int id, string typeName) {
-            var dict = EntityController.GetEntity(id).Components;
+            var dict = EntityController.GetEntity(id).GetAllComponents();
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -361,9 +388,9 @@ namespace PixelComrades {
             System.Type type = null;
             EntityContainer instance = null;
             foreach (var cRef in dict) {
-                if (cRef.Key.Name == typeName) {
-                    type = cRef.Key;
-                    instance = cRef.Value.Get<EntityContainer>();
+                if (cRef.Array.ArrayType.Name == typeName) {
+                    type = cRef.Array.ArrayType;
+                    instance = cRef.Get<EntityContainer>();
                 }
             }
             if (type == null || instance == null) {
@@ -378,7 +405,7 @@ namespace PixelComrades {
 
         [Command("DebugComponent")]
         public static void DebugComponent(int id, string typeName) {
-            var dict = EntityController.GetEntity(id).Components;
+            var dict = EntityController.GetEntity(id).GetAllComponents();
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -386,9 +413,9 @@ namespace PixelComrades {
             System.Type type = null;
             System.Object instance = null;
             foreach (var cRef in dict) {
-                if (cRef.Key.Name == typeName) {
-                    type = cRef.Key;
-                    instance = cRef.Value.Get();
+                if (cRef.Array.ArrayType.Name == typeName) {
+                    type = cRef.Array.ArrayType;
+                    instance = cRef.Get();
                 }
             }
             if (type == null) {
@@ -406,7 +433,7 @@ namespace PixelComrades {
 
         [Command("TestSerializeComponent")]
         public static void TestSerializeComponent(int id, string typeName) {
-            var dict = EntityController.GetEntity(id).Components;
+            var dict = EntityController.GetEntity(id).GetAllComponents();
             if (dict == null) {
                 Debug.LogFormat("{0} has no components", id);
                 return;
@@ -414,9 +441,9 @@ namespace PixelComrades {
             System.Type type = null;
             IComponent instance = null;
             foreach (var cRef in dict) {
-                if (cRef.Key.Name == typeName) {
-                    type = cRef.Key;
-                    instance = cRef.Value.Get() as IComponent;
+                if (cRef.Array.ArrayType.Name == typeName) {
+                    type = cRef.Array.ArrayType;
+                    instance = cRef.Get() as IComponent;
                 }
             }
             if (type == null || instance == null) {

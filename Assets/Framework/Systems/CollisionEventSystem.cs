@@ -11,6 +11,7 @@ namespace PixelComrades {
         
         private GameOptions.CachedBool _collisionMessage = new GameOptions.CachedBool("CollisionMessages");
         private FastString _collisionString = new FastString();
+        private CircularBuffer<CollisionEvent> _eventLog = new CircularBuffer<CollisionEvent>(10, true);
 
         public CollisionEventSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
@@ -18,7 +19,19 @@ namespace PixelComrades {
             }));
         }
 
+        [Command("PrintCollisionLog")]
+        public static void PrintLog() {
+            var log = World.Get<CollisionEventSystem>()._eventLog;
+            foreach (var msg in log.InOrder()) {
+                Console.Log(string.Format("{6}: {0} hit {1} at {2} eventNum {3} normal {4} has impacts {5}",
+                    msg.Origin?.Entity.DebugId ?? "null",
+                    msg.Target?.Entity.DebugId ?? "null",
+                    msg.HitPoint, msg.Hit, msg.HitNormal, msg.Impacts != null, log.GetTime(msg)));
+            }
+        }
+
         public void HandleGlobal(CollisionEvent msg) {
+            _eventLog.Add(msg);
             if (msg.Hit < 0) {
                 msg.Hit = 10;
                 for (int h = 0; h < Handlers.Count; h++) {
@@ -28,8 +41,8 @@ namespace PixelComrades {
             if (msg.Hit <= 0) {
                 return;
             }
-            var actionStateEvent = new ActionStateEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint, Quaternion.LookRotation(msg
-            .HitNormal), 
+            var actionStateEvent = new ActionStateEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
+                msg.HitNormal == Vector3.zero ? Quaternion.identity :Quaternion.LookRotation(msg.HitNormal), 
             ActionStateEvents.Impact);
             if (msg.Impacts == null) {
                 Debug.LogFormat("{0} had no impacts {1}", msg.Origin.GetName(), System.Environment.StackTrace);
@@ -112,12 +125,12 @@ namespace PixelComrades {
     [Priority(Priority.Higher)]
     public struct CollisionEvent : IEntityMessage {
 
-        public CollidableNode Origin;
-        public CollidableNode Target;
-        public Vector3 HitPoint;
-        public Vector3 HitNormal;
+        public CollidableNode Origin { get; }
+        public CollidableNode Target { get; }
+        public Vector3 HitPoint { get; }
+        public Vector3 HitNormal { get; }
         public int Hit;
-        public List<IActionImpact> Impacts;
+        public List<IActionImpact> Impacts { get; }
 
         public CollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, List<IActionImpact> impacts,  int hit = 
         -1) {

@@ -18,7 +18,7 @@ namespace PixelComrades {
             if (_disableLog) {
                 return;
             }
-            _sb.Append(TimeManager.TimeUnscaled.ToString("F2"));
+            _sb.Append(TimeManager.TimeUnscaled.ToString("F3"));
             _sb.Append("-");
             _sb.Append(msg);
             _sb.Append(Environment.NewLine);

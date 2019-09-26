@@ -16,7 +16,7 @@ namespace PixelComrades {
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {
-                typeof(GridPosition), typeof(SensorComponent)
+                typeof(GridPosition), typeof(SensorComponent), typeof(TransformComponent)
             };
         }
     }
@@ -37,7 +37,7 @@ namespace PixelComrades {
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {
-                typeof(SensorTargetsComponent), typeof(UnitySensorComponent), typeof(FactionComponent)
+                typeof(SensorTargetsComponent), typeof(UnitySensorComponent), typeof(FactionComponent), typeof(TransformComponent)
             };
         }
     }

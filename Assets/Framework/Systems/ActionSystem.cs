@@ -7,11 +7,12 @@ using UnityEngine.Experimental.PlayerLoop;
 
 namespace PixelComrades {
 
-    [Priority(Priority.Lower)]
-    public class ActionSystem : SystemBase, IMainSystemUpdate {
+    [Priority(Priority.Lower), AutoRegister]
+    public class ActionSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ActionStateEvent> {
 
         private NodeList<ActionUsingNode> _nodeList;
-
+        private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
+        
         public ActionSystem() {
             NodeFilter<ActionUsingNode>.New(ActionUsingNode.GetTypes());
         }
@@ -29,6 +30,23 @@ namespace PixelComrades {
             }
             if (_nodeList != null) {
                 _nodeList.Run(UpdateNode);
+            }
+        }
+
+        public void HandleGlobal(ActionStateEvent arg) {
+            _eventLog.Add(arg);
+        }
+
+        [Command("PrintActionStateLog")]
+        public static void PrintLog() {
+            var log = World.Get<ActionSystem>()._eventLog;
+            foreach (var msg in log.InOrder()) {
+                Console.Log(
+                    string.Format(
+                        "{5}: Action source {0} target {1} at {2} {3} State {4}",
+                        msg.Origin?.Entity.DebugId ?? "null",
+                        msg.Target?.Entity.DebugId ?? "null",
+                        msg.Position, msg.Rotation, msg.State, log.GetTime(msg)));
             }
         }
 

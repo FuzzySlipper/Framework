@@ -26,13 +26,13 @@ namespace PixelComrades {
         }
 
         public bool TryStore(Entity entity) {
-            UnityToEntityBridge.Unregister(entity);
-            entity.Get<RenderingComponent>().Clear();
-            entity.Remove(typeof(SpriteAnimationComponent));
-            entity.Tags.Clear();
-            entity.Post(new ProjectileDespawned(entity));
             if (_poolDict.TryGetValue(entity.Get<TypeId>().Id, out var stack)) {
                 if (!stack.IsFull) {
+                    UnityToEntityBridge.Unregister(entity);
+                    entity.Get<RenderingComponent>().Clear();
+                    entity.Remove(typeof(SpriteAnimationComponent));
+                    entity.Tags.Clear();
+                    entity.Post(new ProjectileDespawned(entity));
                     entity.Pooled = true;
                     entity.ClearParent();
                     entity.Get<StatsContainer>().ClearMods();

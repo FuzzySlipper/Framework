@@ -7,6 +7,7 @@ namespace PixelComrades {
     public sealed class EquipmentSystem : SystemBase, IReceiveGlobal<SaveGameLoaded>, IReceive<DataDescriptionUpdating>,
         IReceive<TooltipDisplaying>, IReceiveGlobal<EquipItemEvent>, IReceiveGlobal<UnEquipItemEvent> {
 
+        
         public EquipmentSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(Equipment)

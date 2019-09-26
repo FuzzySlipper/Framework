@@ -195,7 +195,7 @@ namespace PixelComrades {
             //        }
             //    }
             //}
-            UICenterTarget.SetTargetActor(currentActor.GetNode<VisibleNode>());
+            UICenterTarget.SetTargetActor(currentActor.GetNode<CharacterNode>());
             if (!_foundControl || currentActor != null) {
                 SetCurrentNull();
             }

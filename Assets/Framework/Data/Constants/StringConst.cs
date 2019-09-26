@@ -165,7 +165,7 @@ namespace PixelComrades {
                     return ActionStateEvents.FxOn;
                 case AnimationEvents.FxOff:
                     return ActionStateEvents.FxOff;
-                case Default:
+                case AnimationEvents.Default:
                     return ActionStateEvents.Activate;
             }
             return ActionStateEvents.None;

@@ -14,11 +14,11 @@ namespace PixelComrades {
     }
 
     public struct ActionStateEvent: IEntityMessage {
-        public CharacterNode Origin;
-        public CharacterNode Target;
-        public Vector3 Position;
-        public Quaternion Rotation;
-        public ActionStateEvents State;
+        public CharacterNode Origin { get; }
+        public CharacterNode Target { get; }
+        public Vector3 Position { get; }
+        public Quaternion Rotation { get; }
+        public ActionStateEvents State { get; }
 
         public ActionStateEvent(CharacterNode origin, CharacterNode target, Vector3 position, Quaternion rotation, ActionStateEvents state) {
             Origin = origin;

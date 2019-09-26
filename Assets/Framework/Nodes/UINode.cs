@@ -28,16 +28,17 @@ namespace PixelComrades {
 
         public void Setup(GameObject obj) {
             _rendering.Value.Set(obj.GetComponent<RenderingWrapper>());
-            
+            _tr.Set(Entity.Add(new TransformComponent(obj.transform)));
         }
 
         public void Clear() {
             _rendering.Value.Clear();
-            _tr.Value.Set(null);
+            Entity.Remove<TransformComponent>();
+            _tr.Clear();
         }
 
-        public Vector3 position { get { return Tr != null ? Tr.position : Vector3.zero; } }
-        public Quaternion rotation { get { return Tr != null ? Tr.rotation : Quaternion.identity; } }
+        public Vector3 position { get { return Tr?.position ?? Vector3.zero; } }
+        public Quaternion rotation { get { return Tr?.rotation ?? Quaternion.identity; } }
 
         public static System.Type[] GetTypes() {
             return new System.Type[] {

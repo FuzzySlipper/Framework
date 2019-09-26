@@ -31,13 +31,13 @@ namespace PixelComrades {
         }
 
         public SerializedEntity(Entity entity) {
-            var dict = entity.Components;
+            var components = entity.GetAllComponents();
             _entity = entity;
             _entityName = entity.Name;
             _entityId = entity.Id;
             _tags = entity.Tags.Tags;
-            foreach (var cref in dict) {
-                _allComponents.Add((IComponent)cref.Value.Get());
+            foreach (var cref in components) {
+                _allComponents.Add((IComponent)cref.Get());
             }
         }
 

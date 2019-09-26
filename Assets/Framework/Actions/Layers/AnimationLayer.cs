@@ -49,7 +49,7 @@ namespace PixelComrades {
                     }
                     break;
             }
-            if (node.LastProcessedAnimationEvent != node.Animator.CurrentAnimationEvent) {
+            if (!string.IsNullOrEmpty(node.Animator.CurrentAnimationEvent) && node.LastProcessedAnimationEvent != node.Animator.CurrentAnimationEvent) {
                 node.LastProcessedAnimationEvent = node.Animator.CurrentAnimationEvent;
                 if (!string.IsNullOrEmpty(node.LastProcessedAnimationEvent)) {
                     node.ActionEvent.Current.PostAnimationEvent(node, node.LastProcessedAnimationEvent);

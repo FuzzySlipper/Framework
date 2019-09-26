@@ -37,7 +37,7 @@ namespace PixelComrades {
         private static float _epsilon = 0.0000001f;
         private static Stopwatch _stopWatch;
 
-        private static CircularBuffer<MeshRaycastHit> _hitsBuffer = new CircularBuffer<MeshRaycastHit>(50, ClearHit);
+        private static CircularBufferPool<MeshRaycastHit> _hitsBuffer = new CircularBufferPool<MeshRaycastHit>(50, ClearHit);
 
         public static bool DebugCast = false;
         public static string IntersectionErrorType = "";

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 namespace PixelComrades {
     [AutoRegister]
     public sealed class ContainerSystem : SystemBase  {
+        
+        private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
 
         public ContainerSystem() {
             NodeFilter<ContainerItemNode>.New(ContainerItemNode.GetTypes());

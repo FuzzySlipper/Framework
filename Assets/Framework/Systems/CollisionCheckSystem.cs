@@ -68,7 +68,7 @@ namespace PixelComrades {
         
 
         private static CollisionEvent? CheckRayList(Entity entity, int limit, bool limitEnemy,  List<IActionImpact> impacts) {
-            int hitIdex = 0;
+            int hitIdx = 0;
             for (int i = 0; i < limit; i++) {
                 if (entity.IsDestroyed()) {
                     return null;
@@ -81,7 +81,7 @@ namespace PixelComrades {
 #if DEBUG_RAYCAST
                 Color pointColor = Color.white;
                 if (hitEntity == null) {
-                    if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment)) {
+                    if (hit.transform.IsEnvironment()) {
                         pointColor = Color.green;
                     }
                 }
@@ -91,14 +91,14 @@ namespace PixelComrades {
                 else if (hitEntity != null) {
                     pointColor = Color.red;
                 }
-                DebugExtension.DebugPoint(_rayHits[i].point + (Vector3.up * hitIdex), pointColor, 0.25f, 2.5f );
+                DebugExtension.DebugPoint(_rayHits[i].point + (Vector3.up * hitIdx), pointColor, 0.25f, 2.5f );
 #endif
                 if (hit.transform.CompareTag(StringConst.TagInvalidCollider) || 
                     hit.transform.CompareTag(StringConst.TagSensor)) {
                     continue;
                 }
                 if (hitEntity == null) {
-                    if (_rayHits[i].transform.CompareTag(StringConst.TagEnvironment) || _rayHits[i].transform.gameObject.layer == LayerMasks.NumberWall || _rayHits[i].transform.gameObject.layer == LayerMasks.NumberFloor || _rayHits[i].transform.gameObject.layer == LayerMasks.NumberCeiling) {
+                    if (hit.transform.IsEnvironment()) {
 #if DEBUG
                         DebugLog.Add(entity.DebugId + " hit environment " + _rayHits[i].transform.name);
 #endif
@@ -116,8 +116,13 @@ namespace PixelComrades {
 #if DEBUG
                 DebugLog.Add(entity.DebugId + " hit actor " + _rayHits[i].transform.name);
 #endif
+                var sourceNode = entity.FindNode<CollidableNode>();
+                var targetNode = hitEntity.FindNode<CollidableNode>();
+                if (sourceNode == null || targetNode == null || sourceNode == targetNode) {
+                    continue;
+                }
                 if (limitEnemy) {
-                    if (World.Get<FactionSystem>().AreEnemies(entity, hitEntity)) {
+                    if (World.Get<FactionSystem>().AreEnemies(sourceNode.Entity, targetNode.Entity)) {
                         if (entity.Tags.IsConfused) {
                             continue;
                         }
@@ -127,11 +132,6 @@ namespace PixelComrades {
                             continue;
                         }
                     }
-                }
-                var sourceNode = entity.FindNode<CollidableNode>();
-                var targetNode = hitEntity.FindNode<CollidableNode>();
-                if (sourceNode == null || targetNode == null) {
-                    continue;
                 }
                 if (impacts == null) {
                     impacts = entity.Get<ActionImpacts>()?.Impacts;

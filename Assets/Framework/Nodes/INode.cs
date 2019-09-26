@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface INode {
-        void Register(Entity entity, Dictionary<Type, ComponentReference> list);
+        void Register(Entity entity);
         void Dispose();
         bool Disposed { get; }
     }
@@ -16,12 +16,12 @@ namespace PixelComrades {
         public abstract List<CachedComponent> GatherComponents { get; }
         public bool Disposed { get; private set; }
 
-        public void Register(Entity entity, Dictionary<Type, ComponentReference> list) {
+        public void Register(Entity entity) {
             Entity = entity;
             Disposed = false;
             var components = GatherComponents;
             for (int i = 0; i < components.Count; i++) {
-                components[i].Set(entity, list);
+                components[i].Set(entity);
             }
         }
 

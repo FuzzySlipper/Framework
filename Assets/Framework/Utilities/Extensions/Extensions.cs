@@ -1034,6 +1034,16 @@ namespace PixelComrades {
         //    }
         //}
 
+        public static bool IsEnvironment(this Transform tr) {
+            if (tr.CompareTag(StringConst.TagEnvironment) ||
+                tr.gameObject.layer == LayerMasks.NumberWall ||
+                tr.gameObject.layer == LayerMasks.NumberFloor ||
+                tr.gameObject.layer == LayerMasks.NumberCeiling) {
+                return true;
+            }
+            return false;
+        }
+
         public static void SetParentResetPos(this Transform child, Transform parent) {
             child.SetParent(parent, true);
             child.localPosition = Vector3.zero;

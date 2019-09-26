@@ -46,9 +46,8 @@ namespace PixelComrades {
             if (!_entities.Contains(entity.Id)) {
                 return;
             }
-            var cref = entity.Components;
             for (int i = 0; i < Types.Length; i++) {
-                if (cref.ContainsKey(Types[i])) {
+                if (entity.HasReference(Types[i])) {
                     return;
                 }
             }

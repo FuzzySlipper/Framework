@@ -19,7 +19,6 @@ namespace PixelComrades {
 
         private static UICenterTarget _main;
         private static Task _currentWriting;
-        private static VisibleNode _visible;
         private static CharacterNode _character;
         private static bool _actorLock = false;
         private static bool _lockedText = false;
@@ -30,17 +29,16 @@ namespace PixelComrades {
         //private Ray _mouseRay;
         private static TriggerableUnscaledTimer _clearTextTimer = new TriggerableUnscaledTimer();
 
-        public static VisibleNode LockedActor {
+        public static CharacterNode LockedActor {
             get {
                 if (_main == null) {
                     return null;
                 }
 
-                return _actorLock ? _visible : null;
+                return _actorLock ? _character : null;
             }
         }
 
-        public static VisibleNode CurrentVisible { get { return _visible; } }
         public static CharacterNode CurrentCharacter { get { return _character; } }
 
         void Awake() {
@@ -51,7 +49,7 @@ namespace PixelComrades {
             if (!Game.GameActive || _actorLock) {
                 return;
             }
-            if (_visible != null && (_visible.Disposed || _visible.Entity.Tags.Contain(EntityTags.IsDead))) {
+            if (_character != null && (_character.Disposed || _character.Entity.Tags.Contain(EntityTags.IsDead))) {
                 RemoveActor();
                 return;
             }
@@ -90,14 +88,14 @@ namespace PixelComrades {
             if (_actorLock || _clearTextTimer.Triggered) {
                 return;
             }
-            _clearTextTimer.StartNewTime(_visible != null ? _main._clearActorTime : _main._clearTextTime);
+            _clearTextTimer.StartNewTime(_character != null ? _main._clearActorTime : _main._clearTextTime);
         }
 
         private static void ClearCurrentText() {
             if (_actorLock) {
                 return;
             }
-            if (_visible != null) {
+            if (_character != null) {
                 _main.RemoveActor();
                 return;
             }
@@ -111,7 +109,7 @@ namespace PixelComrades {
         }
 
         public static void ToggleActorLock() {
-            if (_visible== null) {
+            if (_character == null) {
                 _actorLock = false;
             }
             else {
@@ -125,25 +123,24 @@ namespace PixelComrades {
         /// Maybe also add a right click option to show more stats behind skill/spell
         /// </summary>
         /// <param name="actor"></param>
-        public static void SetTargetActor(VisibleNode actor) {
-            if (_actorLock || _visible == actor) {
+        public static void SetTargetActor(CharacterNode actor) {
+            if (_actorLock || _character == actor) {
                 return;
             }
             _clearTextTimer.Triggered = false;
-            if (_visible != null) {
+            if (_character != null) {
                 _main.RemoveActor();
             }
-            _visible = actor;
-            if (_visible == null) {
+            _character = actor;
+            if (_character == null) {
                 return;
             }
             _main._textHolder.maxVisibleCharacters = 0;
-            _main._textHolder.text = _visible.Label.Text;
+            _main._textHolder.text = _character.Label.Text;
             if (_currentWriting != null) {
                 TimeManager.Cancel(_currentWriting);
             }
             _currentWriting = TimeManager.StartUnscaled(_main.RevealText(), _main.CurrentNull);
-            _character = actor.Entity.GetNode<CharacterNode>();
             if (_character != null) {
                 _character.Entity.AddObserver(_main);
             }
@@ -151,18 +148,18 @@ namespace PixelComrades {
                 _main._vitals[i].SetNewTarget(_character);
             }
             _main.CheckMods();
-            _visible.Entity.AddObserver(_main);
+            _character.Entity.AddObserver(_main);
         }
 
         private void SetTextOnly(string text, bool lockTxt) {
-            if (_visible != null && !_lockedText) {
+            if (_character != null && !_lockedText) {
                 _queuedText = text;
                 return;
             }
             if (lockTxt) {
                 _lockedText = true;
                 _queuedText = text;
-                if (_visible != null) {
+                if (_character != null) {
                     return;
                 }
             }
@@ -201,10 +198,7 @@ namespace PixelComrades {
                 _main._vitals[i].RemoveActor();
             }
             _sliderBackground.enabled = false;
-            if (_visible != null && !_visible.Disposed) {
-                _visible.Entity.RemoveObserver(_main);
-            }
-            _visible = null;
+            _character = null;
             _actorLock = false;
             _textHolder.text = "";
             if (!string.IsNullOrEmpty(_queuedText)) {
@@ -245,7 +239,7 @@ namespace PixelComrades {
         }
 
         public void Handle(DeathEvent arg) {
-            if (_character.Entity == arg.Target) {
+            if (_character != null && _character.Entity == arg.Target) {
                 RemoveActor();
             }
         }

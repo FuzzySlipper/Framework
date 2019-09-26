@@ -78,14 +78,14 @@ namespace PixelComrades {
             if (entity == null) {
                 return null;
             }
-            return entity.Components.TryGetValue(type, out var cRef)? cRef : (ComponentReference?) null;
+            return entity.TryGetReference(type, out var cRef)? cRef : (ComponentReference?) null;
         }
 
         public static bool HasComponent<T>(this Entity entity) {
             if (entity == null) {
                 return false;
             }
-            return entity.Components.ContainsKey(typeof(T));
+            return entity.HasReference<T>();
         }
 
         public static Entity Get(int index) {
@@ -116,12 +116,11 @@ namespace PixelComrades {
 
         public static void FinishDeleteEntity(Entity entity) {
             _entities.Remove(entity.Id);
-            entity.Components.Keys.CopyTo(_tempRemoveList, 0);
-            var limit = entity.Components.Count;
+            entity.CopyKeys(ref _tempRemoveList);
+            var limit = entity.ComponentCount;
             for (int i = 0; i < limit; i++) {
                 entity.Remove(_tempRemoveList[i]);
             }
-            entity.Components.Clear();
         }
 
         private static ComponentArray<T> AddComponentArray<T>() where T : IComponent {
@@ -140,7 +139,7 @@ namespace PixelComrades {
             array.Add(entity, newComponent);
             if (_nodeFilters.TryGetValue(type, out var filterList)) {
                 for (int i = 0; i < filterList.Count; i++) {
-                    filterList[i].TryAdd(entity, entity.Components);
+                    filterList[i].TryAdd(entity);
                 }
             }
             if (_eventFilters.TryGetValue(type, out var receiverList)) {
@@ -162,7 +161,7 @@ namespace PixelComrades {
                 if (checkEntity == null) {
                     break;
                 }
-                if (checkEntity.Components.ContainsKey(type)) {
+                if (checkEntity.HasReference(type)) {
                     return checkEntity.Get<T>();
                 }
                 checkEntity = checkEntity.GetParent();
@@ -178,7 +177,7 @@ namespace PixelComrades {
             if (parent == null) {
                 return entity.Get<T>();
             }
-            return !entity.Components.ContainsKey(typeof(T)) ? parent.Get<T>() : entity.Get<T>();
+            return !entity.HasReference(typeof(T)) ? parent.Get<T>() : entity.Get<T>();
         }
 
         public static System.Object GetComponent(Entity entity, string type) {
@@ -189,13 +188,8 @@ namespace PixelComrades {
             if (entity == null) {
                 return null;
             }
-            if (entity.Components.TryGetValue(type, out var cref)) {
+            if (entity.TryGetReference(type, out var cref)) {
                 return cref.Get();
-            }
-            foreach (var cr in entity.Components) {
-                if (type.IsAssignableFrom(cr.Key)) {
-                    return cr.Value.Get();
-                }
             }
             return null;
         }
@@ -204,7 +198,7 @@ namespace PixelComrades {
             if (entity == null) {
                 return default(T);
             }
-            if (entity.Components.TryGetValue(typeof(T), out var cref)) {
+            if (entity.TryGetReference(typeof(T), out var cref)) {
                 return cref.Get<T>();
             }
 //            if (_components.TryGetValue(typeof(T), out var array)) {
@@ -224,7 +218,7 @@ namespace PixelComrades {
 //            if (array.HasComponent(entity)) {
 //                return array.Get(entity);
 //            }    
-            if (entity.Components.TryGetValue(typeof(T), out var cref)) {
+            if (entity.TryGetReference(typeof(T), out var cref)) {
                 return cref.Get<T>();
             }
             return entity.Add(new T());
@@ -255,7 +249,7 @@ namespace PixelComrades {
         }
 
         public static void Remove(this Entity entity, System.Type type){
-            if (!entity.Components.TryGetValue(type, out var cref)) {
+            if (!entity.TryGetReference(type, out var cref)) {
                 return;
             }
             Remove(entity, cref, type);
@@ -270,12 +264,12 @@ namespace PixelComrades {
             entity.RemoveReference(reference);
             if (_nodeFilters.TryGetValue(type, out var filterList)) {
                 for (int f = 0; f < filterList.Count; f++) {
-                    filterList[f].CheckRemove(entity, entity.Components);
+                    filterList[f].CheckRemove(entity);
                 }
             }
             if (_eventFilters.TryGetValue(type, out var receiverList)) {
-                for (int i = 0; i < receiverList.Count; i++) {
-                    receiverList[i].CheckRemove(entity);
+                for (int r = 0; r < receiverList.Count; r++) {
+                    receiverList[r].CheckRemove(entity);
                 }
             }
         }

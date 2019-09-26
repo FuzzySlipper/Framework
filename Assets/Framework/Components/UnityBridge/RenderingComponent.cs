@@ -65,6 +65,9 @@ namespace PixelComrades {
 
     public static class RenderingComponentExtensions {
         public static void SetMode(this Renderer renderer, RenderingMode status) {
+            if (renderer == null) {
+                return;
+            }
             renderer.enabled = status != RenderingMode.None;
             switch (status) {
                 case RenderingMode.Normal:

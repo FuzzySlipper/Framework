@@ -36,7 +36,7 @@ namespace PixelComrades {
 
         private bool ShouldStartMouseLook {
             get {
-                return Input.GetMouseButtonDown(1) && !PlayerInput.IsCursorOverUI && UICenterTarget.CurrentVisible == null;
+                return Input.GetMouseButtonDown(1) && !PlayerInput.IsCursorOverUI && UICenterTarget.CurrentCharacter == null;
             }
         }
 

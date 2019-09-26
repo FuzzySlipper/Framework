@@ -77,13 +77,13 @@ public class EntityWindow : OdinEditorWindow {
                 EditorGUILayout.LabelField("Tag " + EntityTags.GetNameAt(i));
             }
         }
-        foreach (var componentReference in entity.Components) {
+        foreach (var componentReference in entity.GetAllComponents()) {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Type: " + componentReference.Key.Name);
-            System.Type type = componentReference.Key;
+            System.Type type = componentReference.Array.ArrayType;
+            EditorGUILayout.LabelField("Type: " + type.Name);
             var bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
             var fields = type.GetFields(bindingFlags);
-            System.Object instance = componentReference.Value.Get();
+            System.Object instance = componentReference.Get();
             List<object> fieldValues = null;
             if (instance != null) {
                 fieldValues = fields.Select(field => field.GetValue(instance)).ToList();
@@ -154,7 +154,7 @@ public class EntityWindow : OdinEditorWindow {
                 GUI.Label(arg1, tr?.gameObject != null ? tr.gameObject.name : "No Tr");
                 break;
             case 3:
-                GUI.Label(arg1, entity.Components.Count.ToString());
+                GUI.Label(arg1, entity.ComponentCount.ToString());
                 break;
             case 4:
                 var stats = entity.Get<StatsContainer>();

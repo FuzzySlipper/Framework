@@ -14,25 +14,25 @@ namespace PixelComrades {
             _requiredTypes = types;
         }
 
-        public bool TryAdd(Entity entity, Dictionary<System.Type, ComponentReference> references) {
+        public bool TryAdd(Entity entity) {
             if (ContainsEntity(entity)) {
                 return true;
             }
             for (int i = 0; i < _requiredTypes.Length; i++) {
-                if (!references.ContainsKey(_requiredTypes[i])) {
+                if (!entity.HasReference(_requiredTypes[i])) {
                     return false;
                 }
             }
-            AddEntity(entity, references);
+            AddEntity(entity);
             return true;
         }
 
-        public void CheckRemove(Entity entity, Dictionary<System.Type, ComponentReference> references) {
+        public void CheckRemove(Entity entity) {
             if (!ContainsEntity(entity)) {
                 return;
             }
             for (int i = 0; i < _requiredTypes.Length; i++) {
-                if (references.ContainsKey(_requiredTypes[i])) {
+                if (entity.HasReference(_requiredTypes[i])) {
                     continue;
                 }
 #if DEBUG
@@ -45,7 +45,7 @@ namespace PixelComrades {
 
         public abstract void RegisterType(System.Type[] types);
 
-        protected abstract void AddEntity(Entity entity, Dictionary<Type, ComponentReference> references);
+        protected abstract void AddEntity(Entity entity);
         public abstract void RemoveEntity(Entity entity);
         public abstract bool ContainsEntity(Entity entity);
     }
@@ -73,7 +73,7 @@ namespace PixelComrades {
             return _nodes.ContainsKey(entity);
         }
 
-        protected override void AddEntity(Entity entity, Dictionary<Type, ComponentReference> references) {
+        protected override void AddEntity(Entity entity) {
             if (_nodes.ContainsKey(entity)) {
                 return;
             }
@@ -81,7 +81,7 @@ namespace PixelComrades {
                 DebugLog.Add("Add " + entity.DebugId + " to " + typeof(T).Name);
 #endif
             T node = _pool.New();
-            node.Register(entity, references);
+            node.Register(entity);
             _allNodes.Add(node);
             _nodes.Add(entity, node);
         }

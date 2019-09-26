@@ -9,7 +9,7 @@ namespace PixelComrades {
     public abstract class CachedComponent : IDisposable {
 
         public abstract void Clear();
-        public abstract void Set(Entity owner, Dictionary<Type, ComponentReference> list);
+        public abstract void Set(Entity owner);
 
         public void Dispose() {
             Clear();
@@ -70,7 +70,7 @@ namespace PixelComrades {
             info.AddValue(nameof(_entity), _entity);
         }
 
-        public void Set(Entity entity) {
+        public override void Set(Entity entity) {
             _entity = entity;
             _array = EntityController.GetComponentArray<T>();
             var arrRef = EntityController.GetEntity(_entity).GetComponentReference(typeof(T));
@@ -84,14 +84,6 @@ namespace PixelComrades {
             Set(component.GetEntity());
         }
 
-        public override void Set(Entity owner, Dictionary<Type, ComponentReference> list) {
-            _entity = owner;
-            var type = typeof(T);
-            if (list.TryGetValue(type, out var cref)) {
-                _index = cref.Index;
-                _array = (ManagedArray<T>) cref.Array;
-            }
-        }
         /// <summary>
         /// This can null reference exception as there's no way to ref return null.
         /// Check IsValid before accessing
