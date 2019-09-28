@@ -103,11 +103,11 @@ namespace PixelComrades {
             }
         }
 
-        private bool BlockDamageFlat(DamageEvent dmgEvent) {
+        private bool BlockDamageFlat(TakeDamageEvent dmgEvent) {
             return true;
         }
 
-        public bool BlockDamageWithStats(DamageEvent arg) {
+        public bool BlockDamageWithStats(TakeDamageEvent arg) {
             if (_fxComponent != null) {
                 CollisionExtensions.GenerateHitLocDir(arg.Origin.Tr, arg.Target.Tr, arg.Target.Collider, 
                     out var hitPoint, out var hitNormal);
@@ -119,7 +119,6 @@ namespace PixelComrades {
             if (_vitalStat == null || arg.Amount <= 0) {
                 return false;
             }
-            arg.Amount = 0;
             _vitalStat.Current -= _finalCost;
             return true;
         }

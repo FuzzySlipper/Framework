@@ -297,7 +297,6 @@ namespace PixelComrades {
             int bucketSizeX = Mathf.FloorToInt ((max.x - min.x) / bucketStep) + 1;
             int bucketSizeY = Mathf.FloorToInt ((max.y - min.y) / bucketStep) + 1;
             int bucketSizeZ = Mathf.FloorToInt ((max.z - min.z) / bucketStep) + 1;
-            Debug.Log(bucketSizeX + " " + bucketSizeY + " " + bucketSizeZ);
             if (bucketSizeX + bucketSizeY + bucketSizeZ < -14000) {
                 return;
             }

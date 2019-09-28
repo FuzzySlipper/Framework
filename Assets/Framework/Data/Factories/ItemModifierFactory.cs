@@ -53,7 +53,9 @@ namespace PixelComrades {
                     continue;
                 }
                 if (equipment != null && addToEquip) {
-                    equipment.AddStat(statName);
+                    if (!equipment.StatsToEquip.Contains(statName)) {
+                        equipment.StatsToEquip.Add(statName);
+                    }
                 }
                 var stats = entity.Get<StatsContainer>();
                 var stat = stats.Get(statName);

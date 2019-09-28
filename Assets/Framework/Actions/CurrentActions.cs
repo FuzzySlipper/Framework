@@ -7,9 +7,9 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
 
     public struct CurrentActionsChanged : IEntityMessage {
-        public int Index;
-        public Action Action;
-        public CurrentActions Container;
+        public int Index { get; }
+        public Action Action { get; }
+        public CurrentActions Container { get; }
 
         public CurrentActionsChanged(int index, Action action, CurrentActions container) {
             Index = index;
@@ -18,65 +18,16 @@ namespace PixelComrades {
         }
     }
 
-    public class CurrentActionSlot : IEquipmentHolder, ISerializable {
-        public Action<Entity> OnItemChanged { get; set; }
-        public string TargetSlot { get { return "Current"; } }
-        public string LastEquipStatus { get { return ""; } }
-        public Entity Item { get; private set; }
-        public Action ActionComponent { get; private set; }
-        
-        public CurrentActionSlot(){}
-
-        public CurrentActionSlot(SerializationInfo info, StreamingContext context) {
-            //TODO: what happens if we restore this before the Item is restored?
-            var item = EntityController.Get(info.GetValue(nameof(Item), -1));
-            if (item != null) {
-                AddItem(item);
-            }
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(Item), Item.Id);
-        }
-        
-        public bool AddItem(Entity item) {
-            Item = item;
-            ActionComponent = item.Get<Action>();
-            OnItemChanged.SafeInvoke(item);
-            return true;
-        }
-
-        public bool AddItem(Action item) {
-            Item = item.GetEntity();
-            ActionComponent = item;
-            OnItemChanged.SafeInvoke(Item);
-            return true;
-        }
-
-        public void Remove() {
-            if (ActionComponent == null) {
-                return;
-            }
-            ActionComponent.EquippedSlot = -1;
-            Item = null;
-            ActionComponent = null;
-            OnItemChanged.SafeInvoke(null);
-        }
-
-        public Transform EquipTr { get { return null; } }
-    }
-
     [System.Serializable]
 	public sealed class CurrentActions : IComponent {
 
-        private CurrentActionSlot[] _actions;
+        private CachedComponent<Action>[] _actions;
 
-        public CurrentActionSlot[] Actions { get => _actions; }
-
+        public Action this[int index] { get { return _actions[index].Value; } }
         public CurrentActions(int actionsCnt) {
-            _actions = new CurrentActionSlot[actionsCnt];
+            _actions = new CachedComponent<Action>[actionsCnt];
             for (int i = 0; i < _actions.Length; i++) {
-                _actions[i] = new CurrentActionSlot();
+                _actions[i] = new CachedComponent<Action>();
             }
         }
 
@@ -89,7 +40,7 @@ namespace PixelComrades {
         }
 
         public Action GetAction(int index) {
-            return _actions[index].ActionComponent;
+            return _actions[index];
         }
 
         public void EquipToEmpty(Action action) {
@@ -109,8 +60,7 @@ namespace PixelComrades {
                 RemoveAction(slot);
                 return;
             }
-            //Add(usable.Sequence);
-            _actions[slot].AddItem(action);
+            _actions[slot].Set(action);
             action.EquippedSlot = slot;
             this.GetEntity().Post(new CurrentActionsChanged(slot, action, this));
         }
@@ -119,8 +69,10 @@ namespace PixelComrades {
             if (_actions.Length <= slot) {
                 return;
             }
-            //Remove(usable.Sequence);
-            _actions[slot].Remove();
+            if (_actions[slot].Value != null && _actions[slot].Value.EquippedSlot == slot) {
+                _actions[slot].Value.EquippedSlot = -1;
+            }
+            _actions[slot].Clear();
             this.GetEntity().Post(new CurrentActionsChanged(slot, null, this));
         }
     }

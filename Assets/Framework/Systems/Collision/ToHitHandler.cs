@@ -11,7 +11,7 @@ namespace PixelComrades {
             //float hitRoll = Game.DiceRoll() + collisionEvent.ToHit;
             //var result = hitRoll - defendRoll;
             //RpgSystem.DistanceMulti(collisionEvent.OriginEvent.OriginP3, collisionEvent.PositionP3
-            return ToHitCalculation.Calculate(collisionEvent.Origin, collisionEvent.Target);
+            return ToHitCalculation.Calculate(collisionEvent.Origin.Entity, collisionEvent.Target.Entity);
         }
     }
 }

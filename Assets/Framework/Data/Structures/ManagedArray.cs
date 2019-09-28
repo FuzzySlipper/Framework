@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using UnityEngine;
+using Object = System.Object;
 
 namespace PixelComrades {
 
@@ -72,17 +74,17 @@ namespace PixelComrades {
         }
 
         public int Add(T newComponent) {
+            if (_freeIndices.Count > 0) {
+                var index = _freeIndices[_freeIndices.Count - 1];
+                _freeIndices.RemoveAt(_freeIndices.Count - 1);
+                _array[index] = newComponent;
+                _invalidPositionIndex[index] = false;
+                return index;
+            }
             if (_max < _array.Length) {
                 _array[_max] = newComponent;
                 _max++;
                 return _max - 1;
-            }
-            if (_freeIndices.Count > 0) {
-                var index = _freeIndices.Count - 1;
-                _array[index] = newComponent;
-                _freeIndices.Remove(index);
-                _invalidPositionIndex[index] = false;
-                return index;
             }
             _max = _array.Length;
             ResizeArray(_max *2);

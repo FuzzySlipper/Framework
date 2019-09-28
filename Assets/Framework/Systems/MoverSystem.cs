@@ -15,13 +15,13 @@ namespace PixelComrades {
         private NodeList<ArcMoverNode> _arcMovers;
 
         public MoverSystem() {
-            NodeFilter<ForwardMoverNode>.New(ForwardMoverNode.GetTypes());
+            NodeFilter<ForwardMoverNode>.Setup(ForwardMoverNode.GetTypes());
             _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
-            NodeFilter<RotateToNode>.New(RotateToNode.GetTypes());
+            NodeFilter<RotateToNode>.Setup(RotateToNode.GetTypes());
             _rotators = EntityController.GetNodeList<RotateToNode>();
-            NodeFilter<SimpleMoverNode>.New(SimpleMoverNode.GetTypes());
+            NodeFilter<SimpleMoverNode>.Setup(SimpleMoverNode.GetTypes());
             _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
-            NodeFilter<ArcMoverNode>.New(ArcMoverNode.GetTypes());
+            NodeFilter<ArcMoverNode>.Setup(ArcMoverNode.GetTypes());
             _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
         }
         

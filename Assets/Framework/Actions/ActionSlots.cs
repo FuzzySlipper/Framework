@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -37,13 +38,13 @@ namespace PixelComrades {
         }
 
         public bool Add(Entity item) {
-            return EquipToEmpty(item, item.Get<Action>());
+            return EquipToEmpty(item);
         }
 
         public bool Remove(Entity entity) {
             for (int i = 0; i < Count; i++) {
                 if (this[i] == entity) {
-                    _list[i].ClearContents();
+                    World.Get<EquipmentSystem>().ClearEquippedItem(_list[i], false);
                     return true;
                 }
             }
@@ -52,25 +53,25 @@ namespace PixelComrades {
 
         public void Clear() {
             for (int i = 0; i < _list.Count; i++) {
-                _list[i].ClearContents();
+                World.Get<EquipmentSystem>().ClearEquippedItem(_list[i], false);
             }
         }
         
-        public bool EquipToEmpty(Entity actionEntity, Action action) {
+        public bool EquipToEmpty(Entity actionEntity) {
             for (int i = 0; i < _list.Count; i++) {
-                if (_list[i].Item == null && _list[i].EquipItem(actionEntity, action)) {
+                if (_list[i].Item == null && World.Get<EquipmentSystem>().TryEquip(_list[i], actionEntity)) {
                     return true;
                 }
             }
             return false;
         }
 
-        public bool EquipToHidden(Entity actionEntity, Action action) {
+        public bool EquipToHidden(Entity actionEntity) {
             for (int i = 0; i < _list.Count; i++) {
                 if (!_list[i].IsHidden) {
                     continue;
                 }
-                if (_list[i].Item == null && _list[i].EquipItem(actionEntity, action)) {
+                if (_list[i].Item == null && World.Get<EquipmentSystem>().TryEquip(_list[i], actionEntity)) {
                     return true;
                 }
             }
@@ -82,25 +83,44 @@ namespace PixelComrades {
         public System.Action<Entity> OnItemChanged { get; set; }
         
         private CachedEntity _cachedItem = new CachedEntity();
-        private string _lastEquipStatus = "";
         private bool _isSecondary;
         private bool _isHidden;
         private CachedComponent<ActionSlots> _owner;
         private CachedComponent<Action> _action = new CachedComponent<Action>();
-
-        public ActionSlots SlotOwner { get { return _owner.Value; } }
-        public Entity Item { get { return _cachedItem.Entity; } }
+        
+        public Entity Owner { get { return _owner.Value.GetEntity(); } }
+        public string[] CompatibleSlots { get; }
+        public Type[] RequiredTypes { get; }
+        public List<StatModHolder> CurrentStats { get; }
+        public IEntityContainer Container { get { return _owner.Value; } }
         public Action Action { get { return _action.Value; } }
-        public string LastEquipStatus { get { return _lastEquipStatus; } }
+        public string LastEquipStatus { get; set; }
         public string TargetSlot { get { return "Usable"; } }
         public Transform EquipTr { get { return null; } }
         public bool IsSecondary { get => _isSecondary; }
         public bool IsHidden { get => _isHidden; }
+        public Entity Item {
+            get {
+                return _cachedItem.Entity;
+            }
+            set {
+                if (value == null) {
+                    if (Action?.EquippedSlot >= 0) {
+                        Owner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
+                    }
+                }
+                _cachedItem.Set(value);
+                _action.Set(value);
+            }
+        }
 
         public ActionSlot(ActionSlots slotOwner, bool isSecondary, bool isHidden) {
             _owner = new CachedComponent<ActionSlots>(slotOwner);
             _isSecondary = isSecondary;
             _isHidden = isHidden;
+            CompatibleSlots = null;
+            CurrentStats = null;
+            RequiredTypes = new[] {typeof(Action)};
         }
 
         public ActionSlot(SerializationInfo info, StreamingContext context) {
@@ -109,7 +129,10 @@ namespace PixelComrades {
             _cachedItem = info.GetValue(nameof(_cachedItem), _cachedItem);
             _owner = info.GetValue(nameof(_owner), _owner);
             _action = info.GetValue(nameof(_action), _action);
-            _lastEquipStatus = info.GetValue(nameof(_lastEquipStatus), _lastEquipStatus);
+            LastEquipStatus = info.GetValue(nameof(LastEquipStatus), LastEquipStatus);
+            CompatibleSlots = null;
+            CurrentStats = null;
+            RequiredTypes = new[] {typeof(Action)};
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
@@ -118,83 +141,7 @@ namespace PixelComrades {
             info.AddValue(nameof(_cachedItem), _cachedItem);
             info.AddValue(nameof(_owner), _owner);
             info.AddValue(nameof(_action), _action);
-            info.AddValue(nameof(_lastEquipStatus), _lastEquipStatus);
-        }
-        public bool AddItem(Entity item) {
-            if (item == null) {
-                _lastEquipStatus = "Item null";
-                return false;
-            }
-            var action = item.Get<Action>();
-            if (action == null) {
-                _lastEquipStatus = "Wrong type";
-                return false;
-            }
-            return EquipItem(item, action);
-        }
-
-        public bool EquipItem(Entity actionEntity, Action action) {
-            if (action == null || _isSecondary && action.Primary || !_isSecondary && !action.Primary) {
-                _lastEquipStatus = "Wrong type";
-                return false;
-            }
-            if (actionEntity == Item) {
-                return false;
-            }
-            InventoryItem containerItem = actionEntity.Get<InventoryItem>();
-            if (containerItem == null) {
-                return false;
-            }
-            //var req = item.Get<SkillRequirement>();
-            //if (req != null && (int) _owner.Stats.Get<SkillStat>(req.Skill).CurrentRank < 
-            //    (int) req.Required) {
-            //    _lastEquipStatus = "Skill too low";
-            //    return false;
-            //}
-            if (Item != null) {
-                RemoveItemAddToOwnInventory();
-            }
-            if (containerItem.Inventory != null) {
-                containerItem.Inventory.Remove(actionEntity);
-            }
-            _action.Set(action);
-            _cachedItem.Set(actionEntity);
-            var owner = SlotOwner.GetEntity();
-            actionEntity.ParentId = owner;
-            containerItem.SetContainer(SlotOwner);
-            var msg = new EquipmentChanged(owner, this);
-            actionEntity.Post(msg);
-            if (OnItemChanged != null) {
-                OnItemChanged(Item);
-            }
-            _lastEquipStatus = "";
-            return true;
-        }
-
-        public bool RemoveItemAddToOwnInventory() {
-            var item = Item;
-            ClearContents();
-            if (item != null) {
-                SlotOwner.GetEntity().Get<ItemInventory>()?.Add(item);
-            }
-            return true;
-        }
-
-        public void ClearContents() {
-            if (Item != null) {
-                if (Action?.EquippedSlot >= 0) {
-                    SlotOwner.GetEntity().Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
-                }
-                var container = Item.Get<InventoryItem>();
-                if (container != null && container.Inventory == SlotOwner) {
-                    container.SetContainer(null);
-                }
-                _action.Clear();
-                _cachedItem.Clear();
-            }
-            if (OnItemChanged != null) {
-                OnItemChanged(null);
-            }
+            info.AddValue(nameof(LastEquipStatus), LastEquipStatus);
         }
     }
 }

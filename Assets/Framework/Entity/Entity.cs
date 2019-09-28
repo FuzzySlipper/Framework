@@ -76,7 +76,7 @@ namespace PixelComrades {
         }
         
         public void Destroy() {
-            if (_toDeleteList.Contains(this) || IsDestroyed()) {
+            if (IsDestroyed() || _toDeleteList.Contains(this)) {
                 return;
             }
 #if DEBUG

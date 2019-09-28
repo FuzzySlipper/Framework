@@ -29,7 +29,7 @@ namespace PixelComrades {
         public bool Remove(Entity entity) {
             for (int i = 0; i < Count; i++) {
                 if (this[i] == entity) {
-                    _list[i].ClearContents();
+                    World.Get<EquipmentSystem>().ClearEquippedItem(_list[i], false);
                     return true;
                 }
             }
@@ -38,13 +38,13 @@ namespace PixelComrades {
 
         public void Clear() {
             for (int i = 0; i < _list.Count; i++) {
-                _list[i].ClearContents();
+                World.Get<EquipmentSystem>().ClearEquippedItem(_list[i], false);
             }
         }
 
         public EquipmentSlot GetSlot(string slotType) {
             for (int i = 0; i < _list.Count; i++) {
-                if (_list[i].SlotIsCompatible(slotType)) {
+                if (_list[i].CompatibleSlots.Contains(slotType)) {
                     return _list[i];
                 }
             }
@@ -88,7 +88,7 @@ namespace PixelComrades {
                 if (_list[i].Item != null && !overrideCurrent) {
                     continue;
                 }
-                if (_list[i].SlotIsCompatible(equip.EquipmentSlotType) && _list[i].EquipItem(entity)) {
+                if (_list[i].CompatibleSlots.Contains(equip.EquipmentSlotType) && World.Get<EquipmentSystem>().TryEquip(_list[i], entity)) {
                     return true;
                 }
             }
@@ -101,8 +101,8 @@ namespace PixelComrades {
     }
 
     public struct EquipmentChanged : IEntityMessage {
-        public Entity Owner;
-        public IEquipmentHolder Slot;
+        public Entity Owner { get; }
+        public IEquipmentHolder Slot { get; }
 
         public EquipmentChanged(Entity owner, IEquipmentHolder slot) {
             Owner = owner;

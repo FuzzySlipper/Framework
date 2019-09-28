@@ -9,7 +9,7 @@ namespace PixelComrades {
         private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
 
         public ContainerSystem() {
-            NodeFilter<ContainerItemNode>.New(ContainerItemNode.GetTypes());
+            NodeFilter<ContainerItemNode>.Setup(ContainerItemNode.GetTypes());
         }
 //
 //        public void HandleGlobal(EntityDestroyed arg) {

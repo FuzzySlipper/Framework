@@ -55,17 +55,40 @@ namespace PixelComrades {
         }
 
         public void PostSignal(int entity, int messageType) {
+#if DEBUGMSGS
+            if (msg > 0) {
+                DebugLog.Add(DebugId + " posted " + msg + " " + EntitySignals.GetNameAt(msg));
+            }
+#endif
             if (!_entityEvents.TryGetValue(entity, out var hub)) {
                 return;
             }
             hub.PostSignal(messageType);
         }
 
-        public void Post<T>(int entity, T msg) where T : IEntityMessage {
+        public void Post<T>(int entity, T msg) where T : struct, IEntityMessage {
+#if DEBUGMSGS
+            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
+#endif
+            World.Enqueue(msg);
             if (!_entityEvents.TryGetValue(entity, out var hub)) {
                 return;
             }
             hub.Post(msg);
+        }
+
+        public void PostAll<T>(Entity entity, T msg) where T : struct, IEntityMessage {
+#if DEBUGMSGS
+            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
+#endif
+            World.Enqueue(msg);
+            var targetEntity = entity;
+            while (targetEntity != null) {
+                if (_entityEvents.TryGetValue(targetEntity, out var hub)) {
+                    hub.Post(msg);
+                }
+                targetEntity = targetEntity.GetParent();
+            }
         }
         
         private EntityEventHub GetHub(int entity) {
@@ -92,46 +115,23 @@ namespace PixelComrades {
     public static class EntityEventExtensions {
 
         public static void Post(this Entity entity, int msg) {
-#if DEBUGMSGS
-            if (msg > 0) {
-                DebugLog.Add(DebugId + " posted " + msg + " " + EntitySignals.GetNameAt(msg));
-            }
-#endif
             World.Get<EntityEventSystem>().PostSignal(entity, msg);
         }
 
         public static void Post<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
-#if DEBUGMSGS
-            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
-#endif
             World.Get<EntityEventSystem>().Post<T>(entity, msg);
-            World.Enqueue(msg);
-        }
-
-        public static void PostAll<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
-#if DEBUGMSGS
-            DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
-#endif
-            var evs = World.Get<EntityEventSystem>(); 
-            evs.Post<T>(entity, msg);
-            World.Enqueue(msg);
-            var parent = entity.GetParent();
-            while (parent != null) {
-                evs.Post(parent, msg);
-                parent = parent.GetParent();
-            }
-        }
-
-        public static void Post(this BaseNode node, int msg) {
-            node.Entity.Post(msg);
         }
         
-        public static void Post<T>(this BaseNode node, T msg) where T : struct, IEntityMessage {
-            node.Entity.Post(msg);
+        public static void PostAll<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().PostAll<T>(entity, msg);
         }
 
-        public static void PostAll<T>(this BaseNode node, T msg) where T : struct, IEntityMessage {
-            node.Entity.Post<T>(msg);
+        public static void Post<T>(this INode node, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().Post<T>(node.Entity, msg);
+        }
+
+        public static void PostAll<T>(this INode node, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().PostAll<T>(node.Entity, msg);
         }
 
         public static void AddObserver<T>(this Entity entity, IReceive<T> handler) {

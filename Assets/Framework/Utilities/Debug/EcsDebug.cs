@@ -93,7 +93,7 @@ namespace PixelComrades {
             if (entity == null) {
                 return "No Entity " + entityId;
             }
-            entity.Post(new HealEvent(amount, null, null, "Vitals.Energy"));
+            entity.Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
             return entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString();
         }
         
@@ -104,11 +104,11 @@ namespace PixelComrades {
             if (entity == null) {
                 return "No Entity " + entityId;
             }
-            entity.Post(new HealEvent(amount, null, null, "Vitals.Health"));
+            entity.Post(new HealingEvent(amount, null, null, "Vitals.Health"));
             return entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString();
         }
 
-        private static bool GodModeDamage(DamageEvent dmg) {
+        private static bool GodModeDamage(TakeDamageEvent dmg) {
             return true;
         }
 

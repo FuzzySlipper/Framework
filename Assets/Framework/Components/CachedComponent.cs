@@ -46,8 +46,9 @@ namespace PixelComrades {
             Set(owner);
         }
 
-        public CachedComponent(T owner) {
-            Set(owner.GetEntity());
+        public CachedComponent(T component) {
+            _component = component;
+            Set(component.GetEntity());
         }
         
         public CachedComponent(Entity owner, Dictionary<Type, ComponentReference> list) {
@@ -66,12 +67,19 @@ namespace PixelComrades {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
+            if (_index < 0) {
+                Set(_component.GetEntity());
+            }
             info.AddValue(nameof(_index), _index);
             info.AddValue(nameof(_entity), _entity);
         }
 
         public override void Set(Entity entity) {
             _entity = entity;
+            if (entity == null) {
+                ClearEntity();
+                return;
+            }
             _array = EntityController.GetComponentArray<T>();
             var arrRef = EntityController.GetEntity(_entity).GetComponentReference(typeof(T));
             if (arrRef != null) {
@@ -94,6 +102,11 @@ namespace PixelComrades {
         }
 
         public override void Clear() {
+            _component = default(T);
+            ClearEntity();
+        }
+
+        private void ClearEntity() {
             _array = null;
             _index = -1;
             _entity = -1;

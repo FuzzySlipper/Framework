@@ -7,12 +7,10 @@ namespace PixelComrades {
     public class EventSpawnProjectile : IActionEvent {
 
         public ActionStateEvents StateEvent { get; }
-        public string Data;
-        public List<IActionImpact> Impacts;
+        public string Data { get; }
 
-        public EventSpawnProjectile(ActionStateEvents stateEvent, List<IActionImpact> impacts, string data) {
+        public EventSpawnProjectile(ActionStateEvents stateEvent, string data) {
             StateEvent = stateEvent;
-            Impacts = impacts;
             Data = data;
         }
 
@@ -20,14 +18,16 @@ namespace PixelComrades {
             var target = node.ActionEvent.Target;
             Entity spawnEntity;
             if (node.ActionEvent.SpawnPivot != null) {
-                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.Entity, Data, target, node.ActionEvent.SpawnPivot.position, node.ActionEvent.SpawnPivot.rotation, Impacts);
+                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.ActionEvent.Action.Entity, Data, target, 
+                    node.ActionEvent.SpawnPivot.position, node.ActionEvent.SpawnPivot.rotation);
             }
             else {
                 var animData = node.Animator;
                 var spawnPos = animData?.GetEventPosition ?? (node.Tr != null ? node.Tr.position : Vector3.zero);
                 var spawnRot = animData?.GetEventRotation ?? (node.Tr != null ? node.Tr.rotation : Quaternion.identity);
                 DebugExtension.DebugPoint(spawnPos, Color.blue, 1f, 1f);
-                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.Entity, Data, node.ActionEvent.Target, spawnPos, spawnRot, Impacts);
+                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.ActionEvent.Action.Entity, Data, node.ActionEvent.Target, 
+                spawnPos, spawnRot);
             }
             if (spawnEntity != null) {
                 if (node.ActionEvent.Action.Fx != null) {

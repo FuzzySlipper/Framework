@@ -40,7 +40,7 @@ namespace PixelComrades {
                 StatusMessages(null, "Inventory full");
                 return;
             }
-            var sellPrice = RuleSystem.TotalPrice(InventoryItem);
+            var sellPrice = RulesSystem.TotalPrice(InventoryItem);
             if (Player.DefaultCurrencyHolder.Value < sellPrice) {
                 StatusMessages(null, string.Format("Costs {0}, Not enough {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 return;
@@ -52,7 +52,7 @@ namespace PixelComrades {
             if (index > 0 || Data == null) {
                 return;
             }
-            var sellPrice = RuleSystem.TotalPrice(InventoryItem);
+            var sellPrice = RulesSystem.TotalPrice(InventoryItem);
             if (Player.MainInventory.TryAdd(Data)) {
                 StatusMessages(null, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 Clear();

@@ -28,7 +28,7 @@ namespace PixelComrades {
         public override void Start(ActionUsingNode node) {
             base.Start(node);
             var entity = node.Entity;
-            var spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(entity, Data, node.ActionEvent, null);
+            var spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(entity, Data, node.ActionEvent);
             if (spawnEntity != null) {
                 Vector3 target = node.ActionEvent.Target;
                 spawnEntity.ParentId = entity.Id;

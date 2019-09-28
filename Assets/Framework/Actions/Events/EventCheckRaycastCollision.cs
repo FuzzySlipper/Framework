@@ -6,13 +6,11 @@ namespace PixelComrades {
     public class EventCheckRaycastCollision : IActionEvent {
 
         public ActionStateEvents StateEvent { get; }
-        public List<IActionImpact> Impacts;
-        public float RayDistance;
-        public float RaySize;
-        public bool LimitToEnemy;
+        public float RayDistance { get; }
+        public float RaySize { get; }
+        public bool LimitToEnemy { get; }
 
-        public EventCheckRaycastCollision(ActionStateEvents stateEvent, List<IActionImpact> impacts, float rayDistance, float raySize, bool limit) {
-            Impacts = impacts;
+        public EventCheckRaycastCollision(ActionStateEvents stateEvent, float rayDistance, float raySize, bool limit) {
             RayDistance = rayDistance;
             RaySize = raySize;
             StateEvent = stateEvent;
@@ -32,9 +30,9 @@ namespace PixelComrades {
             var target = node.ActionEvent.Target;
             var actionEntity = node.ActionEvent.Action.GetEntity();
             var ray = new Ray(originPos, (target - originPos).normalized);
-            CollisionEvent? ce = CollisionCheckSystem.Raycast(actionEntity, ray, RayDistance, LimitToEnemy, Impacts);
+            CollisionEvent? ce = CollisionCheckSystem.Raycast(actionEntity, ray, RayDistance, LimitToEnemy);
             if (ce == null && RaySize > 0.01f) {
-                ce = CollisionCheckSystem.SphereCast(actionEntity, ray, RayDistance, RaySize, LimitToEnemy, Impacts);
+                ce = CollisionCheckSystem.SphereCast(actionEntity, ray, RayDistance, RaySize, LimitToEnemy);
             }
             if (ce != null) {
                 var stateEvent = new ActionStateEvent(node.Entity, ce.Value.Target.Entity, ce.Value.HitPoint, Quaternion.LookRotation(ce.Value.HitNormal), StateEvent);

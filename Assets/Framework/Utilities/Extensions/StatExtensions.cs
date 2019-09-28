@@ -81,7 +81,9 @@ namespace PixelComrades {
                 var multiplier = statEntry.GetValue<float>(DatabaseFields.Multiplier);
                 var addToEquip = statEntry.GetValue<bool>(DatabaseFields.AddToEquipList);
                 if (equipment != null && addToEquip) {
-                    equipment.AddStat(statName);
+                    if (!equipment.StatsToEquip.Contains(statName)) {
+                        equipment.StatsToEquip.Add(statName);
+                    }
                 }
                 if (Math.Abs(multiplier) < Comparison || Math.Abs(multiplier - 1) < Comparison) {
                     stats.GetOrAdd(statName, label).AddToBase(amount);

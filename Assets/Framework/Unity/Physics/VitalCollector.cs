@@ -12,7 +12,7 @@ namespace PixelComrades {
             if (collision.transform.CompareTag(StringConst.TagPlayer)) {
                 var entity = UnityToEntityBridge.GetEntity(collision.collider);
                 if (entity != null) {
-                    entity.Post(new HealEvent(_amount, entity, entity, _vital));
+                    entity.Post(new HealingEvent(_amount, entity, entity, _vital));
                     ItemPool.Despawn(gameObject);
                 }
             }
@@ -20,7 +20,7 @@ namespace PixelComrades {
 
         public void Collision(Entity entity) {
             if (entity != null && entity.Tags.Contain(EntityTags.Player)) {
-                entity.Post(new HealEvent(_amount, entity, entity, _vital));
+                entity.Post(new HealingEvent(_amount, entity, entity, _vital));
                 ItemPool.Despawn(gameObject);
             }
         }

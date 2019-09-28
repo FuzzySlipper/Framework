@@ -24,13 +24,12 @@ namespace PixelComrades {
             if (sourceNode == null || targetNode == null) {
                 return;
             }
-            var impacts = entity.Get<ActionImpacts>();
             var collisionPnt = collision.contacts[0];
 #if DEBUG
             DebugExtension.DebugPoint(collisionPnt.point, Color.magenta, 1.5f, 4f);
 #endif
-            hitEntity.Post(new CollisionEvent(sourceNode, targetNode, collisionPnt.point, collisionPnt.normal, impacts));
-            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, collisionPnt.point, collisionPnt.normal, impacts));
+            hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, collisionPnt.point, collisionPnt.normal));
+            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, collisionPnt.point, collisionPnt.normal));
         }
     }
 }

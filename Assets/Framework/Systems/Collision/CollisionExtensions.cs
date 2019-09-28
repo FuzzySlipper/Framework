@@ -31,10 +31,10 @@ namespace PixelComrades {
             //}
         }
 
-        public static void GenerateHitLocDir(Vector3 origin, Entity target, out Vector3 hitPnt, out Vector3 normal) {
-            var collider = target.Get<ColliderComponent>();
-            if (collider != null && collider.Collider != null) {
-                hitPnt = collider.Collider.ClosestPointOnBounds(origin);
+        public static void GenerateHitLocDir(Vector3 origin, Entity target, Collider collider, out Vector3 hitPnt, out Vector3 
+        normal) {
+            if (collider != null && collider != null) {
+                hitPnt = collider.ClosestPointOnBounds(origin);
             }
             else {
                 hitPnt = target.GetPosition();

@@ -16,7 +16,7 @@ namespace PixelComrades {
         private List<BaseCell> _occupiedCells = new List<BaseCell>(50);
 
         public MapSystem() {
-            NodeFilter<UnitOccupyingCellNode>.New(UnitOccupyingCellNode.GetTypes());
+            NodeFilter<UnitOccupyingCellNode>.Setup(UnitOccupyingCellNode.GetTypes());
             _nodeList = EntityController.GetNodeList<UnitOccupyingCellNode>();
         }
 

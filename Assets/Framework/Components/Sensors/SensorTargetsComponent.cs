@@ -75,7 +75,7 @@ namespace PixelComrades {
 
         public void UpdateWatchTargets() {
             for (int i = WatchTargets.Count - 1; i >= 0; i--) {
-                if (WatchTargets[i].Target == null || WatchTargets[i].Target.Stats.HealthStat?.Current < 0) {
+                if (WatchTargets[i].Target == null || WatchTargets[i].Target.IsDead) {
                     RemoveWatch(WatchTargets[i]);
                     continue;
                 }

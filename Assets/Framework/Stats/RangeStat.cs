@@ -16,9 +16,9 @@ namespace PixelComrades {
             _max = rangeMax - rangeMin;
         }
 
-        public float UpperRange { get { return base.Value + _max; } }
-        public override float Value { get { return Game.Random.NextFloat(base.Value, base.Value + _max); } }
+        public float MaxModifier { get { return _max; } }
         public float Min { get { return base.Value; } }
+        public override float Value { get { return Game.Random.NextFloat(base.Value, base.Value + _max); } }
 
         public void SetValue(float rangeMin, float rangeMax) {
             ChangeBase(rangeMin);

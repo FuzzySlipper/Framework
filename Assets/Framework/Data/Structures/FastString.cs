@@ -63,6 +63,12 @@ namespace PixelComrades {
             Append(value);
         }
 
+        public void AppendBold(string value) {
+            Append("<size=125%><b>");
+            Append(value);
+            Append("</b><size=100%> ");
+        }
+
         public void AppendBoldLabel(string label, float value) {
             Append("<size=125%><b>");
             Append(label);

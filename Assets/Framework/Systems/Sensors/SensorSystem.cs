@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PixelComrades {
     [Priority(Priority.Higher)]
-    public class SensorSystem : SystemBase, IPeriodicUpdate, IReceive<DamageEvent> {
+    public class SensorSystem : SystemBase, IPeriodicUpdate, IReceive<TakeDamageEvent> {
 
         public GameOptions.CachedInt MaxTurnsNpcVisible = new GameOptions.CachedInt("MaxTurnsNpcVisible");
         public bool CheckVision = false;
@@ -19,9 +19,9 @@ namespace PixelComrades {
         private const int HearingChance = 10;
 
         public SensorSystem() {
-            NodeFilter<SensorDetectingNode>.New(SensorDetectingNode.GetTypes());
+            NodeFilter<SensorDetectingNode>.Setup(SensorDetectingNode.GetTypes());
             _sensorNodes = EntityController.GetNodeList<SensorDetectingNode>();
-            NodeFilter<UnitySensorNode>.New(UnitySensorNode.GetTypes());
+            NodeFilter<UnitySensorNode>.Setup(UnitySensorNode.GetTypes());
             _unitySensorNodes = EntityController.GetNodeList<UnitySensorNode>();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(SensorTargetsComponent)
@@ -156,7 +156,7 @@ namespace PixelComrades {
         //    simple.UpdateWatchTargets();
         //}
 
-        public void Handle(DamageEvent arg) {
+        public void Handle(TakeDamageEvent arg) {
             var sensorTargets = arg.Target.Entity.Find<SensorTargetsComponent>();
 #if DEBUG
             DebugLog.Add(

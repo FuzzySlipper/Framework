@@ -25,22 +25,5 @@ namespace PixelComrades {
         public Equipment(string equip) {
             EquipmentSlotType = equip;
         }
-
-        public void AddStat(string stat) {
-            if (StatsToEquip.Contains(stat)) {
-                return;
-            }
-            StatsToEquip.Add(stat);
-        }
-        
-        public void ClearCurrentMods() {
-            if (Mods == null) {
-                return;
-            }
-            for (int i = 0; i < Mods.Length; i++) {
-                Mods[i].Remove();
-            }
-        }
-
     }
 }

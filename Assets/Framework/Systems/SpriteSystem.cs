@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class SpriteSystem : SystemBase, IMainSystemUpdate, IReceive<DamageEvent>, IReceive<StunEvent>, IReceive<SlowEvent>,
+    public sealed class SpriteSystem : SystemBase, IMainSystemUpdate, IReceive<TakeDamageEvent>, IReceive<TagChangeEvent>,
         IReceive<ConfusionEvent> {
         
         private const float Duration = 0.5f;
@@ -80,7 +80,7 @@ namespace PixelComrades {
             tween.Length = Duration;
         }
 
-        public void Handle(DamageEvent arg) {
+        public void Handle(TakeDamageEvent arg) {
             if (arg.Amount <= 0) {
                 return;
             }
@@ -108,11 +108,7 @@ namespace PixelComrades {
             _colorList.Add(new SpriteColorWatch(colorComponent, tween, colorComponent.Renderer.transform.localScale));
         }
 
-        public void Handle(StunEvent arg) {
-            CheckTagColor(arg.Entity, arg.Entity.Get<SpriteColorComponent>(), arg.Active? TagTypes.Stun : TagTypes.None);
-        }
-
-        public void Handle(SlowEvent arg) {
+        public void Handle(TagChangeEvent arg) {
             CheckTagColor(arg.Entity, arg.Entity.Get<SpriteColorComponent>(), arg.Active ? TagTypes.Slow : TagTypes.None);
         }
 

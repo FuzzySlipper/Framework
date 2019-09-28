@@ -169,6 +169,21 @@ namespace PixelComrades {
             return default(T);
         }
 
+        public static Entity FindEntityWith<T>(this Entity entity) where T : IComponent {
+            if (entity == null) {
+                return null;
+            }
+            var checkEntity = entity;
+            var type = typeof(T);
+            while (checkEntity != null) {
+                if (checkEntity.HasReference(type)) {
+                    return checkEntity;
+                }
+                checkEntity = checkEntity.GetParent();
+            }
+            return null;
+        }
+
         public static T GetSelfOrParent<T>(this Entity entity) where T : IComponent {
             if (entity == null) {
                 return default(T);
@@ -431,47 +446,5 @@ namespace PixelComrades {
             }
             return null;
         }
-
-        //public static List<T> GetAll<T>(this Entity entity) where T : IComponent {
-        //    var type = typeof(T);
-        //    if (!_components.TryGetValue(type, out var list)) {
-        //        return null;
-        //    }
-        //    if (!_entityComponents.TryGetValue(entity.Id, out var entityList)) {
-        //        return null;
-        //    }
-        //    List<T> returnList = new List<T>();
-        //    for (int i = 0; i < entityList.Count; i++) {
-        //        if (entityList[i].Type == type) {
-        //            returnList.Add(((ManagedArray<T>)list)[entityList[i].Index]);
-        //        }
-        //    }
-        //    return returnList.Count > 0 ? returnList : null;
-        //}
-
-        //public static List<T> DestructiveRetrieve<T>() where T : IEntityMessage {
-        //    if (!_entityMessageList.TryGetValue(typeof(T).GetHashCode(), out var msgList) || msgList.Count == 0) {
-        //        return null;
-        //    }
-        //    List<T> targetList = new List<T>();
-        //    for (int i = 0; i < msgList.Count; i++) {
-        //        targetList.Add((T) msgList[i]);
-        //    }
-        //    msgList.Clear();
-        //    return targetList;
-        //}
-
-        //public static float GatherFloat<T>(this IEntity entity, int messageEvent, T msg) where T : IEntityMessage {
-        //    if (!_componentDict.TryGetValue(entity, out var list)) {
-        //        return 0;
-        //    }
-        //    float val = 0;
-        //    for (int i = 0; i < list.Count; i++) {
-        //        if (list[i] is IProvideFloat<T> gatherFloater) {
-        //            val += gatherFloater.GatherFloat(messageEvent, msg);
-        //        }
-        //    }
-        //    return val;
-        //}
     }
 }

@@ -19,7 +19,6 @@ namespace PixelComrades {
             var skill = data.TryGetValue<string>(DatabaseFields.Skill, "");
             action.Primary = type?.TargetID == "WeaponUsable";
             action.WeaponModel = data.TryGetValue("WeaponModel", "");
-            List<IActionImpact> impacts = new List<IActionImpact>();
             var stats = entity.Get<StatsContainer>();
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
             (DatabaseFields.PowerMax, 1f));
@@ -38,18 +37,18 @@ namespace PixelComrades {
                 switch (abilityType) {
                     default:
                     case "Attack":
-                        impacts.Add(
+                        entity.Add(
                             new DamageImpact(data.TryGetValue(
                                     DatabaseFields.DamageType,
-                                    GameData.DamageTypes.GetID(0)), Stats.Health, 1, power));
+                                    GameData.DamageTypes.GetID(0)), Stats.Health, 1));
                         break;
                     case "Heal":
-                        impacts.Add(AddHealImpact( config, power, false));
+                        entity.Add(AddHealImpact( config, false));
                         generateCollision = true;
                         limitEnemy = false;
                         break;
                     case "AddModImpact":
-                        impacts.Add(AddModImpact(entity, config, power));
+                        entity.Add(AddModImpact(entity, config));
                         generateCollision = true;
                         limitEnemy = false;
                         break;
@@ -60,25 +59,27 @@ namespace PixelComrades {
                 }
                 switch (secondaryType) {
                     case "Heal":
-                        impacts.Add(AddHealImpact(config, power, true));
+                        entity.Add(AddHealImpact(config, true));
                         break;
                     case "AddModImpact":
-                        impacts.Add(AddModImpact(entity, config, power));
+                        entity.Add(AddModImpact(entity, config));
                         break;
                     case "ConvertVital":
-                        impacts.Add(new ConvertVitalImpact(config.FindFloat("Percent", 1f), config.FindString("SourceVital"), config.FindString("TargetVital")));
+                        entity.Add(new ConvertVitalImpact(config.FindFloat("Percent", 1f), config.FindString("SourceVital"), config.FindString("TargetVital")));
                         break;
                     case "InstantKill":
-                        impacts.Add(new InstantKill(config.FindFloat("Chance", 1f)));
+                        entity.Add(new InstantKillImpact(config.FindFloat("Chance", 1f)));
                         break;
                     case "Confuse":
-                        impacts.Add(new ConfuseImpact(data.TryGetValue("SecondaryPower", EffectChance), config.FindFloat("Length", EffectTime)));
+                        entity.Add(new ConfuseImpact(data.TryGetValue("SecondaryPower", EffectChance), config.FindFloat("Length", EffectTime)));
                         break;
                     case "Slow":
-                        impacts.Add(new SlowImpact(data.TryGetValue("SecondaryPower", EffectChance), config.FindFloat("Length", EffectTime)));
+                        entity.Add(new ApplyTagImpact(EntityTags.IsSlowed, data.TryGetValue("SecondaryPower", EffectChance), config
+                            .FindFloat("Length",EffectTime), "Slow"));
                         break;
                     case "Stun":
-                        impacts.Add(new StunImpact(data.TryGetValue("SecondaryPower", EffectChance), config.FindFloat("Length", EffectTime)));
+                        entity.Add(new ApplyTagImpact(EntityTags.IsStunned, data.TryGetValue("SecondaryPower", EffectChance), config
+                            .FindFloat("Length",EffectTime), "Stun"));
                         break;
                 }
                 switch (abilityType) {
@@ -91,9 +92,9 @@ namespace PixelComrades {
                 }
             }
             else {
-                impacts.Add(
+                entity.Add(
                     new DamageImpact(data.TryGetValue(DatabaseFields.DamageType,
-                            GameData.DamageTypes.GetID(0)), Stats.Health, 1, power));
+                            GameData.DamageTypes.GetID(0)), Stats.Health, 1));
                 var reload = data.TryGetValue("ReloadType", "Repair");
                 var reloadSpeed = data.TryGetValue("ReloadSpeed", 1f);
                 var ammo = AmmoFactory.GetTemplate(data.Get<DataReference>("Ammo"));
@@ -116,16 +117,16 @@ namespace PixelComrades {
                     mainLayer = new AnimationLayer(action, animation);
                     var radius = ParseUtilities.TryParseEnum(data.TryGetValue(DatabaseFields.Radius, "Single"), ImpactRadiusTypes.Single);
                     if (radius != ImpactRadiusTypes.Single) {
-                        impacts.Add(new ImpactRadius(radius));
+                        entity.Add(new ImpactRadius(radius, true));
                     }
                     action.Range = GameData.ActionDistance.GetAssociatedValue(data.TryGetValue("Range", "Medium"));
                     var spawn = data.Get<DataReference>(DatabaseFields.ActionSpawn);
                     if (spawn != null) {
-                        mainLayer.Events.Add(AnimationEvents.Default, new EventSpawnProjectile(ActionStateEvents.None, impacts, spawn.TargetID));
+                        mainLayer.Events.Add(AnimationEvents.Default, new EventSpawnProjectile(ActionStateEvents.None, spawn.TargetID));
                     }
                     else {
                         if (generateCollision) {
-                            mainLayer.Events.Add(AnimationEvents.Default, new EventGenerateCollisionEvent(ActionStateEvents.None, impacts));
+                            mainLayer.Events.Add(AnimationEvents.Default, new EventGenerateCollisionEvent(ActionStateEvents.None));
                         }
                         else {
                             var collisionType = data.TryGetValue("CollisionType", "Point");
@@ -138,7 +139,7 @@ namespace PixelComrades {
 
                             }
                             //melee or hitscan need to make that clearer
-                            mainLayer.Events.Add(AnimationEvents.Default, new EventCheckRaycastCollision(ActionStateEvents.None, impacts, action.Range, raycastSize, limitEnemy));
+                            mainLayer.Events.Add(AnimationEvents.Default, new EventCheckRaycastCollision(ActionStateEvents.None,  action.Range, raycastSize, limitEnemy));
                         }
                     }
                     action.Sequence.Add(mainLayer);
@@ -189,13 +190,13 @@ namespace PixelComrades {
             }
         }
 
-        private HealImpact AddHealImpact(DataList config, BaseStat power, bool self) {
-            return new HealImpact(config.FindString("TargetVital", Stats.Health), config.FindFloat("Percent", 1f), power, self);
+        private HealImpact AddHealImpact(DataList config, bool self) {
+            return new HealImpact(config.FindString("TargetVital", Stats.Health), config.FindFloat("Percent", 1f), self);
         }
 
-        private AddModImpact AddModImpact(Entity entity, DataList config, BaseStat power) {
+        private AddModImpact AddModImpact(Entity entity, DataList config) {
             return new AddModImpact( config.FindFloat("Length", 1f), config.FindString("Stat", ""), config.FindFloat("Percent", 1f), 
-            power, entity.Get<IconComponent>());
+             entity.Get<IconComponent>());
         }
     }
 }

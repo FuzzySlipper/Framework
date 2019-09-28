@@ -53,7 +53,6 @@ namespace PixelComrades {
                 typeof(FactionComponent),
                 typeof(CurrentActions),
                 typeof(StatsContainer),
-                typeof(TransformComponent)
             };
         }
     }

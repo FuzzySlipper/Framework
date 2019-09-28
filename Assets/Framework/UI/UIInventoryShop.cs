@@ -90,7 +90,7 @@ namespace PixelComrades {
                 FloatingText(button.RectTransform, "Inventory full");
                 return;
             }
-            var sellPrice = RuleSystem.TotalPrice(item);
+            var sellPrice = RulesSystem.TotalPrice(item);
             if (Player.DefaultCurrencyHolder.Value < sellPrice) {
                 FloatingText(button.RectTransform, string.Format("Costs {0}, Not enough {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 
@@ -110,7 +110,7 @@ namespace PixelComrades {
                 _currentButton = null;
                 return;
             }
-            var sellPrice = RuleSystem.TotalPrice(item);
+            var sellPrice = RulesSystem.TotalPrice(item);
             if (Player.MainInventory.TryAdd(item.GetEntity())) {
                 Player.DefaultCurrencyHolder.ReduceValue(sellPrice);
                 FloatingText(_currentButton.RectTransform, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));

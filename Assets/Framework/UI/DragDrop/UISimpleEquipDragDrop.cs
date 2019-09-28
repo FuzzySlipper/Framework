@@ -19,7 +19,7 @@ namespace PixelComrades {
 
         protected override void TryDrop() {
             var newItem = UIDragDropHandler.CurrentData;
-            if (_slot.AddItem(newItem)) {
+            if (World.Get<EquipmentSystem>().TryEquip(_slot, newItem)) {
                 UIDragDropHandler.Take();
             }
             else {
@@ -34,7 +34,7 @@ namespace PixelComrades {
         protected override void TrySwap() {
             var newItem = UIDragDropHandler.CurrentData;
             Entity oldItem = Data;
-            if (_slot.AddItem(newItem)) {
+            if (World.Get<EquipmentSystem>().TryEquip(_slot, newItem)) {
                 UIDragDropHandler.Take();
                 UIDragDropHandler.SetItem(oldItem);
             }

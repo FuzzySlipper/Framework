@@ -1,10 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 namespace PixelComrades {
-    public class ModifierSystem : SystemBase, IMainSystemUpdate {
+    [AutoRegister]
+    public class ModifierSystem : SystemBase, IMainSystemUpdate, IReceive<ImpactEvent> {
         
+        public ModifierSystem() {
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
+                typeof(AddModImpact)
+            }));
+        }
+
+        private static FastString _fastString = new FastString();
+
         private List<RemoveStatModifier> _removeStats = new List<RemoveStatModifier>();
         
         public void OnSystemUpdate(float dt, float unscaledDt) {
@@ -32,6 +42,54 @@ namespace PixelComrades {
                     entries.Add(_removeStats[i].Entry);
                 }
             }
+        }
+
+        public void Handle(ImpactEvent arg) {
+            if (arg.Hit <= 0) {
+                return;
+            }
+            var addMod = arg.Source.Find<AddModImpact>();
+            var sourceEntity = addMod.GetEntity();
+            var stats = sourceEntity.Get<StatsContainer>();
+            if (addMod == null || stats == null) {
+                return;
+            }
+            var stat = stats.Get(addMod.TargetStat);
+            if (stat == null) {
+                return;
+            }
+            if (stat.HasMod(addMod.ID)) {
+                RemoveStatMod(addMod.ID);
+            }
+            var power = RulesSystem.CalculateTotal(stats, Stats.Power, addMod.NormalizedPercent);
+            stat.AddValueMod(new BaseStat.StatValueMod(power, addMod.ID));
+            _fastString.Clear();
+            _fastString.Append("+");
+            _fastString.Append(power);
+            _fastString.Append(" ");
+            _fastString.Append(stat.Label);
+            var label = _fastString.ToString();
+            AddStatRemovalTimer(
+                new RemoveStatModifier(
+                    stat, new ModEntry(
+                        label, label, addMod.ID, addMod.Length,
+                        arg.Origin.Entity, arg.Target.Entity, addMod.Icon)));
+            arg.Target.Post(new ModifiersChanged(arg.Target.Entity));
+            var logSystem = World.Get<GameLogSystem>();
+            logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
+            logMsg.Append(arg.Origin.GetName());
+            logMsg.Append(" added ");
+            logMsg.Append(stat.Label);
+            logMsg.Append(" modifier to ");
+            logMsg.Append(arg.Target.GetName());
+
+            hoverMsg.AppendNewLine(RulesSystem.LastQueryString.ToString());
+            hoverMsg.Append(label);
+            hoverMsg.Append(" for ");
+            hoverMsg.Append(addMod.Length);
+            hoverMsg.Append(" ");
+            hoverMsg.Append(StringConst.TimeUnits);
+            logSystem.PostCurrentStrings( power > 0 ? GameLogSystem.HealColor : GameLogSystem.DamageColor);
         }
 
         public void AddStatRemovalTimer(RemoveStatModifier arg) {

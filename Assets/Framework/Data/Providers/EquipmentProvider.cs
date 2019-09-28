@@ -12,8 +12,8 @@ namespace PixelComrades {
             var equipment = entity.Add(new Equipment(data.TryGetValue(DatabaseFields.EquipmentSlot, _defaultEquipmentSlot.Value)));
             StatExtensions.AddStatList(entity, data.Get<DataList>(DatabaseFields.Stats), equipment);
             var stats = entity.Get<StatsContainer>();
-            if (stats.HasStat(Stats.Weight)) {
-                equipment.AddStat(Stats.Weight);
+            if (stats.HasStat(Stats.Weight) && !equipment.StatsToEquip.Contains(Stats.Weight)) {
+                equipment.StatsToEquip.Add(Stats.Weight);
             }
         }
     }

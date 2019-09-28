@@ -11,13 +11,11 @@ namespace PixelComrades {
         public string ProjectileId;
         public FloatRange ShootCooldown;
         public Timer ShootTimer = new Timer();
-        public List<IActionImpact> Impacts;
 
-        public SimpleProjectileSpawner(Transform shootPivot, string projectileId, FloatRange shootCooldown, List<IActionImpact> impacts) {
+        public SimpleProjectileSpawner(Transform shootPivot, string projectileId, FloatRange shootCooldown) {
             ShootPivot.Set(shootPivot);
             ProjectileId = projectileId;
             ShootCooldown = shootCooldown;
-            Impacts = impacts;
         }
 
         public void Fire() {
@@ -27,7 +25,7 @@ namespace PixelComrades {
         public void Fire(Vector3 targetPos) {
             var position = ShootPivot.Tr.position;
             World.Get<ProjectileSystem>().SpawnProjectile(this.GetEntity(), ProjectileId, targetPos, position, Quaternion
-            .LookRotation(targetPos - position), Impacts);
+            .LookRotation(targetPos - position));
             ShootTimer.StartNewTime(ShootCooldown.Get());
         }
         
@@ -35,7 +33,6 @@ namespace PixelComrades {
             ProjectileId = info.GetValue(nameof(ProjectileId), ProjectileId);
             ShootCooldown = info.GetValue(nameof(ShootCooldown), ShootCooldown);
             ShootTimer = info.GetValue(nameof(ShootTimer), ShootTimer);
-            Impacts = info.GetValue(nameof(Impacts), Impacts);
             ShootPivot = info.GetValue(nameof(ShootPivot), ShootPivot);
         }
         
@@ -43,7 +40,6 @@ namespace PixelComrades {
             info.AddValue(nameof(ProjectileId), ProjectileId);
             info.AddValue(nameof(ShootCooldown), ShootCooldown);
             info.AddValue(nameof(ShootTimer), ShootTimer);
-            info.AddValue(nameof(Impacts), Impacts);
             info.AddValue(nameof(ShootPivot), ShootPivot);
         }
     }

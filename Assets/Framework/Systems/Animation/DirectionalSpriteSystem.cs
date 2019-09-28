@@ -9,7 +9,7 @@ namespace PixelComrades {
         private NodeList<DirectionalSpriteNode> _directionalComponents;
         
         public DirectionalSpriteSystem() {
-            NodeFilter<DirectionalSpriteNode>.New(DirectionalSpriteNode.GetTypes());
+            NodeFilter<DirectionalSpriteNode>.Setup(DirectionalSpriteNode.GetTypes());
             _directionalComponents = EntityController.GetNodeList<DirectionalSpriteNode>();
         }
 

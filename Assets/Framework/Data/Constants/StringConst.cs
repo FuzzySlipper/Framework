@@ -36,6 +36,8 @@ namespace PixelComrades {
 
         public const string AudioDefaultItemClick = "Sounds/DefaultItemClick";
         public const string AudioDefaultItemReturn = "Sounds/DefaultItemReturn";
+
+        public const string TimeUnits = "seconds";
     }
 
     public static partial class UnityDirs {

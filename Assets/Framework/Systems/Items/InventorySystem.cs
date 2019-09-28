@@ -17,7 +17,7 @@ namespace PixelComrades {
                 return;
             }
             FastString.Instance.Clear();
-            FastString.Instance.AppendBoldLabelNewLine("Price", RuleSystem.TotalPrice(inventoryItem));
+            FastString.Instance.AppendBoldLabelNewLine("Price", RulesSystem.TotalPrice(inventoryItem));
             if (inventoryItem.Count > 1) {
                 FastString.Instance.AppendBoldLabelNewLine("Count", inventoryItem.Count);
             }

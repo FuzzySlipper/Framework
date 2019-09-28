@@ -28,9 +28,8 @@ namespace PixelComrades {
 #if DEBUG
             DebugExtension.DebugPoint(hitPnt, Color.magenta, 1.5f, 4f);
 #endif
-            var impacts = entity.Get<ActionImpacts>();
-            hitEntity.Post(new CollisionEvent(sourceNode, targetNode, hitPnt, (hitPnt - transform.position).normalized, impacts));
-            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, (hitPnt - transform.position).normalized,impacts));
+            hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, hitPnt, (hitPnt - transform.position).normalized));
+            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, (hitPnt - transform.position).normalized));
         }
     }
 }

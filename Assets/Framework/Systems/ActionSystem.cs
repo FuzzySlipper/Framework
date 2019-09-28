@@ -14,7 +14,7 @@ namespace PixelComrades {
         private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
         
         public ActionSystem() {
-            NodeFilter<ActionUsingNode>.New(ActionUsingNode.GetTypes());
+            NodeFilter<ActionUsingNode>.Setup(ActionUsingNode.GetTypes());
         }
 
         public override void Dispose() {

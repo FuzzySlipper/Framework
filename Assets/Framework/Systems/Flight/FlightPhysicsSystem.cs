@@ -8,7 +8,7 @@ namespace PixelComrades {
         private NodeList<FlyingNode> _flyingList;
         
         public FlightPhysicsSystem() {
-            NodeFilter<FlyingNode>.New(FlyingNode.GetTypes());
+            NodeFilter<FlyingNode>.Setup(FlyingNode.GetTypes());
             _flyingList = EntityController.GetNodeList<FlyingNode>();
         }
 

@@ -65,11 +65,8 @@ namespace PixelComrades {
             var dmgStat = new BaseStat(_entity, _damage, "Damage", 9999);
             var stats = _entity.Add(new StatsContainer());
             stats.Add(dmgStat);
-            _entity.Add(
-                new SimpleProjectileSpawner(
-                    _firePivot, "SpaceLaser", _shootCooldown, new List<IActionImpact>() {
-                        new DamageImpact( "DamageTypes.Physical", "Vitals.Health", 1, dmgStat)
-                    }));
+            _entity.Add(new DamageImpact("DamageTypes.Physical", "Vitals.Health", 1));
+            _entity.Add(new SimpleProjectileSpawner(_firePivot, "SpaceLaser", _shootCooldown));
             _entity.Add(new FlightPlayerInput(PlayerInput.main, "Sprint", PlayerFlightControls.FlightThrust, PlayerFlightControls.FlightStrafeHorizontal, PlayerFlightControls.FlightStrafeVertical, PlayerFlightControls.FlightPitch, PlayerFlightControls.FlightYaw, PlayerFlightControls.FlightRoll));
             UnityToEntityBridge.RegisterToEntity(gameObject, _entity);
         }

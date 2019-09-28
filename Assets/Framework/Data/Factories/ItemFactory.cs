@@ -168,6 +168,7 @@ namespace PixelComrades {
             }
             entity.Add(new EntityLevelComponent(level));
             entity.Add(new TooltipComponent());
+            entity.Add(new StatusUpdateComponent());
             var dataDescr = entity.Add(new DataDescriptionComponent());
             if (data.TypeComponents != null) {
                 World.Get<DataFactory>().AddComponentList(entity, data.Data, data.TypeComponents);

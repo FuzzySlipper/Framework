@@ -13,6 +13,10 @@ namespace PixelComrades {
         private static Dictionary<string, ProjectileTemplate> _templates = new Dictionary<string, ProjectileTemplate>();
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
 
+        public ProjectileSystem() {
+            NodeFilter<ProjectileNode>.Setup(ProjectileNode.GetTypes());
+        }
+
         private static void Init() {
             GameData.AddInit(Init);
             foreach (var loadedDataEntry in GameData.GetSheet("ActionSpawn")) {
@@ -35,7 +39,6 @@ namespace PixelComrades {
                     entity.Post(new ProjectileDespawned(entity));
                     entity.Pooled = true;
                     entity.ClearParent();
-                    entity.Get<StatsContainer>().ClearMods();
                     stack.Add(entity);
                     return true;
                 }
@@ -44,7 +47,7 @@ namespace PixelComrades {
             return false;
         }
 
-        public Entity SpawnProjectile(Entity owner, string id, ActionEvent msg, List<IActionImpact> impacts) {
+        public Entity SpawnProjectile(Entity owner, string id, ActionEvent msg) {
             var animData = owner.Find<AnimatorComponent>();
             Vector3 spawnPos = Vector3.zero;
             Quaternion spawnRot = Quaternion.identity;
@@ -64,10 +67,10 @@ namespace PixelComrades {
                 }
             }
             
-            return SpawnProjectile(owner, id, msg.Target, spawnPos, spawnRot, impacts);
+            return SpawnProjectile(owner, id, msg.Target, spawnPos, spawnRot);
         }
 
-        public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, List<IActionImpact> impacts) {
+        public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot) {
             if (_templates.Count == 0) {
                 Init();
             }
@@ -78,10 +81,10 @@ namespace PixelComrades {
                 return null;
             }
             var entity = GetProjectile(template);
-            entity.Get<MoveTarget>().SetMoveTarget(target);
-            entity.Get<ActionImpacts>().Impacts = impacts;
+            var node = entity.GetNode<ProjectileNode>();
+            node.MoveTarget.SetMoveTarget(target);
             if (template.ActionFx != null) {
-                entity.Get<ActionFxComponent>().ChangeFx(template.ActionFx);
+                node.ActionFx.ChangeFx(template.ActionFx);
             }
             var prefab = ItemPool.Spawn(UnityDirs.ActionSpawn, template.Type, spawnPos, spawnRot);
             if (prefab == null) {
@@ -115,10 +118,10 @@ namespace PixelComrades {
                     break;
             }
             if (spawn.Rigidbody != null) {
-                entity.Get<RigidbodyComponent>().SetRb(spawn.Rigidbody);
+                node.Rb.SetRb(spawn.Rigidbody);
             }
             entity.Tags.Add(EntityTags.Moving);
-            entity.Get<RenderingComponent>().Set(spawn);
+            node.Rendering.Set(spawn);
             UnityToEntityBridge.RegisterToEntity(prefab.Transform.gameObject, entity);
             entity.ParentId = owner.Id;
             entity.Post(new ProjectileSpawned(template, entity));
@@ -191,9 +194,37 @@ namespace PixelComrades {
             entity.Add(new RotationSpeed(_defaultRotation.Value));
             entity.Add(new RigidbodyComponent(null));
             entity.Add(new MoveTarget());
-            entity.Add(new ActionImpacts(null));
-            entity.Add(new StatsContainer());
             return entity;
+        }
+
+        public sealed class ProjectileNode : BaseNode {
+            private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
+            private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
+            private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
+            private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
+            private CachedComponent<RenderingComponent> _rendering = new CachedComponent<RenderingComponent>();
+            private CachedComponent<ActionFxComponent> _actionFx = new CachedComponent<ActionFxComponent>();
+            
+            public MoveTarget MoveTarget { get => _moveTarget; }
+            public RigidbodyComponent Rb { get => _rb; }
+            public MoveSpeed MoveSpeed { get => _moveSpeed; }
+            public RotationSpeed RotationSpeed { get => _rotationSpeed; }
+            public RenderingComponent Rendering { get => _rendering; }
+            public ActionFxComponent ActionFx { get => _actionFx; }
+            
+            public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+                _moveTarget, _rotationSpeed, _rb, _moveSpeed, _rendering, _actionFx
+            };
+
+            public static System.Type[] GetTypes() {
+                return new System.Type[] {
+                    typeof(MoveTarget),
+                    typeof(RigidbodyComponent),
+                    typeof(RotationSpeed),
+                    typeof(MoveSpeed),
+                    typeof(RenderingComponent),
+                };
+            }
         }
 
         public class ProjectileTemplate {

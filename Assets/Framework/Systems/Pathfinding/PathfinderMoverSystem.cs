@@ -34,11 +34,11 @@ namespace PixelComrades {
                 typeof(AstarPathfindingAgent), typeof(SimplePathfindingAgent),
             }));
             if (UseSimple) {
-                NodeFilter<SimplePathfindMoverNode>.New(SimplePathfindMoverNode.GetTypes());
+                NodeFilter<SimplePathfindMoverNode>.Setup(SimplePathfindMoverNode.GetTypes());
                 _simpleNodeList = EntityController.GetNodeList<SimplePathfindMoverNode>();
             }
             else {
-                NodeFilter<AstarPathfindMoverNode>.New(AstarPathfindMoverNode.GetTypes());
+                NodeFilter<AstarPathfindMoverNode>.Setup(AstarPathfindMoverNode.GetTypes());
                 _astarNodeList = EntityController.GetNodeList<AstarPathfindMoverNode>();
             }
         }

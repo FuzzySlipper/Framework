@@ -41,13 +41,12 @@ namespace PixelComrades {
             if (Instance == null) {
                 return;
             }
-            NodeFilter<VisibleNode>.New(VisibleNode.GetTypes());
-            NodeFilter<CharacterNode>.New(CharacterNode.GetTypes());
-            NodeFilter<CollidableNode>.New(CollidableNode.GetTypes());
+            NodeFilter<VisibleNode>.Setup(VisibleNode.GetTypes());
+            NodeFilter<CharacterNode>.Setup(CharacterNode.GetTypes());
+            NodeFilter<CollidableNode>.Setup(CollidableNode.GetTypes());
             Get<AnimatorSystem>();
             Get<CommandSystem>();
             Get<CollisionCheckSystem>();
-            Get<CollisionEventSystem>();
             Get<DespawnEntitySystem>();
             Get<DistanceSystem>();
             Get<FactionSystem>();
@@ -55,7 +54,6 @@ namespace PixelComrades {
             Get<ModifierSystem>();
             Get<MoverSystem>();
             Get<PhysicsMoverSystem>();
-            Get<RadiusSystem>();
             Get<CharacterRectSystem>();
             Get<SensorSystem>();
             Get<EntityUIPoolSystem>();

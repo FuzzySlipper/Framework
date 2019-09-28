@@ -60,7 +60,7 @@ namespace PixelComrades {
 
         public NodeFilter(System.Type[] types) : base(types) {}
 
-        public static void New(System.Type[] types) {
+        public static void Setup(System.Type[] types) {
             EntityController.RegisterNodeFilter(new NodeFilter<T>(types), typeof(T));
         }
 

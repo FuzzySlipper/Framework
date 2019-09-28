@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface INode {
+        Entity Entity { get; }
         void Register(Entity entity);
         void Dispose();
         bool Disposed { get; }
@@ -92,5 +93,16 @@ namespace PixelComrades {
         public T Get<T>() where T : IComponent {
             return Entity.Get<T>();
         }
+    }
+
+    public static class NodeExtensions {
+
+        public static bool IsPlayer(this INode node) {
+            return node.Entity.Tags.Contain(EntityTags.Player);
+        }
+        
+//        public static T Find<T>(this INode node) where T : IComponent {
+//            return node.Entity.Find<T>();
+//        }
     }
 }

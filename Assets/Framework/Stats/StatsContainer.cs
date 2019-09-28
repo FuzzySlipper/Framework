@@ -42,8 +42,6 @@ namespace PixelComrades {
 
         public BaseStat this[int index] { get { return _list[index]; } }
         public int Count { get { return _list.Count; } }
-        public VitalStat HealthStat { get; private set; }
-
         public void Add(BaseStat item) {
             if (item == null || _dict.ContainsKey(item.ID)) {
                 return;
@@ -51,9 +49,6 @@ namespace PixelComrades {
             _list.Add(item);
             _dict.Add(item.ID, item);
             if (item is VitalStat vital) {
-                if (item.ID == GameOptions.Get(RpgSettings.HealthStat, "Vitals.Health")) {
-                    HealthStat = vital;
-                }
                 _vitals.Add(vital.ID, vital);
             }
         }
@@ -71,9 +66,6 @@ namespace PixelComrades {
             _list.Remove(item);
             _dict.Remove(item.ID);
             if (item is VitalStat vital) {
-                if (item.ID == GameOptions.Get(RpgSettings.HealthStat, "Vitals.Health")) {
-                    HealthStat = null;
-                }
                 _vitals.Remove(vital.ID);
             }
         }
@@ -152,7 +144,6 @@ namespace PixelComrades {
             ClearMods();
             _dict.Clear();
             _vitals.Clear();
-            HealthStat = null;
         }
 
         public void ClearMods() {

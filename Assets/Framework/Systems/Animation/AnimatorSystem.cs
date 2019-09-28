@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [Priority(Priority.Lowest)]
-    public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation>, IReceive<DamageEvent>,
+    public class AnimatorSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<PlayAnimation>, IReceive<TakeDamageEvent>,
         IReceive<DeathEvent> {
 
         private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>();
@@ -58,7 +58,7 @@ namespace PixelComrades {
             _animations.Add(msg);
         }
 
-        public void Handle(DamageEvent arg) {
+        public void Handle(TakeDamageEvent arg) {
             if (arg.Amount <= 0) {
                 return;
             }
