@@ -8,7 +8,7 @@ namespace PixelComrades {
     [Serializable]
     public abstract class BufferedList : IDisposable {
         
-        private static BufferedList<BufferedList> _allLists = new BufferedList<BufferedList>(10,false);
+        private static BufferedList<BufferedList> _allLists = new BufferedList<BufferedList>(50,false);
 
         private bool _addToGlobalList;
         

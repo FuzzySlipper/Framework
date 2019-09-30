@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace PixelComrades {
+    [AutoRegister]
     public class DataFactory : SystemBase {
 
         private Dictionary<System.Type, IDataFactory> _factories = new Dictionary<Type, IDataFactory>();

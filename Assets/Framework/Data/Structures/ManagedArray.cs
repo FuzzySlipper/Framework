@@ -25,6 +25,7 @@ namespace PixelComrades {
         private bool[] _invalidPositionIndex;
 
         public int Max { get { return _max; } }
+        public int ArrayCount { get { return _array.Length; } }
         public int UsedCount { get { return _max - _freeIndices.Count; } }
         public bool IsFull { get { return _max == _array.Length && _freeIndices.Count == 0; } }
         public override System.Type ArrayType { get { return typeof(T); } }
@@ -63,10 +64,7 @@ namespace PixelComrades {
         }
 
         public bool IndexFree(int index) {
-            if (index < _max) {
-                return true;
-            }
-            return !_invalidPositionIndex[index];
+            return index < _invalidPositionIndex.Length && !_invalidPositionIndex[index];
         }
 
         public bool HasIndex(int index) {
@@ -86,7 +84,6 @@ namespace PixelComrades {
                 _max++;
                 return _max - 1;
             }
-            _max = _array.Length;
             ResizeArray(_max *2);
             _array[_max] = newComponent;
             _max++;
@@ -111,14 +108,18 @@ namespace PixelComrades {
 
         public void CompressReplaceWith(ManagedArray<T> source) {
             Clear();
-            if (_array.Length < source.UsedCount) {
-                ResizeArray(source.Max * 2);
+            if (_array.Length <= source.UsedCount + 2) {
+                ResizeArray(source.UsedCount * 2);
             }
             for (int i = 0; i < source.Max; i++) {
                 if (source._invalidPositionIndex[i]) {
                     continue;
                 }
-                _array[_max] = source[i];
+                if (_max >= _array.Length || i >= source._array.Length) {
+                    Debug.LogFormat("Something went wrong max {0} {1} i {2} {3}", _max, _array.Length, i, source._array.Length);
+                    ResizeArray(_array.Length * 2);
+                }
+                _array[_max] = source._array[i];
                 _max++;
             }
         }
@@ -210,6 +211,10 @@ namespace PixelComrades {
             }
             for (int i = 0; i < _max; i++) {
                 if (_invalidPositionIndex[i]) {
+                    continue;
+                }
+                if (_array[i] == null) {
+                    Debug.LogErrorFormat("Something went wrong at {0} for {1}", i, ArrayType);
                     continue;
                 }
                 del(ref _array[i]);

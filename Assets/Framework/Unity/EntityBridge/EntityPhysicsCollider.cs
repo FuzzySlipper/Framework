@@ -6,30 +6,39 @@ namespace PixelComrades {
     public class EntityPhysicsCollider : EntityIdentifier {
 
         [SerializeField] private bool _canGenerateCollisions = true;
+        [SerializeField] private bool _limitToEnemy = false;
+
+        private HashSet<Collider> _checkedColliders = new HashSet<Collider>();
+
+        public void OnPoolSpawned() {
+            _checkedColliders.Clear();
+        }
+
+        public void OnPoolDespawned() {
+        }
 
         void OnCollisionEnter(Collision collision) {
-            if (!enabled || !_canGenerateCollisions) {
+            if (!enabled || !_canGenerateCollisions || _checkedColliders.Contains(collision.collider)) {
                 return;
             }
-            var hitEntity = EntityController.GetEntity(UnityToEntityBridge.GetEntityId(collision.collider));
+            var other = collision.collider;
+            _checkedColliders.Add(other);
+            var hitEntity = EntityController.GetEntity(UnityToEntityBridge.GetEntityId(other));
             var entity = EntityController.GetEntity(EntityID);
-            if (hitEntity == null || hitEntity == entity) {
+            if (hitEntity == null || hitEntity.Id == EntityID) {
                 return;
             }
-            if (!entity.Tags.Contain(EntityTags.CanUnityCollide) || !hitEntity.Tags.Contain(EntityTags.CanUnityCollide)) {
-                return;
-            }
-            var sourceNode = entity.FindNode<CollidableNode>();
-            var targetNode = hitEntity.FindNode<CollidableNode>();
-            if (sourceNode == null || targetNode == null) {
+            if (!CollisionCheckSystem.IsValidCollision(entity, _limitToEnemy, hitEntity, other, out var sourceNode, out var targetNode)) {
                 return;
             }
             var collisionPnt = collision.contacts[0];
+            var hitPnt = collisionPnt.point;
+            var hitNormal = collisionPnt.normal;
 #if DEBUG
-            DebugExtension.DebugPoint(collisionPnt.point, Color.magenta, 1.5f, 4f);
+            DebugExtension.DebugPoint(hitPnt, Color.magenta, 1.5f, 4f);
 #endif
-            hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, collisionPnt.point, collisionPnt.normal));
-            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, collisionPnt.point, collisionPnt.normal));
+            hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, hitPnt, hitNormal));
+            entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, hitNormal));
         }
     }
 }

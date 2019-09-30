@@ -18,7 +18,7 @@ namespace PixelComrades {
         
         private CircularBuffer<TakeDamageEvent> _eventLog = new CircularBuffer<TakeDamageEvent>(10, true);
 
-        [Command("PrintDamageEventLog")]
+        [Command("printDamageEventLog")]
         public static void PrintLog() {
             var log = World.Get<DamageSystem>()._eventLog;
             foreach (var msg in log.InOrder()) {
@@ -44,8 +44,8 @@ namespace PixelComrades {
             logSystem.StartNewMessage(out var dmgMsg, out var dmgHoverMsg);
             var blockDamage = node.Entity.Get<BlockDamage>();
             if (blockDamage != null) {
-                for (int i = 0; i < blockDamage.Dels.Count; i++) {
-                    if (blockDamage.Dels[i](msg)) {
+                for (int i = 0; i < blockDamage.DamageBlockers.Count; i++) {
+                    if (blockDamage.DamageBlockers[i](msg)) {
                         dmgMsg.Append(msg.Target.GetName());
                         dmgMsg.Append(" completely blocked damage from ");
                         dmgMsg.Append(msg.Origin.GetName());

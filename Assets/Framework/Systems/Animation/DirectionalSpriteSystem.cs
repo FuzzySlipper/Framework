@@ -18,6 +18,7 @@ namespace PixelComrades {
         }
 
         private void UpdateNode(ref DirectionalSpriteNode node) {
+            node.Animator.Billboard.Apply(node.Renderer.SpriteTr, node.Animator.Backwards, ref node.Animator.LastAngleHeight);
             if (node.Animator.Requests.Count > 0) {
                 var request = node.Animator.Requests[0];
                 if (node.Animator.Requests.Count > 1) {
@@ -33,12 +34,12 @@ namespace PixelComrades {
                 node.PlayAnimation(request.Clip, request.OverrideClip);
                 node.Animator.Requests.Clear();
             }
+            
             if (node.Animator.CurrentClipHolder == null || node.Animator.IsSimpleClip) {
                 node.CheckMoving();
             }
-            node.Animator.Billboard.Apply(node.Renderer.SpriteTr, node.Animator.Backwards, ref node.Animator.LastAngleHeight);
-            var orientation = SpriteFacingControl.GetCameraSide(
-                node.Animator.Facing, node.Renderer.SpriteTr,
+            
+            var orientation = SpriteFacingControl.GetCameraSide(node.Animator.Facing, node.Renderer.SpriteTr,
                 node.Renderer.BaseTr, 5, out var inMargin);
             if (node.Animator.Orientation == orientation || (inMargin && (orientation.IsAdjacent(node.Animator.Orientation)))) {
                 if (node.CheckFrameUpdate()) {
@@ -47,6 +48,7 @@ namespace PixelComrades {
                 return;
             }
             node.Animator.Orientation = orientation;
+            node.CheckFrameUpdate();
             node.UpdateSpriteFrame();
         }
 

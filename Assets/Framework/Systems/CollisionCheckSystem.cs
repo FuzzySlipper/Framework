@@ -110,7 +110,7 @@ namespace PixelComrades {
             return null;
         }
 
-        private static bool IsValidCollision(Entity entity, bool limitEnemy, Entity hitEntity, Collider collider, out CollidableNode 
+        public static bool IsValidCollision(Entity entity, bool limitEnemy, Entity hitEntity, Collider collider, out CollidableNode 
         sourceNode, out CollidableNode targetNode) {
             sourceNode = targetNode = null;
             if (hitEntity == entity) {
@@ -160,7 +160,7 @@ namespace PixelComrades {
                 if (hitEntity == ignoreEntity || hitEntity == null) {
                     continue;
                 }
-                if (IsValidCollision(originEntity, limitEnemy , hitEntity, _rayHits[i].collider, out var sourceNode, out var targetNode)) {
+                if (IsValidCollision(originEntity, limitEnemy , hitEntity, collider, out var sourceNode, out var targetNode)) {
                     CollisionExtensions.GenerateHitLocDir(position, hitEntity, collider, out var hitPnt, out var hitNormal);
                     var ce = new CollisionEvent(originEntity, sourceNode, targetNode, hitPnt, hitNormal);
                     hitEntity.Post(ce);

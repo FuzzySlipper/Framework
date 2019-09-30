@@ -7,7 +7,7 @@ namespace PixelComrades {
     public class CollisionEventSystem : SystemBase, IReceiveGlobal<CollisionEvent>,
         IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent> {
 
-        public List<ICollisionHandler> Handlers = new List<ICollisionHandler>();
+        private List<ICollisionHandler> _globalHandlers = new List<ICollisionHandler>();
         
         private GameOptions.CachedBool _collisionMessage = new GameOptions.CachedBool("CollisionMessages");
         private FastString _collisionString = new FastString();
@@ -19,7 +19,7 @@ namespace PixelComrades {
             }));
         }
 
-        [Command("PrintCollisionLog")]
+        [Command("printCollisionLog")]
         public static void PrintLog() {
             var log = World.Get<CollisionEventSystem>()._eventLog;
             foreach (var msg in log.InOrder()) {
@@ -30,12 +30,22 @@ namespace PixelComrades {
             }
         }
 
+        public void AddGlobalCollisionHandler(ICollisionHandler collisionHandler) {
+            _globalHandlers.Add(collisionHandler);
+        }
+
         public void HandleGlobal(CollisionEvent msg) {
             _eventLog.Add(msg);
             if (msg.Hit < 0) {
-                msg.Hit = 10;
-                for (int h = 0; h < Handlers.Count; h++) {
-                    msg.Hit = MathEx.Min(Handlers[h].CheckHit(msg), msg.Hit);
+                msg.Hit = CollisionResult.Hit;
+                for (int h = 0; h < _globalHandlers.Count; h++) {
+                    msg.Hit = MathEx.Min(_globalHandlers[h].CheckHit(msg), msg.Hit);
+                }
+            }
+            var blockDamage = msg.Target.Entity.Get<BlockDamage>();
+            if (blockDamage != null) {
+                for (int h = 0; h < blockDamage.CollisionHandlers.Count; h++) {
+                    msg.Hit = MathEx.Min(blockDamage.CollisionHandlers[h](msg), msg.Hit);
                 }
             }
             if (msg.Hit <= 0) {

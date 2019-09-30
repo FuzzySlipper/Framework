@@ -7,6 +7,9 @@ using Random = System.Random;
 
 namespace PixelComrades {
     public static class EntityController {
+
+        private const int InitialComponentArraySize = 25;
+        
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
         private static Dictionary<Type, List<NodeFilter>> _nodeFilters = new Dictionary<Type, List<NodeFilter>>();
@@ -124,7 +127,7 @@ namespace PixelComrades {
         }
 
         private static ComponentArray<T> AddComponentArray<T>() where T : IComponent {
-            var componentList = new ComponentArray<T>();
+            var componentList = new ComponentArray<T>(InitialComponentArraySize);
             _components.Add(typeof(T), componentList);
             return componentList;
         }
@@ -446,5 +449,7 @@ namespace PixelComrades {
             }
             return null;
         }
+        
+        
     }
 }

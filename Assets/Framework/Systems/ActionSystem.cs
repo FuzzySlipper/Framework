@@ -37,7 +37,7 @@ namespace PixelComrades {
             _eventLog.Add(arg);
         }
 
-        [Command("PrintActionStateLog")]
+        [Command("printActionStateLog")]
         public static void PrintLog() {
             var log = World.Get<ActionSystem>()._eventLog;
             foreach (var msg in log.InOrder()) {

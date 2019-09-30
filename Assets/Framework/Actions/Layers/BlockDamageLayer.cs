@@ -55,7 +55,7 @@ namespace PixelComrades {
             }
             var dmgComponent = node.Entity.GetOrAdd<BlockDamage>();
             if (!node.Entity.Tags.Contain(EntityTags.Player)) {
-                dmgComponent.Dels.Add(BlockDamageFlat);
+                dmgComponent.DamageBlockers.Add(BlockDamageFlat);
                 _isWaiting = true;
                 _vitalStat = null;
                 return;
@@ -66,7 +66,7 @@ namespace PixelComrades {
                 var skillValue = node.Entity.FindStatValue(_skill);
                 skillMulti = Mathf.Clamp(1 - (skillValue * CostVital.SkillPercent), CostVital.SkillMaxReduction, 1);
             }
-            dmgComponent.Dels.Add(BlockDamageWithStats);
+            dmgComponent.CollisionHandlers.Add(EvadeDamageWithStats);
             _fxComponent = node.ActionEvent.Action.Fx;
             _finalCost = Cost * skillMulti;
         }
@@ -83,10 +83,10 @@ namespace PixelComrades {
             var blockDamage = node.Entity.Get<BlockDamage>();
             if (blockDamage != null) {
                 if (_isWaiting) {
-                    blockDamage.Dels.Remove(BlockDamageFlat);
+                    blockDamage.DamageBlockers.Remove(BlockDamageFlat);
                 }
                 else {
-                    blockDamage.Dels.Remove(BlockDamageWithStats);
+                    blockDamage.CollisionHandlers.Remove(EvadeDamageWithStats);
                 }
             }
         }
@@ -107,20 +107,18 @@ namespace PixelComrades {
             return true;
         }
 
-        public bool BlockDamageWithStats(TakeDamageEvent arg) {
+        private int EvadeDamageWithStats(CollisionEvent arg) {
+            if (_vitalStat == null) {
+                return arg.Hit;
+            }
             if (_fxComponent != null) {
-                CollisionExtensions.GenerateHitLocDir(arg.Origin.Tr, arg.Target.Tr, arg.Target.Collider, 
-                    out var hitPoint, out var hitNormal);
                 _fxComponent.TriggerEvent(
-                    new ActionStateEvent(
-                        arg.Origin, arg.Target, hitPoint + (hitNormal * 0.1f), Quaternion.LookRotation(hitNormal),
-                        ActionStateEvents.Collision));                
+                    new ActionStateEvent(arg.Origin, arg.Target, arg.HitPoint, Quaternion.LookRotation(arg.HitNormal),
+                    ActionStateEvents.Collision));                
             }
-            if (_vitalStat == null || arg.Amount <= 0) {
-                return false;
-            }
+            
             _vitalStat.Current -= _finalCost;
-            return true;
+            return CollisionResult.Miss;
         }
     }
 }

@@ -30,7 +30,6 @@ namespace PixelComrades {
     }
 
     public static class ReflectionHelper {
-
         //public static void BuildFromTextList(List<string> list) {
         //    for (int i = 0; i < list.Count; i++) {
         //        var className = "PixelComrades." + list[i];
