@@ -235,7 +235,7 @@ namespace PixelComrades {
                 }
                 current++;
                 UIChargeCircle.ManualSetPercent((float) current/totalAmmo);
-                if (!_primary.Ammo.TryLoadOneAmmo(Player.Controller.Entity) || !_reloading) {
+                if (!_primary.Ammo.TryLoadOneAmmo(Player.MainEntity) || !_reloading) {
                     break;
                 }
                 yield return reloadPerAmmo;

@@ -47,7 +47,7 @@ namespace PixelComrades {
 
         public void SetStatus(bool status) {
             gameObject.SetActive(status);
-            Player.Controller.SetActive(!status);
+            Player.Tr.gameObject.SetActive(!status);
         }
 
         public void NewGame() {

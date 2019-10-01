@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public partial class PlayerControls : GenericEnum<AnimationEvents, string> {
+    public partial class PlayerControls : GenericEnum<PlayerControls, string> {
         
         public static string[] MoveButtons = new string[] {
             MovePosX, MoveNegX, MoveNegY, MovePosY
@@ -25,6 +25,10 @@ namespace PixelComrades {
         public const string Menu = "Menu";
         public const string Use = "Use";
         public const string Pause = "Pause";
+        public const string UsePrimary = "UsePrimary";
+        public const string UseSecondary = "UseSecondary";
+        public const string ChangePrimary = "ChangePrimary";
+        public const string ChangeSecondary = "ChangeSecondary";
         
         public override string Parse(string value, string defaultValue) {
             return value;

@@ -45,7 +45,8 @@ namespace PixelComrades {
         public const string ItemRarity = "ItemRarity";
         public const string EquipmentSlotType = "EquipmentSlotType";
         public const string Currencies = "Currencies";
-
+        public const string ActionDistance = "ActionDistance";
+        public const string CollisionType = "CollisionType";
     }
 
     public enum ActionSource {
