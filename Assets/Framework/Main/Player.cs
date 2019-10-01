@@ -23,6 +23,8 @@ namespace PixelComrades {
             }
             set { _tr = value; }
         }
+        public static IPlayerFlightController Flight { get; set; }
+
         public static PlayerSaveData Data { get { return _playerSaveData; } set { _playerSaveData = value; } }
         public static ItemInventory MainInventory { get; set; }
         public static Rigidbody Rb { get; set; }

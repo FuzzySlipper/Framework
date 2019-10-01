@@ -267,7 +267,7 @@ namespace PixelComrades {
         }
 
         private IEnumerator LoadWeaponProcess() {
-            Player.Party[0].Entity.Tags.Add(EntityTags.PerformingCommand);
+            Player.Entities[0].Tags.Add(EntityTags.PerformingCommand);
             yield return LowerWeapon(false);
             _state = State.Reloading;
             UIChargeCircle.ManualStart(_current.Ammo.Template.ReloadText);
@@ -280,7 +280,7 @@ namespace PixelComrades {
                 }
                 current++;
                 UIChargeCircle.ManualSetPercent((float) current/totalAmmo);
-                if (!_current.Ammo.TryLoadOneAmmo(Player.Controller.Entity)) {
+                if (!_current.Ammo.TryLoadOneAmmo(Player.Entities[0])) {
                     break;
                 }
                 yield return reloadPerAmmo;

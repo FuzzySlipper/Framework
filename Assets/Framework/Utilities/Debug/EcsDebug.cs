@@ -47,8 +47,8 @@ namespace PixelComrades {
         [Command("godMode")]
         public static void GodMode() {
             bool added = false;
-            for (int i = 0; i < Player.Party.Length; i++) {
-                var block = Player.Party[i].Entity.GetOrAdd<BlockDamage>();
+            for (int i = 0; i < Player.Entities.Length; i++) {
+                var block = Player.Entities[i].GetOrAdd<BlockDamage>();
                 if (block.DamageBlockers.Contains(GodModeDamage)) {
                     block.DamageBlockers.Remove(GodModeDamage);
                 }

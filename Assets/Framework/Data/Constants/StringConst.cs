@@ -55,6 +55,16 @@ namespace PixelComrades {
         public const string UI = "UI/";
         public const string Materials = "Materials/";
         public const string Models = "Models/";
+        public const string Dialogue = "Dialogue/";
+        public const string Characters = "Characters/";
+        public const string CharacterAnimations = "CharacterAnimations/";
+        public const string Audio = "Audio/";
+        public const string PlayerAnimations = "PlayerAnimations/";
+        public const string Levels = "Levels/";
+        public const string Towns = "Towns/";
+        public const string LevelObjects = "Levels/Objects/";
+        public const string LevelTileSets = "Levels/TileSets/";
+        public const string LevelMatConfigs = "Levels/MatConfigs/";
     }
 
     public static partial class Stats {
@@ -68,6 +78,19 @@ namespace PixelComrades {
         public const string Weight = "Weight";
         public const string Range = "Range";
         public const string AttackStats = "AttackStats";
+        public const string BonusPowerMelee = "BonusPowerMelee";
+        public const string BonusCritMelee = "BonusCritMelee";
+        public const string BonusToHitMelee = "BonusToHitMelee";
+        public const string BonusPowerRanged = "BonusPowerRanged";
+        public const string BonusCritRanged = "BonusCritRanged";
+        public const string BonusToHitRanged = "BonusToHitRanged";
+        public const string BonusPowerMagic = "BonusPowerMagic";
+        public const string BonusCritMagic = "BonusCritMagic";
+        public const string BonusToHitMagic = "BonusToHitMagic";
+
+        public const string Recovery = "Vitals.Recovery";
+        public const string CombatRating = "CombatPower";
+        public const string MaxWeight = "MaxWeight";
     }
 
     public static partial class DatabaseSheets {
@@ -82,6 +105,10 @@ namespace PixelComrades {
     }
 
     public static partial class DatabaseFields {
+        public const string ToHit = "ToHit";
+        public const string Radius = "Radius";
+        public const string PowerMin = "PowerMin";
+        public const string PowerMax = "PowerMax";
         public const string Components = "Components";
         public const string Component = "Component";
         public const string MaxStack = "MaxStack";
@@ -133,6 +160,9 @@ namespace PixelComrades {
         public const string Death = "Death";
         public const string Move = "Move";
         public const string Attack = "Attack";
+        public const string CastSpell = "CastSpell";
+        public const string RangedAttack = "RangedAttack";
+        public const string SpecialAttack = "SpecialAttack";
 
         public override string Parse(string value, string defaultValue) {
             return value;
