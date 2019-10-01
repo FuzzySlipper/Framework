@@ -107,6 +107,7 @@ namespace PixelComrades {
         }
 
         private void CheckPause() {
+            Debug.Log("check pause");
             if (_currentAnimation != null) {
                 if (Game.Paused) {
                     _director.Pause();
@@ -162,7 +163,7 @@ namespace PixelComrades {
             base.ClipEventTriggered();
         }
 
-        protected PlayableClipState CanPlayClip(string clip, bool overrideClip) {
+        private PlayableClipState CanPlayClip(string clip, bool overrideClip) {
             if (!_animDictionary.TryGetValue(clip, out var state) || state.Clip == null) {
                 return null;
             }

@@ -7,7 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class FlightPlayerInput : IComponent {
 
-        public PlayerInput Input;
+        public PlayerInputComponent Input;
         public string Boost;
         public string ThrustAxis;
         public string StrafeHorizontalAxis;
@@ -16,7 +16,7 @@ namespace PixelComrades {
         public string YawAxis;
         public string RollAxis;
 
-        public FlightPlayerInput(PlayerInput input, string boost, string thrustAxis, string strafeHorizontalAxis, string strafeVerticalAxis, string pitchAxis, string yawAxis, string rollAxis) {
+        public FlightPlayerInput(PlayerInputComponent input, string boost, string thrustAxis, string strafeHorizontalAxis, string strafeVerticalAxis, string pitchAxis, string yawAxis, string rollAxis) {
             Input = input;
             Boost = boost;
             ThrustAxis = thrustAxis;
@@ -35,20 +35,20 @@ namespace PixelComrades {
 
         public void UpdateControl(FlightControl control) {
             control.GotoPos = GetMousePosition();
-            if (!string.IsNullOrEmpty(Boost) && Input.GetKeyDown(Boost)) {
+            if (!string.IsNullOrEmpty(Boost) && Input.Handler.GetButtonDown(Boost)) {
                 control.Boost = 1;
             }
             else {
                 control.Boost = 0;
             }
             if (!string.IsNullOrEmpty(ThrustAxis)) {
-                control.Thrust = Input.GetAxis(ThrustAxis);
+                control.Thrust = Input.Handler.GetAxis(ThrustAxis);
             }
             if (!string.IsNullOrEmpty(StrafeHorizontalAxis)) {
-                control.StrafeHorizontal = Input.GetAxis(StrafeHorizontalAxis);
+                control.StrafeHorizontal = Input.Handler.GetAxis(StrafeHorizontalAxis);
             }
             if (!string.IsNullOrEmpty(StrafeVerticalAxis)) {
-                control.StrafeVertical = Input.GetAxis(StrafeVerticalAxis);
+                control.StrafeVertical = Input.Handler.GetAxis(StrafeVerticalAxis);
             }
             if (control.Config.UseMouse) {
                 if (control.Config.UseDirectControl) {
@@ -69,7 +69,7 @@ namespace PixelComrades {
                     }
                     else {
                         if (!string.IsNullOrEmpty(RollAxis)) {
-                            control.Roll = Input.GetAxis(RollAxis);
+                            control.Roll = Input.Handler.GetAxis(RollAxis);
                         }
                         control.Yaw = Mathf.Clamp(mousePos.x * control.Config.MouseYawSensitivity, -1f, 1f);
                     }
@@ -80,13 +80,13 @@ namespace PixelComrades {
             }
             else {
                 if (!string.IsNullOrEmpty(PitchAxis)) {
-                    control.Pitch = Input.GetAxis(PitchAxis);
+                    control.Pitch = Input.Handler.GetAxis(PitchAxis);
                 }
                 if (!string.IsNullOrEmpty(YawAxis)) {
-                    control.Yaw = Input.GetAxis(YawAxis);
+                    control.Yaw = Input.Handler.GetAxis(YawAxis);
                 }
                 if (!string.IsNullOrEmpty(RollAxis)) {
-                    control.Roll = Input.GetAxis(RollAxis);
+                    control.Roll = Input.Handler.GetAxis(RollAxis);
                 }
             }
         }

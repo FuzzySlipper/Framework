@@ -17,6 +17,7 @@ namespace PixelComrades {
         public const int LevelClear = 5;
         public const int LevelLoadingFinished = 7;
         public const int LevelChanged = 8;
+        public const int ApplicationFocus = 9;
         
         public const int PlayerNewGame = 10;
         public const int PlayerDead = 11;

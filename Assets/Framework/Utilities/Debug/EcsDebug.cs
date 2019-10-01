@@ -210,7 +210,7 @@ namespace PixelComrades {
         [Command("screenShot")]
         public static void ScreenShot() {
             ScreenCapture.CaptureScreenshot(
-                string.Format( "Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png", Game.Title, System.DateTime.Now));
+                string.Format("Screenshots/{0}-{1:MM-dd-yy hh-mm-ss}.png", Game.Title, System.DateTime.Now));
         }
         
         public static void FPS() {

@@ -56,7 +56,7 @@ namespace PixelComrades {
 
         public override void Evaluate(ActionUsingNode node) {
             var elapsed = (TimeManager.Time - _start);
-            if (elapsed >= MaxChargeTime || ( _input != null && !_input.Input.GetKey(ChargeInput))) {
+            if (elapsed >= MaxChargeTime || ( _input != null && !_input.Handler.GetButton(ChargeInput))) {
                 var chargeComponent = node.ActionEvent.Action.Entity.GetOrAdd<ChargeComponent>();
                 chargeComponent.CurrentCharge = ForceRange.Lerp(Mathf.Clamp01(elapsed / MaxChargeTime));
                 node.AdvanceEvent();

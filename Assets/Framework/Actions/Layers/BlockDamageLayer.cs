@@ -98,7 +98,7 @@ namespace PixelComrades {
                 }
                 return;
             }
-            if (!PlayerInput.main.GetKey(ChargeInput) || _vitalStat.Current < Cost) {
+            if (!PlayerInputSystem.GetButton(ChargeInput) || _vitalStat.Current < Cost) {
                 node.AdvanceEvent();
             }
         }

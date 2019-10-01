@@ -61,8 +61,13 @@ namespace PixelComrades {
         }
 
         public bool Start(Entity owner, Transform spawn, Action action, Vector3 target) {
-            if (action == null || !action.CanStart(owner) || owner.Tags.Contain(EntityTags.PerformingCommand)) {
+            if (owner == null || action == null || owner.Tags.Contain(EntityTags.PerformingCommand)) {
                 return false;
+            }
+            for (int i = 0; i < action.Costs.Count; i++) {
+                if (!action.Costs[i].CanAct(owner)) {
+                    return false;
+                }
             }
             var node = owner.GetNode<ActionUsingNode>();
             if (node == null) {
@@ -88,7 +93,9 @@ namespace PixelComrades {
         }
 
         private void Complete(ActionUsingNode node) {
-            node.ActionEvent.Action.ProcessCost(node.Entity);
+            for (int i = 0; i < node.ActionEvent.Action.Costs.Count; i++) {
+                node.ActionEvent.Action.Costs[i].ProcessCost(node.Entity);
+            }
             StopEvent(node);
         }
 

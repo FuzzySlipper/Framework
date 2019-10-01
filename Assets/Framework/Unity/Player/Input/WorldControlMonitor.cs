@@ -125,7 +125,7 @@ namespace PixelComrades {
             _foundControl = false;
             //_eventData.position = Input.mousePosition;
             //EventSystem.current.RaycastAll(_eventData, _result);
-            if (PlayerInput.IsCursorOverUI) {
+            if (PlayerInputSystem.IsCursorOverUI) {
                 SetCurrentNull();
                 //if (_debug) {
                 //    var go = PlayerInput.CurrentInput != null ? PlayerInput.CurrentInput.GameObjectUnderPointer() : null;

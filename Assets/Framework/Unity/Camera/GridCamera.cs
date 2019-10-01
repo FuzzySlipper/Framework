@@ -36,7 +36,7 @@ namespace PixelComrades {
 
         private bool ShouldStartMouseLook {
             get {
-                return Input.GetMouseButtonDown(1) && !PlayerInput.IsCursorOverUI && UICenterTarget.CurrentCharacter == null;
+                return Input.GetMouseButtonDown(1) && !PlayerInputSystem.IsCursorOverUI && UICenterTarget.CurrentCharacter == null;
             }
         }
 
@@ -108,8 +108,8 @@ namespace PixelComrades {
         private void FreeLook() {
             //_xDeg += (Input.GetAxis("Mouse X")*_xSpeed*0.02f);
             //_yDeg -= (Input.GetAxis("Mouse Y")*_ySpeed*0.02f);
-            _xDeg += (PlayerInput.LookInput.x * _lookSensitivity);
-            _yDeg -= (PlayerInput.LookInput.y * _lookSensitivity);
+            _xDeg += (PlayerInputSystem.LookInput.x * _lookSensitivity);
+            _yDeg -= (PlayerInputSystem.LookInput.y * _lookSensitivity);
             _xDeg = ClampAngle(_xDeg, _xMinLimit, _xMaxLimit);
             _yDeg = ClampAngle(_yDeg, _yMinLimit, _yMaxLimit);
             _desiredRotation = Quaternion.Euler(_yDeg, _xDeg, 0.0f);

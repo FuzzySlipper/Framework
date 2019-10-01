@@ -392,11 +392,12 @@ namespace PixelComrades {
         }
 
         private void RefreshControls() {
-            Controller controller = PlayerInput.RewiredPlayer.controllers.GetLastActiveController();
+            var input = Rewired.ReInput.players.GetPlayer(0);
+            Controller controller = input.controllers.GetLastActiveController();
             if (controller.type == ControllerType.Mouse) {
-                controller = PlayerInput.RewiredPlayer.controllers.Keyboard;
+                controller = input.controllers.Keyboard;
             }
-            var controllerMap = PlayerInput.RewiredPlayer.controllers.maps.GetFirstMapInCategory(controller, 0);
+            var controllerMap = input.controllers.maps.GetFirstMapInCategory(controller, 0);
             foreach (InputAction inputAction in ReInput.mapping.ActionsInCategory(0)) {
                 _targetOptions.Add(SetupLabel(_optionControlsTr, inputAction.descriptiveName).gameObject);
                 var pivot = ItemPool.SpawnUIPrefab(_horizontalListPrefab, _optionControlsTr);
@@ -433,7 +434,7 @@ namespace PixelComrades {
 
         private void OnStopped(InputMapper.StoppedEventData data) {
             UIModalQuestion.Stop();
-            PlayerInput.AllInputBlocked = false;
+            PlayerInputSystem.AllInputBlocked = false;
             ReInput.userDataStore.Save();
             for (int i = 0; i < _targetOptions.Count; i++) {
                 ItemPool.Despawn(_targetOptions[i]);
@@ -443,10 +444,10 @@ namespace PixelComrades {
         }
 
         public void SetInputListen(InputMapper.Context context) {
-            PlayerInput.AllInputBlocked = true;
+            PlayerInputSystem.AllInputBlocked = true;
             _inputMapper.Start(context);
             UIModalQuestion.Set((int i) => {
-                PlayerInput.AllInputBlocked = false;
+                PlayerInputSystem.AllInputBlocked = false;
                 _inputMapper.Stop();
             }, "Press the new button", "Cancel");
         }

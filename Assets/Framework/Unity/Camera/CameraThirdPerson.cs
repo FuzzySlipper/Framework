@@ -47,7 +47,7 @@ namespace PixelComrades {
             if (ControlRotation) {
                 HandleRotationMovement();
             }
-            var scroll = PlayerInput.main.GetAxis("Scroll");
+            var scroll = PlayerInputSystem.GetAxis("Scroll");
             if (Mathf.Abs(scroll) < 0.05f) {
                 return;
             }
@@ -100,8 +100,8 @@ namespace PixelComrades {
             if (Time.timeScale < float.Epsilon) {
                 return;
             }
-            SetRootRotation(PlayerInput.main.GetAxis(PlayerInput.Axis.MoveX));
-            float y = PlayerInput.main.GetAxis(PlayerInput.Axis.LookY);
+            SetRootRotation(PlayerInputSystem.GetAxis(PlayerControls.MoveX));
+            float y = PlayerInputSystem.GetAxis(PlayerControls.LookY);
             _tiltAngle -= y * TurnSpeed;
             _tiltAngle = Mathf.Clamp(_tiltAngle, -TiltMin, TiltMax);
             _pivotTargetRot = Quaternion.Euler(_tiltAngle, _pivotEulers.y, _pivotEulers.z);

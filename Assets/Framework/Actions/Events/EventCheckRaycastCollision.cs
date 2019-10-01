@@ -21,7 +21,7 @@ namespace PixelComrades {
             var entity = node.Entity;
             Vector3 originPos;
             if (entity.Tags.Contain(EntityTags.Player)) {
-                originPos = PlayerInput.GetTargetRay.origin;
+                originPos = PlayerInputSystem.GetLookTargetRay.origin;
             }
             else {
                 var animData = entity.Find<AnimatorComponent>();

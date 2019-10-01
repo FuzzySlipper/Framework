@@ -306,8 +306,8 @@ namespace PixelComrades {
         }
 
         public void CameraLook() {
-            _rotationX += PlayerInput.LookInput.x * _sensitivity;
-            _rotationY += PlayerInput.LookInput.y * _sensitivity;
+            _rotationX += PlayerInputSystem.LookInput.x * _sensitivity;
+            _rotationY += PlayerInputSystem.LookInput.y * _sensitivity;
             if (UICenterTarget.LockedActor != null) {
                 var targetPos = UICenterTarget.LockedActor.Tr.position + Vector3.up;// + UICenterTarget.LockedActor.LocalCenter;
                 var targetScreen = Player.Cam.WorldToViewportPoint(targetPos);

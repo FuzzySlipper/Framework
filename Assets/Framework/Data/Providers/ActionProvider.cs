@@ -147,7 +147,8 @@ namespace PixelComrades {
                 case "Shield":
                     action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCastStart));
                     action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCast));
-                    mainLayer = new BlockDamageLayer(action, config.FindString("Model", "Shield"), "Vitals.Energy", data.TryGetValue("Cost", 1f),skill, ActionInputControls.UseSecondary, 2f);
+                    mainLayer = new BlockDamageLayer(action, config.FindString("Model", "Shield"), "Vitals.Energy", data.TryGetValue
+                    ("Cost", 1f),skill, PlayerControls.UseSecondary, 2f);
                     action.Sequence.Add(mainLayer);
                     action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCastEnd));
                     break;

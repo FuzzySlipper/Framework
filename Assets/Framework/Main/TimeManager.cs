@@ -150,6 +150,10 @@ namespace PixelComrades {
             }
         }
 
+        void OnApplicationFocus(bool focusStatus) {
+            MessageKit<bool>.post(Messages.ApplicationFocus, focusStatus);
+        }
+
         void Update() {
             //_time += UnityEngine.Time.deltaTime * TimeScale;
             if (!_pathTimer.IsActive) {

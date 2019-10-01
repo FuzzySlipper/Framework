@@ -106,13 +106,13 @@ namespace PixelComrades {
 
         private void StartModal() {
             _active = true;
-            PlayerInput.AllInputBlocked = true;
+            PlayerInputSystem.AllInputBlocked = true;
             Game.CursorUnlock("Modal");
             _canvasGroup.SetActive(true);
         }
 
         private void DisableModal() {
-            PlayerInput.AllInputBlocked = false;
+            PlayerInputSystem.AllInputBlocked = false;
             Game.RemoveCursorUnlock("Modal");
             _active = false;
             _del = null;

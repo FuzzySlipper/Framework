@@ -973,6 +973,19 @@ namespace PixelComrades {
             return value;
         }
 
+        public static T GetValue<T>(this SerializationInfo self, string name) {
+            //return (T) self.GetValue(name, typeof(T));
+            T value;
+            try {
+                value = (T) self.GetValue(name, typeof(T));
+            }
+            catch (Exception e) {
+                Debug.LogFormat("Name {0} {1} {2}", name, e.TargetSite.ToString(), e.StackTrace);
+                value = default(T);
+            }
+            return value;
+        }
+
         public static Color GetValue(this SerializationInfo self, string name, Color currentValue) {
             //return (T) self.GetValue(name, typeof(T));
             Color value;

@@ -59,14 +59,15 @@ namespace PixelComrades {
             _entity.Add(new FakeFlightEngine(_fakeFlightConfig));
             _entity.Add(new CosmeticFlightBanking(_bankTransform, _controlConfig));
             _entity.Add(new RigidbodyComponent(GetComponent<Rigidbody>()));
-            _entity.Add(new PlayerInputComponent(PlayerInput.main));
             var dmgStat = new BaseStat(_entity,_damage, "Damage", 9999);
             var stats = _entity.Add(new StatsContainer());
             stats.Add(dmgStat);
 //            _entity.Add(
 //                new SimpleProjectileSpawner(
 //                    _bankTransform, "SpaceLaser", _shootCooldown));
-            _entity.Add(new FlightPlayerInput(PlayerInput.main, "Sprint", "FlightThrust", "FlightStrafeHorizontal", "FlightStrafeVertical", "FlightPitch", "FlightYaw", "FlightRoll"));
+            _entity.Add(new FlightPlayerInput(_entity.Get<PlayerInputComponent>(), "Sprint", "FlightThrust", "FlightStrafeHorizontal", 
+            "FlightStrafeVertical", 
+            "FlightPitch", "FlightYaw", "FlightRoll"));
         }
 
         public void SetEntity(Entity entity) {

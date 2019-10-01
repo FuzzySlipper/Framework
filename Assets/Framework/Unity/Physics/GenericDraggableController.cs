@@ -36,7 +36,7 @@ namespace PixelComrades {
             //      Vector3 point = new Vector3(PlayerInput.LookInput.x, PlayerInput.LookInput.y, _screenPoint.z);
             //Vector3 dest = Player.Camera.ScreenToWorldPoint(point) + _offset;
             //_rigidbody.AddForce((dest - _rigidbody.position) * _pushForce);
-            var ray = PlayerInput.GetTargetRay;
+            var ray = PlayerInputSystem.GetLookTargetRay;
             _rigidbody.MovePosition(ray.GetPoint(_hitDistance));
         }
 
@@ -44,7 +44,7 @@ namespace PixelComrades {
 
         public bool CanDrag() {
             RaycastHit hit;
-            var ray = PlayerInput.GetTargetRay;
+            var ray = PlayerInputSystem.GetLookTargetRay;
             if (!Physics.Raycast(ray, out hit, _grabDistance, _mask)) {
                 _target = null;
                 return false;

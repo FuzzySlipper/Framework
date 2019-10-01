@@ -49,23 +49,5 @@ namespace PixelComrades {
             info.AddValue(nameof(_ammo), _ammo);
             info.AddValue(nameof(Fx), ItemPool.GetAssetLocation(Fx));
         }
-
-        public bool CanStart(Entity entity) {
-            if (entity == null) {
-                return false;
-            }
-            for (int i = 0; i < Costs.Count; i++) {
-                if (!Costs[i].CanAct(entity)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        public void ProcessCost(Entity entity) {
-            for (int i = 0; i < Costs.Count; i++) {
-                Costs[i].ProcessCost(entity);
-            }
-        }
     }
 }

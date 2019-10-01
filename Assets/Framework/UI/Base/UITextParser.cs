@@ -45,7 +45,7 @@ namespace PixelComrades {
             _canvasGroup.SetActive(true);
             _inputField.text = "";
             _inputField.Select();
-            PlayerInput.AllInputBlocked = true;
+            PlayerInputSystem.AllInputBlocked = true;
         }
 
         private void Cancel() {
@@ -53,7 +53,7 @@ namespace PixelComrades {
             _canvasGroup.SetActive(false);
             _inputField.text = "";
             EventSystem.current.SetSelectedGameObject(null);
-            PlayerInput.AllInputBlocked = false;
+            PlayerInputSystem.AllInputBlocked = false;
         }
 
         public void ExecuteCommand() {

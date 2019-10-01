@@ -64,7 +64,7 @@ namespace PixelComrades {
                 //    LerpPosition();
                 //    break;
             }
-            if (Cursor.lockState == CursorLockMode.Locked || !PlayerInput.IsCursorOverUI) {
+            if (Cursor.lockState == CursorLockMode.Locked || !PlayerInputSystem.IsCursorOverUI) {
                 HideTooltip();
             }
         }

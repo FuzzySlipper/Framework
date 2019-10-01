@@ -30,7 +30,8 @@ namespace PixelComrades {
         }
 
         public void RefreshLabel() {
-            _mapped = PlayerInput.RewiredPlayer.controllers.maps.GetFirstButtonMapWithAction(_inputAction.name, true);
+            var input = Rewired.ReInput.players.GetPlayer(0);
+            _mapped = input.controllers.maps.GetFirstButtonMapWithAction(_inputAction.name, true);
             if (_mapped != null) {
                 _text.text = _mapped.elementIdentifierName;
             }

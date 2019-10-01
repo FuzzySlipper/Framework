@@ -63,7 +63,7 @@ namespace PixelComrades {
 
         private RaycastHit[] _hits = new RaycastHit[10];
         private Vector3 GetMouseRaycastPosition() {
-            var ray = PlayerInput.GetTargetRay;
+            var ray = PlayerInputSystem.GetLookTargetRay;
             var cnt = Physics.RaycastNonAlloc(ray, _hits, 500, LayerMasks.DefaultCollision);
             _hits.SortByDistanceAsc(cnt);
             for (int i = 0; i < cnt; i++) {

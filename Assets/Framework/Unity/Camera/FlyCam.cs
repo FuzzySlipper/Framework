@@ -36,12 +36,12 @@ namespace PixelComrades {
             if (IsActive) {
                 _oldPos = Player.Cam.transform.localPosition;
                 _oldRot = Player.Cam.transform.localRotation;
-                PlayerInput.MoveInputLocked = true;
+                PlayerInputSystem.MoveInputLocked = true;
             }
             else {
                 Player.Cam.transform.localPosition = _oldPos;
                 Player.Cam.transform.localRotation = _oldRot;
-                PlayerInput.MoveInputLocked = false;
+                PlayerInputSystem.MoveInputLocked = false;
             }
         }
  
