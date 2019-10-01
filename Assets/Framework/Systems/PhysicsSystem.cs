@@ -38,4 +38,14 @@ namespace PixelComrades {
             arg.Target.Post(new PhysicsInputMessage(arg.Target.Entity, dir * Mathf.Clamp(power, 1, _maxPhysicsDamage)));
         }   
     }
+
+    public struct PhysicsInputMessage : IEntityMessage {
+        public Vector3 Force { get; }
+        public Entity Target { get; }
+
+        public PhysicsInputMessage(Entity target, Vector3 force) {
+            Force = force;
+            Target = target;
+        }
+    }
 }

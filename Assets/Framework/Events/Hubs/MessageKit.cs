@@ -45,7 +45,6 @@ namespace PixelComrades {
         //public const int MapScrolled = 37;
         //public const int MapRotated = 37;
 
-
         public const int GlobalDataChanged = 40;
         public const int TurnBasedChanged = 41;
         public const int LoadTextChanged = 42;
@@ -55,6 +54,8 @@ namespace PixelComrades {
         public const int MessageLog = 46;
         public const int OptionsChanged = 48;
         public const int GraphicOptionsChanged = 49;
+
+        public const int ToggleMainMenu = 50;
     }
 
     public enum DialogueMsg {

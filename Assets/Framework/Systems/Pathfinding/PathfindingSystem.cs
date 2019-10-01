@@ -5,8 +5,6 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class PathfindingSystem : SystemBase, IMainSystemUpdate {
 
-        public static bool UseSimple = false;
-
         private GameOptions.CachedInt _playerWalkableRadius = new GameOptions.CachedInt("PathfindPlayerWalkableRadius");
         private GameOptions.CachedInt _playerOccupyRadius = new GameOptions.CachedInt("PathfindPlayerOccupiedRadius");
         private GameOptions.CachedInt _threadCount = new GameOptions.CachedInt("PathfindThreadCount");
@@ -27,25 +25,23 @@ namespace PixelComrades {
         public int ReturnCount { get; private set; }
         public IPathfindingGrid Grid { get => _pathfindingGrid; }
 
-        public PathfindingSystem() {
-            if (!UseSimple) {
-                _pathfindingSource = new AstarPathfinderSystemGrid();
-                return;
-            }
-            AstarP3Pathfinder.SetAxis(2);
-            _pathfindingGrid = new SimpleThreadSafeGrid();
-            _pathfindingSource = _pathfindingGrid;
+        public PathfindingSystem() {}
+
+        public void SetSource(IPathfindingSource source, IPathfindingGrid grid) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
+                AstarP3Pathfinder.SetAxis(2);
+                _pathfindingGrid = new SimpleThreadSafeGrid();
+                _pathfindingSource = _pathfindingGrid;
                 _nonThreadedPathfinder = new AstarP3Pathfinder();
+                //_nonThreadedPathfinder = new AstarP3Pathfinder();
                 return;
             }
 #endif
+            _pathfindingSource = source;
+            _pathfindingGrid = grid;
             if (Game.GameActive && _useThreading) {
                 StartThreads();
-            }
-            else {
-                _nonThreadedPathfinder = new AstarP3Pathfinder();
             }
         }
 

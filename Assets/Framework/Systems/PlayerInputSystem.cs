@@ -76,7 +76,7 @@ namespace PixelComrades {
                     UIBasicMenu.CloseAll();
                 }
                 else if (Game.GameActive) {
-                    UIMainMenu.main.Toggle();
+                    MessageKit.post(Messages.ToggleMainMenu);
                 }
             }
         }

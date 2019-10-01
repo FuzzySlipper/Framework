@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using KinematicCharacterController;
 
 namespace PixelComrades.DungeonCrawler {
     public class SpriteHolder : MonoBehaviour {
@@ -14,7 +13,6 @@ namespace PixelComrades.DungeonCrawler {
         [SerializeField] private SpriteFacing _facing = SpriteFacing.EightwayFlipped;
         [SerializeField] private bool _backwards = true;
         [SerializeField] private List<Collider> _ignoreColliders = new List<Collider>();
-        [SerializeField] private KinematicCharacterMotor _motor = null;
 
         public BillboardMode Billboard { get => _billboard; }
         public bool Unscaled { get => _unscaled; }
@@ -24,6 +22,5 @@ namespace PixelComrades.DungeonCrawler {
         public SpriteFacing Facing { get => _facing; }
         public bool Backwards { get => _backwards; }
         public List<Collider> IgnoreColliders { get => _ignoreColliders; }
-        public KinematicCharacterMotor Motor { get => _motor; }
     }
 }

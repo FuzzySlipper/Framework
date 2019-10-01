@@ -5,7 +5,17 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PixelComrades {
-        
+
+    public enum PathfindingStatus {
+        Created,
+        NoPath,
+        WaitingOnPath,
+        PathReceived,
+        Moving,
+        WaitingOnNode,
+        InvalidPath,
+    }
+    
     [System.Serializable]
 	public sealed class SimplePathfindingAgent : IComponent, IDisposable {
 

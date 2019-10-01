@@ -61,7 +61,7 @@ namespace PixelComrades {
                 Debug.LogErrorFormat("Error deserializing save game {0}", path);
                 return;
             }
-            UIMainMenu.main.CloseMainMenu();
+            MessageKit.post(Messages.ToggleMainMenu);
             saveGame.Load();
         }
 
