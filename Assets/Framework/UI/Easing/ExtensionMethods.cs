@@ -7,8 +7,7 @@ using TMPro;
 
 namespace PixelComrades{
 public static class EasingExtensionMethods{
-		#region Tweening Helpers
-		public static Task MoveTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
+	public static Task MoveTo(this Transform trans, Vector3 target, float length, EasingTypes easingChoice, bool unscaled = false, 
 		                          Tween.TweenRepeat repeat = Tween.TweenRepeat.Once,
 		                          System.Action onComplete = null) {
 			Vector3 start = trans.position;
@@ -99,9 +98,6 @@ public static class EasingExtensionMethods{
 				scrollRect.normalizedPosition = newPosition;
 			}, start, target, length, easingChoice, unscaled, repeat, onComplete).Play();
 		}
-		#endregion
-
-		#region Easing Helpers
 
 		public static float Difference(this float f, float a, float b){
 			if(a > b) {
@@ -185,9 +181,7 @@ public static class EasingExtensionMethods{
 			}
 			return res;
 		}
-		#endregion
 
-		#region Keyframe Reduction
 		/// <summary>
 		/// Reduces the keyframes of the AnimationCurve with the given tolerance using doug
 		/// </summary>
@@ -283,6 +277,5 @@ public static class EasingExtensionMethods{
 			return height;
 
 		}
-		#endregion
-	}
+}
 }

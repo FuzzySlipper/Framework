@@ -16,8 +16,6 @@ namespace SimpleFileBrowser {
             ShouldAsk = 2
         }
 
-        #region Structs
-
         [Serializable]
         private struct FiletypeIcon {
             public string extension;
@@ -30,10 +28,6 @@ namespace SimpleFileBrowser {
             public string name;
             public Sprite icon;
         }
-
-        #endregion
-
-        #region Inner Classes
 
         public class Filter {
             public readonly string defaultExtension;
@@ -98,18 +92,9 @@ namespace SimpleFileBrowser {
             }
         }
 
-        #endregion
-
-        #region Constants
-
         private const string ALL_FILES_FILTER_TEXT = "All Files (.*)";
         private const string FOLDERS_FILTER_TEXT = "Folders";
         private string DEFAULT_PATH;
-
-        #endregion
-
-        #region Static Variables
-
         public static bool IsOpen { get; private set; }
 
         public static bool Success { get; private set; }
@@ -162,11 +147,6 @@ namespace SimpleFileBrowser {
 			}
 		}
 #endif
-
-        #endregion
-
-        #region Variables
-
         [Header("References")]
         [SerializeField] private FileBrowserItem itemPrefab;
         [SerializeField] private FileBrowserQuickLink quickLinkPrefab;
@@ -217,11 +197,6 @@ namespace SimpleFileBrowser {
         private List<string> _pathsFollowed = new List<string>();
         // Required in RefreshFiles() function
         private PointerEventData _nullPointerEventData;
-
-        #endregion
-
-        #region Properties
-
         private string m_currentPath = string.Empty;
 
         private string CurrentPath {
@@ -344,20 +319,12 @@ namespace SimpleFileBrowser {
 
         private string SubmitButtonText { get { return submitButtonText.text; } set { submitButtonText.text = value; } }
 
-        #endregion
-
-        #region Delegates
-
         public delegate void OnSuccess(string path);
 
         public delegate void OnCancel();
 
         private OnSuccess onSuccess;
         private OnCancel onCancel;
-
-        #endregion
-
-        #region Messages
 
         private void Awake() {
             m_instance = this;
@@ -393,10 +360,6 @@ namespace SimpleFileBrowser {
                 RefreshFiles(true);
             }
         }
-
-        #endregion
-
-        #region Interface Methods
 
         public OnItemClickedHandler OnItemClicked { get { return null; } set { } }
 
@@ -435,10 +398,6 @@ namespace SimpleFileBrowser {
                 file.Deselect();
             }
         }
-
-        #endregion
-
-        #region Initialization Functions
 
         private void InitializeFiletypeIcons() {
             filetypeToIcon = new Dictionary<string, Sprite>();
@@ -524,10 +483,6 @@ namespace SimpleFileBrowser {
             quickLinksContainer.sizeDelta = new Vector2(0f, -anchoredPos.y);
         }
 
-        #endregion
-
-        #region Button Events
-
         public void OnBackButtonPressed() {
             if (_currentPathIndex > 0) {
                 CurrentPath = _pathsFollowed[--_currentPathIndex];
@@ -592,10 +547,6 @@ namespace SimpleFileBrowser {
         public void OnCancelButtonClicked() {
             OnOperationCanceled(true);
         }
-
-        #endregion
-
-        #region Other Events
 
         private void OnOperationSuccessful(string path) {
             Success = true;
@@ -668,10 +619,6 @@ namespace SimpleFileBrowser {
 
             return addedChar;
         }
-
-        #endregion
-
-        #region Helper Functions
 
         public void Show(string initialPath) {
             if (AskPermissions) {
@@ -872,10 +819,6 @@ namespace SimpleFileBrowser {
 
             return initialPath;
         }
-
-        #endregion
-
-        #region File Browser Functions (static)
 
         public static bool ShowSaveDialog(
             OnSuccess onSuccess, OnCancel onCancel,
@@ -1171,8 +1114,6 @@ namespace SimpleFileBrowser {
             return Permission.Granted;
 #endif
         }
-
-        #endregion
 
 #pragma warning restore 0649
     }

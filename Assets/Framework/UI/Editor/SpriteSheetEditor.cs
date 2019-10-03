@@ -20,8 +20,7 @@ namespace UIKit.Editor
 		private string folderpath, foldername = "Spritesheet";
 
 		private int xAxis = 4;
-		
-		#region Window Settings
+
 		[MenuItem ("Window/Essential UI Kit/Create Spritesheet from Sequence")]
 		static void  ShowWindow () {
 			SpriteSheetEditor window = EditorWindow.GetWindow<SpriteSheetEditor>(EditorPrefs.GetBool(typeof(SpriteSheetEditor).Name + "Detachable", false) ,"Create Sprite Sheet", true);
@@ -84,10 +83,7 @@ namespace UIKit.Editor
 			EditorGUI.EndChangeCheck();
 			GUILayout.EndArea();
 		}
-		#endregion
-		
-		#region Helper Functions
-		
+
 		void OnInspectorUpdate()
 		{
 			this.Repaint();
@@ -196,6 +192,5 @@ namespace UIKit.Editor
 			//fallback
 			return "Assets";
 		}
-		#endregion
 	}
 }

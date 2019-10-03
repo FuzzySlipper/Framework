@@ -116,9 +116,6 @@ namespace PixelComrades
 			End();
 		}
 
-		
-		#region Helper Functions
-
 		private void End()
 		{
 			GUILayout.Space(5);
@@ -193,7 +190,6 @@ namespace PixelComrades
 			Undo.RecordObject (clip, "Added Easing to Clip");
 			AnimationUtility.SetEditorCurve(clip, binding, proposedCurve);
 		}
-		#endregion
 	}
 #if UNITY_EDITOR
     

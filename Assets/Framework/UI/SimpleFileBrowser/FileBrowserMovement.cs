@@ -6,7 +6,6 @@ namespace SimpleFileBrowser
 #pragma warning disable 649
     public class FileBrowserMovement : MonoBehaviour
 	{
-		#region Variables
 		[SerializeField]
 		private RectTransform canvas;
 
@@ -23,9 +22,7 @@ namespace SimpleFileBrowser
 		private RecycledListView listView;
 
 		private Vector2 movePointerOffset = Vector2.zero;
-		#endregion
 
-		#region Pointer Events
 		public void OnDragStarted( BaseEventData data )
 		{
 			PointerEventData pointer = (PointerEventData) data;
@@ -63,7 +60,6 @@ namespace SimpleFileBrowser
 
 			listView.OnViewportDimensionsChanged();
 		}
-		#endregion
 	}
 #pragma warning restore 649
 }

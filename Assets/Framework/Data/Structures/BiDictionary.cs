@@ -69,8 +69,6 @@ public class BiDictionary<TFirst, TSecond> : IEnumerable<BiDictionary<TFirst, TS
 
     }
 
-    #region Exception throwing methods
-
     /// <summary>
     /// Tries to add the pair to the dictionary.
     /// Throws an exception if either element is already in the dictionary
@@ -147,10 +145,6 @@ public class BiDictionary<TFirst, TSecond> : IEnumerable<BiDictionary<TFirst, TS
         _firstToSecond.Remove(first);
     }
 
-    #endregion
-
-    #region Try methods
-
     /// <summary>
     /// Tries to add the pair to the dictionary.
     /// Returns false if either element is already in the dictionary        
@@ -224,8 +218,6 @@ public class BiDictionary<TFirst, TSecond> : IEnumerable<BiDictionary<TFirst, TS
         _firstToSecond.Remove(first);
         return true;
     }
-
-    #endregion        
 
     /// <summary>
     /// The number of pairs stored in the dictionary

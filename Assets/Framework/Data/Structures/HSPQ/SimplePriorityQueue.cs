@@ -29,7 +29,6 @@ namespace Priority_Queue
         private readonly Dictionary<TItem, IList<SimpleNode>> _itemToNodesCache;
         private readonly IList<SimpleNode> _nullNodesCache;
 
-        #region Constructors
         /// <summary>
         /// Instantiate a new Priority Queue
         /// </summary>
@@ -71,7 +70,6 @@ namespace Priority_Queue
             _itemToNodesCache = new Dictionary<TItem, IList<SimpleNode>>(itemEquality);
             _nullNodesCache = new List<SimpleNode>();
         }
-        #endregion
 
         /// <summary>
         /// Given an item of type T, returns the existing SimpleNode in the queue
@@ -372,7 +370,6 @@ namespace Priority_Queue
             }
         }
 
-        #region Try* methods for multithreading
         /// Get the head of the queue, without removing it (use TryDequeue() for that).
         /// Useful for multi-threading, where the queue may become empty between calls to Contains() and First
         /// Returns true if successful, false otherwise
@@ -507,7 +504,6 @@ namespace Priority_Queue
                 return true;
             }
         }
-        #endregion
 
         public IEnumerator<TItem> GetEnumerator()
         {

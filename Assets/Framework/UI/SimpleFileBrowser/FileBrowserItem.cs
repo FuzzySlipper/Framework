@@ -8,11 +8,7 @@ namespace SimpleFileBrowser
 #pragma warning disable 649
 	public class FileBrowserItem : ListItem, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 	{
-		#region Constants
 		private const float DOUBLE_CLICK_TIME = 0.5f;
-		#endregion
-
-		#region Variables
 		protected FileBrowser fileBrowser;
 
 		[SerializeField]
@@ -25,9 +21,6 @@ namespace SimpleFileBrowser
 		private TextMeshProUGUI nameText;
 
 		private float prevTouchTime = Mathf.NegativeInfinity;
-		#endregion
-
-		#region Properties
 		private RectTransform m_transform;
 		public RectTransform TransformComponent
 		{
@@ -44,9 +37,7 @@ namespace SimpleFileBrowser
 
 		private bool m_isDirectory;
 		public bool IsDirectory { get { return m_isDirectory; } }
-		#endregion
 
-		#region Initialization Functions
 		public void SetFileBrowser( FileBrowser fileBrowser )
 		{
 			this.fileBrowser = fileBrowser;
@@ -59,9 +50,7 @@ namespace SimpleFileBrowser
 
 			m_isDirectory = isDirectory;
 		}
-		#endregion
 
-		#region Pointer Events
 		public void OnPointerClick( PointerEventData eventData )
 		{
 			if( Time.realtimeSinceStartup - prevTouchTime < DOUBLE_CLICK_TIME )
@@ -93,9 +82,7 @@ namespace SimpleFileBrowser
 				background.color = fileBrowser.normalFileColor;
 #endif
 		}
-		#endregion
 
-		#region Other Events
 		public void Select()
 		{
 			background.color = fileBrowser.selectedFileColor;
@@ -116,7 +103,6 @@ namespace SimpleFileBrowser
 			c.a = isHidden ? 0.55f : 1f;
 			nameText.color = c;
 		}
-		#endregion
 	}
 #pragma warning restore 649
 }

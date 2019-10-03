@@ -21,11 +21,8 @@ public static class DebugExtension
         Gizmos.DrawRay(pos, leftRayDirection * length);
         Gizmos.DrawRay(pos, rightRayDirection * length);
     }
-    
-    
-    #region DebugDrawFunctions
-	
-	/// <summary>
+
+    /// <summary>
 	/// 	- Debugs a point.
 	/// </summary>
 	/// <param name='position'>
@@ -790,11 +787,7 @@ public static class DebugExtension
 	{
 		DebugCapsule(start, end, Color.white, radius, duration, depthTest);	
 	}
-	
-	#endregion
-	
-	#region GizmoDrawFunctions
-	
+
 	/// <summary>
 	/// 	- Draws a point.
 	/// </summary>
@@ -1424,11 +1417,7 @@ public static class DebugExtension
 	{
 		DrawCapsule(start, end, Color.white, radius);
 	}
-	
-	#endregion
-	
-	#region DebugFunctions
-	
+
 	/// <summary>
 	/// 	- Gets the methods of an object.
 	/// </summary>
@@ -1484,7 +1473,5 @@ public static class DebugExtension
 		
 		return (methods);
 	}
-	
-	#endregion
 }
 #endif
