@@ -5,16 +5,14 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [CreateAssetMenu]
-    public class GenericAnimation : ScriptableObject {
+    public class GenericSequence : ScriptableObject {
         
-        [SerializeField] private List<AnimationObject> _objects = new List<AnimationObject>();
-        [SerializeField] private List<SimpleAnimationEvent> _events = new List<SimpleAnimationEvent>();
-        [SerializeField] private int _maxTracks = 5;
+        [SerializeField] private List<SequenceObject> _objects = new List<SequenceObject>();
+        [SerializeField] private int _maxTracks = 2;
         [SerializeField] private float _maxDuration = 1f;
 
         public bool Looping;
         
-        public List<SimpleAnimationEvent> Events { get => _events; }
         public float MaxDuration {
             get { return _maxDuration; }
             set {
@@ -35,14 +33,14 @@ namespace PixelComrades {
                 _maxTracks = value < minMax ? minMax : value;
             }
         }
-        public List<AnimationObject> Objects { get { return _objects; } }
+        public List<SequenceObject> Objects { get { return _objects; } }
 
 
-        public void Add(AnimationObject animObject) {
+        public void Add(SequenceObject animObject) {
             _objects.Add(animObject);
         }
 
-        public void Remove(AnimationObject animObject) {
+        public void Remove(SequenceObject animObject) {
             _objects.Remove(animObject);
         }
 
@@ -52,17 +50,6 @@ namespace PixelComrades {
                 max = Mathf.Max(max, _objects[i].EndTime);
             }
             return max;
-        }
-
-        private const float EventPrecision = 0.1f;
-        
-        public SimpleAnimationEvent? FindEvent(float time) {
-            for (int i = 0; i < _events.Count; i++) {
-                if (Math.Abs(_events[i].Time - time) < EventPrecision) {
-                    return _events[i];
-                }
-            }
-            return null;
         }
     }
 }

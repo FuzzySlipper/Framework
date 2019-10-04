@@ -5,14 +5,14 @@ using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 
 namespace PixelComrades {
-    public class AnimationObjectWindow : EditorWindow {
-        private AnimationObject _currentAction;
+    public class SequenceObjectWindow : EditorWindow {
+        private SequenceObject _currentAction;
 
         public static void ShowWindow() {
-            GetWindow(typeof(AnimationObjectWindow));
+            GetWindow(typeof(SequenceObjectWindow));
         }
 
-        public void Set(AnimationObject action) {
+        public void Set(SequenceObject action) {
             _currentAction = action;
         }
 
@@ -25,7 +25,7 @@ namespace PixelComrades {
                 _currentAction.DrawEditorGui();
             }
             else {
-                GUILayout.Label("Select action");
+                GUILayout.Label("Select Object");
             }
         }
     }

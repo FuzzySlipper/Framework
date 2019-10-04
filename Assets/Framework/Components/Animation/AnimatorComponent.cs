@@ -121,4 +121,12 @@ namespace PixelComrades {
             Animation = animation;
         }
     }
+
+    public struct AnimationEventTriggered : IEntityMessage {
+        public string Event { get; }
+
+        public AnimationEventTriggered(string @event) {
+            Event = @event;
+        }
+    }
 }

@@ -32,13 +32,13 @@ namespace PixelComrades {
 
     }
 
-    [CustomEditor(typeof(GenericAnimation), true)]
-    public class GenericAnimationEditor : Editor {
+    [CustomEditor(typeof(GenericSequence), true)]
+    public class GenericSequenceEditor : Editor {
 
         public override void OnInspectorGUI() {
-            var script = (GenericAnimation) target;
+            var script = (GenericSequence) target;
             if (GUILayout.Button("Open Editor")) {
-                var window = CustomAnimationWindow.ShowWindow();
+                var window = SequencerWindow.ShowWindow();
                 window.Set(script);
             }
             base.OnInspectorGUI();

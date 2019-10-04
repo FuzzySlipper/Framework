@@ -7,22 +7,29 @@ using UnityEditor;
 using UnityEngine;
 
 namespace PixelComrades {
-    public class CustomAnimationWindow : EditorWindow {
+    public class SequencerWindow : EditorWindow {
+
+        [MenuItem("Window/Sequencer Window %#L")]
+        public static SequencerWindow ShowWindow() {
+            var window = (SequencerWindow) GetWindow(typeof(SequencerWindow), false, "Sequencer Window");
+            _myControlId = window.GetInstanceID();
+            return window;
+        }
 
         private const float TimelinePositionY = 25f;
         private const float NotchPosition = 43f;
-        private const float LabelWidth = 20;
+        private const float LabelWidth = 30;
         private const float LabelOffset = 5f;
         private const float NotchWidth = 5f;
         private const float HandleWidth = 10f;
         private static int _myControlId;
         //private readonly Dictionary<int, TempObjectValues> _playTimeChanges = new Dictionary<int, TempObjectValues>();
-        private readonly List<AnimationObject> _selectedObjects = new List<AnimationObject>();
-        private AnimationObjectWindow _objectWindow;
+        private readonly List<SequenceObject> _selectedObjects = new List<SequenceObject>();
+        private SequenceObjectWindow _objectWindow;
         private GenericMenu _addTrackMenu;
         private bool _batchSelect;
-        private GenericAnimation _currentAnimation;
-        private AnimationObject _draggedObject;
+        private GenericSequence _currentSequence;
+        private SequenceObject _draggedObject;
         private bool _endHandleDragged;
         private List<Type> _animationObjectTypes = new List<Type>();
         private float _hScrollPosition;
@@ -30,26 +37,160 @@ namespace PixelComrades {
         private float _startPositionX;
         private float _visibleDuration;
         private float _vScrollPosition;
-        private int _boxHeight = 35;
+        private int _boxHeight = 100;
         private Task _playTask;
         private float _currentTime;
         private float _visibleOffset;
         private float _visibleScale = 1f;
         private bool _paused = false;
+        private bool _cancelPlay = false;
         private WhileLoopLimiter _playLimiter = new WhileLoopLimiter(99999);
         
-        private GenericAnimation CurrentAnimation { get => _currentAnimation; set => _currentAnimation = value; }
+        private GenericSequence CurrentSequence { get => _currentSequence; set => _currentSequence = value; }
 
-        public CustomAnimationWindow() {
+        public SequencerWindow() {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             for (int a = 0; a < assemblies.Length; a++) {
                 var types = assemblies[a].GetTypes();
                 for (int t = 0; t < types.Length; t++) {
                     var type = types[t];
-                    if (type.IsSubclassOf(typeof(AnimationObject))) {
+                    if (type.IsSubclassOf(typeof(SequenceObject))) {
                         _animationObjectTypes.Add(type);
                     }
                 }
+            }
+        }
+
+        void OnDestroy() {
+            if (_playTask != null) {
+                _cancelPlay = true;
+                _playTask = null;
+            }
+        }
+
+        public void Set(GenericSequence sequence) {
+            CurrentSequence = sequence;
+        }
+        
+        private void OnGUI() {
+            if (CurrentSequence == null) {
+                GUILayout.Label("Select Sequence");
+                if (Selection.objects.Length == 1) {
+                    OnSelectionChange();
+                }
+                return;
+            }
+            if (_animationObjectTypes.Count == 0) {
+                GUILayout.Label("No Sequence Types");
+            }
+            var objs = CurrentSequence.Objects;
+            var newBatchSelect = Event.current.command || Event.current.control;
+            if (_batchSelect != newBatchSelect) {
+                _batchSelect = newBatchSelect;
+                Repaint();
+            }
+            if (Event.current.type == EventType.ScrollWheel) {
+                _visibleScale = Mathf.Clamp(_visibleScale + Mathf.Sign(Event.current.delta.y) * 0.1f, 0.1f, 100);
+                Repaint();
+            }
+            GUILayout.BeginHorizontal();
+            if (!Application.isPlaying) {
+                if (_playTask == null) {
+                    if (GUILayout.Button("PLAY")) {
+                        _playTask = TimeManager.StartUnscaled(PlayAnimation());
+                    }
+                }
+                else {
+                    if (GUILayout.Button("STOP")) {
+                        _cancelPlay = true;
+                        _playTask = null;
+                    }
+                    _paused = GUILayout.Toggle(_paused, "Paused");
+                }
+                
+            }
+            GUILayout.BeginHorizontal();
+            EditorGUIUtility.labelWidth *= 0.75f;
+            _visibleScale = EditorGUILayout.Slider("Scale:", _visibleScale, 0.1f, 10f);
+            CurrentSequence.MaxDuration = EditorGUILayout.FloatField(
+                "Max duration:",
+                CurrentSequence.MaxDuration);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            CurrentSequence.MaxTracks = EditorGUILayout.IntField("Max tracks:", CurrentSequence.MaxTracks);
+            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 50, 150);
+            if (_draggedObject == null) {
+                var newVisibleDuration = CurrentSequence.MaxDuration / _visibleScale;
+                if (Math.Abs(_visibleDuration - newVisibleDuration) > 0) {
+                    _visibleDuration = newVisibleDuration;
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            CurrentSequence.Looping = EditorGUILayout.Toggle("Looping", CurrentSequence.Looping);
+            EditorGUILayout.LabelField("Current Time: " + _currentTime.ToString("F2"));
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            var barPosition = position;
+            _currentTime = GUILayout.HorizontalSlider(_currentTime, 0, 
+                _currentSequence.MaxDuration, "box", "box", GUILayout.Height(40), GUILayout.ExpandWidth(true));
+            var centerStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
+            centerStyle.alignment = TextAnchor.UpperCenter;
+            for (int i = 0; i <= 20; i++) {
+                var percent = i * 0.05f * _visibleScale;
+                if (percent > 1) {
+                    break;
+                }
+                DrawTrackLabel(barPosition, percent , centerStyle);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(50);
+            GUILayout.EndHorizontal();
+            EditorGUIUtility.labelWidth *= 1.25f;
+            var lastRect = GUILayoutUtility.GetLastRect();
+            if (lastRect.yMax <= 1f) {
+                return;
+            }
+            var trackOffset = Mathf.FloorToInt(_vScrollPosition / _boxHeight);
+            PerformDrag(lastRect.yMax, _visibleDuration, trackOffset);
+            DrawObjects(objs, lastRect.yMax, _visibleDuration, _visibleOffset, trackOffset);
+            DrawTimeline(lastRect.yMax);
+            var vScrollVisible = CurrentSequence.MaxTracks * _boxHeight > position.height;
+            var tempMaxDuration = vScrollVisible ? CurrentSequence.MaxDuration + 0.1f : CurrentSequence.MaxDuration;
+            var hScrollVisible = _visibleDuration < tempMaxDuration;
+            if (vScrollVisible) {
+                _vScrollPosition =
+                    GUI.VerticalScrollbar(
+                        new Rect(
+                            position.width - 15f, lastRect.yMax, 15f, position.height - lastRect.yMax - (hScrollVisible ? 15f : 0f)),
+                        _vScrollPosition, position.height - lastRect.yMax - _boxHeight, 0f,
+                        CurrentSequence.MaxTracks * _boxHeight);
+            }
+            else {
+                _vScrollPosition = 0f;
+            }
+            if (hScrollVisible) {
+                _hScrollPosition =
+                    GUI.HorizontalScrollbar(
+                        new Rect(0f, position.height - 15f, position.width - (vScrollVisible ? 15f : 0f), 15f),
+                        _hScrollPosition, position.width, 0f, tempMaxDuration * position.width / _visibleDuration);
+                _visibleOffset = _hScrollPosition;
+            }
+            else {
+                _hScrollPosition = 0f;
+            }
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 1) {
+                if (_addTrackMenu == null) {
+                    _addTrackMenu = new GenericMenu();
+                    for (var i = 0; i < _animationObjectTypes.Count; i++) {
+                        _addTrackMenu.AddItem(new GUIContent(_animationObjectTypes[i].ToString()), false, CreateContextItem,
+                            _animationObjectTypes[i]);
+                    }
+                }
+                _addTrackMenu.ShowAsContext();
+                Event.current.Use();
             }
         }
 
@@ -59,15 +200,15 @@ namespace PixelComrades {
                 return;
             }
             var newObj = CreateInstance(targetType);
-            AssetDatabase.AddObjectToAsset(newObj, _currentAnimation);
+            AssetDatabase.AddObjectToAsset(newObj, _currentSequence);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
-            var animObj = newObj as AnimationObject;
-            CurrentAnimation.Add(animObj);
+            var animObj = newObj as SequenceObject;
+            CurrentSequence.Add(animObj);
             FindOpenStartTime(animObj);
             Repaint();
         }
 
-        private void FindOpenStartTime(AnimationObject animObject) {
+        private void FindOpenStartTime(SequenceObject animObject) {
             float start = animObject.StartTime;
             while (true) {
                 if (Intersects(animObject, animObject.EditingTrack, start, animObject.Duration)) {
@@ -80,10 +221,10 @@ namespace PixelComrades {
             }
         }
 
-        private bool Intersects(AnimationObject dragged, int track, float start, float duration) {
+        private bool Intersects(SequenceObject dragged, int track, float start, float duration) {
             var endTime = start + duration;
-            for (int i = 0; i < _currentAnimation.Objects.Count; i++) {
-                var obj = _currentAnimation.Objects[i];
+            for (int i = 0; i < _currentSequence.Objects.Count; i++) {
+                var obj = _currentSequence.Objects[i];
                 if (obj == dragged || obj.EditingTrack != track) {
                     continue;
                 }
@@ -94,7 +235,7 @@ namespace PixelComrades {
             return false;
         }
         
-        private void DragAction(AnimationObject dragged, float visibleDuration, float offset, int trackOffset) {
+        private void DragAction(SequenceObject dragged, float visibleDuration, float offset, int trackOffset) {
             var newStartTime = dragged.StartTime;
             var newDuration = dragged.Duration;
             var newEditingTrack = dragged.EditingTrack;
@@ -120,12 +261,13 @@ namespace PixelComrades {
                     newEditingTrack = Mathf.Clamp(newEditingTrack, 0, newEditingTrack);
                 }
             }
+            newDuration = Mathf.Abs(newDuration);
             if (dragged.StartTime != newStartTime || dragged.Duration != newDuration || dragged.EditingTrack != newEditingTrack) {
                 if (Intersects(dragged, newEditingTrack, newStartTime, newDuration) || newStartTime < 0) {
                     return;
                 }
-                if (newStartTime + newDuration > CurrentAnimation.MaxDuration) {
-                    CurrentAnimation.MaxDuration = newStartTime + newDuration;
+                if (newStartTime + newDuration > CurrentSequence.MaxDuration) {
+                    CurrentSequence.MaxDuration = newStartTime + newDuration;
                 }
                 foreach (var selectedTrack in _selectedObjects.Except(new[] {dragged})) {
                     selectedTrack.StartTime -= dragged.StartTime - newStartTime;
@@ -139,13 +281,13 @@ namespace PixelComrades {
             }
         }
 
-        private void DrawObjects(List<AnimationObject> objs, float offset, float duration, float hOffset, int trackOffset) {
+        private void DrawObjects(List<SequenceObject> objs, float offset, float duration, float hOffset, int trackOffset) {
             var maxVisibleTracks = position.height / _boxHeight + 1;
-            var maxTracks = CurrentAnimation.MaxTracks;
+            var maxTracks = CurrentSequence.MaxTracks;
             for (var i = 0; i < (maxTracks < maxVisibleTracks ? maxTracks : maxVisibleTracks); i++) {
                 var trackStyle = new GUIStyle(GUI.skin.box) {
-                    normal = {background = MakeTex(2, 2, new Color(0f, 0f, 0f, 0.1f))},
-                    name = "Track Style"
+                    normal = {background = TextureUtilities.MakeTexture(2, 2, new Color(0f, 0f, 0f, 0.1f))},
+                    name = "Track"
                 };
                 GUI.Box(new Rect(0, offset + _boxHeight * i, position.width, _boxHeight + 1), string.Empty, trackStyle);
             }
@@ -156,22 +298,31 @@ namespace PixelComrades {
                 var horizontalPosStart = position.width * (obj.StartTime / duration) - hOffset;
                 var horizontalPosEnd = position.width * (obj.EndTime / duration) - hOffset;
                 var width = horizontalPosEnd - horizontalPosStart;
-                var boxRect = new Rect(
-                    horizontalPosStart + HandleWidth, offset + _boxHeight * (obj.EditingTrack - trackOffset), width - HandleWidth * 2,
-                    _boxHeight);
-                EditorGUIUtility.AddCursorRect(boxRect, MouseCursor.Pan);
-                var boxStartHandleRect = new Rect(
-                    horizontalPosStart, offset + _boxHeight * (obj.EditingTrack - trackOffset), HandleWidth, _boxHeight);
-                EditorGUIUtility.AddCursorRect(boxStartHandleRect, MouseCursor.ResizeHorizontal);
-                GUI.Box(boxStartHandleRect, "<");
-                var boxEndHandleRect = new Rect(
-                    horizontalPosEnd - HandleWidth, offset + _boxHeight * (obj.EditingTrack - trackOffset), HandleWidth, _boxHeight);
-                EditorGUIUtility.AddCursorRect(boxEndHandleRect, MouseCursor.ResizeHorizontal);
-                GUI.Box(boxEndHandleRect, ">");
+                Rect boxRect;
+                bool startHandle = false, endHandle = false, mainHandle = false;
+                if (obj.CanResize) {
+                    boxRect = new Rect(
+                        horizontalPosStart + HandleWidth, offset + _boxHeight * (obj.EditingTrack - trackOffset), width - HandleWidth * 2,
+                        _boxHeight);
+                    EditorGUIUtility.AddCursorRect(boxRect, MouseCursor.Pan);
+                    
+                    var boxStartHandleRect = new Rect(
+                        horizontalPosStart, offset + _boxHeight * (obj.EditingTrack - trackOffset), HandleWidth, _boxHeight);
+                    EditorGUIUtility.AddCursorRect(boxStartHandleRect, MouseCursor.ResizeHorizontal);
+                    GUI.Box(boxStartHandleRect, "<");
+                    
+                    var boxEndHandleRect = new Rect(
+                        horizontalPosEnd - HandleWidth, offset + _boxHeight * (obj.EditingTrack - trackOffset), HandleWidth, _boxHeight);
+                    EditorGUIUtility.AddCursorRect(boxEndHandleRect, MouseCursor.ResizeHorizontal);
+                    GUI.Box(boxEndHandleRect, ">");
+                    startHandle = boxStartHandleRect.Contains(Event.current.mousePosition);
+                    endHandle = boxEndHandleRect.Contains(Event.current.mousePosition);
+                }
+                else {
+                    boxRect = new Rect(horizontalPosStart, offset + _boxHeight * (obj.EditingTrack - trackOffset), width,_boxHeight);
+                }
                 obj.DrawTimelineGui(boxRect);
-                var startHandle = boxStartHandleRect.Contains(Event.current.mousePosition);
-                var endHandle = boxEndHandleRect.Contains(Event.current.mousePosition);
-                var mainHandle = boxRect.Contains(Event.current.mousePosition);
+                mainHandle = boxRect.Contains(Event.current.mousePosition);
                 var alreadySelected = _selectedObjects.Contains(obj);
                 if (!_batchSelect &&
                     (Event.current.type == EventType.MouseDown || Event.current.type == EventType.ContextClick) &&
@@ -186,7 +337,7 @@ namespace PixelComrades {
                                 GUIUtility.hotControl = _myControlId;
                                 break;
                             case 2:
-                                _objectWindow = (AnimationObjectWindow) GetWindow(typeof(AnimationObjectWindow), true, "Object Editor");
+                                _objectWindow = (SequenceObjectWindow) GetWindow(typeof(SequenceObjectWindow), true, "Object Editor");
                                 _objectWindow.Set(obj);
                                 break;
                         }
@@ -224,131 +375,6 @@ namespace PixelComrades {
             }
         }
 
-        private void OnGUI() {
-            if (CurrentAnimation == null) {
-                GUILayout.Label("Select Animation");
-                if (Selection.objects.Length == 1) {
-                    OnSelectionChange();
-                }
-                return;
-            }
-            if (_animationObjectTypes.Count == 0) {
-                GUILayout.Label("No Animation Types");
-            }
-            var objs = CurrentAnimation.Objects;
-            var newBatchSelect = Event.current.command || Event.current.control;
-            if (_batchSelect != newBatchSelect) {
-                _batchSelect = newBatchSelect;
-                Repaint();
-            }
-            if (Event.current.type == EventType.ScrollWheel) {
-                _visibleScale = Mathf.Clamp(_visibleScale + Mathf.Sign(Event.current.delta.y) * 0.1f, 0.1f, 100);
-                Repaint();
-            }
-            GUILayout.BeginHorizontal();
-            if (!Application.isPlaying) {
-                if (_playTask == null) {
-                    if (GUILayout.Button("PLAY")) {
-                        _playTask = TimeManager.StartUnscaled(PlayAnimation());
-                    }
-                }
-                else {
-                    if (GUILayout.Button("STOP")) {
-                        _playTask.Cancel();
-                        _playTask = null;
-                    }
-                    _paused = GUILayout.Toggle(_paused, "Paused");
-                }
-                
-            }
-            GUILayout.BeginHorizontal();
-            EditorGUIUtility.labelWidth *= 0.75f;
-            _visibleScale = EditorGUILayout.Slider("Scale:", _visibleScale, 0.1f, 100f);
-            CurrentAnimation.MaxDuration = EditorGUILayout.FloatField(
-                "Max duration:",
-                CurrentAnimation.MaxDuration);
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            CurrentAnimation.MaxTracks = EditorGUILayout.IntField("Max tracks:", CurrentAnimation.MaxTracks);
-            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 20, 100);
-            if (_draggedObject == null) {
-                var newVisibleDuration = CurrentAnimation.MaxDuration / _visibleScale;
-                if (Math.Abs(_visibleDuration - newVisibleDuration) > 0) {
-                    _visibleDuration = newVisibleDuration;
-                }
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            CurrentAnimation.Looping = EditorGUILayout.Toggle("Looping", CurrentAnimation.Looping);
-            EditorGUILayout.LabelField("Current Time: " + _currentTime.ToString("F2"));
-            GUILayout.EndHorizontal();
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            EditorGUI.BeginChangeCheck();
-            var barPosition = position;
-            _currentTime = GUILayout.HorizontalSlider(_currentTime, 0, 
-                _currentAnimation.MaxDuration, "box", "box", GUILayout.Height(40), GUILayout.ExpandWidth(true));
-            if (EditorGUI.EndChangeCheck()) {
-                
-            }
-            var centerStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-            centerStyle.alignment = TextAnchor.UpperCenter;
-            for (int i = 0; i <= 20; i++) {
-                var percent = i * 0.05f * _visibleScale;
-                if (percent > 1) {
-                    break;
-                }
-                DrawTrackLabel(barPosition, percent , centerStyle);
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(50);
-            GUILayout.EndHorizontal();
-            EditorGUIUtility.labelWidth *= 1.25f;
-            var lastRect = GUILayoutUtility.GetLastRect();
-            if (lastRect.yMax <= 1f) {
-                return;
-            }
-            var trackOffset = Mathf.FloorToInt(_vScrollPosition / _boxHeight);
-            PerformDrag(lastRect.yMax, _visibleDuration, trackOffset);
-            DrawObjects(objs, lastRect.yMax, _visibleDuration, _visibleOffset, trackOffset);
-            DrawTimeline(lastRect.yMax);
-            var vScrollVisible = CurrentAnimation.MaxTracks * _boxHeight > position.height;
-            var tempMaxDuration = vScrollVisible ? CurrentAnimation.MaxDuration + 0.1f : CurrentAnimation.MaxDuration;
-            var hScrollVisible = _visibleDuration < tempMaxDuration;
-            if (vScrollVisible) {
-                _vScrollPosition =
-                    GUI.VerticalScrollbar(
-                        new Rect(
-                            position.width - 15f, lastRect.yMax, 15f, position.height - lastRect.yMax - (hScrollVisible ? 15f : 0f)),
-                        _vScrollPosition, position.height - lastRect.yMax - _boxHeight, 0f,
-                        CurrentAnimation.MaxTracks * _boxHeight);
-            }
-            else {
-                _vScrollPosition = 0f;
-            }
-            if (hScrollVisible) {
-                _hScrollPosition =
-                    GUI.HorizontalScrollbar(
-                        new Rect(0f, position.height - 15f, position.width - (vScrollVisible ? 15f : 0f), 15f),
-                        _hScrollPosition, position.width, 0f, tempMaxDuration * position.width / _visibleDuration);
-                _visibleOffset = _hScrollPosition;
-            }
-            else {
-                _hScrollPosition = 0f;
-            }
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 1) {
-                if (_addTrackMenu == null) {
-                    _addTrackMenu = new GenericMenu();
-                    for (var i = 0; i < _animationObjectTypes.Count; i++) {
-                        _addTrackMenu.AddItem(new GUIContent(_animationObjectTypes[i].ToString()), false, CreateContextItem,
-                            _animationObjectTypes[i]);
-                    }
-                }
-                _addTrackMenu.ShowAsContext();
-                Event.current.Use();
-            }
-        }
 
 
         private void DrawTrackLabel(Rect barPosition, float absPercent, GUIStyle style) {
@@ -362,16 +388,20 @@ namespace PixelComrades {
                 offset = -LabelOffset;
             }
             var sizeOffset = barPosition.width * 0.0001f;
-            GUI.Label(new Rect(xPos + offset, TimelinePositionY, LabelWidth, 20), (_currentAnimation.MaxDuration * percent).ToString("F1"), style);
+            GUI.Label(new Rect(xPos + offset, TimelinePositionY, LabelWidth, 20), (_currentSequence.MaxDuration * percent).ToString("F2"), style);
             GUI.DrawTexture(new Rect(xPos- sizeOffset, NotchPosition, NotchWidth, 20), Texture2D.normalTexture);
         }
 
         private IEnumerator PlayAnimation() {
-            var player = new GenericAnimationHolder(_currentAnimation);
+            _cancelPlay = false;
+            var player = new RuntimeSequence(Entity.New("Tester"),  _currentSequence);
             player.Play();
             _playLimiter.Reset();
             var lastPauseTime = 1f;
             while (_playLimiter.Advance()) {
+                if (_cancelPlay) {
+                    break;
+                }
                 var dt = _paused ? 0 : TimeManager.DeltaUnscaled;
                 _currentTime += dt;
                 if (_paused && Math.Abs(_currentTime - lastPauseTime) > 0.0001f) {
@@ -379,22 +409,30 @@ namespace PixelComrades {
                     player.SetTime(_currentTime);
                 }
                 player.Update(dt);
+                if (player.IsComplete && !_paused) {
+                    _currentTime = 0;
+                    if (!_currentSequence.Looping) {
+                        break;
+                    }
+                    player.Play();
+                }
                 yield return null;
             }
+            player.Entity.Destroy();
             _playTask = null;
         }
 
         private void OnSelectionChange() {
-            var newAnim = Selection.objects.Length == 1 ? Selection.activeObject as GenericAnimation : null;
+            var newAnim = Selection.objects.Length == 1 ? Selection.activeObject as GenericSequence : null;
             if (newAnim == null) {
                 return;
             }
-            CurrentAnimation = newAnim;
+            CurrentSequence = newAnim;
             if (_objectWindow != null) {
                 _objectWindow.Close();
             }
-            foreach (var track in CurrentAnimation.Objects) {
-                var newList = CurrentAnimation.Objects.ToList();
+            foreach (var track in CurrentSequence.Objects) {
+                var newList = CurrentSequence.Objects.ToList();
                 newList.Remove(track);
                 foreach (var otherAction in newList) {
                     if (otherAction.EditingTrack == track.EditingTrack &&
@@ -427,7 +465,7 @@ namespace PixelComrades {
 //                else {
 //                    
 //                }
-                EditorUtility.SetDirty(_currentAnimation);
+                EditorUtility.SetDirty(_currentSequence);
                 _draggedObject = null;
             }
             if (_draggedObject != null) {
@@ -436,39 +474,18 @@ namespace PixelComrades {
         }
 
         private void RemoveContextItem(object obj) {
-            var track = obj as AnimationObject;
+            var track = obj as SequenceObject;
             if (track == null) {
                 return;
             }
-            CurrentAnimation.Remove(track);
+            CurrentSequence.Remove(track);
             DestroyImmediate(track, true);
-            EditorUtility.SetDirty(_currentAnimation);
+            EditorUtility.SetDirty(_currentSequence);
             Repaint();
         }
 
         private static float RoundToPoint1(float value) {
             return (float) Math.Round(value * 100, MidpointRounding.AwayFromZero) / 100;
-        }
-
-        public void Set(GenericAnimation animation) {
-            CurrentAnimation = animation;
-        }
-
-        public static Texture2D MakeTex(int width, int height, Color col) {
-            var pix = new Color[width * height];
-            for (var i = 0; i < pix.Length; ++i)
-                pix[i] = col;
-            var result = new Texture2D(width, height);
-            result.SetPixels(pix);
-            result.Apply();
-            return result;
-        }
-
-        [MenuItem("Window/Custom Animation Editor %#L")]
-        public static CustomAnimationWindow ShowWindow() {
-            var window = (CustomAnimationWindow) GetWindow(typeof(CustomAnimationWindow), false, "Custom Animation Window");
-            _myControlId = window.GetInstanceID();
-            return window;
         }
     }
 }

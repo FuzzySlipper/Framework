@@ -31,8 +31,14 @@ namespace PixelComrades {
                 script.CancelAll();
             }
             if (GUILayout.Button("Check Editor")) {
-                script.CheckEditor();
-                Debug.Log(TimeManager.ActiveCount);
+                script.ForceEditorCheck();
+                Debug.Log(TimeManager.ActiveCount + " " + EditorApplication.update.GetInvocationList().Length);
+                foreach (var del in EditorApplication.update.GetInvocationList()) {
+                    if (del.Target == null) {
+                        continue;
+                    }
+                    Debug.Log(del.Target.GetType());
+                }
             }
             if (GUILayout.Button("Test")) {
                 TimeManager.StartTask(Test3(1.5f));

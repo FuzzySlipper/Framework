@@ -7,10 +7,10 @@ namespace PixelComrades {
     [System.Serializable]
     public sealed class GenericAnimatorComponent : IComponent {
         
-        public GenericAnimation Animation { get; }
+        public GenericSequence Sequence { get; }
 
-        public GenericAnimatorComponent(GenericAnimation animation) {
-            Animation = animation;
+        public GenericAnimatorComponent(GenericSequence sequence) {
+            Sequence = sequence;
         }
         
         public GenericAnimatorComponent(SerializationInfo info, StreamingContext context) {

@@ -201,11 +201,6 @@ namespace PixelComrades {
                 }
             }
             _lastTime = TimeUnscaled;
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                CheckEditor();
-            }
-#endif
         }
 
         private void SetDeltaEditor() {
@@ -223,15 +218,17 @@ namespace PixelComrades {
                 }
                 return;
             }
-            if (_active.Count > 0 && !_editorUpdate) {
+            if (!_editorUpdate) {
                 _editorUpdate = true;
                 _lastTime = Time;
                 EditorApplication.update += RunUpdate;
             }
-            else if (_active.Count == 0 && _editorUpdate) {
-                _editorUpdate = false;
-                EditorApplication.update -= RunUpdate;
-            }
+        }
+
+        public void ForceEditorCheck() {
+            EditorApplication.update -= RunUpdate;
+            EditorApplication.update += RunUpdate;
+            _editorUpdate = true;
         }
 #endif
     }

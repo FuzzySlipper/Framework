@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public abstract class PlayerWeaponAnimator : EntityIdentifier, IOnCreate, IAnimator, IRenderingComponent, ISystemUpdate {
+    public abstract class PlayerWeaponAnimator : EntityIdentifier, IOnCreate, IAnimator, IRenderingComponent, ISystemUpdate, 
+    IReceive<AnimationEventTriggered> {
 
         public System.Action<PlayerWeaponAnimator, string> OnAnimatorEvent;
 
@@ -17,7 +18,7 @@ namespace PixelComrades {
         private IWeaponModel _weaponModel;
         private MaterialPropertyBlock[] _blocks;
         private Renderer[] _renderers;
-        private PrefabEntity _entity;
+        private PrefabEntity _prefabEntity;
         private Vector3 _lastEventPosition;
         private Quaternion _lastEventRotation;
         private Vector3 _resetPoint;
@@ -26,6 +27,7 @@ namespace PixelComrades {
         private bool _reloading;
         protected Task ProceduralAnimation;
         protected Action AnimationAction;
+        private Entity _entity;
 
         public bool Unscaled { get { return false; } }
         public string CurrentAnimationEvent { get; protected set; }
@@ -67,7 +69,7 @@ namespace PixelComrades {
         }
 
         public virtual void OnCreate(PrefabEntity entity) {
-            _entity = entity;
+            _prefabEntity = entity;
             List<Renderer> renders = new List<Renderer>();
             for (int i = 0; i < entity.Renderers.Length; i++) {
                 if (entity.Renderers[i] == null || entity.Renderers[i].transform.CompareTag(StringConst.TagConvertedTexture) ||
@@ -78,6 +80,18 @@ namespace PixelComrades {
             }
             _renderers = renders.ToArray();
             _resetPoint = _armsPivot.localPosition;
+        }
+
+        public virtual void SetEntity(Entity entity) {
+            if (_entity != null) {
+                entity.RemoveObserver(this);
+            }
+            _entity = entity;
+            _entity.AddObserver(this);
+        }
+
+        public void Handle(AnimationEventTriggered arg) {
+            ProcessEvent(arg.Event);
         }
 
         public virtual void OnSystemUpdate(float dt) {
@@ -171,7 +185,7 @@ namespace PixelComrades {
         }
 
         public void SetRendering(RenderingMode status) {
-            _entity.SetVisible(status != RenderingMode.None);
+            _prefabEntity.SetVisible(status != RenderingMode.None);
         }
 
         public virtual void ClipEventTriggered() {

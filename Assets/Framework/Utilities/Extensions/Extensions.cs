@@ -15,6 +15,64 @@ using Random = System.Random;
 using UnityEditor;
 #endif
 namespace PixelComrades {
+
+    public static class TextureUtilities {
+        public static Texture2D MakeTexture(int width, int height, Color col) {
+            var pix = new Color[width * height];
+            for (var i = 0; i < pix.Length; ++i)
+                pix[i] = col;
+            var result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+            return result;
+        }
+
+        public static Texture2D MakeTexture(int width, int height, Color col, Color border) {
+            List<Color> pix = new List<Color>();
+            for (int w = 0; w < width; w++) {
+                pix.Add(w == 0 || w == width-1 ? border : col);
+                for (int h = 0; h < height; h++) {
+                    pix.Add(h == 0 || h == height - 1 ? border : col);
+                }
+            }
+            var result = new Texture2D(width, height);
+            result.SetPixels(pix.ToArray());
+            result.Apply();
+            return result;
+        }
+
+        public static Texture2D MakeTexture(int width, int height, Color textureColor, RectOffset border, Color borderColor) {
+            int widthInner = width;
+            width += border.left;
+            width += border.right;
+            Color[] pix = new Color[width * (height + border.top + border.bottom)];
+            for (int i = 0; i < pix.Length; i++) {
+                if (i < (border.bottom * width))
+                    pix[i] = borderColor;
+                else if (i >= ((border.bottom * width) + (height * width))) //Border Top
+                    pix[i] = borderColor;
+                else { //Center of Texture
+
+                    if ((i % width) < border.left) // Border left
+                        pix[i] = borderColor;
+                    else if ((i % width) >= (border.left + widthInner)) //Border right
+                        pix[i] = borderColor;
+                    else
+                        pix[i] = textureColor; //Color texture
+                }
+            }
+            Texture2D result = new Texture2D(width, height + border.top + border.bottom);
+            result.SetPixels(pix);
+            result.Apply();
+
+
+            return result;
+        }
+    }
+    public static class AnimationCurveExtension {
+        public static AnimationCurve ClipBoardAnimationCurve;
+    }
+    
     [Serializable]
     public class PrefabHolder {
         public GameObject Prefab;

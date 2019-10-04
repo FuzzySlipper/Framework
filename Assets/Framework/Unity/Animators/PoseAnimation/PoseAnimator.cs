@@ -3,16 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using Sirenix.OdinInspector;
-using UnityEngine.Playables;
 
 namespace PixelComrades {
     [ExecuteInEditMode]
-    public class PoseAnimator : PlayerWeaponAnimator, INotificationReceiver {
+    public class PoseAnimator : PlayerWeaponAnimator {
 
         [SerializeField] private Avatar _avatar = null;
         
         [SerializeField] private bool _isMain = true;
-        [SerializeField] private PlayableDirector _director = null;
         [SerializeField] private TweenFloat _proceduralMovement = new TweenFloat();
         [SerializeField] private MusclePose _loweredPose = null;
         [SerializeField] private MusclePose _raisedPose = null;
@@ -20,18 +18,19 @@ namespace PixelComrades {
 
         private HumanPose _pose;
         private HumanPoseHandler _hph = null;
-        private Dictionary<string, PlayableClipState> _animDictionary = new Dictionary<string, PlayableClipState>();
-        private PlayableClipState _currentAnimation;
-        private Queue<PlayableClipState> _animationClipQueue = new Queue<PlayableClipState>();
+        private Dictionary<string, RuntimeSequence> _animDictionary = new Dictionary<string, RuntimeSequence>();
+        private RuntimeSequence _currentAnimation;
+        private Queue<RuntimeSequence> _animationClipQueue = new Queue<RuntimeSequence>();
         private GenericPool<SavedMuscleInstance> _musclePool = new GenericPool<SavedMuscleInstance>(20);
         private List<SavedMuscleInstance> _currentMuscles = new List<SavedMuscleInstance>();
+        private bool _eventTriggered = false;
 
-        protected bool IsDirectorPlaying { get { return _currentAnimation != null && !_currentAnimation.Complete; } }
+        protected bool IsDirectorPlaying { get { return _currentAnimation != null && !_currentAnimation.IsComplete; } }
         public HumanPose HumanPose { get => _pose; }
         public MusclePose DefaultPose { get => WeaponModel != null ? WeaponModel.IdlePose : _defaultPose; }
-        public override string CurrentAnimation { get => _currentAnimation?.Id ?? ""; }
-        public override float CurrentAnimationLength { get => _currentAnimation != null ? (float) _currentAnimation.Clip.duration : 0f; }
-        public override float CurrentAnimationRemaining { get { return _currentAnimation?.TimeRemaining ?? 0; } }
+        public override string CurrentAnimation { get => _currentAnimation?.Sequence.name ?? ""; }
+        public override float CurrentAnimationLength { get => _currentAnimation != null ? (float) _currentAnimation.Length : 0f; }
+        public override float CurrentAnimationRemaining { get { return _currentAnimation?.Remaining ?? 0; } }
         public override bool PlayingAnimation { get { return IsDirectorPlaying || (ProceduralAnimation != null && !ProceduralAnimation.Finished); } }
 
         private static PoseAnimator _main;
@@ -57,16 +56,21 @@ namespace PixelComrades {
             Init();
         }
 
+        public override void SetEntity(Entity entity) {
+            base.SetEntity(entity);
+            foreach (var sequence in _animDictionary) {
+                sequence.Value.SetEntity(entity);
+            }
+        }
+
         public override void OnCreate(PrefabEntity entity) {
             base.OnCreate(entity);
-            var clips = Resources.LoadAll<PlayableAsset>(UnityDirs.PlayerAnimations);
+            var clips = Resources.LoadAll<GenericSequence>(UnityDirs.PlayerAnimations);
             for (int i = 0; i < clips.Length; i++) {
-                var state = new PlayableClipState(clips[i]);
-                _animDictionary.Add(state.Id, state);
+                _animDictionary.Add(clips[i].name, new RuntimeSequence( null,clips[i]));
             }
             ResetPose();
             SetPose(_defaultPose);
-            MessageKit.addObserver(Messages.PauseChanged, CheckPause);
         }
         
         public void Init() {
@@ -100,20 +104,9 @@ namespace PixelComrades {
             base.OnSystemUpdate(dt);
             RefreshPose();
             if (_currentAnimation != null) {
-                if (_currentAnimation.TimeRemaining <= 0) {
+                _currentAnimation.Update(dt);
+                if (_currentAnimation.IsComplete) {
                     ClipFinished();
-                }
-            }
-        }
-
-        private void CheckPause() {
-            Debug.Log("check pause");
-            if (_currentAnimation != null) {
-                if (Game.Paused) {
-                    _director.Pause();
-                }
-                else {
-                    _director.Resume();
                 }
             }
         }
@@ -131,21 +124,12 @@ namespace PixelComrades {
             _hph.SetHumanPose(ref _pose);
         }
 
-        public void OnNotify(Playable origin, INotification notification, object context) {
-            if (notification is AnimationEventMarker eventMarker) {
-                ProcessEvent(eventMarker.Event);
-            }
-            else if (notification is HandPoseMarker handPose && handPose.Pose != null) {
-                handPose.Pose.SetPose(this);
-            }
-        }
-
         public override bool IsAnimationComplete(string clip) {
-            return !_animDictionary.TryGetValue(clip, out var clipHolder) || clipHolder.Complete;
+            return !_animDictionary.TryGetValue(clip, out var clipHolder) || clipHolder.IsComplete;
         }
 
         public override bool IsAnimationEventComplete(string clip) {
-            return !_animDictionary.TryGetValue(clip, out var clipHolder) || clipHolder.EventTriggered;
+            return !_animDictionary.TryGetValue(clip, out var clipHolder) || _eventTriggered;
         }
 
         public override void PlayAnimation(string clip, bool overrideClip, Action action) {
@@ -158,13 +142,13 @@ namespace PixelComrades {
 
         public override void ClipEventTriggered() {
             if (_currentAnimation != null) {
-                _currentAnimation.EventTriggered = true;
+                _eventTriggered = true;
             }
             base.ClipEventTriggered();
         }
 
-        private PlayableClipState CanPlayClip(string clip, bool overrideClip) {
-            if (!_animDictionary.TryGetValue(clip, out var state) || state.Clip == null) {
+        private RuntimeSequence CanPlayClip(string clip, bool overrideClip) {
+            if (!_animDictionary.TryGetValue(clip, out var state)) {
                 return null;
             }
             if (!PlayingAnimation) {
@@ -175,7 +159,6 @@ namespace PixelComrades {
             }
             if (!overrideClip) {
                 if (!_animationClipQueue.Contains(state)) {
-                    state.Reset();
                     _animationClipQueue.Enqueue(state);
                 }
                 return null;
@@ -183,23 +166,22 @@ namespace PixelComrades {
             return state;
         }
 
-        protected virtual void PlayAnimation(PlayableClipState clip) {
+        protected virtual void PlayAnimation(RuntimeSequence clip) {
+            _eventTriggered = false;
             CurrentAnimationEvent = "";
             _currentAnimation = clip;
-            _currentAnimation.Start();
-            _director.time = 0;
-            _director.Play(clip.Clip);
+            _currentAnimation.Play();
         }
 
         public override void StopCurrentAnimation() {
-            _director.Stop();
-            _director.playableAsset = null;
+            if (_currentAnimation != null) {
+                _currentAnimation.Stop();
+            }
             _currentAnimation = null;
         }
 
         public void ClipFinished() {
-            _currentAnimation.Complete = true;
-            if (!_currentAnimation.EventTriggered) {
+            if (!_eventTriggered) {
                 ClipEventTriggered();
             }
             _currentAnimation = null;
@@ -209,6 +191,13 @@ namespace PixelComrades {
         protected override void CheckFinish() {
             if (_animationClipQueue.Count > 0) {
                 PlayAnimation(_animationClipQueue.Dequeue());
+            }
+        }
+
+        protected override void ProcessEvent(string eventName) {
+            base.ProcessEvent(eventName);
+            if (eventName == AnimationEvents.Default) {
+                _eventTriggered = true;
             }
         }
 
@@ -279,9 +268,9 @@ namespace PixelComrades {
             str.Append(ProceduralAnimation != null && !ProceduralAnimation.Finished);
             if (_currentAnimation != null) {
                 str.Append(" Remaining ");
-                str.Append(_currentAnimation.TimeRemaining);
+                str.Append(_currentAnimation.Remaining);
                 str.Append(" Event");
-                str.Append(_currentAnimation.EventTriggered);
+                str.Append(_eventTriggered);
             }
             UnityEditor.Handles.Label(transform.position, str.ToString());
             UnityEditor.Handles.color = Color.red;

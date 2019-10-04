@@ -33,7 +33,7 @@ namespace PixelComrades {
         private static IPlayerInputHandler LocalInput { get { return _local.Value?.Handler; } }
         public static bool IsCursorOverUI { get { return LocalInput.IsCursorOverUI; } }
         public static Ray GetLookTargetRay { get { return LocalInput.GetLookTargetRay; } }
-        public static Vector2 LookInput { get { return LocalInput.LookInput; } }
+        public static Vector2 LookInput { get { return LocalInput?.LookInput ?? Vector2.zero; } }
 
         public static void Assign(PlayerInputComponent component) {
             _local.Set(component);
@@ -64,7 +64,7 @@ namespace PixelComrades {
         }
         
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            if (_allInputBlocked) {
+            if (_allInputBlocked || LocalInput == null) {
                 return;
             }
             CheckDebugInput();
@@ -124,6 +124,9 @@ namespace PixelComrades {
         }
 
         private void ReceivedFocus(bool focusStatus) {
+            if (!Game.GameStarted) {
+                return;
+            }
             if (!focusStatus) {
                 Cursor.visible = true;
                 return;
