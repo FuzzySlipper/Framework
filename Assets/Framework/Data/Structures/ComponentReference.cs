@@ -18,7 +18,7 @@ namespace PixelComrades {
             return Array.Get(Index);
         }
 
-        public ref T Get<T>() {
+        public ref T Get<T>() where T : IComponent {
             return ref ((ManagedArray<T>) Array)[Index];
         }
 

@@ -8,35 +8,39 @@ namespace PixelComrades {
 
         public event System.Action OnRefreshItemList;
 
-        private EntityContainer _entityContainer;
+        private EntityContainer _container;
 
         public AbilitiesContainer(int limit = -1) {
-            _entityContainer = new EntityContainer(limit);
+            _container = new EntityContainer(limit);
         }
 
         public AbilitiesContainer(SerializationInfo info, StreamingContext context) {
-            _entityContainer = info.GetValue(nameof(_entityContainer), _entityContainer);
+            _container = info.GetValue(nameof(_container), _container);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_entityContainer), _entityContainer);
+            info.AddValue(nameof(_container), _container);
         }
 
-        public Entity this[int index] { get { return _entityContainer[index]; } }
-        public int Count { get { return _entityContainer.Count; } }
+        public Entity this[int index] { get { return _container[index]; } }
+        public int Count { get { return _container.Count; } }
         public Entity Owner { get { return this.GetEntity(); } }
-        public bool CanAdd(Entity entity) {
-            if (!_entityContainer.CanAdd(entity) || (!entity.HasComponent<AbilityData>() && !entity.HasComponent<SpellData>())) {
-                return false;
+        public bool IsFull { get { return false; } }
+
+        public bool Contains(Entity item) {
+            for (int i = 0; i < Count; i++) {
+                if (this[i] == item) {
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
 
-        public bool Add(Entity item) {
-            if (!_entityContainer.Add(item)) {
-                return false;
-            }
-            item.ParentId = this.GetEntity();
+        public void ContainerSystemSet(Entity item, int index) {
+            _container.Add(item);
+        }
+        
+        public int ContainerSystemAdd(Entity item) {
             var abilityData = item.Get<AbilityData>();
             if (abilityData == null) {
                 var spellData = item.Get<SpellData>();
@@ -45,22 +49,15 @@ namespace PixelComrades {
                 }
             }
             else {
-                AddAbility(abilityData, item);                
+                AddAbility(abilityData, item);
             }
-            item.Get<InventoryItem>().SetContainer(this);
-            var msg = new ContainerStatusChanged(this, item);
-            item.Post(msg);
-            this.GetEntity().Post(msg);
-            OnRefreshItemList.SafeInvoke();
-            return true;
+            return _container.Add(item);
         }
 
         public bool Remove(Entity entity) {
-            if (!_entityContainer.Add(entity)) {
+            if (!_container.Contains(entity)) {
                 return false;
             }
-            entity.Get<InventoryItem>()?.SetContainer(null);
-            entity.ParentId = -1;
             var msg = new ContainerStatusChanged(null, entity);
             entity.Post(msg);
             this.GetEntity().Post(msg);
@@ -69,7 +66,7 @@ namespace PixelComrades {
         }
 
         public void Clear() {
-            _entityContainer.Clear();
+            _container.Clear();
             var msg = new ContainerStatusChanged(this, null);
             this.GetEntity().Post(msg);
             OnRefreshItemList.SafeInvoke();

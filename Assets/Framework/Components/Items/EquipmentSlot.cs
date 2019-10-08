@@ -58,5 +58,9 @@ namespace PixelComrades {
         private static System.Type[] _requiredTypes = new[] {
             typeof(Equipment),
         };
+        public bool FinalCheck(Entity item, out string error) {
+            error = null;
+            return true;
+        }
     }
 }

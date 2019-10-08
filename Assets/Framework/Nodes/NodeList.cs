@@ -48,6 +48,10 @@ namespace PixelComrades {
             return false;
         }
 
+        /// <summary>
+        /// Warning: This allocates unless del is cached
+        /// </summary>
+        /// <param name="del"></param>
         public void Run(ManagedArray<T>.RefDelegate del) {
             //_list.Run(del);
             if (_list.Max == 0) {

@@ -14,5 +14,6 @@ namespace PixelComrades {
         Entity Item { get; set; }
         Transform EquipTr { get; }
         List<StatModHolder> CurrentStats { get; }
+        bool FinalCheck(Entity item, out string error);
     }
 }

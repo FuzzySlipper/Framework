@@ -7,14 +7,16 @@ namespace PixelComrades {
     public sealed class DirectionalSpriteSystem : SystemBase, IMainSystemUpdate {
 
         private NodeList<DirectionalSpriteNode> _directionalComponents;
+        private ManagedArray<DirectionalSpriteNode>.RefDelegate _del;
         
         public DirectionalSpriteSystem() {
             NodeFilter<DirectionalSpriteNode>.Setup(DirectionalSpriteNode.GetTypes());
             _directionalComponents = EntityController.GetNodeList<DirectionalSpriteNode>();
+            _del = UpdateNode;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _directionalComponents.Run(UpdateNode);
+            _directionalComponents.Run(_del);
         }
 
         private void UpdateNode(ref DirectionalSpriteNode node) {

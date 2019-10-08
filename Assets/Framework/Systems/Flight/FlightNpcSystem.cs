@@ -6,10 +6,12 @@ namespace PixelComrades {
     public class FlightNpcSystem : SystemBase, IMainSystemUpdate {
 
         private NodeList<NpcFlyingNode> _flyingList;
+        private ManagedArray<NpcFlyingNode>.RefDelegate _del;
 
         public FlightNpcSystem() {
             NodeFilter<NpcFlyingNode>.Setup(NpcFlyingNode.GetTypes());
             _flyingList = EntityController.GetNodeList<NpcFlyingNode>();
+            _del = UpdateNode;
         }
 
         public override void Dispose() {
@@ -23,7 +25,7 @@ namespace PixelComrades {
             if (Game.Paused || !Game.GameActive) {
                 return;
             }
-            _flyingList.Run(UpdateNode);
+            _flyingList.Run(_del);
         }
 
         private void UpdateNode(ref NpcFlyingNode npc) {

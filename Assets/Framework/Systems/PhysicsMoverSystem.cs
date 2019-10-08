@@ -9,11 +9,13 @@ namespace PixelComrades {
         
         private bool _frozen = false;
         private NodeList<RigidbodyMoverNode> _moverList;
+        private ManagedArray<RigidbodyMoverNode>.RefDelegate _moverDel;
         private ManagedArray<RigidbodyComponent> _rbList;
         private ManagedArray<RigidbodyComponent>.RefDelegate _rbDel;
 
         public PhysicsMoverSystem() {
             _rbDel = CheckPaused;
+            _moverDel = HandleVelocityMover;
             MessageKit.addObserver(Messages.PauseChanged, CheckPause);
         }
 
@@ -27,7 +29,7 @@ namespace PixelComrades {
                 _moverList = EntityController.GetNodeList<RigidbodyMoverNode>();
             }
             if (_moverList != null) {
-                _moverList.Run(HandleVelocityMover);
+                _moverList.Run(_moverDel);
             }
             if (_frozen) {
                 CheckRigidbodies();

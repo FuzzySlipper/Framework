@@ -270,18 +270,19 @@ namespace PixelComrades {
             }
         }
 
+        private List<string> _lines = new List<string>(); 
         //adds text to console text
         private void Add(string input, string color) {
-            List<string> lines = new List<string>();
+            _lines.Clear();
             string str = input.ToString();
             if (str.Contains("\n")) {
-                lines.AddRange(str.Split('\n'));
+                _lines.AddRange(str.Split('\n'));
             }
             else {
-                lines.Add(str);
+                _lines.Add(str);
             }
-            for (int i = 0; i < lines.Count; i++) {
-                _text.Add("<color=" + color + ">" + lines[i] + "</color>");
+            for (int i = 0; i < _lines.Count; i++) {
+                _text.Add("<color=" + color + ">" + _lines[i] + "</color>");
                 if (_text.Count > HistorySize) {
                     _text.RemoveAt(0);
                 }

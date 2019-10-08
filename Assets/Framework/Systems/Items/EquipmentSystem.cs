@@ -29,6 +29,10 @@ namespace PixelComrades {
                     return false;
                 }
             }
+            if (!holder.FinalCheck(item, out var errorMsg)) {
+                holder.LastEquipStatus = errorMsg;
+                return false;
+            }
             var equipNode = item.GetNode<EquipmentNode>();
             if (equipNode == null) {
                 holder.LastEquipStatus = "Item is bugged";
@@ -80,7 +84,7 @@ namespace PixelComrades {
             }
             var oldItem = holder.Item;
             ClearEquippedItem(holder, isSwap);
-            if (!inventory.TryAdd(oldItem)) {
+            if (!World.Get<ContainerSystem>().TryAdd(inventory, oldItem)) {
                 holder.LastEquipStatus = "Owner inventory rejected old item";
                 return false;
             }

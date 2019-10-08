@@ -5,6 +5,11 @@ namespace PixelComrades {
     public class CommandSystem : SystemBase, IMainSystemUpdate {
 
         private BufferedList<Command> _commands = new BufferedList<Command>();
+        private ManagedArray<Command>.RefDelegate _del;
+
+        public CommandSystem() {
+            _del = Update;
+        }
 
         public bool TryAddCommand(Command cmd) {
             if (!cmd.CanStart()) {
@@ -53,7 +58,7 @@ namespace PixelComrades {
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _commands.Run(Update);
+            _commands.Run(_del);
         }
     }
 }

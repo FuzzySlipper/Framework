@@ -205,6 +205,10 @@ namespace PixelComrades {
             }
         }
 
+        /// <summary>
+        /// Warning: This allocates unless del is cached
+        /// </summary>
+        /// <param name="del"></param>
         public void Run(RefDelegate del) {
             if (_max == 0) {
                 return;
@@ -221,6 +225,10 @@ namespace PixelComrades {
             }
         }
 
+        /// <summary>
+        /// Warning: This allocates unless del is cached
+        /// </summary>
+        /// <param name="del"></param>
         public void Run(Delegate del) {
             if (_max == 0) {
                 return;

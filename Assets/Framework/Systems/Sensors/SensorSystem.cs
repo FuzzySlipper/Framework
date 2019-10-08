@@ -13,12 +13,18 @@ namespace PixelComrades {
         private NodeList<SensorDetectingNode> _sensorNodes;
         private NodeList<UnitySensorNode> _unitySensorNodes;
         private NodeList<UnitOccupyingCellNode> _occupyNodes;
+        
+        private ManagedArray<SensorDetectingNode>.RefDelegate _sensorDel;
+        private ManagedArray<UnitySensorNode>.RefDelegate _unitySensorDel;
+        
         private List<Entity> _tempEnemyList = new List<Entity>();
 
         private const float HearingSectorSize = 25f;
         private const int HearingChance = 10;
 
         public SensorSystem() {
+            _sensorDel = RunUpdate;
+            _unitySensorDel = RunUpdate;
             NodeFilter<SensorDetectingNode>.Setup(SensorDetectingNode.GetTypes());
             _sensorNodes = EntityController.GetNodeList<SensorDetectingNode>();
             NodeFilter<UnitySensorNode>.Setup(UnitySensorNode.GetTypes());
@@ -40,8 +46,8 @@ namespace PixelComrades {
                 _occupyNodes = EntityController.GetNodeList<UnitOccupyingCellNode>();
             }
             if (Game.GameActive && !Game.Paused) {
-                _sensorNodes.Run(RunUpdate);
-                _unitySensorNodes.Run(RunUpdate);
+                _sensorNodes.Run(_sensorDel);
+                _unitySensorNodes.Run(_unitySensorDel);
             }
         }
 

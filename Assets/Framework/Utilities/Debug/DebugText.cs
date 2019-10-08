@@ -106,9 +106,12 @@ namespace PixelComrades {
             }
             main._threadedText.Enqueue(text);
         }
+        
+        public static bool IsActive { get { return main.Canvas.alpha > 0; } }
 
+        [Command("DebugTextToggle")]
         public static void Toggle() {
-            if (main.Canvas.alpha > 0) {
+            if (IsActive) {
                 main.Canvas.alpha = 0;
             }
             else {

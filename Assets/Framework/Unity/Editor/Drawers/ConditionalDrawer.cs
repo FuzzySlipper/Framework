@@ -5,7 +5,7 @@ using PixelComrades;
 using UnityEditor;
 using UnityEngine;
 
-//Decides if a varible should be shown in the inspector depending on another (boolean) varible
+//Decides if a variable should be shown in the inspector depending on another (boolean) variable
 [CustomPropertyDrawer(typeof(ConditionalAttribute))]
 public class ConditionalDrawer : PropertyDrawer {
 

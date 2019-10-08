@@ -6,7 +6,7 @@ using TMPro;
 
 
 namespace PixelComrades {
-    public class UIInventory : UIBasicMenu {
+    public class UIInventory : UIBasicMenu, IReceive<ContainerChanged> {
 
         [SerializeField] private TextMeshProUGUI _titleText = null;
         [SerializeField] private Transform _grid = null;
@@ -54,7 +54,7 @@ namespace PixelComrades {
                 _slots[i].Index = i;
                 _slots[i].SetItem(_inventory[i]);
             }
-            _inventory.OnRefreshItemList += RefreshInventory;
+            _inventory.Owner.AddObserver(this);
             RefreshInventory();
         }
 
@@ -72,7 +72,7 @@ namespace PixelComrades {
 
         private void ClearOld() {
             if (_inventory != null) {
-                _inventory.OnRefreshItemList -= RefreshInventory;
+                _inventory.Owner.RemoveObserver(this);
             }
         }
 
@@ -102,5 +102,8 @@ namespace PixelComrades {
             }
         }
 
+        public void Handle(ContainerChanged arg) {
+            RefreshInventory();
+        }
     }
 }

@@ -12,6 +12,8 @@ namespace PixelComrades {
         private Dictionary<int, List<System.Action>> _simpleHub = new Dictionary<int, List<System.Action>>();
         private BufferedList<IReceive> _messageReceivers = new BufferedList<IReceive>();
 
+        public EntityEventHub() {}
+
         public int Count { get { return _simpleHub.Count + _messageReceivers.Count; } }
         
         public void AddObserver<T>(IReceive<T> handler) {
@@ -63,12 +65,11 @@ namespace PixelComrades {
         }
 
         public void Post<T>(T msg) where T : IEntityMessage {
-            _messageReceivers.Run(
-                del => {
-                    (del as IReceive<T>)?.Handle(msg);
-                });
+            foreach (var del in _messageReceivers) {
+                (del as IReceive<T>)?.Handle(msg);
+            }
         }
-        
+
         public void ClearMessageTable(int messageType) {
             if (_simpleHub.ContainsKey(messageType)) {
                 _simpleHub.Remove(messageType);

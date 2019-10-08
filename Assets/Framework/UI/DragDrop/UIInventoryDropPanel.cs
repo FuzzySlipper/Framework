@@ -25,7 +25,7 @@ namespace PixelComrades {
                 UIDragDropHandler.Return();
                 return;
             }
-            if (Player.MainInventory.Add(UIDragDropHandler.CurrentData)) {
+            if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory, UIDragDropHandler.CurrentData)) {
                 UIDragDropHandler.Take();
             }
         }

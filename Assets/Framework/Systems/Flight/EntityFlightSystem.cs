@@ -7,11 +7,13 @@ namespace PixelComrades {
     public sealed class EntityFlightSystem : SystemBase, IMainSystemUpdate, IReceive<CanMoveStatusChanged>, IReceive<ChangePositionEvent>  {
 
         private NodeList<FlyingNode> _flyingList;
+        private ManagedArray<FlyingNode>.RefDelegate _del;
         
         public EntityFlightSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(FlightMoveInput)
             }));
+            _del = UpdateNode;
         }
 
         public override void Dispose() {
@@ -26,7 +28,7 @@ namespace PixelComrades {
                 _flyingList = EntityController.GetNodeList<FlyingNode>();
             }
             if (_flyingList != null) {
-                _flyingList.Run(UpdateNode);
+                _flyingList.Run(_del);
             }
         }
 

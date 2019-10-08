@@ -8,7 +8,6 @@ namespace PixelComrades {
         public string EventName;
         private const float EventDuration = 0.05f;
         
-        private GenericPool<RuntimeSequenceEvent> _pool = new GenericPool<RuntimeSequenceEvent>(1, t => t.Clear());
         public override float Duration { 
             get { return EventDuration; }
             set {}
@@ -36,15 +35,7 @@ namespace PixelComrades {
         }
 
         public override IRuntimeSequenceObject GetRuntime(IRuntimeSequence owner) {
-            var obj = _pool.New();
-            obj.Set(this, owner);
-            return obj;
-        }
-
-        public override void DisposeRuntime(IRuntimeSequenceObject runtime) {
-            if (runtime is RuntimeSequenceEvent pose) {
-                _pool.Store(pose);
-            }
+            return new RuntimeSequenceEvent(this, owner);
         }
 
         public virtual void TriggerEvent(RuntimeSequenceEvent sequenceEvent) {
@@ -60,12 +51,12 @@ namespace PixelComrades {
         public float StartTime { get => _original.StartTime; }
         public float EndTime { get => _original.EndTime; }
 
-        public void Clear() {
+        public void Dispose() {
             Owner = null;
             _original = null;
         }
         
-        public void Set(SequenceEvent original, IRuntimeSequence owner) {
+        public RuntimeSequenceEvent(SequenceEvent original, IRuntimeSequence owner) {
             _original = original;
             Owner = owner;
             _triggered = false;

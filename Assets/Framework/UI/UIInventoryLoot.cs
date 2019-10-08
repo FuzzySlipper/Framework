@@ -31,7 +31,7 @@ namespace PixelComrades {
         public void ClickDel(UISimpleGameDataButton button, PointerEventData.InputButton buttonEvent) {
             var item = button.Data as Entity;
             if (item != null) {
-                Player.MainInventory.Add(item);
+                World.Get<ContainerSystem>().TryAdd(Player.MainInventory,item);
             }
         }
 

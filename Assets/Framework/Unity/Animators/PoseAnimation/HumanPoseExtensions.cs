@@ -31,6 +31,12 @@ namespace PixelComrades {
             Target = muscle.Value;
         }
 
+        public SavedMuscleInstance(SavedMuscle muscle, float start) {
+            MuscleIndex = muscle.MuscleIndex;
+            Target = muscle.Value;
+            Start = start;
+        }
+
         public void Set(SavedMuscle muscle, float start) {
             MuscleIndex = muscle.MuscleIndex;
             Target = muscle.Value;

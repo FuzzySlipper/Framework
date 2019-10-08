@@ -170,6 +170,7 @@ namespace PixelComrades {
             _eventTriggered = false;
             CurrentAnimationEvent = "";
             _currentAnimation = clip;
+            RuntimeSequence.DebugSequence = clip;
             _currentAnimation.Play();
         }
 

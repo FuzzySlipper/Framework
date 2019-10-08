@@ -8,9 +8,19 @@ namespace PixelComrades {
     public sealed class TransformSystem : SystemBase, IReceive<DeathEvent>, IReceiveGlobalArray<SetTransformPosition>, 
     IReceiveGlobalArray<SetTransformRotation>, IReceiveGlobalArray<MoveTransform>, IReceiveGlobalArray<SetLocalTransformPosition>,
     IReceiveGlobalArray<SetLocalTransformRotation> {
-
+        private ManagedArray<MoveTransform>.Delegate _moveDel;
+        private ManagedArray<SetTransformPosition>.Delegate _setMoveDel;
+        private ManagedArray<SetTransformRotation>.Delegate _setRotDel;
+        private ManagedArray<SetLocalTransformPosition>.Delegate _setLocalMoveDel;
+        private ManagedArray<SetLocalTransformRotation>.Delegate _setLocalRotDel;
+        
         public TransformSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new []{ typeof(DisableTrOnDeath)}));
+            _moveDel = RunUpdate;
+            _setMoveDel = RunUpdate;
+            _setRotDel = RunUpdate;
+            _setLocalMoveDel = RunUpdate;
+            _setLocalRotDel = RunUpdate;
         }
         
         public void Handle(DeathEvent arg) {
@@ -20,7 +30,7 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(BufferedList<MoveTransform> arg) {
-            arg.Run(RunUpdate);
+            arg.Run(_moveDel);
         }
 
         private void RunUpdate(MoveTransform arg) {
@@ -28,7 +38,7 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(BufferedList<SetTransformPosition> arg) {
-            arg.Run(RunUpdate);
+            arg.Run(_setMoveDel);
         }
 
         private void RunUpdate(SetTransformPosition arg) {
@@ -36,7 +46,7 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(BufferedList<SetTransformRotation> arg) {
-            arg.Run(RunUpdate);
+            arg.Run(_setRotDel);
         }
 
         private void RunUpdate(SetTransformRotation arg) {
@@ -44,7 +54,7 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(BufferedList<SetLocalTransformPosition> arg) {
-            arg.Run(RunUpdate);
+            arg.Run(_setLocalMoveDel);
         }
 
         private void RunUpdate(SetLocalTransformPosition arg) {
@@ -52,7 +62,7 @@ namespace PixelComrades {
         }
         
         public void HandleGlobal(BufferedList<SetLocalTransformRotation> arg) {
-            arg.Run(RunUpdate);
+            arg.Run(_setLocalRotDel);
         }
 
         private void RunUpdate(SetLocalTransformRotation arg) {

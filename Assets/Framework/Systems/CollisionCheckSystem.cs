@@ -12,15 +12,17 @@ namespace PixelComrades {
         private static Collider[] _colliders = new Collider[25];
 
         private NodeList<CollisionCheckForwardNode> _list;
+        private ManagedArray<CollisionCheckForwardNode>.RefDelegate _del;
         
 
         public CollisionCheckSystem() {
             NodeFilter<CollisionCheckForwardNode>.Setup(CollisionCheckForwardNode.GetTypes());
             _list = EntityController.GetNodeList<CollisionCheckForwardNode>();
+            _del = UpdateNode;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _list.Run(UpdateNode);
+            _list.Run(_del);
         }
 
         private void UpdateNode(ref CollisionCheckForwardNode node) {

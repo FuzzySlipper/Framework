@@ -3,21 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public sealed class AnimationNodeTrigger {
-
-        private const float MinTriggerTime = 0.1f;
-        
-        public string Key { get; }
+    [System.Serializable]
+    public sealed class GraphTrigger {
+        public string Key;
+        [SerializeField] private float _minTriggerTime = 0.1f;
         public bool Triggered { get; private set; }
-
-        private float _timeTriggered;
-        private float _minTriggerTime;
         
-        public AnimationNodeTrigger(string key, float minTriggerTime = MinTriggerTime) {
-            Key = key;
-            _minTriggerTime = minTriggerTime;
-        }
-
+        private float _timeTriggered;
+        
         public void Reset() {
             Triggered = false;
         }

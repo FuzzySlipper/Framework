@@ -89,7 +89,7 @@ namespace PixelComrades {
 
         private void TryAddPlayer() {
             UIDragDropHandler.ClearData();
-            if (Player.MainInventory.TryAdd(Data)) {
+            if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory, Data)) {
                 Clear();
             }
         }
@@ -102,12 +102,16 @@ namespace PixelComrades {
 
         protected virtual void TryDrop() {
             var dragInventoryData = UIDragDropHandler.CurrentData.Get<InventoryItem>();
-            if (dragInventoryData.Inventory == Player.MainInventory && Player.MainInventory.TryChangeIndex(dragInventoryData.Index, Index, dragInventoryData)) {
-                Player.MainInventory.ContainerChanged();
-                UIDragDropHandler.Take();
+            if (dragInventoryData.Inventory == Player.MainInventory) {
+                if (World.Get<ContainerSystem>().TrySwap(Player.MainInventory, dragInventoryData.Index, Index)) {
+                    UIDragDropHandler.Take();
+                }
+                else {
+                    RejectDrag();
+                }
                 return;
             }
-            if (Player.MainInventory.Add(UIDragDropHandler.CurrentData, Index)) {
+            if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory, UIDragDropHandler.CurrentData, Index)) {
                 UIDragDropHandler.Take();
             }
             else {
@@ -132,20 +136,20 @@ namespace PixelComrades {
             }
             if (dragInventoryData.Inventory == Player.MainInventory &&
                 currentInventoryData.Inventory == Player.MainInventory) {
-                if (Player.MainInventory.TrySwap(dragInventoryData.Index, currentInventoryData.Index)) {
+                if (World.Get<ContainerSystem>().TrySwap(Player.MainInventory, dragInventoryData.Index, Index)) {
                     UIDragDropHandler.Take();
-                    Player.MainInventory.ContainerChanged();
-                    return;
                 }
+                else {
+                    RejectDrag();
+                }
+                return;
             }
-            if (Player.MainInventory.TryReplace(UIDragDropHandler.CurrentData, currentInventoryData.Index)) {
+            if (World.Get<ContainerSystem>().TryReplace(Player.MainInventory, UIDragDropHandler.CurrentData, currentInventoryData.Index)) {
                 UIDragDropHandler.Take();
                 UIDragDropHandler.SetItem(oldItem);
-                Player.MainInventory.ContainerChanged();
             }
             else {
                 RejectDrag();
-                Player.MainInventory.TryAdd(oldItem);
             }
         }
 

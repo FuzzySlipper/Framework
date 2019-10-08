@@ -14,10 +14,11 @@ namespace PixelComrades {
         private IMapProvider _map;
         private NodeList<UnitOccupyingCellNode> _nodeList;
         private List<BaseCell> _occupiedCells = new List<BaseCell>(50);
-
+        private ManagedArray<UnitOccupyingCellNode>.RefDelegate _del;
         public MapSystem() {
             NodeFilter<UnitOccupyingCellNode>.Setup(UnitOccupyingCellNode.GetTypes());
             _nodeList = EntityController.GetNodeList<UnitOccupyingCellNode>();
+            _del = UpdateNode;
         }
 
         public override void Dispose() {
@@ -30,7 +31,7 @@ namespace PixelComrades {
                 _occupiedCells[i].Occupied = null;
             }
             _occupiedCells.Clear();
-            _nodeList.Run(UpdateNode);
+            _nodeList.Run(_del);
         }
 
         private void UpdateNode(ref UnitOccupyingCellNode node) {

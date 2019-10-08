@@ -14,7 +14,6 @@ namespace PixelComrades {
         public abstract bool CanResize { get; }
         public abstract void DrawTimelineGui(Rect rect);
         public abstract void DrawEditorGui();
-        public abstract IRuntimeSequenceObject GetRuntime(IRuntimeSequence owner);
-        public abstract void DisposeRuntime(IRuntimeSequenceObject runtime);
+        public abstract IRuntimeSequenceObject GetRuntime(IRuntimeSequence runtimeSequence);
     }
 }

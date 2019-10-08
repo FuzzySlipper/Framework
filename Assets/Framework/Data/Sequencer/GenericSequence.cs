@@ -35,13 +35,16 @@ namespace PixelComrades {
         }
         public List<SequenceObject> Objects { get { return _objects; } }
 
-
         public void Add(SequenceObject animObject) {
             _objects.Add(animObject);
         }
 
         public void Remove(SequenceObject animObject) {
             _objects.Remove(animObject);
+        }
+
+        public RuntimeSequence GetRuntimeSequence(Entity owner) {
+            return new RuntimeSequence(owner,this);
         }
 
         public float FindEndTime() {

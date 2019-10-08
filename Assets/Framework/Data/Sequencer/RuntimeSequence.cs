@@ -5,6 +5,8 @@ using Sirenix.Utilities;
 
 namespace PixelComrades {
     public class RuntimeSequence : IRuntimeSequence {
+
+        public static RuntimeSequence DebugSequence;
         
         private List<IRuntimeSequenceObject> _allObjects = new List<IRuntimeSequenceObject>();
         private List<IRuntimeSequenceObject> _pendingObjects = new List<IRuntimeSequenceObject>();
@@ -111,8 +113,8 @@ namespace PixelComrades {
 
         public void Dispose() {
             Stop();
-            for (int i = 0; i < Sequence.Objects.Count; i++) {
-                Sequence.Objects[i].DisposeRuntime(_allObjects[i]);
+            for (int i = 0; i < _allObjects.Count; i++) {
+                _allObjects[i].Dispose();
             }
             _allObjects.Clear();
             Sequence = null;
@@ -121,13 +123,8 @@ namespace PixelComrades {
 
     public interface IRuntimeSequence {
         Entity Entity { get; }
-        float Remaining { get; }
         float CurrentTime { get; }
-        float Length { get; }
-        bool IsComplete { get; }
         GenericSequence Sequence { get; }
-        void SetTimeNormalized(float normalized);
-        void SetTime(float time);
         void Play();
         void Stop();
         void Update(float dt);

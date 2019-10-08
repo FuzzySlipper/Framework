@@ -6,10 +6,12 @@ namespace PixelComrades {
     public class FlightPhysicsSystem : SystemBase, IMainFixedUpdate {
 
         private NodeList<FlyingNode> _flyingList;
+        private ManagedArray<FlyingNode>.RefDelegate _del;
         
         public FlightPhysicsSystem() {
             NodeFilter<FlyingNode>.Setup(FlyingNode.GetTypes());
             _flyingList = EntityController.GetNodeList<FlyingNode>();
+            _del = UpdateNode;
         }
 
         public override void Dispose() {
@@ -20,9 +22,7 @@ namespace PixelComrades {
         }
 
         public void OnFixedSystemUpdate(float dt) {
-            if (_flyingList != null) {
-                _flyingList.Run(UpdateNode);
-            }
+            _flyingList.Run(_del);
         }
 
         private void UpdateNode(ref FlyingNode node) {

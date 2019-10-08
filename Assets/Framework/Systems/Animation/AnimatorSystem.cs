@@ -9,16 +9,20 @@ namespace PixelComrades {
 
         private BufferedList<PlayAnimation> _animations = new BufferedList<PlayAnimation>();
         private BufferedList<PauseMovementForClip> _moveClips = new BufferedList<PauseMovementForClip>();
-
+        private ManagedArray<PlayAnimation>.RefDelegate _animDel;
+        private ManagedArray<PauseMovementForClip>.RefDelegate _moveDel;
+        
         public AnimatorSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(DeathAnimation), typeof(HurtAnimation),
             }));
+            _animDel = CheckAnimations;
+            _moveDel = CheckMoveClips;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _animations.Run(CheckAnimations);
-            _moveClips.Run(CheckMoveClips);
+            _animations.Run(_animDel);
+            _moveClips.Run(_moveDel);
         }
 
         private void CheckAnimations(ref PlayAnimation anim) {

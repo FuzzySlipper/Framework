@@ -14,7 +14,7 @@ namespace PixelComrades {
 
         private GenericPool<TweenFloat> _floatPool = new GenericPool<TweenFloat>(0, null, SetupTween);
         private BufferedList<SpriteColorWatch> _colorList = new BufferedList<SpriteColorWatch>();
-        
+        private ManagedArray<SpriteColorWatch>.RefDelegate _del;
         private struct SpriteColorWatch {
             public SpriteColorComponent ColorComponent;
             public TweenFloat Tween;
@@ -40,10 +40,11 @@ namespace PixelComrades {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(SpriteColorComponent)
             }));
+            _del = UpdateSprite;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _colorList.Run(UpdateSprite);
+            _colorList.Run(_del);
         }
 
         private void UpdateSprite(ref SpriteColorWatch colorStage) {

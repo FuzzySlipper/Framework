@@ -37,8 +37,29 @@ namespace PixelComrades {
             return _list[slot];
         }
 
-        public bool Add(Entity item) {
-            return EquipToEmpty(item);
+        public int ContainerSystemAdd(Entity item) {
+            if (EquipToEmpty(item)) {
+                for (int i = 0; i < _list.Count; i++) {
+                    if (_list[i].Item == item) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public bool IsFull { get { return false; } }
+        public bool Contains(Entity item) {
+            for (int i = 0; i < Count; i++) {
+                if (this[i] == item) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void ContainerSystemSet(Entity item, int index) {
+            World.Get<EquipmentSystem>().TryEquip(_list[index], item);
         }
 
         public bool Remove(Entity entity) {
@@ -142,6 +163,20 @@ namespace PixelComrades {
             info.AddValue(nameof(_owner), _owner);
             info.AddValue(nameof(_action), _action);
             info.AddValue(nameof(LastEquipStatus), LastEquipStatus);
+        }
+
+        public bool FinalCheck(Entity item, out string error) {
+            var action = item.Get<Action>();
+            if (action.Primary && IsSecondary) {
+                error = "Requires Primary Slot";
+                return false;
+            }
+            if (!action.Primary && !IsSecondary) {
+                error = "Requires Secondary Slot";
+                return false;
+            }
+            error = null;
+            return true;
         }
     }
 }

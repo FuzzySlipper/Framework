@@ -21,9 +21,29 @@ namespace PixelComrades {
         public int Count { get { return _list.Count; } }
         public Entity this[int index] { get { return _list[index].Item; } }
         public Entity Owner { get { return this.GetEntity(); } }
-        
-        public bool Add(Entity item) {
-            return TryEquip(item);
+        public bool IsFull { get; }
+        public bool Contains(Entity item) {
+            for (int i = 0; i < _list.Count; i++) {
+                if (_list[i].Item == item) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void ContainerSystemSet(Entity item, int index) {
+            World.Get<EquipmentSystem>().TryEquip(_list[index], item);
+        }
+
+        public int ContainerSystemAdd(Entity item) {
+            if (TryEquip(item)) {
+                for (int i = 0; i < _list.Count; i++) {
+                    if (_list[i].Item == item) {
+                        return i;
+                    }
+                }
+            }
+            return 0;
         }
 
         public bool Remove(Entity entity) {

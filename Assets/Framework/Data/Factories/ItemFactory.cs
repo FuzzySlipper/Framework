@@ -125,7 +125,7 @@ namespace PixelComrades {
                 var item = CreateItem(list[i],1);
                 if (item != null) {
                     if (!equip.TryEquip(item)) {
-                        Player.MainInventory.Add(item);
+                        World.Get<ContainerSystem>().TryAdd(Player.MainInventory, item);
                     }
                 }
             }

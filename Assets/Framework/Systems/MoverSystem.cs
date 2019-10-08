@@ -14,15 +14,24 @@ namespace PixelComrades {
         private NodeList<SimpleMoverNode> _simpleMovers;
         private NodeList<ArcMoverNode> _arcMovers;
 
+        private ManagedArray<ForwardMoverNode>.RefDelegate _forwardDel;
+        private ManagedArray<RotateToNode>.RefDelegate _rotateDel;
+        private ManagedArray<SimpleMoverNode>.RefDelegate _simpleDel;
+        private ManagedArray<ArcMoverNode>.RefDelegate _arcDel;
+
         public MoverSystem() {
             NodeFilter<ForwardMoverNode>.Setup(ForwardMoverNode.GetTypes());
             _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
+            _forwardDel = HandleForwardMovement;
             NodeFilter<RotateToNode>.Setup(RotateToNode.GetTypes());
             _rotators = EntityController.GetNodeList<RotateToNode>();
+            _rotateDel = HandleRotation;
             NodeFilter<SimpleMoverNode>.Setup(SimpleMoverNode.GetTypes());
             _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
+            _simpleDel = HandleMoveSimple;
             NodeFilter<ArcMoverNode>.Setup(ArcMoverNode.GetTypes());
             _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
+            _arcDel = HandleArcMovement;
         }
         
         public void OnSystemUpdate(float dt, float unscaledDt) {
@@ -40,10 +49,10 @@ namespace PixelComrades {
                     _moveTweens.RemoveAt(i);
                 }
             }
-            _forwardMovers.Run(HandleForwardMovement);
-            _rotators.Run(HandleRotation);
-            _simpleMovers.Run(HandleMoveSimple);
-            _arcMovers.Run(HandleArcMovement);
+            _forwardMovers.Run(_forwardDel);
+            _rotators.Run(_rotateDel);
+            _simpleMovers.Run(_simpleDel);
+            _arcMovers.Run(_arcDel);
         }
         
         private void FinishMove(Entity owner, Vector3 moveTarget) {

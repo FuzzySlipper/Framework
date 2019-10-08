@@ -14,18 +14,9 @@ namespace PixelComrades {
 
         public override float Duration { get => _duration; set => _duration = value; }
         public override bool CanResize { get { return true; } }
-        private GenericPool<RuntimePoseAnimation> _pool = new GenericPool<RuntimePoseAnimation>(1, t=>t.Clear());
 
         public override IRuntimeSequenceObject GetRuntime(IRuntimeSequence owner) {
-            var obj = _pool.New();
-            obj.Set(this, owner);
-            return obj;
-        }
-
-        public override void DisposeRuntime(IRuntimeSequenceObject runtime) {
-            if (runtime is RuntimePoseAnimation pose) {
-                _pool.Store(pose);
-            }
+            return new RuntimePoseAnimation(this, owner);
         }
 
         public override void DrawTimelineGui(Rect rect) {
@@ -72,7 +63,7 @@ namespace PixelComrades {
         public float StartTime { get => _originalClip.StartTime; }
         public float EndTime { get => _originalClip.EndTime; }
 
-        public void Clear() {
+        public void Dispose() {
             _owner = null;
             _originalClip = null;
             _curve = null;
@@ -81,8 +72,8 @@ namespace PixelComrades {
             _started = false;
             _pose.Clear();
         }
-        
-        public void Set(PoseAnimationClip original, IRuntimeSequence owner) {
+
+        public RuntimePoseAnimation(PoseAnimationClip original, IRuntimeSequence owner) {
             _originalClip = original;
             _owner = owner;
             _curve = original.Curve;
@@ -138,13 +129,29 @@ namespace PixelComrades {
             _animator.UpdatePose();
             if (_originalClip.TargetPose == null) {
                 _pose.Clear();
-                SetupPose(_animator.DefaultPose);
+                SetupDefaultPose();
+                return;
             }
             if (_previous != null) {
                 return;
             }
             for (int i = 0; i < _pose.Count; i++) {
                 _pose[i].Start = _animator.HumanPose.muscles[_pose[i].MuscleIndex];
+            }
+        }
+
+        private void SetupDefaultPose() {
+            var targetPose = _animator.DefaultPose;
+            for (int i = 0; i < targetPose.Count; i++) {
+                var muscleIndex = targetPose.Pose[i].MuscleIndex;
+                float startPose;
+                if (_previous != null && _previous.TargetPose.HasPose(muscleIndex)) {
+                    startPose = _previous.TargetPose.GetMuscle(muscleIndex).Value;
+                }
+                else {
+                    startPose = _animator.HumanPose.muscles[muscleIndex];
+                }
+                _pose.Add(new SavedMuscleInstance(targetPose.Pose[i], startPose));
             }
         }
 

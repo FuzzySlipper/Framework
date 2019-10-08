@@ -73,6 +73,11 @@ namespace PixelComrades {
         }
         
         private void OnGUI() {
+            if (Application.isPlaying) {
+                if (RuntimeSequence.DebugSequence != null && _currentSequence != RuntimeSequence.DebugSequence.Sequence) {
+                    Set(RuntimeSequence.DebugSequence.Sequence);
+                }
+            }
             if (CurrentSequence == null) {
                 GUILayout.Label("Select Sequence");
                 if (Selection.objects.Length == 1) {
@@ -133,8 +138,14 @@ namespace PixelComrades {
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             var barPosition = position;
-            _currentTime = GUILayout.HorizontalSlider(_currentTime, 0, 
+            var currentTime = GUILayout.HorizontalSlider(_currentTime, 0, 
                 _currentSequence.MaxDuration, "box", "box", GUILayout.Height(40), GUILayout.ExpandWidth(true));
+            if (Application.isPlaying && RuntimeSequence.DebugSequence != null) {
+                _currentTime = RuntimeSequence.DebugSequence.CurrentTime;
+            }
+            else {
+                _currentTime = currentTime;
+            }
             var centerStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
             centerStyle.alignment = TextAnchor.UpperCenter;
             for (int i = 0; i <= 20; i++) {
@@ -277,6 +288,7 @@ namespace PixelComrades {
                 dragged.StartTime = newStartTime;
                 dragged.Duration = newDuration;
                 dragged.EditingTrack = newEditingTrack;
+                EditorUtility.SetDirty(dragged);
                 Repaint();
             }
         }

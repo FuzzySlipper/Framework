@@ -10,11 +10,14 @@ namespace PixelComrades {
     [Priority(Priority.Lower), AutoRegister]
     public class ActionSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ActionStateEvent> {
 
+        private ManagedArray<ActionUsingNode>.RefDelegate _del;
         private NodeList<ActionUsingNode> _nodeList;
         private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
         
         public ActionSystem() {
+            _del = UpdateNode;
             NodeFilter<ActionUsingNode>.Setup(ActionUsingNode.GetTypes());
+            _nodeList = EntityController.GetNodeList<ActionUsingNode>();
         }
 
         public override void Dispose() {
@@ -25,12 +28,7 @@ namespace PixelComrades {
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            if (_nodeList == null) {
-                _nodeList = EntityController.GetNodeList<ActionUsingNode>();
-            }
-            if (_nodeList != null) {
-                _nodeList.Run(UpdateNode);
-            }
+            _nodeList.Run(_del);
         }
 
         public void HandleGlobal(ActionStateEvent arg) {

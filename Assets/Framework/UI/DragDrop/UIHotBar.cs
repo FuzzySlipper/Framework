@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace PixelComrades {
-    public class UIHotBar : MonoSingleton<UIHotBar> {
+    public class UIHotBar : MonoSingleton<UIHotBar>, IReceive<ContainerChanged> {
 
         public static void UseSlot(int index) {
             main._slots[index].UseSlot();
@@ -64,11 +64,11 @@ namespace PixelComrades {
                 _slots[i].Clear();
             }
             if (_playerInventory != null) {
-                _playerInventory.OnRefreshItemList -= CheckSlots;
+                _playerInventory.Owner.RemoveObserver(this);
             }
             _playerInventory = Player.MainInventory;
             if (_playerInventory != null) {
-                _playerInventory.OnRefreshItemList += CheckSlots;
+                _playerInventory.Owner.AddObserver(this);
             }
         }
 
@@ -106,6 +106,9 @@ namespace PixelComrades {
             }
         }
 
+        public void Handle(ContainerChanged arg) {
+            CheckSlots();
+        }
 
         public void CheckForDuplicates(UIHotbarSlot origin) {
             for (int s = 0; s < _slots.Length; s++) {

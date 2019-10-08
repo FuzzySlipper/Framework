@@ -9,12 +9,13 @@ namespace PixelComrades {
     public abstract class BufferedList : IDisposable {
         
         private static BufferedList<BufferedList> _allLists = new BufferedList<BufferedList>(50,false);
-
+        private static ManagedArray<BufferedList>.RefDelegate _del = UpdateList;
         private bool _addToGlobalList;
+        
         
         public static void UpdateAllLists() {
             _allLists.Update();
-            _allLists.Run(UpdateList);
+            _allLists.Run(_del);
         }
 
         private static void UpdateList(ref BufferedList list) {
@@ -99,11 +100,19 @@ namespace PixelComrades {
             CurrentList.Clear();
             _pendingDeletes.Clear();
         }
-
+        
+        /// <summary>
+        /// Warning: This allocates unless del is cached
+        /// </summary>
+        /// <param name="del"></param>
         public void Run(ManagedArray<T>.RefDelegate del) {
             CurrentList.Run(del);
         }
 
+        /// <summary>
+        /// Warning: This allocates unless del is cached
+        /// </summary>
+        /// <param name="del"></param>
         public void Run(ManagedArray<T>.Delegate del) {
             CurrentList.Run(del);
         }

@@ -111,7 +111,7 @@ namespace PixelComrades {
                 return;
             }
             var sellPrice = RulesSystem.TotalPrice(item);
-            if (Player.MainInventory.TryAdd(item.GetEntity())) {
+            if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory, item.GetEntity())) {
                 Player.DefaultCurrencyHolder.ReduceValue(sellPrice);
                 FloatingText(_currentButton.RectTransform, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));
             }
@@ -153,7 +153,7 @@ namespace PixelComrades {
             var price = GameOptions.PriceEstimateSell(item.GetEntity());
             FloatingText(_currentButton.RectTransform, string.Format("Sold for {0} {1}", price, GameText.DefaultCurrencyLabel));
             Player.DefaultCurrencyHolder.AddToValue(price);
-            _sellingInventory.TryAdd(item.GetEntity());
+            World.Get<ContainerSystem>().TryAdd(_sellingInventory, item.GetEntity());
             //item.Despawn(); better to be able to buy back
             _currentButton = null;
         }

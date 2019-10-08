@@ -44,7 +44,7 @@ namespace PixelComrades {
                 }
                 UIFloatingText.InventoryMessage(_slot.LastEquipStatus, RectTransform);
                 UIDragDropHandler.Return();
-                Player.MainInventory.Add(oldItem);
+                World.Get<ContainerSystem>().TryAdd(Player.MainInventory,oldItem);
             }
         }
 

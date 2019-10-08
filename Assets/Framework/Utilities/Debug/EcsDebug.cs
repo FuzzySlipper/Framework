@@ -258,7 +258,7 @@ namespace PixelComrades {
 
         [Command("addItem")]
         public static void AddItem(string template) {
-            Player.MainInventory.Add(ItemFactory.GetItem(template));
+            World.Get<ContainerSystem>().TryAdd(Player.MainInventory, ItemFactory.GetItem(template));
         }
 
         [Command("listUpdaters")]        
@@ -332,11 +332,11 @@ namespace PixelComrades {
                 return;
             }
             System.Type type = null;
-            EntityContainer instance = null;
+            ItemInventory instance = null;
             foreach (var cRef in dict) {
                 if (cRef.Array.ArrayType.Name == typeName) {
                     type = cRef.Array.ArrayType;
-                    instance = cRef.Get<EntityContainer>();
+                    instance = cRef.Get<ItemInventory>();
                 }
             }
             if (type == null || instance == null) {

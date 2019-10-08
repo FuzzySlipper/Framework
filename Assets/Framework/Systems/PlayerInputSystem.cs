@@ -34,6 +34,7 @@ namespace PixelComrades {
         public static bool IsCursorOverUI { get { return LocalInput.IsCursorOverUI; } }
         public static Ray GetLookTargetRay { get { return LocalInput.GetLookTargetRay; } }
         public static Vector2 LookInput { get { return LocalInput?.LookInput ?? Vector2.zero; } }
+        public static Vector2 MoveInput { get { return LocalInput?.MoveInput ?? Vector2.zero; } }
 
         public static void Assign(PlayerInputComponent component) {
             _local.Set(component);
@@ -79,6 +80,7 @@ namespace PixelComrades {
                     MessageKit.post(Messages.ToggleMainMenu);
                 }
             }
+            LocalInput.RunUpdate();
         }
 
         private void CheckDebugInput() {

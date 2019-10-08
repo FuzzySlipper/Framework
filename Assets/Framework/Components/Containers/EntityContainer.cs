@@ -39,26 +39,9 @@ namespace PixelComrades {
             return _list.Contains(item);
         }
 
-        public bool Add(Entity entity) {
-            if (entity == null) {
-                return false;
-            }
-            if (!CanAdd(entity)) {
-                return false;
-            }
-            InventoryItem containerItem = entity.Get<InventoryItem>();
-            if (containerItem == null) {
-                return false;
-            }
-            if (containerItem.Inventory != null) {
-                containerItem.Inventory.Remove(entity);
-            }
+        public int Add(Entity entity) {
             _list.Add(entity);
-            return true;
-        }
-
-        public bool TryAdd(Entity item) {
-            return Add(item);
+            return _list.Count-1;
         }
 
         public bool Remove(Entity entity) {
@@ -66,13 +49,6 @@ namespace PixelComrades {
                 return false;
             }
             _list.Remove(entity);
-            return true;
-        }
-
-        public bool CanAdd(Entity entity) {
-            if (Contains(entity) || IsFull) {
-                return false;
-            }
             return true;
         }
 
@@ -98,17 +74,38 @@ namespace PixelComrades {
     }
 
     public interface IEntityContainer {
+        bool IsFull { get; }
         Entity this[int index] { get; }
         Entity Owner { get; }
         int Count { get; }
-        bool Add(Entity item);
+        bool Contains(Entity item);
+        /// <summary>
+        /// Should only be used by ContainerSystem
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        int ContainerSystemAdd(Entity item);
+        /// <summary>
+        /// Should only be used by ContainerSystem
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="index"></param>
+        void ContainerSystemSet(Entity item, int index);
         bool Remove(Entity entity);
         void Clear();
     }
 
+    public struct ContainerChanged : IEntityMessage {
+        public IEntityContainer EntityContainer { get; }
+
+        public ContainerChanged(IEntityContainer entityContainer) {
+            EntityContainer = entityContainer;
+        }
+    }
+
     public struct ContainerStatusChanged : IEntityMessage {
-        public readonly IEntityContainer EntityContainer;
-        public readonly Entity Entity;
+        public IEntityContainer EntityContainer { get; }
+        public Entity Entity { get; }
 
         public ContainerStatusChanged(IEntityContainer entityContainer, Entity entity) {
             EntityContainer = entityContainer;

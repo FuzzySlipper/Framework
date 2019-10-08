@@ -62,6 +62,15 @@ namespace PixelComrades {
             return null;
         }
 
+        public bool HasPose(int muscleIndex) {
+            for (int s = 0; s < Pose.Count; s++) {
+                if (Pose[s].MuscleIndex == muscleIndex) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void UpdateMuscleIndices(int[] indices, PoseAnimator animator) {
             animator.UpdatePose();
             for (int m = 0; m < indices.Length; m++) {

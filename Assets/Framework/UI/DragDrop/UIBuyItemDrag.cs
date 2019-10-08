@@ -53,7 +53,7 @@ namespace PixelComrades {
                 return;
             }
             var sellPrice = RulesSystem.TotalPrice(InventoryItem);
-            if (Player.MainInventory.TryAdd(Data)) {
+            if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory,Data)) {
                 StatusMessages(null, string.Format("Bought for {0} {1}", sellPrice, GameText.DefaultCurrencyLabel));
                 Clear();
             }

@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine.EventSystems;
 
 namespace PixelComrades {
-    public class UISimpleInventoryList : UIBaseActorPanel {
+    public class UISimpleInventoryList : UIBaseActorPanel, IReceive<ContainerChanged> {
 
         public System.Action<UISimpleGameDataButton, PointerEventData.InputButton> OnClickDel;
 
@@ -46,13 +46,13 @@ namespace PixelComrades {
 
         public void SetInventory(ItemInventory inventory, string title) {
             if (_inventory != null) {
-                _inventory.OnRefreshItemList -= RefreshInventory;
+                _inventory.Owner.RemoveObserver(this);
             }
             _inventory = inventory;
             if (_titleText != null) {
                 _titleText.text = title;
             }
-            _inventory.OnRefreshItemList += RefreshInventory;
+            _inventory.Owner.AddObserver(this);
             //RefreshInventory();
         }
 
@@ -86,6 +86,10 @@ namespace PixelComrades {
                 }
                 AddItem(item);
             }
+        }
+
+        public void Handle(ContainerChanged arg) {
+            RefreshInventory();
         }
     }
 }
