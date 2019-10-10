@@ -5,9 +5,9 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class UIBaseActorPanel : UIBasicMenu {
 
-        protected CharacterNode Actor;
+        protected CharacterTemplate Actor;
 
-        public virtual void SetActor(CharacterNode actor) {
+        public virtual void SetActor(CharacterTemplate actor) {
             Actor = actor;
         }
     }

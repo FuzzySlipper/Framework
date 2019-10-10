@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace PixelComrades {
     public class UIHealthBar : MonoBehaviour {
 
-        private static Dictionary<CharacterNode, UIHealthBar> _activeBars = new Dictionary<CharacterNode, UIHealthBar>();
+        private static Dictionary<CharacterTemplate, UIHealthBar> _activeBars = new Dictionary<CharacterTemplate, UIHealthBar>();
 
         private enum State {
             Waiting,
@@ -31,7 +31,7 @@ namespace PixelComrades {
             _canvasGroup = GetComponent<CanvasGroup>();
         }
 
-        private IEnumerator UpdateBar(CharacterNode unit, float offset) {
+        private IEnumerator UpdateBar(CharacterTemplate unit, float offset) {
             _healthSlider.value = unit.GetVital(_targetVital).CurrentPercent;
             //_shieldSlider.value = unit.VitalStats[Vitals.Shield].CurrentPercent;
             _endTime = TimeManager.Time + _timeOut;
@@ -63,7 +63,7 @@ namespace PixelComrades {
             ItemPool.Despawn(gameObject);
         }
 
-        private void CheckSliders(CharacterNode unit) {
+        private void CheckSliders(CharacterTemplate unit) {
             _state = State.Waiting;
             if (!_healthTween.Active) {
                 var healthPercent = unit.GetVital(_targetVital).CurrentPercent;

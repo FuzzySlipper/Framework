@@ -3,29 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class EventGenerateCollisionEvent : IActionEvent {
+    public class EventGenerateCollisionEvent : IActionEventHandler {
 
-        public ActionStateEvents StateEvent { get; }
+        public ActionState State { get; }
 
-        public EventGenerateCollisionEvent(ActionStateEvents stateEvent) {
-            StateEvent = stateEvent;
+        public EventGenerateCollisionEvent(ActionState state) {
+            State = state;
         }
 
-        public void Trigger(ActionUsingNode node, string eventName) {
-            var entity = node.Entity;
+        public void Trigger(ActionEvent ae, string eventName) {
+            var entity = ae.Origin.Entity;
             var cmdTarget = entity.Get<CommandTarget>();
             Entity target;
             if (cmdTarget != null && cmdTarget.Target != null) {
                 target = cmdTarget.Target;
             }
             else {
-                target = node.Entity;
+                target = ae.Origin.Entity;
             }
             if (target == null) {
                 return;
             }
-            var sourceNode = entity.FindNode<CollidableNode>();
-            var targetNode = target.FindNode<CollidableNode>();
+            var sourceNode = entity.FindNode<CollidableTemplate>();
+            var targetNode = target.FindNode<CollidableTemplate>();
             if (sourceNode == null || targetNode == null) {
                 return;
             }
@@ -33,8 +33,8 @@ namespace PixelComrades {
             var ce = new CollisionEvent(entity, sourceNode, targetNode, hitPoint, dir);
             target.Post(ce);
             entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, ce.HitPoint, ce.HitNormal));
-            var stateEvent = new ActionStateEvent(node.Entity, ce.Target.Entity, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), StateEvent);
-            node.Entity.Post(stateEvent);
+            var stateEvent = new ActionEvent(ae.Origin.Entity, ce.Target.Entity, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), State);
+            ae.Origin.Entity.Post(stateEvent);
         }
     }
 }

@@ -169,8 +169,17 @@ namespace PixelComrades {
         }
     }
 
+    public partial class AbilityTypes : GenericEnum<AnimationEvents, string> {
+        public const string None = "";
+        public const string Attack = "Attack";
+        public override string Parse(string value, string defaultValue) {
+            return value;
+        }
+    }
+
     public partial class AnimationEvents : GenericEnum<AnimationEvents, string> {
         public const string None = "";
+        public const string Start = "Start";
         public const string Default = "Default";
         public const string FxOn = "FxOn";
         public const string FxOff = "FxOff";
@@ -190,17 +199,23 @@ namespace PixelComrades {
         public const string PullLeftBottom = "PullLeftBottom";
         public const string PullTop = "PullTop";
         public const string PullBottom = "PullBottom";
+        public const string Reload = "Reload";
+        public const string ReloadStop = "ReloadStop";
+        public const string Miss = "Miss";
+        public const string Impact = "Impact";
+        public const string Collision = "Collision";
+        public const string CollisionOrImpact = "CollisionOrImpact";
 
-        public static ActionStateEvents ToStateEvent(string eventName) {
+        public static ActionState ToStateEvent(string eventName) {
             switch (eventName) {
                 case AnimationEvents.FxOn:
-                    return ActionStateEvents.FxOn;
+                    return ActionState.FxOn;
                 case AnimationEvents.FxOff:
-                    return ActionStateEvents.FxOff;
+                    return ActionState.FxOff;
                 case AnimationEvents.Default:
-                    return ActionStateEvents.Activate;
+                    return ActionState.Activate;
             }
-            return ActionStateEvents.None;
+            return ActionState.None;
         }
 
         public override string Parse(string value, string defaultValue) {

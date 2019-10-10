@@ -3,15 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class TeleportSequence : IActionEvent {
+    public class TeleportSequence : IActionEventHandler {
         public float Distance { get; }
 
         public TeleportSequence(float distance) {
             Distance = distance;
         }
 
-        public void Trigger(ActionUsingNode node, string eventName) {
-            node.Entity.Post(new ChangePositionEvent(node.Entity, FindPosition(node.Tr.position, node.Tr.forward, Distance)));
+        public void Trigger(ActionUsingTemplate template, string eventName) {
+            template.Entity.Post(new ChangePositionEvent(template.Entity, FindPosition(template.Tr.position, template.Tr.forward, Distance)));
             //Player.Controller.Teleport(FindPosition(msg.Owner.Tr.position, msg.Owner.Tr.forward, current.Distance));
         }
 

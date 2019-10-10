@@ -10,8 +10,8 @@ namespace PixelComrades {
         public int LastSensedTurnCount;
         public Point3 LastSensedPos;
         public bool Seen;
-        public CharacterNode Target {
-            get { return EntityController.Get(_target).GetNode<CharacterNode>(); }
+        public CharacterTemplate Target {
+            get { return EntityController.Get(_target).GetTemplate<CharacterTemplate>(); }
         }
 
         public WatchTarget(Entity target) {

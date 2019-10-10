@@ -8,7 +8,7 @@ namespace PixelComrades {
         [SerializeField] private Renderer _matSource = null;
         [SerializeField] private SimpleAnimation _animationUi = null;
 
-        public void OnActionSpawn(ActionStateEvent state) {
+        public void OnActionSpawn(ActionEvent state) {
             var focus = state.Target;
             if (focus == null) {
                 return;

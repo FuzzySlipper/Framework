@@ -10,12 +10,12 @@ namespace PixelComrades {
         public GameOptions.CachedInt MaxTurnsNpcVisible = new GameOptions.CachedInt("MaxTurnsNpcVisible");
         public bool CheckVision = false;
 
-        private NodeList<SensorDetectingNode> _sensorNodes;
-        private NodeList<UnitySensorNode> _unitySensorNodes;
-        private NodeList<UnitOccupyingCellNode> _occupyNodes;
+        private TemplateList<SensorDetectingTemplate> _sensorTemplates;
+        private TemplateList<UnitySensorTemplate> _unitySensorTemplates;
+        private TemplateList<UnitOccupyingCellTemplate> _occupyTemplates;
         
-        private ManagedArray<SensorDetectingNode>.RefDelegate _sensorDel;
-        private ManagedArray<UnitySensorNode>.RefDelegate _unitySensorDel;
+        private ManagedArray<SensorDetectingTemplate>.RefDelegate _sensorDel;
+        private ManagedArray<UnitySensorTemplate>.RefDelegate _unitySensorDel;
         
         private List<Entity> _tempEnemyList = new List<Entity>();
 
@@ -25,10 +25,10 @@ namespace PixelComrades {
         public SensorSystem() {
             _sensorDel = RunUpdate;
             _unitySensorDel = RunUpdate;
-            NodeFilter<SensorDetectingNode>.Setup(SensorDetectingNode.GetTypes());
-            _sensorNodes = EntityController.GetNodeList<SensorDetectingNode>();
-            NodeFilter<UnitySensorNode>.Setup(UnitySensorNode.GetTypes());
-            _unitySensorNodes = EntityController.GetNodeList<UnitySensorNode>();
+            TemplateFilter<SensorDetectingTemplate>.Setup(SensorDetectingTemplate.GetTypes());
+            _sensorTemplates = EntityController.GetTemplateList<SensorDetectingTemplate>();
+            TemplateFilter<UnitySensorTemplate>.Setup(UnitySensorTemplate.GetTypes());
+            _unitySensorTemplates = EntityController.GetTemplateList<UnitySensorTemplate>();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(SensorTargetsComponent)
             }));
@@ -36,42 +36,42 @@ namespace PixelComrades {
 
         public override void Dispose() {
             base.Dispose();
-            if (_occupyNodes != null) {
-                _occupyNodes.Clear();
+            if (_occupyTemplates != null) {
+                _occupyTemplates.Clear();
             }
         }
 
         public void OnPeriodicUpdate() {
-            if (_occupyNodes == null) {
-                _occupyNodes = EntityController.GetNodeList<UnitOccupyingCellNode>();
+            if (_occupyTemplates == null) {
+                _occupyTemplates = EntityController.GetTemplateList<UnitOccupyingCellTemplate>();
             }
             if (Game.GameActive && !Game.Paused) {
-                _sensorNodes.Run(_sensorDel);
-                _unitySensorNodes.Run(_unitySensorDel);
+                _sensorTemplates.Run(_sensorDel);
+                _unitySensorTemplates.Run(_unitySensorDel);
             }
         }
 
-        private void RunUpdate(ref UnitySensorNode node) {
-            node.Sensor.Sensor.Pulse();
-            node.Targets.UpdateWatchTargets();
-            for (int i = 0; i < node.Sensor.Sensor.DetectedColliders.Count; i++) {
-                var enemy = UnityToEntityBridge.GetEntity(node.Sensor.Sensor.DetectedColliders[i]);
-                if (enemy == null || enemy == node.Entity) {
+        private void RunUpdate(ref UnitySensorTemplate template) {
+            template.Sensor.Sensor.Pulse();
+            template.Targets.UpdateWatchTargets();
+            for (int i = 0; i < template.Sensor.Sensor.DetectedColliders.Count; i++) {
+                var enemy = UnityToEntityBridge.GetEntity(template.Sensor.Sensor.DetectedColliders[i]);
+                if (enemy == null || enemy == template.Entity) {
                     continue;
                 }
                 var faction = enemy.Get<FactionComponent>();
-                if (!World.Get<FactionSystem>().AreEnemies(faction, node.Faction)) {
+                if (!World.Get<FactionSystem>().AreEnemies(faction, template.Faction)) {
                     continue;
                 }
-                node.Targets.AddWatch(enemy, true);
-                Console.Log(node.Entity.DebugId + " saw " + enemy.DebugId);
+                template.Targets.AddWatch(enemy, true);
+                Console.Log(template.Entity.DebugId + " saw " + enemy.DebugId);
             }
-            if (node.Targets.WatchTargets.Count != 0) {
+            if (template.Targets.WatchTargets.Count != 0) {
                 return;
             }
             _tempEnemyList.Clear();
-            World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, node.Faction.Faction);
-            var nodePos = node.Tr.position.WorldToGenericGrid(HearingSectorSize);
+            World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, template.Faction.Faction);
+            var nodePos = template.Tr.position.WorldToGenericGrid(HearingSectorSize);
             for (int f = 0; f < _tempEnemyList.Count; f++) {
                 var enemy = _tempEnemyList[f];
                 var tr = enemy.Get<TransformComponent>();
@@ -83,27 +83,27 @@ namespace PixelComrades {
                     continue;
                 }
                 var hearingChance = HearingChance;
-                if (enemy.Tags.Contain(EntityTags.PerformingCommand)) {
+                if (enemy.Tags.Contain(EntityTags.PerformingAction)) {
                     hearingChance *= 4;
                 }
                 else if (enemy.Tags.Contain(EntityTags.Moving)) {
                     hearingChance *= 2;
                 }
                 if (Game.Random.DiceRollSucess(hearingChance)) {
-                    if (!Physics.Linecast(tr.position, node.Tr.position, LayerMasks.Walls)) {
-                        node.Targets.AddWatch(enemy, false);
-                        Console.Log(node.Entity.DebugId + " heard " + enemy.DebugId);
+                    if (!Physics.Linecast(tr.position, template.Tr.position, LayerMasks.Walls)) {
+                        template.Targets.AddWatch(enemy, false);
+                        Console.Log(template.Entity.DebugId + " heard " + enemy.DebugId);
                     }
                 }
             }
         }
 
-        private void RunUpdate(ref SensorDetectingNode node) {
-            var sensor = node.Sensor;
+        private void RunUpdate(ref SensorDetectingTemplate template) {
+            var sensor = template.Sensor;
             sensor.DetectedCells.Clear();
-            var start = node.Position.Position;
+            var start = template.Position.Position;
             sensor.LastDetectedCenter = start;
-            var fwd = node.Tr.ForwardDirection2D();
+            var fwd = template.Tr.ForwardDirection2D();
             var ls = World.Get<LineOfSightSystem>();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
@@ -113,12 +113,12 @@ namespace PixelComrades {
                     ref sensor.DetectedCells, start, start,
                     maxRowDistance, new[] {adjacent[0].ToPoint3(), adjacent[1].ToPoint3()}, dir.ToPoint3());
             }
-            for (int i = 0; i < _occupyNodes.Max; i++) {
-                if (_occupyNodes.IsInvalid(i)) {
+            for (int i = 0; i < _occupyTemplates.Max; i++) {
+                if (_occupyTemplates.IsInvalid(i)) {
                     continue;
                 }
-                var visible = _occupyNodes[i];
-                if (visible.Entity == node.Entity) {
+                var visible = _occupyTemplates[i];
+                if (visible.Entity == template.Entity) {
                     continue;
                 }
                 if (!sensor.DetectedCells.Contains(visible.Position)) {
@@ -126,7 +126,7 @@ namespace PixelComrades {
                 }
                 var isVision = true;
                 if (CheckVision) {
-                    ls.CanSeeOrHear(node.Entity, visible.Entity, out isVision);
+                    ls.CanSeeOrHear(template.Entity, visible.Entity, out isVision);
                 }
                 sensor.AddWatch(visible.Entity, isVision);
             }

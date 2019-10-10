@@ -12,14 +12,14 @@ namespace PixelComrades {
         private Vector3? _explicitPosition;
         private Quaternion? _explicitRotation;
         
-        public VisibleNode TargetTr { get; private set; }
+        public VisibleTemplate TargetTr { get; private set; }
         public Entity Target {
             get {
                 return _target;
             }
             set {
                 _target.Set(value);
-                TargetTr = value != null ? value.GetNode<VisibleNode>() : null;
+                TargetTr = value != null ? value.GetTemplate<VisibleTemplate>() : null;
                 if (value != null) {
                     _explicitRotation = null;
                     _explicitPosition = null;
@@ -50,7 +50,7 @@ namespace PixelComrades {
         }
         public bool Valid { get { return _explicitPosition != null || _target != null; } }
 
-        public CommandTarget(Entity target, Vector3? explicitPosition, VisibleNode targetTr) {
+        public CommandTarget(Entity target, Vector3? explicitPosition, VisibleTemplate targetTr) {
             _target.Set(target);
             _explicitPosition = explicitPosition;
             TargetTr = targetTr;
@@ -58,7 +58,7 @@ namespace PixelComrades {
 
         public CommandTarget(Entity target) {
             _target.Set(target);
-            TargetTr = target.GetNode<VisibleNode>();
+            TargetTr = target.GetTemplate<VisibleTemplate>();
             _explicitPosition = null;
         }
 

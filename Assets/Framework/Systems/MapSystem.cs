@@ -12,18 +12,18 @@ namespace PixelComrades {
     public sealed class MapSystem : SystemBase, IPeriodicUpdate {
 
         private IMapProvider _map;
-        private NodeList<UnitOccupyingCellNode> _nodeList;
+        private TemplateList<UnitOccupyingCellTemplate> _templateList;
         private List<BaseCell> _occupiedCells = new List<BaseCell>(50);
-        private ManagedArray<UnitOccupyingCellNode>.RefDelegate _del;
+        private ManagedArray<UnitOccupyingCellTemplate>.RefDelegate _del;
         public MapSystem() {
-            NodeFilter<UnitOccupyingCellNode>.Setup(UnitOccupyingCellNode.GetTypes());
-            _nodeList = EntityController.GetNodeList<UnitOccupyingCellNode>();
+            TemplateFilter<UnitOccupyingCellTemplate>.Setup(UnitOccupyingCellTemplate.GetTypes());
+            _templateList = EntityController.GetTemplateList<UnitOccupyingCellTemplate>();
             _del = UpdateNode;
         }
 
         public override void Dispose() {
             base.Dispose();
-            _nodeList = null;
+            _templateList = null;
         }
 
         public void OnPeriodicUpdate() {
@@ -31,21 +31,21 @@ namespace PixelComrades {
                 _occupiedCells[i].Occupied = null;
             }
             _occupiedCells.Clear();
-            _nodeList.Run(_del);
+            _templateList.Run(_del);
         }
 
-        private void UpdateNode(ref UnitOccupyingCellNode node) {
-            if (node.Entity.IsDead() || node.Tr == null) {
+        private void UpdateNode(ref UnitOccupyingCellTemplate template) {
+            if (template.Entity.IsDead() || template.Tr == null) {
                 return;
             }
-            var position = node.Tr.position.ToCellGridP3ZeroY();
-            ref var gridPos = ref node.PositionComponent.GetReference();
+            var position = template.Tr.position.ToCellGridP3ZeroY();
+            ref var gridPos = ref template.PositionComponent.GetReference();
             gridPos.Position = position;
             var cell = GetCell(position);
             if (cell == null) {
                 return;
             }
-            cell.Occupied = node.Entity;
+            cell.Occupied = template.Entity;
             _occupiedCells.Add(cell);
         }
 

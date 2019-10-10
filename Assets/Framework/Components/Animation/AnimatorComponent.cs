@@ -124,9 +124,11 @@ namespace PixelComrades {
 
     public struct AnimationEventTriggered : IEntityMessage {
         public string Event { get; }
+        public Entity Entity { get; }
 
-        public AnimationEventTriggered(string @event) {
-            Event = @event;
+        public AnimationEventTriggered(Entity entity, string eventName) {
+            Event = eventName;
+            Entity = entity;
         }
     }
 }

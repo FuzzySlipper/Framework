@@ -90,7 +90,7 @@ namespace PixelComrades {
             _thrust = _flightControl.Thrust;
             _boost = _flightControl.Boost;
             _speed = _flightControl.Speed;
-            var node = _entity.GetNode<FlyingNode>();
+            var node = _entity.GetTemplate<FlyingTemplate>();
             if (node == null) {
                 _debugString = "No Node";
                 return;

@@ -11,7 +11,7 @@ namespace PixelComrades {
         [SerializeField] private TweenFloat _statTween = new TweenFloat();
         [SerializeField] private int _targetStat = 0;
         [SerializeField] private float _maxTweenLength = 1.5f;
-        private CharacterNode _actor;
+        private CharacterTemplate _actor;
 
         public bool Unscaled { get { return true; } }
 
@@ -21,7 +21,7 @@ namespace PixelComrades {
             }
         }
 
-        public void SetNewTarget(CharacterNode actor) {
+        public void SetNewTarget(CharacterTemplate actor) {
             if (_actor != null) {
                 RemoveActor();
             }

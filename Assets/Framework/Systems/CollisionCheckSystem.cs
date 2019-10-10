@@ -11,13 +11,13 @@ namespace PixelComrades {
         private static RaycastHit[] _rayHits = new RaycastHit[25];
         private static Collider[] _colliders = new Collider[25];
 
-        private NodeList<CollisionCheckForwardNode> _list;
-        private ManagedArray<CollisionCheckForwardNode>.RefDelegate _del;
+        private TemplateList<CollisionCheckForwardTemplate> _list;
+        private ManagedArray<CollisionCheckForwardTemplate>.RefDelegate _del;
         
 
         public CollisionCheckSystem() {
-            NodeFilter<CollisionCheckForwardNode>.Setup(CollisionCheckForwardNode.GetTypes());
-            _list = EntityController.GetNodeList<CollisionCheckForwardNode>();
+            TemplateFilter<CollisionCheckForwardTemplate>.Setup(CollisionCheckForwardTemplate.GetTypes());
+            _list = EntityController.GetTemplateList<CollisionCheckForwardTemplate>();
             _del = UpdateNode;
         }
 
@@ -25,21 +25,21 @@ namespace PixelComrades {
             _list.Run(_del);
         }
 
-        private void UpdateNode(ref CollisionCheckForwardNode node) {
-            var tr = node.Tr;
+        private void UpdateNode(ref CollisionCheckForwardTemplate template) {
+            var tr = template.Tr;
             if (tr == null) {
-                node.Forward.LastPos = null;
+                template.Forward.LastPos = null;
                 return;
             }
-            if (Raycast(node.Entity, new Ray(tr.position, tr.forward), node.Forward.RayDistance, false) != null) {
-                node.Forward.LastPos = tr.position;
+            if (Raycast(template.Entity, new Ray(tr.position, tr.forward), template.Forward.RayDistance, false) != null) {
+                template.Forward.LastPos = tr.position;
                 return;
             }
-            if (node.Forward.LastPos != null) {
-                var backwardDir = (tr.position - node.Forward.LastPos.Value);
-                Raycast(node.Entity, new Ray(node.Forward.LastPos.Value, backwardDir.normalized), backwardDir.magnitude, false);
+            if (template.Forward.LastPos != null) {
+                var backwardDir = (tr.position - template.Forward.LastPos.Value);
+                Raycast(template.Entity, new Ray(template.Forward.LastPos.Value, backwardDir.normalized), backwardDir.magnitude, false);
             }
-            node.Forward.LastPos = tr.position;
+            template.Forward.LastPos = tr.position;
         }
 
         public static CollisionEvent? Raycast(Entity entity, Ray ray, float distance, bool limitCollision) {
@@ -112,9 +112,9 @@ namespace PixelComrades {
             return null;
         }
 
-        public static bool IsValidCollision(Entity entity, bool limitEnemy, Entity hitEntity, Collider collider, out CollidableNode 
-        sourceNode, out CollidableNode targetNode) {
-            sourceNode = targetNode = null;
+        public static bool IsValidCollision(Entity entity, bool limitEnemy, Entity hitEntity, Collider collider, out CollidableTemplate 
+        sourceTemplate, out CollidableTemplate targetTemplate) {
+            sourceTemplate = targetTemplate = null;
             if (hitEntity == entity) {
                 return false;
             }
@@ -132,13 +132,13 @@ namespace PixelComrades {
 #if DEBUG
             DebugLog.Add(entity.DebugId + " hit actor " + tr.name);
 #endif
-            sourceNode = entity.FindNode<CollidableNode>();
-            targetNode = hitEntity.FindNode<CollidableNode>();
-            if (sourceNode == null || targetNode == null || sourceNode == targetNode) {
+            sourceTemplate = entity.FindNode<CollidableTemplate>();
+            targetTemplate = hitEntity.FindNode<CollidableTemplate>();
+            if (sourceTemplate == null || targetTemplate == null || sourceTemplate == targetTemplate) {
                 return false;
             }
             if (limitEnemy) {
-                if (World.Get<FactionSystem>().AreEnemies(sourceNode.Entity, targetNode.Entity)) {
+                if (World.Get<FactionSystem>().AreEnemies(sourceTemplate.Entity, targetTemplate.Entity)) {
                     if (entity.Tags.IsConfused) {
                         return false;
                     }
@@ -228,7 +228,7 @@ namespace PixelComrades {
         }
     }
 
-    public class CollisionCheckForwardNode : BaseNode {
+    public class CollisionCheckForwardTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();

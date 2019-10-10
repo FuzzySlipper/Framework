@@ -8,11 +8,13 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class Action : IComponent {
 
-        public List<ActionLayer> Sequence = new List<ActionLayer>();
+        [SerializeField] private Dictionary<string, List<IActionEventHandler>> _events = new Dictionary<string, List<IActionEventHandler>>();
         public List<ICommandCost> Costs = new List<ICommandCost>();
+        public string ActionType;
         public float Range;
         public ActionFx Fx;
-        public string WeaponModel;
+        public string EquipTrigger;
+        public string AnimationTrigger;
         public bool Primary;
         public int EquippedSlot = -1;
         private CachedComponent<AmmoComponent> _ammo = new CachedComponent<AmmoComponent>();
@@ -29,25 +31,56 @@ namespace PixelComrades {
         public Action() {}
 
         public Action(SerializationInfo info, StreamingContext context) {
-            Sequence = info.GetValue(nameof(Sequence), Sequence);
+            _events = info.GetValue(nameof(_events), _events);
             Costs = info.GetValue(nameof(Costs), Costs);
             Range = info.GetValue(nameof(Range), Range);
-            WeaponModel = info.GetValue(nameof(WeaponModel), WeaponModel);
             Primary = info.GetValue(nameof(Primary), Primary);
             EquippedSlot = info.GetValue(nameof(EquippedSlot), EquippedSlot);
             _ammo = info.GetValue(nameof(_ammo), _ammo);
             Fx = ItemPool.LoadAsset<ActionFx>(info.GetValue(nameof(Fx), ""));
         }
 
+        public void AddEvent(string eventName, IActionEventHandler eventHandler) {
+            if (!_events.TryGetValue(eventName, out var list)) {
+                list = new List<IActionEventHandler>();
+                _events.Add(eventName, list);
+            }
+            list.Add(eventHandler);
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(Sequence), Sequence);
+            info.AddValue(nameof(_events), _events);
             info.AddValue(nameof(Costs), Costs);
             info.AddValue(nameof(Range), Range);
-            info.AddValue(nameof(WeaponModel), WeaponModel);
             info.AddValue(nameof(Primary), Primary);
             info.AddValue(nameof(EquippedSlot), EquippedSlot);
             info.AddValue(nameof(_ammo), _ammo);
             info.AddValue(nameof(Fx), ItemPool.GetAssetLocation(Fx));
         }
+
+        public void PostAnimationEvent(ActionEvent ae, string eventName) {
+            if (_events.TryGetValue(eventName, out var animationList)) {
+                for (int i = 0; i < animationList.Count; i++) {
+                    animationList[i].Trigger(ae, eventName);
+                }
+            }
+            ActionState state = AnimationEvents.ToStateEvent(eventName);
+            if (state == ActionState.Activate) {
+                ae.Origin.Entity.Post(
+                    new ActionEvent(
+                        ae.Origin.Entity, ae.Origin.Entity, ae.Origin.Animator.Value.GetEventPosition, ae.Origin.Animator.Value
+                            .GetEventRotation,
+                        ActionState.Activate));
+            }
+            if (state == ActionState.None) {
+                return;
+            }
+            var stateEvent = new ActionEvent(
+                ae.Origin.Entity, Entity, ae.Origin.Animator.Value.GetEventPosition, ae.Origin.Animator.Value.GetEventRotation, state);
+            if (Fx != null) {
+                Fx.TriggerEvent(stateEvent);
+            }
+        }
     }
+
 }

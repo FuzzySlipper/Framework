@@ -6,12 +6,12 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class DirectionalSpriteSystem : SystemBase, IMainSystemUpdate {
 
-        private NodeList<DirectionalSpriteNode> _directionalComponents;
-        private ManagedArray<DirectionalSpriteNode>.RefDelegate _del;
+        private TemplateList<DirectionalSpriteTemplate> _directionalComponents;
+        private ManagedArray<DirectionalSpriteTemplate>.RefDelegate _del;
         
         public DirectionalSpriteSystem() {
-            NodeFilter<DirectionalSpriteNode>.Setup(DirectionalSpriteNode.GetTypes());
-            _directionalComponents = EntityController.GetNodeList<DirectionalSpriteNode>();
+            TemplateFilter<DirectionalSpriteTemplate>.Setup(DirectionalSpriteTemplate.GetTypes());
+            _directionalComponents = EntityController.GetTemplateList<DirectionalSpriteTemplate>();
             _del = UpdateNode;
         }
 
@@ -19,44 +19,44 @@ namespace PixelComrades {
             _directionalComponents.Run(_del);
         }
 
-        private void UpdateNode(ref DirectionalSpriteNode node) {
-            node.Animator.Billboard.Apply(node.Renderer.SpriteTr, node.Animator.Backwards, ref node.Animator.LastAngleHeight);
-            if (node.Animator.Requests.Count > 0) {
-                var request = node.Animator.Requests[0];
-                if (node.Animator.Requests.Count > 1) {
-                    for (int r = 1; r < node.Animator.Requests.Count; r++) {
-                        if (!request.OverrideClip && node.Animator.Requests[r].OverrideClip) {
-                            request = node.Animator.Requests[r];
+        private void UpdateNode(ref DirectionalSpriteTemplate template) {
+            template.Animator.Billboard.Apply(template.Renderer.SpriteTr, template.Animator.Backwards, ref template.Animator.LastAngleHeight);
+            if (template.Animator.Requests.Count > 0) {
+                var request = template.Animator.Requests[0];
+                if (template.Animator.Requests.Count > 1) {
+                    for (int r = 1; r < template.Animator.Requests.Count; r++) {
+                        if (!request.OverrideClip && template.Animator.Requests[r].OverrideClip) {
+                            request = template.Animator.Requests[r];
                         }
                     }
                 }
 #if DEBUG
-                DebugLog.Add("Playing " + request.Clip + " for " + node.Entity.DebugId);
+                DebugLog.Add("Playing " + request.Clip + " for " + template.Entity.DebugId);
 #endif
-                node.PlayAnimation(request.Clip, request.OverrideClip);
-                node.Animator.Requests.Clear();
+                template.PlayAnimation(request.Clip, request.OverrideClip);
+                template.Animator.Requests.Clear();
             }
             
-            if (node.Animator.CurrentClipHolder == null || node.Animator.IsSimpleClip) {
-                node.CheckMoving();
+            if (template.Animator.CurrentClipHolder == null || template.Animator.IsSimpleClip) {
+                template.CheckMoving();
             }
             
-            var orientation = SpriteFacingControl.GetCameraSide(node.Animator.Facing, node.Renderer.SpriteTr,
-                node.Renderer.BaseTr, 5, out var inMargin);
-            if (node.Animator.Orientation == orientation || (inMargin && (orientation.IsAdjacent(node.Animator.Orientation)))) {
-                if (node.CheckFrameUpdate()) {
-                    node.UpdateSpriteFrame();
+            var orientation = SpriteFacingControl.GetCameraSide(template.Animator.Facing, template.Renderer.SpriteTr,
+                template.Renderer.BaseTr, 5, out var inMargin);
+            if (template.Animator.Orientation == orientation || (inMargin && (orientation.IsAdjacent(template.Animator.Orientation)))) {
+                if (template.CheckFrameUpdate()) {
+                    template.UpdateSpriteFrame();
                 }
                 return;
             }
-            node.Animator.Orientation = orientation;
-            node.CheckFrameUpdate();
-            node.UpdateSpriteFrame();
+            template.Animator.Orientation = orientation;
+            template.CheckFrameUpdate();
+            template.UpdateSpriteFrame();
         }
 
     }
 
-    public class DirectionalSpriteNode : BaseNode {
+    public class DirectionalSpriteTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<DirectionalSpriteAnimationComponent> _animator = new CachedComponent<DirectionalSpriteAnimationComponent>();

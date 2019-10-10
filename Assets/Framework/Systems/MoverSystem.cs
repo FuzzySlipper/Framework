@@ -9,28 +9,28 @@ namespace PixelComrades {
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
         private List<MoveTweenEvent> _moveTweens = new List<MoveTweenEvent>();
-        private NodeList<ForwardMoverNode> _forwardMovers;
-        private NodeList<RotateToNode> _rotators;
-        private NodeList<SimpleMoverNode> _simpleMovers;
-        private NodeList<ArcMoverNode> _arcMovers;
+        private TemplateList<ForwardMoverTemplate> _forwardMovers;
+        private TemplateList<RotateToTemplate> _rotators;
+        private TemplateList<SimpleMoverTemplate> _simpleMovers;
+        private TemplateList<ArcMoverTemplate> _arcMovers;
 
-        private ManagedArray<ForwardMoverNode>.RefDelegate _forwardDel;
-        private ManagedArray<RotateToNode>.RefDelegate _rotateDel;
-        private ManagedArray<SimpleMoverNode>.RefDelegate _simpleDel;
-        private ManagedArray<ArcMoverNode>.RefDelegate _arcDel;
+        private ManagedArray<ForwardMoverTemplate>.RefDelegate _forwardDel;
+        private ManagedArray<RotateToTemplate>.RefDelegate _rotateDel;
+        private ManagedArray<SimpleMoverTemplate>.RefDelegate _simpleDel;
+        private ManagedArray<ArcMoverTemplate>.RefDelegate _arcDel;
 
         public MoverSystem() {
-            NodeFilter<ForwardMoverNode>.Setup(ForwardMoverNode.GetTypes());
-            _forwardMovers = EntityController.GetNodeList<ForwardMoverNode>();
+            TemplateFilter<ForwardMoverTemplate>.Setup(ForwardMoverTemplate.GetTypes());
+            _forwardMovers = EntityController.GetTemplateList<ForwardMoverTemplate>();
             _forwardDel = HandleForwardMovement;
-            NodeFilter<RotateToNode>.Setup(RotateToNode.GetTypes());
-            _rotators = EntityController.GetNodeList<RotateToNode>();
+            TemplateFilter<RotateToTemplate>.Setup(RotateToTemplate.GetTypes());
+            _rotators = EntityController.GetTemplateList<RotateToTemplate>();
             _rotateDel = HandleRotation;
-            NodeFilter<SimpleMoverNode>.Setup(SimpleMoverNode.GetTypes());
-            _simpleMovers = EntityController.GetNodeList<SimpleMoverNode>();
+            TemplateFilter<SimpleMoverTemplate>.Setup(SimpleMoverTemplate.GetTypes());
+            _simpleMovers = EntityController.GetTemplateList<SimpleMoverTemplate>();
             _simpleDel = HandleMoveSimple;
-            NodeFilter<ArcMoverNode>.Setup(ArcMoverNode.GetTypes());
-            _arcMovers = EntityController.GetNodeList<ArcMoverNode>();
+            TemplateFilter<ArcMoverTemplate>.Setup(ArcMoverTemplate.GetTypes());
+            _arcMovers = EntityController.GetTemplateList<ArcMoverTemplate>();
             _arcDel = HandleArcMovement;
         }
         
@@ -61,7 +61,7 @@ namespace PixelComrades {
             owner.Get<MoveTarget>()?.Complete();
         }
 
-        private void HandleMoveSimple(ref SimpleMoverNode mover) {
+        private void HandleMoveSimple(ref SimpleMoverTemplate mover) {
             var entity = mover.Entity;
             if (entity.IsDestroyed() || !entity.Tags.Contain(EntityTags.Moving)) {
                 return;
@@ -109,7 +109,7 @@ namespace PixelComrades {
         //    }
         //}
 
-        private void HandleArcMovement(ref ArcMoverNode mover) {
+        private void HandleArcMovement(ref ArcMoverTemplate mover) {
             var entity = mover.Entity;
             if (entity.IsDestroyed() || !entity.Tags.Contain(EntityTags.Moving)) {
                 return;
@@ -124,7 +124,7 @@ namespace PixelComrades {
             }
         }
 
-        private void HandleForwardMovement(ref ForwardMoverNode mover) {
+        private void HandleForwardMovement(ref ForwardMoverTemplate mover) {
             var entity = mover.Entity;
             if (!entity.Tags.Contain(EntityTags.Moving) || mover.Tr == null) {
                 return;
@@ -133,7 +133,7 @@ namespace PixelComrades {
             mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * ms * TimeManager.DeltaTime));
         }
 
-        private void HandleRotation(ref RotateToNode r) {
+        private void HandleRotation(ref RotateToTemplate r) {
             if (r.Entity.IsDestroyed()) {
                 return;
             }
@@ -200,7 +200,7 @@ namespace PixelComrades {
             Origin = origin;
         }
 
-        public StartMoveEvent(Entity origin, VisibleNode follow) {
+        public StartMoveEvent(Entity origin, VisibleTemplate follow) {
             MoveTarget = follow.position;
             Follow = follow.Tr;
             Origin = origin;
@@ -252,7 +252,7 @@ namespace PixelComrades {
             Force = (moveTarget - Rb.position).normalized * force;
         }
     }
-    public class ForwardMoverNode : BaseNode {
+    public class ForwardMoverTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
@@ -275,7 +275,7 @@ namespace PixelComrades {
         }
     }
 
-    public class RotateToNode : BaseNode {
+    public class RotateToTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
@@ -298,7 +298,7 @@ namespace PixelComrades {
         }
     }
 
-    public class ArcMoverNode : BaseNode {
+    public class ArcMoverTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();
@@ -321,7 +321,7 @@ namespace PixelComrades {
         }
     }
 
-    public class SimpleMoverNode : BaseNode {
+    public class SimpleMoverTemplate : BaseTemplate {
 
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
         private CachedComponent<ColliderComponent> _collider = new CachedComponent<ColliderComponent>();

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public class ActionFxSystem : SystemBase, IReceive<DeathEvent>, IReceive<ActionStateEvent>,
+    public class ActionFxSystem : SystemBase, IReceive<DeathEvent>, IReceive<ActionEvent>,
         IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent>, IReceive<CollisionEvent> {
         
         public ActionFxSystem() {
@@ -13,17 +13,17 @@ namespace PixelComrades {
             }));
         }
 
-        public void TriggerSpawn(SpawnOnEvent spawnEvent, ActionStateEvent arg) {
-            if (arg.State == spawnEvent.EndEvent && spawnEvent.ActiveGameObject != null) {
+        public void TriggerSpawn(SpawnOnEvent spawnEvent, ActionEvent arg) {
+            if (arg.State == spawnEvent.End && spawnEvent.ActiveGameObject != null) {
                 ItemPool.Despawn(spawnEvent.ActiveGameObject);
             }
-            else if (arg.State == spawnEvent.StartEvent && spawnEvent.Prefab != null) {
+            else if (arg.State == spawnEvent.Start && spawnEvent.Prefab != null) {
                 var animData = arg.Origin.Entity.Find<AnimatorComponent>();
                 var spawnPos = animData?.Value?.GetEventPosition ?? (arg.Origin.Tr != null ? arg.Origin.Tr.position : Vector3.zero);
                 var spawnRot = animData?.Value?.GetEventRotation ??
                                (arg.Origin.Tr != null ? arg.Origin.Tr.rotation : Quaternion.identity);
                 spawnEvent.ActiveGameObject = ItemPool.Spawn(spawnEvent.Prefab, spawnPos, spawnRot);
-                if (spawnEvent.EndEvent == ActionStateEvents.None) {
+                if (spawnEvent.End == ActionState.None) {
                     spawnEvent.ActiveGameObject = null;
                 }
             }
@@ -36,7 +36,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Handle(ActionStateEvent arg) {
+        public void Handle(ActionEvent arg) {
             var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Fx;
             if (data != null) {
                 data.TriggerEvent(arg);
@@ -47,9 +47,9 @@ namespace PixelComrades {
             var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Fx;
             if (data != null) {
                 data.TriggerEvent(
-                    new ActionStateEvent(
+                    new ActionEvent(
                         arg.Origin, arg.Target, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionStateEvents.Collision));
+                        ActionState.Collision));
             }
         }
 
@@ -57,9 +57,9 @@ namespace PixelComrades {
             var data = arg.EntityHit.Find<ActionFxComponent>()?.Fx;
             if (data != null) {
                 data.TriggerEvent(
-                    new ActionStateEvent(
+                    new ActionEvent(
                         arg.EntityHit, null, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionStateEvents.Collision));
+                        ActionState.Collision));
             }
         }
 
@@ -67,9 +67,9 @@ namespace PixelComrades {
             var data = arg.Target.Entity.Find<ActionFxComponent>()?.Fx;
             if (data != null) {
                 data.TriggerEvent(
-                    new ActionStateEvent(
+                    new ActionEvent(
                         arg.Origin, arg.Target, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionStateEvents.Collision));
+                        ActionState.Collision));
             }
         }
 

@@ -9,10 +9,10 @@ namespace PixelComrades {
         [SerializeField] private int _modLimit = 5;
 
         private List<UIModIcon> _active = new List<UIModIcon>();
-        private CharacterNode _actor;
+        private CharacterTemplate _actor;
         private List<ModEntry> _mods = new List<ModEntry>();
 
-        public void SetupActor(CharacterNode actor) {
+        public void SetupActor(CharacterTemplate actor) {
             if (_actor != null) {
                 _actor.Entity.RemoveObserver(this);
             }

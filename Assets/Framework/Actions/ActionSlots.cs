@@ -127,7 +127,7 @@ namespace PixelComrades {
             set {
                 if (value == null) {
                     if (Action?.EquippedSlot >= 0) {
-                        Owner.Get<CurrentActions>().RemoveAction(Action.EquippedSlot);
+                        Owner.Get<ReadyActions>().RemoveAction(Action.EquippedSlot);
                     }
                 }
                 _cachedItem.Set(value);

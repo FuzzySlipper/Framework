@@ -6,7 +6,8 @@ using UnityEngine;
 namespace PixelComrades {
     public class StateGraphWindow : EditorWindow {
 
-        private const int StyleIndexDefault = 2;
+        private const int StyleIndexDefault = 3;
+        private const int StyleBlockGlobal = 2;
         private const int StyleIndexGlobal = 1;
         
         private StateGraph _graph;
@@ -52,8 +53,8 @@ namespace PixelComrades {
         }
 
         private void SetupStyles() {
-            _nodeStyles = new GUIStyle[3];
-            _nodeSelectedStyles = new GUIStyle[3];
+            _nodeStyles = new GUIStyle[4];
+            _nodeSelectedStyles = new GUIStyle[4];
             var path = "builtin skins/darkskin/images/node";
             for (int i = 0; i < _nodeStyles.Length; i++) {
                 int index = i;
@@ -184,6 +185,9 @@ namespace PixelComrades {
                 }
                 else if (node.IsGlobal) {
                     styleIndex = StyleIndexGlobal;
+                }
+                else if (node.BlockAnyStateChecks) {
+                    styleIndex = StyleBlockGlobal;
                 }
                 var style = node == _selected ? _nodeSelectedStyles[styleIndex] : _nodeStyles[styleIndex];
                 GUILayout.BeginArea(node.Rect, style);
@@ -320,6 +324,9 @@ namespace PixelComrades {
                                     GenericMenu genericMenu = new GenericMenu();
                                     genericMenu.AddItem(new GUIContent("Remove node"), false, () => OnClickRemoveNode(node));
                                     genericMenu.AddItem(new GUIContent("Toggle Default"), false, () => OnClickSetDefault(node));
+                                    genericMenu.AddItem(new GUIContent((node.BlockAnyStateChecks ? "Disable" : "Enable") + " Any State Checking"),
+                                        false, () => OnClickToggleGlobalBlock
+                                    (node));
                                     genericMenu.ShowAsContext();
                                     e.Use();
                                 }
@@ -446,6 +453,12 @@ namespace PixelComrades {
                 _graph.Default = node;
             }
             EditorUtility.SetDirty(_graph);
+            Repaint();
+        }
+
+        private void OnClickToggleGlobalBlock(StateGraphNode node) {
+            node.BlockAnyStateChecks = !node.BlockAnyStateChecks;
+            EditorUtility.SetDirty(node);
             Repaint();
         }
 

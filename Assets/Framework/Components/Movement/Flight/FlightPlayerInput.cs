@@ -75,7 +75,7 @@ namespace PixelComrades {
                     }
                 }
                 else {
-                    control.TurnTowardsPoint(control.GetEntity().GetNode<CollidableNode>().Tr, control.GotoPos);
+                    control.TurnTowardsPoint(control.GetEntity().GetTemplate<CollidableTemplate>().Tr, control.GotoPos);
                 }
             }
             else {

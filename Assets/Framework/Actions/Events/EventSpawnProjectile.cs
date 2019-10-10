@@ -3,40 +3,43 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-
-    public class EventSpawnProjectile : IActionEvent {
-
-        public ActionStateEvents StateEvent { get; }
+    public class EventSpawnProjectile : IActionEventHandler {
+        public ActionState State { get; }
         public string Data { get; }
 
-        public EventSpawnProjectile(ActionStateEvents stateEvent, string data) {
-            StateEvent = stateEvent;
+        public EventSpawnProjectile(ActionState state, string data) {
+            State = state;
             Data = data;
         }
 
-        public void Trigger(ActionUsingNode node, string eventName) {
-            var target = node.ActionEvent.Target;
+        public void Trigger(ActionEvent ae, string eventName) {
+            var target = ae.Position;
             Entity spawnEntity;
-            if (node.ActionEvent.SpawnPivot != null) {
-                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.ActionEvent.Action.Entity, Data, target, 
-                    node.ActionEvent.SpawnPivot.position, node.ActionEvent.SpawnPivot.rotation);
+            var node = ae.Origin;
+            var spawnPivot = ae.Origin.Get<SpawnPivotComponent>();
+            if (spawnPivot != null) {
+                var pivot = ae.Origin.CurrentAction.Primary ? spawnPivot.PrimaryPivot : spawnPivot.SecondaryPivot;
+                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(
+                    node.CurrentAction.Entity, Data, target, 
+                    pivot.position, pivot.rotation);
             }
             else {
-                var animData = node.Animator;
+                var animData = node.Animator.Value;
                 var spawnPos = animData?.GetEventPosition ?? (node.Tr != null ? node.Tr.position : Vector3.zero);
                 var spawnRot = animData?.GetEventRotation ?? (node.Tr != null ? node.Tr.rotation : Quaternion.identity);
                 DebugExtension.DebugPoint(spawnPos, Color.blue, 1f, 1f);
-                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(node.ActionEvent.Action.Entity, Data, node.ActionEvent.Target, 
+                spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(
+                    node.CurrentAction.Entity, Data, ae.Position, 
                 spawnPos, spawnRot);
             }
             if (spawnEntity != null) {
-                if (node.ActionEvent.Action.Fx != null) {
+                if (node.CurrentAction.Fx != null) {
                     var afx = spawnEntity.Get<ActionFxComponent>();
                     if (afx != null) {
-                        afx.ChangeFx(node.ActionEvent.Action.Fx);
+                        afx.ChangeFx(node.CurrentAction.Fx);
                     }
                     else {
-                        spawnEntity.Add(new ActionFxComponent(node.ActionEvent.Action.Fx));
+                        spawnEntity.Add(new ActionFxComponent(node.CurrentAction.Fx));
                     }
                 }
             }

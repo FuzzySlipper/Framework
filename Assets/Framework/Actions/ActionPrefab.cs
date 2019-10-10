@@ -4,14 +4,14 @@ using UnityEngine.Serialization;
 namespace PixelComrades {
     [System.Serializable]
     public class ActionPrefab {
-        public ActionStateEvents Event;
+        public ActionState Event;
         public GameObject Prefab;
         public AudioClip Sound;
     }
 
     [System.Serializable]
     public class ActionFxData {
-        public ActionStateEvents Event;
+        public ActionState Event;
         public AudioClip Sound;
         public SpriteParticle Particle;
         public bool Parent = false;
@@ -26,11 +26,11 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class ActionSound {
-        public ActionStateEvents Event;
+        public ActionState Event;
         public AudioClip Sound;
     }
 
     public interface IActionPrefab {
-        void OnActionSpawn(ActionStateEvent state);
+        void OnActionSpawn(ActionEvent state);
     }
 }

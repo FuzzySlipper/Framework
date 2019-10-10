@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         
         public EquipmentSystem() {
-            NodeFilter<EquipmentNode>.Setup(EquipmentNode.GetTypes());
+            TemplateFilter<EquipmentTemplate>.Setup(EquipmentTemplate.GetTypes());
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(Equipment)
             }));
@@ -33,7 +33,7 @@ namespace PixelComrades {
                 holder.LastEquipStatus = errorMsg;
                 return false;
             }
-            var equipNode = item.GetNode<EquipmentNode>();
+            var equipNode = item.GetTemplate<EquipmentTemplate>();
             if (equipNode == null) {
                 holder.LastEquipStatus = "Item is bugged";
                 return false;
@@ -69,7 +69,7 @@ namespace PixelComrades {
             SetStats(holder, equipNode);
             equipNode.Item.SetContainer(holder.Container);
             holder.OnItemChanged?.Invoke(item);
-            var msg = new EquipmentChanged(owner, holder);
+            var msg = new EquipmentChanged(holder, item);
             item.Post(msg);
             owner.Post(msg);
             holder.LastEquipStatus = "";
@@ -97,7 +97,7 @@ namespace PixelComrades {
             }
             var item = holder.Item;
             var owner = holder.Owner;
-            var node = item.GetNode<EquipmentNode>();
+            var node = item.GetTemplate<EquipmentTemplate>();
             ClearStats(holder);
             item.ClearParent(owner);
             holder.Item = null;
@@ -107,9 +107,9 @@ namespace PixelComrades {
             if (node?.Item != null && node.Item.Inventory == holder.Container) {
                 node.Item.SetContainer(null);
             }
-            item.Post(new EquipmentChanged(null, null));
+            item.Post(new EquipmentChanged(null, item));
             if (!isSwap) {
-                owner.Post(new EquipmentChanged(owner, holder));
+                owner.Post(new EquipmentChanged(holder, null));
                 holder.OnItemChanged?.Invoke(null);
             }
         }
@@ -134,8 +134,8 @@ namespace PixelComrades {
             holder.Mods = null;
         }
 
-        public void SetStats(IEquipmentHolder holder, EquipmentNode node) {
-            if (node.Equipment == null) {
+        public void SetStats(IEquipmentHolder holder, EquipmentTemplate template) {
+            if (template.Equipment == null) {
                 return;
             }
             //var ownerStats = SlotOwner.GetEntity().Stats;
@@ -151,17 +151,17 @@ namespace PixelComrades {
             //    _currentStats.Add(new DerivedStatModHolder(ownerStats.Get(ranged ? Stats.BonusToHitRanged : Stats.BonusToHitMelee), Item.Stats.Get(Stats.ToHit), 1));
             //    _currentStats.Add(new DerivedStatModHolder(ownerStats.Get(ranged ? Stats.BonusCritRanged : Stats.BonusCritMelee), Item.Stats.Get(Stats.CriticalHit), 1));
             //}
-            ClearStats(node.Equipment);
-            var itemStats = node.Equipment.GetEntity().Get<StatsContainer>();
-            if (node.Equipment.Mods == null || node.Equipment.Mods.Length != node.Equipment.StatsToEquip.Count) {
-                node.Equipment.Mods = new StatModHolder[node.Equipment.StatsToEquip.Count];
-                for (int i = 0; i < node.Equipment.Mods.Length; i++) {
-                    node.Equipment.Mods[i] = new DerivedStatModHolder(itemStats.Get(node.Equipment.StatsToEquip[i]), 1);
+            ClearStats(template.Equipment);
+            var itemStats = template.Equipment.GetEntity().Get<StatsContainer>();
+            if (template.Equipment.Mods == null || template.Equipment.Mods.Length != template.Equipment.StatsToEquip.Count) {
+                template.Equipment.Mods = new StatModHolder[template.Equipment.StatsToEquip.Count];
+                for (int i = 0; i < template.Equipment.Mods.Length; i++) {
+                    template.Equipment.Mods[i] = new DerivedStatModHolder(itemStats.Get(template.Equipment.StatsToEquip[i]), 1);
                 }
             }
             var slotStats = holder.Owner.Get<StatsContainer>();
-            for (int i = 0; i < node.Equipment.Mods.Length; i++) {
-                node.Equipment.Mods[i].Attach(slotStats.Get(node.Equipment.Mods[i].StatID));
+            for (int i = 0; i < template.Equipment.Mods.Length; i++) {
+                template.Equipment.Mods[i].Attach(slotStats.Get(template.Equipment.Mods[i].StatID));
             }
         }
         public void HandleGlobal(SaveGameLoaded arg) {
@@ -219,7 +219,7 @@ namespace PixelComrades {
 
     }
 
-    public class EquipmentNode : BaseNode {
+    public class EquipmentTemplate : BaseTemplate {
 
         private CachedComponent<InventoryItem> _item = new CachedComponent<InventoryItem>();
         private CachedComponent<Equipment> _equip = new CachedComponent<Equipment>();

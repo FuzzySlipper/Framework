@@ -7,14 +7,16 @@ namespace PixelComrades {
         
         private Dictionary<int, RuntimeStateNode> _lookup = new Dictionary<int, RuntimeStateNode>();
         private Dictionary<string, GraphTrigger> _triggers = new Dictionary<string, GraphTrigger>();
-
+        private List<IGlobalRuntimeStateNode> _globals = new List<IGlobalRuntimeStateNode>();
+        
+        public System.Action OnComplete;
         public float TimeStartGraph { get; protected set; }
         public RuntimeStateNode Current { get; protected set; }
         public RuntimeStateNode StartNode { get; protected set; }
 
         public bool IsActive { get { return Current != null; } }
         public StateGraph OriginalGraph { get; private set; }
-        public Entity Owner { get; private set; }
+        public Entity Entity { get; private set; }
 
         public RuntimeStateGraph(StateGraph graph) {
             OriginalGraph = graph;
@@ -28,7 +30,7 @@ namespace PixelComrades {
         }
         
         public void SetOwner(Entity owner) {
-            Owner = owner;
+            Entity = owner;
         }
 
         public virtual void Start() {
@@ -36,7 +38,22 @@ namespace PixelComrades {
             SetCurrentNode(StartNode);
         }
 
+        public void Stop() {
+            if (Current != null) {
+                Current.OnExit();
+            }
+            Current = null;
+        }
+
         public virtual void Update(float dt) {
+            if (Current == null) {
+                return;
+            }
+            if (!Current.BlocksGlobal) {
+                for (int i = 0; i < _globals.Count; i++) {
+                    _globals[i].CheckConditions();
+                }
+            }
             if (Current.TryComplete(dt)) {
                 SetCurrentNode(Current.GetExitNode());
             }
@@ -53,15 +70,25 @@ namespace PixelComrades {
             }
             Current = node;
             if (Current == null) {
-                //OnComplete();
+                GraphCompleted();
                 return;
             }
             Current.OnEnter(last);
         }
 
+        public void GraphCompleted() {
+            OnComplete.SafeInvoke();
+        }
+
         public void Trigger(string key) {
             if (_triggers.TryGetValue(key, out var trigger)) {
                 trigger.Trigger();
+            }
+        }
+
+        public void ResetAllTriggers() {
+            foreach (var trigger in _triggers) {
+                trigger.Value.Reset();
             }
         }
 
@@ -85,6 +112,9 @@ namespace PixelComrades {
             }
             var runtimeNode = node.GetRuntimeNode(this);
             _lookup.Add(node.Id, runtimeNode);
+            if (runtimeNode is IGlobalRuntimeStateNode global) {
+                _globals.Add(global);
+            }
             //_allNodes.Add(runtimeNode);
             return runtimeNode;
         }

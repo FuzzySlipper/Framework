@@ -10,7 +10,7 @@ using UnityEditor;
 #endif
 
 namespace PixelComrades {
-    public class ClipAnimator : PlayerWeaponAnimator, IPoolEvents, ISystemUpdate {
+    public class ClipAnimator : EntityIdentifier, IPoolEvents, ISystemUpdate, IOnCreate {
 
         [SerializeField] private int _layer = 0;
 #if Animancer
@@ -19,7 +19,7 @@ namespace PixelComrades {
         [SerializeField] private AnimationClipState[] _clips = new AnimationClipState[0];
         [SerializeField] private Animator _animator = null;
         [SerializeField] private bool _checkMovement = false;
-        [SerializeField] protected float FadeDuration = 0.5f;
+        [SerializeField] protected float _fadeDuration = 0.5f;
 
         private bool _playing;
         private AnimationClipState _currentAnimation;
@@ -36,20 +36,17 @@ namespace PixelComrades {
         
         private int _lastClipFrame = -1;
         
-        public override string CurrentAnimation { get { return _currentAnimation.Id; } }
         public Animator Animator { get => _animator; set => _animator = value; }
-        public override float CurrentAnimationLength { get { return _currentAnimation?.ClipLength ?? 1f; } }
-        public override float CurrentAnimationRemaining { get { return _currentAnimation?.AdjustedLength - _currentClipTime ?? 0f; } }
         public AnimationClipState[] Clips { get => _clips; set => _clips = value; }
         
-        public override bool PlayingAnimation { get { return _playing; } }
+        public bool PlayingAnimation { get { return _playing; } }
         
         protected int Layer { get { return _layer; } }
         public AnimationClipState CurrentAnimationClipState { get { return _currentAnimation; } }
         private string CurrentClipID { get { return _currentAnimation?.Id ?? ""; } }
-        
-        public override void OnCreate(PrefabEntity entity) {
-            base.OnCreate(entity);
+        public bool Unscaled { get => false; }
+
+        public void OnCreate(PrefabEntity entity) {
             BuildDictionary();
         }
 
@@ -67,17 +64,15 @@ namespace PixelComrades {
         public void OnPoolSpawned() {
             MessageKit.addObserver(Messages.PauseChanged, CheckPause);
             if (_checkMovement) {
-                PlayAnimation(AnimationIds.Idle, false);
+                PlayAnimation(CanPlayClip(PlayerAnimationIds.Move, false));
             }
         }
 
         public void OnPoolDespawned() {
             MessageKit.removeObserver(Messages.PauseChanged, CheckPause);
-            ClearWeaponModel();
         }
 
-        public override void OnSystemUpdate(float dt) {
-            base.OnSystemUpdate(dt);
+        public void OnSystemUpdate(float dt) {
 #if Animancer
             if (_currentAnimation != null && _currentState != null) {
                 _currentClipTime += dt * _currentAnimation.PlaySpeedMultiplier;
@@ -109,7 +104,7 @@ namespace PixelComrades {
         private void AdvanceClip(int frame) {
             _lastClipFrame = frame;
             if (!string.IsNullOrEmpty(_currentAnimation.Events[frame])) {
-                ProcessEvent(_currentAnimation.Events[frame]);
+                //ProcessEvent(_currentAnimation.Events[frame]);
             }
 #if Animancer
             _currentState.IsPlaying = true;
@@ -143,11 +138,11 @@ namespace PixelComrades {
             return !PlayingAnimation;
         }
 
-        public override bool IsAnimationComplete(string clip) {
+        public bool IsAnimationComplete(string clip) {
             return !_animDictionary.TryGetValue(clip, out var clipHolder) || clipHolder.Complete;
         }
 
-        public override bool IsAnimationEventComplete(string clip) {
+        public bool IsAnimationEventComplete(string clip) {
             return !_animDictionary.TryGetValue(clip, out var clipHolder) || clipHolder.EventTriggered;
         }
 
@@ -155,18 +150,17 @@ namespace PixelComrades {
             return CurrentClipID == clip;
         }
 
-        public override void PlayAnimation(string clip, bool overrideClip, Action action) {
+        public void PlayAnimation(string clip, bool overrideClip, Action action) {
             var state = CanPlayClip(clip, overrideClip);
             if (state != null) {
                 PlayAnimation(state);
             }
         }
 
-        public override void ClipEventTriggered() {
+        public void ClipEventTriggered() {
             if (_currentAnimation != null) {
                 _currentAnimation.EventTriggered = true;
             }
-            base.ClipEventTriggered();
         }
 
         protected AnimationClipState CanPlayClip(string clip, bool overrideClip) {
@@ -188,7 +182,7 @@ namespace PixelComrades {
             return state;
         }
 
-        public override void StopCurrentAnimation() {
+        public void StopCurrentAnimation() {
 #if Animancer
             if (_currentState != null) {
                 _currentState.Stop();
@@ -228,7 +222,7 @@ namespace PixelComrades {
             CheckFinish();
         }
 
-        protected override void CheckFinish() {
+        protected void CheckFinish() {
             _playing = false;
             if (_animationClipQueue.Count > 0) {
                 PlayAnimation(_animationClipQueue.Dequeue());
@@ -244,15 +238,15 @@ namespace PixelComrades {
             AnimationIds.Idle, AnimationIds.Move, PlayerAnimationIds.Idle1H, PlayerAnimationIds.Idle2H, 
             PlayerAnimationIds.IdleMelee1H, PlayerAnimationIds.IdleMelee2H
         };
-        protected override IEnumerator LowerArms() {
+        protected IEnumerator LowerArms() {
             yield break;
         }
 
-        protected override IEnumerator RaiseArms() {
+        protected IEnumerator RaiseArms() {
             yield break;
         }
         
-        protected override IEnumerator TransitionToPose(MusclePose pose) {
+        protected IEnumerator TransitionToPose(MusclePose pose) {
             yield break;
         }
     }

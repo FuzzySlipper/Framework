@@ -58,7 +58,7 @@ namespace PixelComrades {
             Length = length;
         }
 
-        public void ProcessImpact(CollisionEvent collisionEvent, ActionStateEvent stateEvent) {
+        public void ProcessImpact(CollisionEvent collisionEvent, ActionEvent stateEvent) {
             
         }
 

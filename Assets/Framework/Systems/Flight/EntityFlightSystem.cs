@@ -6,8 +6,8 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class EntityFlightSystem : SystemBase, IMainSystemUpdate, IReceive<CanMoveStatusChanged>, IReceive<ChangePositionEvent>  {
 
-        private NodeList<FlyingNode> _flyingList;
-        private ManagedArray<FlyingNode>.RefDelegate _del;
+        private TemplateList<FlyingTemplate> _flyingList;
+        private ManagedArray<FlyingTemplate>.RefDelegate _del;
         
         public EntityFlightSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
@@ -25,17 +25,17 @@ namespace PixelComrades {
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             if (_flyingList == null) {
-                _flyingList = EntityController.GetNodeList<FlyingNode>();
+                _flyingList = EntityController.GetTemplateList<FlyingTemplate>();
             }
             if (_flyingList != null) {
                 _flyingList.Run(_del);
             }
         }
 
-        private void UpdateNode(ref FlyingNode node) {
-            if (node.SteeringInput != null && node.FlightMoveInput.CanMove) {
-                node.FlightMoveInput.LookInputVector = node.SteeringInput.Look;
-                node.FlightMoveInput.MoveInputVector = node.SteeringInput.Move;
+        private void UpdateNode(ref FlyingTemplate template) {
+            if (template.SteeringInput != null && template.FlightMoveInput.CanMove) {
+                template.FlightMoveInput.LookInputVector = template.SteeringInput.Look;
+                template.FlightMoveInput.MoveInputVector = template.SteeringInput.Move;
             }
         }
         
@@ -51,7 +51,7 @@ namespace PixelComrades {
         }
 
         public void Handle(ChangePositionEvent arg) {
-            var node = arg.Target.GetNode<CollidableNode>();
+            var node = arg.Target.GetTemplate<CollidableTemplate>();
             node.Entity.Post(new SetTransformPosition(node.Tr, arg.Position));
         }
 

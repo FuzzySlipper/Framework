@@ -61,10 +61,9 @@ namespace PixelComrades {
             return new RuntimeConditionNode(this, graph);
         }
 
-        public class Config {
-            public ConditionType Type;
-            public ComparisonType Comparison;
-            public string Value;
+        [System.Serializable]
+        public class Config : ConditionChecker {
+
             public int Output;
 
             public void DrawGui(ConditionNode node, GUIStyle textStyle, GUIStyle buttonStyle) {
@@ -72,22 +71,13 @@ namespace PixelComrades {
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
                 GUILayout.Label("If", textStyle);
-                Type = (ConditionType) UnityEditor.EditorGUILayout.EnumPopup(Type, textStyle);
-                Comparison = (ComparisonType) UnityEditor.EditorGUILayout.EnumPopup(Comparison, textStyle);
+                DrawComparison(textStyle);
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
-                switch (Type) {
-                    case ConditionType.Trigger:
-                        var labels = node.Graph.Triggers.Select(t => t.Key).ToArray();
-                        var index = System.Array.IndexOf(labels, Value);
-                        var newIndex = UnityEditor.EditorGUILayout.Popup(index, labels, textStyle);
-                        if (newIndex >= 0) {
-                            Value = labels[newIndex];
-                            UnityEditor.EditorUtility.SetDirty(node);
-                        }
-                        break;
+                if (DrawType(node.Graph, textStyle, buttonStyle)) {
+                    UnityEditor.EditorUtility.SetDirty(node);
                 }
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
@@ -106,39 +96,6 @@ namespace PixelComrades {
                 GUILayout.EndHorizontal();
 #endif
             }
-
-            public bool IsTrue(RuntimeConditionNode node) {
-                switch (Type) {
-                    case ConditionType.Trigger:
-                        switch (Comparison) {
-                            case ComparisonType.Equals:
-                            case ComparisonType.GreaterThan:
-                            case ComparisonType.EqualsOrGreaterThan:
-                            case ComparisonType.EqualsOrLessThan:
-                                if (node.Graph.IsTriggerActive(Value)) {
-                                    return true;
-                                }
-                                break;
-                            case ComparisonType.LessThan:
-                            case ComparisonType.NotEqualTo:
-                                if (!node.Graph.IsTriggerActive(Value)) {
-                                    return true;
-                                }
-                                break;
-                        }
-                        break;
-                    
-                }
-                return false;
-            }
-
-            public void UseCondition(RuntimeConditionNode node) {
-                switch (Type) {
-                    case ConditionType.Trigger:
-                        node.Graph.ResetTrigger(Value);
-                        break;
-                }
-            }
         }
 
         public class RuntimeConditionNode : RuntimeStateNode {
@@ -152,8 +109,8 @@ namespace PixelComrades {
             public RuntimeStateNode GetConditionExitNode() {
                 for (int i = 0; i < _originalNode.Conditions.Count; i++) {
                     var condition = _originalNode.Conditions[i];
-                    if (condition.IsTrue(this)) {
-                        condition.UseCondition(this);
+                    if (condition.IsTrue(Graph)) {
+                        condition.UseCondition(Graph);
                         var endPoint = _originalNode.OutPoints[condition.Output];
                         var exitNode = Graph.OriginalGraph.GetConnectionEndpoint(endPoint);
                         if (exitNode != null) {
@@ -164,13 +121,13 @@ namespace PixelComrades {
                 return null;
             }
 
-            public RuntimeConditionNode(ConditionNode node, RuntimeStateGraph graph) : base(graph) {
+            public RuntimeConditionNode(ConditionNode node, RuntimeStateGraph graph) : base(node, graph) {
                 _originalNode = node;
             }
 
             public bool HasTrueCondition() {
                 for (int i = 0; i < _originalNode.Conditions.Count; i++) {
-                    if (_originalNode.Conditions[i].IsTrue(this)) {
+                    if (_originalNode.Conditions[i].IsTrue(Graph)) {
                         return true;
                     }
                 }
@@ -181,18 +138,83 @@ namespace PixelComrades {
                 return HasTrueCondition();
             }
         }
+    }
 
-        public enum ConditionType {
-            Trigger,
+    [System.Serializable]
+    public abstract class ConditionChecker {
+        public ConditionType Type;
+        public ComparisonType Comparison;
+        public string Value;
+
+        public bool IsTrue(RuntimeStateGraph graph) {
+            switch (Type) {
+                case ConditionType.Trigger:
+                    switch (Comparison) {
+                        case ComparisonType.Equals:
+                        case ComparisonType.GreaterThan:
+                        case ComparisonType.EqualsOrGreaterThan:
+                        case ComparisonType.EqualsOrLessThan:
+                            if (graph.IsTriggerActive(Value)) {
+                                return true;
+                            }
+                            break;
+                        case ComparisonType.LessThan:
+                        case ComparisonType.NotEqualTo:
+                            if (!graph.IsTriggerActive(Value)) {
+                                return true;
+                            }
+                            break;
+                    }
+                    break;
+
+            }
+            return false;
         }
 
-        public enum ComparisonType {
-            Equals,
-            NotEqualTo,
-            GreaterThan,
-            LessThan,
-            EqualsOrGreaterThan,
-            EqualsOrLessThan
+        public void UseCondition(RuntimeStateGraph graph) {
+            switch (Type) {
+                case ConditionType.Trigger:
+                    graph.ResetTrigger(Value);
+                    break;
+            }
         }
+
+        public void DrawComparison(GUIStyle textStyle) {
+#if UNITY_EDITOR
+            Type = (ConditionType) UnityEditor.EditorGUILayout.EnumPopup(Type, textStyle);
+            Comparison = (ComparisonType) UnityEditor.EditorGUILayout.EnumPopup(Comparison, textStyle);
+#endif
+        }
+
+        public bool DrawType(StateGraph graph, GUIStyle textStyle, GUIStyle buttonStyle) {
+            bool changed = false;
+#if UNITY_EDITOR
+            switch (Type) {
+                case ConditionType.Trigger:
+                    var labels = graph.Triggers.Select(t => t.Key).ToArray();
+                    var index = System.Array.IndexOf(labels, Value);
+                    var newIndex = UnityEditor.EditorGUILayout.Popup(index, labels, textStyle);
+                    if (newIndex >= 0) {
+                        Value = labels[newIndex];
+                        changed = true;
+                    }
+                    break;
+            }
+#endif
+            return changed;
+        }
+    }
+
+    public enum ConditionType {
+        Trigger,
+    }
+
+    public enum ComparisonType {
+        Equals,
+        NotEqualTo,
+        GreaterThan,
+        LessThan,
+        EqualsOrGreaterThan,
+        EqualsOrLessThan
     }
 }

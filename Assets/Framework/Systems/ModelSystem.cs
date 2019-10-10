@@ -13,7 +13,7 @@ namespace PixelComrades {
         }
 
         public void Handle(EquipmentChanged arg) {
-            var loader = arg.Owner.Get<ModelLoaderComponent>();
+            var loader = arg.Item.Get<ModelLoaderComponent>();
             if (loader != null) {
                 HandleLoader(arg, loader);
             }
@@ -23,8 +23,8 @@ namespace PixelComrades {
             if (!loader.OnlyActiveWhileEquipped) {
                 return;
             }
-            var entity = arg.Owner;
-            if (arg.Owner == null && loader.LoadedComponents.Count > 0) {
+            var entity = arg.Item;
+            if (arg.Slot == null && loader.LoadedComponents.Count > 0) {
                 UnityToEntityBridge.Unregister(entity);
                 for (int i = 0; i < loader.LoadedComponents.Count; i++) {
                     entity.Remove(loader.LoadedComponents[i]);
@@ -32,7 +32,7 @@ namespace PixelComrades {
                 loader.LoadedComponents.Clear();
                 loader.LoadedModel = null;
             }
-            else if (arg.Owner != null && loader.LoadedModel == null) {
+            else if (arg.Slot != null && loader.LoadedModel == null) {
                 var parent = arg.Slot.EquipTr;
                 var model = ItemPool.Spawn(loader.ModelName);
                 if (parent != null) {

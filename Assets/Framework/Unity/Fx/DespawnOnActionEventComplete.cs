@@ -11,14 +11,14 @@ namespace PixelComrades {
 
         private PrefabEntity _entity;
 
-        private IEnumerator WaitForEventComplete(ActionStateEvent actionEvent) {
+        private IEnumerator WaitForEventComplete(ActionEvent actionEvent) {
             var maxTime = TimeManager.Time + _maxTime;
             var minTime = TimeManager.Time + _minTime;
             while (true) {
                 if (TimeManager.Time > maxTime || actionEvent.Origin != null && actionEvent.Origin.Entity.IsDead()) {
                     break;
                 }
-                if (TimeManager.Time > minTime && actionEvent.State != ActionStateEvents.Activate) {
+                if (TimeManager.Time > minTime && actionEvent.State != ActionState.Activate) {
                     break;
                 }
                 yield return null;
@@ -30,7 +30,7 @@ namespace PixelComrades {
             _entity = entity;
         }
 
-        public void OnActionSpawn(ActionStateEvent actionEvent) {
+        public void OnActionSpawn(ActionEvent actionEvent) {
             if (_parentAnimTr && actionEvent.Origin != null) {
                 var parentTr = actionEvent.Origin.Tr;
                 if (parentTr != null) {

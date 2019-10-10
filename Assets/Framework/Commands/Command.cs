@@ -27,7 +27,7 @@ namespace PixelComrades {
         }
 
         public virtual void Cancel() {
-            EntityOwner.Tags.Remove(EntityTags.PerformingCommand);
+            EntityOwner.Tags.Remove(EntityTags.PerformingAction);
             CommandLog.CommandCompleted(this);
         }
 
@@ -44,7 +44,7 @@ namespace PixelComrades {
         }
 
         public virtual void Complete() {
-            EntityOwner.Tags.RemoveWithRoot(EntityTags.PerformingCommand);
+            EntityOwner.Tags.RemoveWithRoot(EntityTags.PerformingAction);
             Post(EntitySignals.CommandComplete);
             ProcessCost();
             if (GameOptions.TurnBased) {
@@ -62,7 +62,7 @@ namespace PixelComrades {
         public virtual void StartCommand() {
             TimeStart = TimeManager.TimeUnscaled;
             CommandLog.CommandActive(this);
-            EntityOwner.Tags.AddWithRoot(EntityTags.PerformingCommand);
+            EntityOwner.Tags.AddWithRoot(EntityTags.PerformingAction);
             Post(new StartedCommand(this));
             //Post(new ActionStateEvent(EntityOwner, EntityOwner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), ActionStateEvents.Start));
         }

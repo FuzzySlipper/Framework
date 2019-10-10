@@ -36,9 +36,9 @@ namespace PixelComrades {
         public bool TryGetColor(out Color color) {
             for (int i = 0; i < _actionData.Length; i++) {
                 switch (_actionData[i].Event) {
-                    case ActionStateEvents.Collision:
-                    case ActionStateEvents.CollisionOrImpact:
-                    case ActionStateEvents.Impact:
+                    case ActionState.Collision:
+                    case ActionState.CollisionOrImpact:
+                    case ActionState.Impact:
                         if (_actionData[i].Particle.Animation != null) {
                             color = _actionData[i].Particle.Color;
                             return true;
@@ -56,9 +56,9 @@ namespace PixelComrades {
             return false;
         }
 
-        public void TriggerEvent(ActionStateEvent actionEvent) {
+        public void TriggerEvent(ActionEvent actionEvent) {
             for (int i = 0; i < _actionData.Length; i++) {
-                if (_actionData[i].Event == actionEvent.State || (_actionData[i].Event == ActionStateEvents.CollisionOrImpact && (actionEvent.State == ActionStateEvents.Impact || actionEvent.State == ActionStateEvents.Collision))) {
+                if (_actionData[i].Event == actionEvent.State || (_actionData[i].Event == ActionState.CollisionOrImpact && (actionEvent.State == ActionState.Impact || actionEvent.State == ActionState.Collision))) {
                     if (_actionData[i].Sound != null) {
                         AudioPool.PlayClip(_actionData[i].Sound, actionEvent.Position, 0.5f);
                     }
@@ -67,9 +67,9 @@ namespace PixelComrades {
                         continue;
                     }
                     switch (_actionData[i].Event) {
-                        case ActionStateEvents.Collision:
-                        case ActionStateEvents.CollisionOrImpact:
-                        case ActionStateEvents.Impact:
+                        case ActionState.Collision:
+                        case ActionState.CollisionOrImpact:
+                        case ActionState.Impact:
                             if (actionEvent.Target != null) {
                                 var impactRenderer = actionEvent.Target.Get<ImpactRendererComponent>();
                                 if (impactRenderer != null) {
@@ -99,7 +99,7 @@ namespace PixelComrades {
             }
         }
 
-        private void CheckObjectForListener(GameObject newObject, ActionStateEvent stateEvent) {
+        private void CheckObjectForListener(GameObject newObject, ActionEvent stateEvent) {
             var actionListener = newObject.GetComponent<IActionPrefab>();
             if (actionListener != null) {
                 actionListener.OnActionSpawn(stateEvent);

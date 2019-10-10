@@ -5,12 +5,12 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class FlightNpcSystem : SystemBase, IMainSystemUpdate {
 
-        private NodeList<NpcFlyingNode> _flyingList;
-        private ManagedArray<NpcFlyingNode>.RefDelegate _del;
+        private TemplateList<NpcFlyingTemplate> _flyingList;
+        private ManagedArray<NpcFlyingTemplate>.RefDelegate _del;
 
         public FlightNpcSystem() {
-            NodeFilter<NpcFlyingNode>.Setup(NpcFlyingNode.GetTypes());
-            _flyingList = EntityController.GetNodeList<NpcFlyingNode>();
+            TemplateFilter<NpcFlyingTemplate>.Setup(NpcFlyingTemplate.GetTypes());
+            _flyingList = EntityController.GetTemplateList<NpcFlyingTemplate>();
             _del = UpdateNode;
         }
 
@@ -28,7 +28,7 @@ namespace PixelComrades {
             _flyingList.Run(_del);
         }
 
-        private void UpdateNode(ref NpcFlyingNode npc) {
+        private void UpdateNode(ref NpcFlyingTemplate npc) {
             if (npc.SensorTargets.WatchTargets.Count == 0) {
                 npc.TryWander();
                 return;

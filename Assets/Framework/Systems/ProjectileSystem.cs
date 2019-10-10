@@ -10,18 +10,18 @@ namespace PixelComrades {
         private static GameOptions.CachedFloat _defaultSpeed = new GameOptions.CachedFloat("ProjectileSpeed");
         private static GameOptions.CachedFloat _defaultRotation = new GameOptions.CachedFloat("ProjectileRotation");
         private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePool");
-        private static Dictionary<string, ProjectileTemplate> _templates = new Dictionary<string, ProjectileTemplate>();
+        private static Dictionary<string, ProjectileConfig> _templates = new Dictionary<string, ProjectileConfig>();
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
 
         public ProjectileSystem() {
-            NodeFilter<ProjectileNode>.Setup(ProjectileNode.GetTypes());
+            TemplateFilter<ProjectileTemplate>.Setup(ProjectileTemplate.GetTypes());
         }
 
         private static void Init() {
             GameData.AddInit(Init);
             foreach (var loadedDataEntry in GameData.GetSheet("ActionSpawn")) {
                 var data = loadedDataEntry.Value;
-                _templates.AddOrUpdate(data.ID, new ProjectileTemplate(data));
+                _templates.AddOrUpdate(data.ID, new ProjectileConfig(data));
             }
         }
 
@@ -76,12 +76,12 @@ namespace PixelComrades {
             }
             if (!_templates.TryGetValue(id, out var template)) {
 #if DEBUG
-                DebugLog.Add("Couldn't find project template " + id, false);
+                DebugLog.Add("Couldn't find project config " + id, false);
 #endif
                 return null;
             }
             var entity = GetProjectile(template);
-            var node = entity.GetNode<ProjectileNode>();
+            var node = entity.GetTemplate<ProjectileTemplate>();
             node.MoveTarget.SetMoveTarget(target);
             if (template.ActionFx != null) {
                 node.ActionFx.ChangeFx(template.ActionFx);
@@ -128,7 +128,7 @@ namespace PixelComrades {
             return entity;
         }
 
-        private Entity GetProjectile(ProjectileTemplate data) {
+        private Entity GetProjectile(ProjectileConfig data) {
             if (_poolDict.TryGetValue(data.ID, out var stack)) {
                 if (stack.UsedCount > 0) {
                     var pooled = stack.Pop();
@@ -197,7 +197,7 @@ namespace PixelComrades {
             return entity;
         }
 
-        public sealed class ProjectileNode : BaseNode {
+        public sealed class ProjectileTemplate : BaseTemplate {
             private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
             private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
             private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
@@ -227,7 +227,7 @@ namespace PixelComrades {
             }
         }
 
-        public class ProjectileTemplate {
+        public class ProjectileConfig {
             public DataEntry Data;
             public string ID;
             public string Type;
@@ -252,7 +252,7 @@ namespace PixelComrades {
             public float TrailFrequency;
             public Color TrailColor;
 
-            public ProjectileTemplate(DataEntry data) {
+            public ProjectileConfig(DataEntry data) {
                 Data = data;
                 ID = data.ID;
                 Type = data.TryGetValue("Type", data.ID);
@@ -296,11 +296,11 @@ namespace PixelComrades {
     }
 
     public struct ProjectileSpawned : IEntityMessage {
-        public ProjectileSystem.ProjectileTemplate Template;
+        public ProjectileSystem.ProjectileConfig Config;
         public Entity Entity;
 
-        public ProjectileSpawned(ProjectileSystem.ProjectileTemplate template, Entity entity) {
-            Template = template;
+        public ProjectileSpawned(ProjectileSystem.ProjectileConfig config, Entity entity) {
+            Config = config;
             Entity = entity;
         }
     }

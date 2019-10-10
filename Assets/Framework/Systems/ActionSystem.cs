@@ -8,31 +8,41 @@ using UnityEngine.Experimental.PlayerLoop;
 namespace PixelComrades {
 
     [Priority(Priority.Lower), AutoRegister]
-    public class ActionSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ActionStateEvent> {
+    public class ActionSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<ActionEvent>, IReceive<AnimationEventTriggered> {
 
-        private ManagedArray<ActionUsingNode>.RefDelegate _del;
-        private NodeList<ActionUsingNode> _nodeList;
-        private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
+        private ManagedArray<ActionUsingTemplate>.RefDelegate _del;
+        private TemplateList<ActionUsingTemplate> _templateList;
+        private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
         
         public ActionSystem() {
             _del = UpdateNode;
-            NodeFilter<ActionUsingNode>.Setup(ActionUsingNode.GetTypes());
-            _nodeList = EntityController.GetNodeList<ActionUsingNode>();
+            TemplateFilter<ActionUsingTemplate>.Setup(ActionUsingTemplate.GetTypes());
+            _templateList = EntityController.GetTemplateList<ActionUsingTemplate>();
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
+                typeof(CurrentAction)
+            }));
         }
 
         public override void Dispose() {
             base.Dispose();
-            if (_nodeList != null) {
-                _nodeList.Clear();
+            if (_templateList != null) {
+                _templateList.Clear();
             }
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
-            _nodeList.Run(_del);
+            _templateList.Run(_del);
         }
 
-        public void HandleGlobal(ActionStateEvent arg) {
+        public void HandleGlobal(ActionEvent arg) {
             _eventLog.Add(arg);
+        }
+
+        public void Handle(AnimationEventTriggered arg) {
+            var node = arg.Entity.GetTemplate<ActionUsingTemplate>();
+            if (node != null) {
+                node.Current.Value.PostAnimationEvent(node, arg.Event);
+            }
         }
 
         [Command("printActionStateLog")]
@@ -48,18 +58,18 @@ namespace PixelComrades {
             }
         }
 
-        private void UpdateNode(ref ActionUsingNode node) {
-            if (node.CurrentState != ActionUsingNode.State.Disabled && node.Entity.IsDead()) {
-                StopEvent(node);
+        private void UpdateNode(ref ActionUsingTemplate template) {
+            if (template.CurrentState != ActionUsingTemplate.State.Disabled && template.Entity.IsDead()) {
+                StopEvent(template);
                 return;
             }
-            if (node.CurrentState != ActionUsingNode.State.Disabled && node.ActionEvent.Current != null) {
-                node.ActionEvent.Current.Evaluate(node);
+            if (template.CurrentState != ActionUsingTemplate.State.Disabled && template.ActionEvent.Current != null) {
+                template.ActionEvent.Current.Evaluate(template);
             }
         }
 
         public bool Start(Entity owner, Transform spawn, Action action, Vector3 target) {
-            if (owner == null || action == null || owner.Tags.Contain(EntityTags.PerformingCommand)) {
+            if (owner == null || action == null || owner.Tags.Contain(EntityTags.PerformingAction)) {
                 return false;
             }
             for (int i = 0; i < action.Costs.Count; i++) {
@@ -67,39 +77,26 @@ namespace PixelComrades {
                     return false;
                 }
             }
-            var node = owner.GetNode<ActionUsingNode>();
+            var node = owner.GetTemplate<ActionUsingTemplate>();
             if (node == null) {
                 return false;
             }
-            node.Entity.Tags.Add(EntityTags.PerformingCommand);
-            node.Entity.Post(new ActionStateEvent(node.Entity, node.Entity, node.Entity.GetPosition(), node.Entity.GetRotation(), ActionStateEvents.Start));
+            node.Entity.Tags.Add(EntityTags.PerformingAction);
+            node.Entity.Post(new ActionEvent(node.Entity, node.Entity, node.Entity.GetPosition(), node.Entity.GetRotation(), ActionState.Start));
             node.Start(new ActionEvent(owner, spawn, action, target));
             return true;
         }
 
-        public void AdvanceEvent(ActionUsingNode node) {
-            node.ActionEvent.Current.End(node);
-            if (node.ActionEvent.IsLastIndex) {
-                Complete(node);
-                return;
+        private void Complete(ActionUsingTemplate template) {
+            for (int i = 0; i < template.ActionEvent.Action.Costs.Count; i++) {
+                template.ActionEvent.Action.Costs[i].ProcessCost(template.Entity);
             }
-            node.ActionEvent = new ActionEvent(node.ActionEvent);
-            //if (node.ActionEvent.Current.IsMainLayer) {
-            //    node.Entity.Post(new ActionStateEvent(node.Entity, node.ActionEvent.ActionEntity, node.ActionEvent.SpawnPivot.position, node.ActionEvent.SpawnPivot.rotation, ActionStateEvents.Activate));
-            //}
-            node.ActionEvent.Current.Start(node);
+            StopEvent(template);
         }
 
-        private void Complete(ActionUsingNode node) {
-            for (int i = 0; i < node.ActionEvent.Action.Costs.Count; i++) {
-                node.ActionEvent.Action.Costs[i].ProcessCost(node.Entity);
-            }
-            StopEvent(node);
-        }
-
-        public void StopEvent(ActionUsingNode node) {
-            node.Entity.Tags.Remove(EntityTags.PerformingCommand);
-            node.Stop();
+        public void StopEvent(ActionUsingTemplate template) {
+            template.Entity.Tags.Remove(EntityTags.PerformingAction);
+            template.Stop();
         }
     }
 }

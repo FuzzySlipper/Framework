@@ -267,7 +267,7 @@ namespace PixelComrades {
         }
 
         private IEnumerator LoadWeaponProcess() {
-            Player.Entities[0].Tags.Add(EntityTags.PerformingCommand);
+            Player.Entities[0].Tags.Add(EntityTags.PerformingAction);
             yield return LowerWeapon(false);
             _state = State.Reloading;
             UIChargeCircle.ManualStart(_current.Ammo.Template.ReloadText);

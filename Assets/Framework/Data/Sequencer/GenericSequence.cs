@@ -10,9 +10,10 @@ namespace PixelComrades {
         [SerializeField] private List<SequenceObject> _objects = new List<SequenceObject>();
         [SerializeField] private int _maxTracks = 2;
         [SerializeField] private float _maxDuration = 1f;
-
-        public bool Looping;
+        [SerializeField] private bool _debugRuntime = false;
         
+        public bool Looping;
+        public bool DebugRuntime { get => _debugRuntime; }
         public float MaxDuration {
             get { return _maxDuration; }
             set {

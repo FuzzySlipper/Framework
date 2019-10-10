@@ -11,6 +11,7 @@ namespace PixelComrades {
         
         private CachedUnityComponent<SpriteRenderer> _renderer;
         private CachedTransform _baseTr;
+        
         public SpriteRenderer Value { get => _renderer; }
         public Transform BaseTr { get => _baseTr; }
         public Transform SpriteTr { get; private set; }

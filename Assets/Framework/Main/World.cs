@@ -41,9 +41,9 @@ namespace PixelComrades {
             if (Instance == null) {
                 return;
             }
-            NodeFilter<VisibleNode>.Setup(VisibleNode.GetTypes());
-            NodeFilter<CharacterNode>.Setup(CharacterNode.GetTypes());
-            NodeFilter<CollidableNode>.Setup(CollidableNode.GetTypes());
+            TemplateFilter<VisibleTemplate>.Setup(VisibleTemplate.GetTypes());
+            TemplateFilter<CharacterTemplate>.Setup(CharacterTemplate.GetTypes());
+            TemplateFilter<CollidableTemplate>.Setup(CollidableTemplate.GetTypes());
             Get<AnimatorSystem>();
             Get<CommandSystem>();
             Get<CollisionCheckSystem>();

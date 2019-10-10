@@ -17,7 +17,7 @@ namespace PixelComrades {
         }
 
         public override void TriggerEvent(RuntimeSequenceEvent sequenceEvent) {
-            sequenceEvent.Owner.Entity.Post(new AnimationEventTriggered(EventName));
+            sequenceEvent.Owner.Entity.Post(new AnimationEventTriggered(sequenceEvent.Owner.Entity, EventName));
         }
     }
 }

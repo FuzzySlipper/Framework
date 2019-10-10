@@ -27,10 +27,10 @@ namespace PixelComrades {
 
         [Command("listCharacters")]
         public static void ListCharacters() {
-            var characterNodes = EntityController.GetNodeList<CharacterNode>();
+            var characterNodes = EntityController.GetTemplateList<CharacterTemplate>();
             Console.Log("Character Count " + characterNodes.UsedCount);
             characterNodes.Run(
-                (ref CharacterNode node) => {
+                (ref CharacterTemplate node) => {
                     Console.Log("Character " + node.Entity.DebugId);
                 });
         }

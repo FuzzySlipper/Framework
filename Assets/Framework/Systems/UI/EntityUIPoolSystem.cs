@@ -8,14 +8,14 @@ namespace PixelComrades {
         private Stack<Entity> _pooled = new Stack<Entity>();
 
         public bool TryStore(Entity entity) {
-            entity.GetNode<UINode>().Clear();
+            entity.GetTemplate<UITemplate>().Clear();
             entity.Pooled = true;
             entity.ParentId = -1;
             _pooled.Push(entity);
             return true;
         }
 
-        public UINode GetNode() {
+        public UITemplate GetNode() {
             Entity entity;
             if (_pooled.Count > 0) {
                 entity = _pooled.Pop();
@@ -28,7 +28,7 @@ namespace PixelComrades {
                 entity.Add(new DataDescriptionComponent(""));
                 entity.Add(new IconComponent(null));
             }
-            return entity.GetNode<UINode>();
+            return entity.GetTemplate<UITemplate>();
         }
 
     }

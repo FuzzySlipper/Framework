@@ -19,7 +19,7 @@ namespace PixelComrades {
 
         private static UICenterTarget _main;
         private static Task _currentWriting;
-        private static CharacterNode _character;
+        private static CharacterTemplate _character;
         private static bool _actorLock = false;
         private static bool _lockedText = false;
         private static string _queuedText;
@@ -29,7 +29,7 @@ namespace PixelComrades {
         //private Ray _mouseRay;
         private static TriggerableUnscaledTimer _clearTextTimer = new TriggerableUnscaledTimer();
 
-        public static CharacterNode LockedActor {
+        public static CharacterTemplate LockedActor {
             get {
                 if (_main == null) {
                     return null;
@@ -39,7 +39,7 @@ namespace PixelComrades {
             }
         }
 
-        public static CharacterNode CurrentCharacter { get { return _character; } }
+        public static CharacterTemplate CurrentCharacter { get { return _character; } }
 
         void Awake() {
             _main = this;
@@ -123,7 +123,7 @@ namespace PixelComrades {
         /// Maybe also add a right click option to show more stats behind skill/spell
         /// </summary>
         /// <param name="actor"></param>
-        public static void SetTargetActor(CharacterNode actor) {
+        public static void SetTargetActor(CharacterTemplate actor) {
             if (_actorLock || _character == actor) {
                 return;
             }

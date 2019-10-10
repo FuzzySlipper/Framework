@@ -32,12 +32,9 @@ namespace PixelComrades {
                 return _exitNode;
             }
 
-            public RuntimeSequenceNode(SequenceNode node, RuntimeStateGraph graph) : base(graph) {
-                _sequence = node.Sequence.GetRuntimeSequence(graph.Owner);
-                var outNode = graph.OriginalGraph.GetConnectionEndpoint(node.OutPoints[0]);
-                if (outNode != null) {
-                    _exitNode = graph.GetRuntimeNode(outNode.Id);
-                }
+            public RuntimeSequenceNode(SequenceNode node, RuntimeStateGraph graph) : base(node,graph) {
+                _sequence = node.Sequence.GetRuntimeSequence(graph.Entity);
+                _exitNode = GetOriginalNodeExit();
             }
 
 

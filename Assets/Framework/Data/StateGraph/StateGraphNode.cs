@@ -16,6 +16,7 @@ namespace PixelComrades {
         public List<ConnectionPoint> OutPoints = new List<ConnectionPoint>();
         public int Id;
         public StateGraph Graph;
+        public bool BlockAnyStateChecks = false;
         
         protected virtual Vector2 GetNodeSize { get { return DefaultNodeSize; } }
 

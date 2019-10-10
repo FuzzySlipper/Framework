@@ -3,41 +3,49 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    
+    public enum ActionState {
+        Start = 0,
+        Activate = 1,
+        Miss = 2,
+        Impact = 3,
+        Collision = 4,
+        CollisionOrImpact = 5,
+        FxOn = 6,
+        FxOff = 7,
+        None
+        //Start, Activate, Miss, Impact, Collision, CollisionOrImpact, FxOn, FxOff, None
+    }
+
     public struct ActionEvent : IEntityMessage {
-        public Entity Owner { get; }
-        public Vector3 Target { get; }
-        public Action Action { get; }
-        public float TimeStart { get; }
-        public int Index { get; }
-        public Transform SpawnPivot { get; }
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
+        public Vector3 Position { get; }
+        public Quaternion Rotation { get; }
+        public ActionState State { get; }
 
-        public bool IsLastIndex { get { return Action.Sequence.Count - 1 == Index; } }
-        public ActionLayer Current { get { return Index >= 0 && Index < Action.Sequence.Count ? Action.Sequence[Index] : null; } }
-
-        public ActionEvent(Entity owner, Transform spawnPivot, Action action, Vector3 target) : this() {
-            Owner = owner;
+        public ActionEvent(CharacterTemplate origin, CharacterTemplate target, Vector3 position, Quaternion rotation, ActionState state) {
+            Origin = origin;
             Target = target;
-            Action = action;
-            SpawnPivot = spawnPivot;
-            TimeStart = TimeManager.Time;
-            Index = 0;
+            Position = position;
+            Rotation = rotation;
+            State = state;
         }
 
-        public ActionEvent(Entity owner, Action action, Vector3 target) : this() {
-            Owner = owner;
-            Target = target;
-            Action = action;
-            TimeStart = TimeManager.Time;
-            Index = 0;
+        public ActionEvent(BaseTemplate origin, BaseTemplate focus, Vector3 position, Quaternion rotation, ActionState state) {
+            Origin = origin.Entity.FindNode<CharacterTemplate>();
+            Target = focus.Entity.FindNode<CharacterTemplate>();
+            Position = position;
+            Rotation = rotation;
+            State = state;
         }
 
-        public ActionEvent(ActionEvent animEvent) : this() {
-            Owner = animEvent.Owner;
-            Target = animEvent.Target;
-            Action = animEvent.Action;
-            TimeStart = animEvent.TimeStart;
-            SpawnPivot = animEvent.SpawnPivot;
-            Index = animEvent.Index + 1;
+        public ActionEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionState state) {
+            Origin = origin.FindNode<CharacterTemplate>();
+            Target = focus.FindNode<CharacterTemplate>();
+            Position = position;
+            Rotation = rotation;
+            State = state;
         }
     }
 }

@@ -78,7 +78,7 @@ namespace PixelComrades {
             return AbilityFactory.BuildAbility(_spellMinLevels[level].RandomElement(), false).Get<SpellData>();
         }
 
-        public static SpellData GetRandomMinNoDuplicate(int level, string skill, CharacterNode actor) {
+        public static SpellData GetRandomMinNoDuplicate(int level, string skill, CharacterTemplate actor) {
             if (!_setup) {
                 Init();
             }
@@ -94,13 +94,13 @@ namespace PixelComrades {
             return null;
         }
 
-        public static List<AbilityConfig> GetUnknownSpellsList(int level, string skill, CharacterNode actor) {
+        public static List<AbilityConfig> GetUnknownSpellsList(int level, string skill, CharacterTemplate actor) {
             List<AbilityConfig> spells = new List<AbilityConfig>();
             FillUnknownSpellsList(level, skill, actor, ref spells);
             return spells;
         }
 
-        public static void FillUnknownSpellsList(int level, string skill, CharacterNode actor, ref List<AbilityConfig> spells) {
+        public static void FillUnknownSpellsList(int level, string skill, CharacterTemplate actor, ref List<AbilityConfig> spells) {
             if (!_setup) {
                 Init();
             }

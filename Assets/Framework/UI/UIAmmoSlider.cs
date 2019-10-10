@@ -4,15 +4,15 @@ using TMPro;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIAmmoSlider : MonoBehaviour, IReceive<EntityDisposed>, IReceive<CurrentActionsChanged> {
+    public class UIAmmoSlider : MonoBehaviour, IReceive<EntityDisposed>, IReceive<ReadyActionsChanged> {
 
         [SerializeField] private Slider _statSlider = null;
         [SerializeField] private int _targetUsable = 0;
 
-        private CharacterNode _actor;
+        private CharacterTemplate _actor;
         private IntValueHolder _currentAmmo;
 
-        public void SetNewTarget(CharacterNode actor) {
+        public void SetNewTarget(CharacterTemplate actor) {
             if (_actor != null) {
                 RemoveActor();
             }
@@ -21,7 +21,7 @@ namespace PixelComrades {
                 return;
             }
             _actor.Entity.AddObserver(this);
-            var action = _actor.CurrentActions.GetAction(_targetUsable);
+            var action = _actor.ReadyActions.GetAction(_targetUsable);
             if (action != null) {
                 _currentAmmo = action.Ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;
@@ -53,7 +53,7 @@ namespace PixelComrades {
             RemoveActor();
         }
 
-        public void Handle(CurrentActionsChanged arg) {
+        public void Handle(ReadyActionsChanged arg) {
             if (arg.Index != _targetUsable) {
                 return;
             }

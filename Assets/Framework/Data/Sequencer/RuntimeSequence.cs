@@ -58,6 +58,11 @@ namespace PixelComrades {
             Stop();
             IsComplete = false;
             _pendingObjects.AddRange(_allObjects);
+#if UNITY_EDITOR
+            if (Application.isPlaying && Sequence.DebugRuntime) {
+                RuntimeSequence.DebugSequence = this;
+            }
+#endif
         }
 
         private void Reset() {

@@ -18,7 +18,10 @@ namespace PixelComrades {
             var type = data.Get<DataReference>(DatabaseFields.ItemType);
             var skill = data.TryGetValue<string>(DatabaseFields.Skill, "");
             action.Primary = type?.TargetID == "WeaponUsable";
-            action.WeaponModel = data.TryGetValue("WeaponModel", "");
+            var weaponModel = data.TryGetValue("WeaponModel", "");
+            if (!string.IsNullOrEmpty(weaponModel)) {
+                entity.Add(new WeaponModelComponent(weaponModel));
+            }
             var stats = entity.Get<StatsContainer>();
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
             (DatabaseFields.PowerMax, 1f));
@@ -111,10 +114,8 @@ namespace PixelComrades {
                 action.Ammo.Amount.SetMax();
                 action.Costs.Add(new CostAmmo(action.Ammo));
             }
-            ActionLayer mainLayer;
             switch (abilityType) {
                 default:
-                    mainLayer = new AnimationLayer(action, animation);
                     var radius = ParseUtilities.TryParseEnum(data.TryGetValue(DatabaseFields.Radius, "Single"), ImpactRadiusTypes.Single);
                     if (radius != ImpactRadiusTypes.Single) {
                         entity.Add(new ImpactRadius(radius, true));
@@ -122,11 +123,11 @@ namespace PixelComrades {
                     action.Range = GameData.ActionDistance.GetAssociatedValue(data.TryGetValue("Range", "Medium"));
                     var spawn = data.Get<DataReference>(DatabaseFields.ActionSpawn);
                     if (spawn != null) {
-                        mainLayer.Events.Add(AnimationEvents.Default, new EventSpawnProjectile(ActionStateEvents.None, spawn.TargetID));
+                        action.AddEvent(AnimationEvents.Default, new EventSpawnProjectile(ActionState.None, spawn.TargetID));
                     }
                     else {
                         if (generateCollision) {
-                            mainLayer.Events.Add(AnimationEvents.Default, new EventGenerateCollisionEvent(ActionStateEvents.None));
+                            action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent(ActionState.None));
                         }
                         else {
                             var collisionType = data.TryGetValue("CollisionType", "Point");
@@ -134,23 +135,21 @@ namespace PixelComrades {
                             switch (collisionType) {
                                 case "Melee":
                                 case "MeleeBig":
-                                    mainLayer.ScriptedEvents.Add(new CameraShakeEvent(ActionStateEvents.CollisionOrImpact, new Vector3(0, 0, 1), 4, false));
+                                    action.AddEvent(AnimationEvents.CollisionOrImpact, new CameraShakeEvent(new Vector3
+                                    (0, 0, 1), 4, false));
                                     break;
 
                             }
                             //melee or hitscan need to make that clearer
-                            mainLayer.Events.Add(AnimationEvents.Default, new EventCheckRaycastCollision(ActionStateEvents.None,  action.Range, raycastSize, limitEnemy));
+                            action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(ActionState.None,  action.Range, raycastSize, limitEnemy));
                         }
                     }
-                    action.Sequence.Add(mainLayer);
                     break;
                 case "Shield":
-                    action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCastStart));
-                    action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCast));
-                    mainLayer = new BlockDamageLayer(action, config.FindString("Model", "Shield"), "Vitals.Energy", data.TryGetValue
-                    ("Cost", 1f),skill, PlayerControls.UseSecondary, 2f);
-                    action.Sequence.Add(mainLayer);
-                    action.Sequence.Add(new AnimationLayer(action, PlayerAnimationIds.LoopCastEnd));
+                    entity.Add(
+                        new BlockDamageAction(
+                            config.FindString("Model", "Shield"), "Vitals.Energy",
+                            data.TryGetValue("Cost", 1f), skill, PlayerControls.UseSecondary));
                     break;
                 //case "Teleport":
                 //    sequence.Add(new PlayActionAnimation(ActionStateEvents.None, animation, true, false, true));
@@ -174,17 +173,17 @@ namespace PixelComrades {
                     entity.Add(new ActionFxComponent(actionFx));
                 }
             }
-            mainLayer.IsMainLayer = true;
             var customScripting = data.Get<DataList>("ScriptedEvents");
             if (customScripting != null) {
                 for (int i = 0; i < customScripting.Count; i++) {
                     var scriptingData = customScripting[i];
-                    var eventType = ParseUtilities.TryParseEnum(scriptingData.TryGetValue("Event", ""), ActionStateEvents.None);
+                    var eventType = scriptingData.TryGetValue("Event", "");
+                    //var eventType = ParseUtilities.TryParseEnum(scriptingData.TryGetValue("Event", ""), ActionState.None);
                     var scripting = scriptingData.TryGetValue("Script", "");
-                    if (eventType != ActionStateEvents.None && !string.IsNullOrEmpty(scripting)) {
-                        var customScript = ScriptingSystem.ParseMessage(eventType, scripting.SplitIntoWords());
+                    if (!string.IsNullOrEmpty(eventType) && !string.IsNullOrEmpty(scripting)) {
+                        var customScript = ScriptingSystem.ParseMessage(scripting.SplitIntoWords());
                         if (customScript != null) {
-                            mainLayer.ScriptedEvents.Add(customScript);
+                            action.AddEvent(eventType, customScript);
                         }
                     }
                 }

@@ -8,8 +8,8 @@ namespace PixelComrades {
         private const float ReachedDestination = 0.1f;
         
         private bool _frozen = false;
-        private NodeList<RigidbodyMoverNode> _moverList;
-        private ManagedArray<RigidbodyMoverNode>.RefDelegate _moverDel;
+        private TemplateList<RigidbodyMoverTemplate> _moverList;
+        private ManagedArray<RigidbodyMoverTemplate>.RefDelegate _moverDel;
         private ManagedArray<RigidbodyComponent> _rbList;
         private ManagedArray<RigidbodyComponent>.RefDelegate _rbDel;
 
@@ -26,7 +26,7 @@ namespace PixelComrades {
 
         public void OnFixedSystemUpdate(float dt) {
             if (_moverList == null) {
-                _moverList = EntityController.GetNodeList<RigidbodyMoverNode>();
+                _moverList = EntityController.GetTemplateList<RigidbodyMoverTemplate>();
             }
             if (_moverList != null) {
                 _moverList.Run(_moverDel);
@@ -65,7 +65,7 @@ namespace PixelComrades {
             }
         }
 
-        private void HandleVelocityMover(ref RigidbodyMoverNode mover) {
+        private void HandleVelocityMover(ref RigidbodyMoverTemplate mover) {
             var dt = TimeManager.DeltaTime;
             var rb = mover.Rb;
             if (rb == null) {

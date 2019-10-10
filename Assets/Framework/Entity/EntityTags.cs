@@ -7,7 +7,7 @@ namespace PixelComrades {
 
         public const int Player = 0;
         public const int Moving = 1;
-        public const int PerformingCommand = 2;
+        public const int PerformingAction = 2;
         public const int InTransition = 3;
         public const int CantMove = 4;
         public const int Disabled = 5;

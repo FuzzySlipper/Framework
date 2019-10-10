@@ -66,13 +66,16 @@ namespace PixelComrades {
         public bool Playing = false;
         public Timer FrameTimer;
         public AnimationFrame CurrentFrame;
-        public float LastAngleHeight;
         public DirectionalAnimationClipHolder CurrentClipHolder;
         public string CurrentClipID;
         public Queue<DirectionalAnimationClipHolder> AnimationClipQueue = new Queue<DirectionalAnimationClipHolder>();
-        public DirectionsEight Orientation = DirectionsEight.Top;
-        public List<AnimationRequest> Requests = new List<AnimationRequest>();
         
+        public List<AnimationRequest> Requests = new List<AnimationRequest>();
+        public DirectionsEight Orientation = DirectionsEight.Top;
+        public float LastAngleHeight;
+
+        public BillboardMode Billboard { get; }
+        public SpriteFacing Facing { get; }
         private bool _unscaled;
         private List<KeyValuePair<string, string>> _animDict = new List<KeyValuePair<string, string>>();
         private Dictionary<string, DirectionalAnimationClipHolder> _animDictionary =
@@ -86,8 +89,6 @@ namespace PixelComrades {
         public Vector3 GetEventPosition { get; set; }
         public Quaternion GetEventRotation { get; set; }
         public string CurrentAnimationEvent { get; set; }
-        public BillboardMode Billboard { get; }
-        public SpriteFacing Facing { get; }
         public bool Backwards { get; }
         public DirectionalSpriteAnimationComponent(SpriteHolder animator, Dictionary<string, List<DirectionalAnimation>> dict,
             List<KeyValuePair<string, string>> animDict) {

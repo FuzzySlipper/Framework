@@ -12,17 +12,17 @@ namespace PixelComrades {
         
         private static ManagedArray<Entity> _entities = new ManagedArray<Entity>(200);
         private static Dictionary<Type, ManagedArray> _components = new Dictionary<Type, ManagedArray>();
-        private static Dictionary<Type, List<NodeFilter>> _nodeFilters = new Dictionary<Type, List<NodeFilter>>();
+        private static Dictionary<Type, List<TemplateFilter>> _templateFilters = new Dictionary<Type, List<TemplateFilter>>();
         private static Dictionary<Type, List<EventReceiverFilter>> _eventFilters = new Dictionary<Type, List<EventReceiverFilter>>();
-        private static Dictionary<Type, NodeFilter> _filterHandler = new Dictionary<Type, NodeFilter>();
+        private static Dictionary<Type, TemplateFilter> _filterHandler = new Dictionary<Type, TemplateFilter>();
         private static System.Type[] _tempRemoveList = new Type[100];
 
         public static ManagedArray<Entity> EntitiesArray { get => _entities; }
 
-        public static void RegisterNodeFilter(NodeFilter filter, System.Type handleType) {
+        public static void RegisterNodeFilter(TemplateFilter filter, System.Type handleType) {
             for (int i = 0; i < filter.RequiredTypes.Length; i++) {
                 var type = filter.RequiredTypes[i];
-                _nodeFilters.GetOrAdd(type).Add(filter);
+                _templateFilters.GetOrAdd(type).Add(filter);
             }
             if (_filterHandler.ContainsKey(handleType)) {
                 _filterHandler[handleType] = filter;
@@ -32,17 +32,17 @@ namespace PixelComrades {
             }
         }
 
-        public static T GetNode<T>(this Entity entity) where T : class, INode, new() {
+        public static T GetTemplate<T>(this Entity entity) where T : class, IEntityTemplate, new() {
             if (entity == null) {
                 return null;
             }
             var type = typeof(T);
-            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).GetNode(entity);
+            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).GetNode(entity);
         }
 
-        public static NodeList<T> GetNodeList<T>() where T : class, INode, new() {
+        public static TemplateList<T> GetTemplateList<T>() where T : class, IEntityTemplate, new() {
             var type = typeof(T);
-            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((NodeFilter<T>) filter).AllNodes;
+            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).AllTemplates;
         }
 
         public static ComponentArray<T> GetComponentArray<T>() where T : IComponent {
@@ -140,7 +140,7 @@ namespace PixelComrades {
             var type = typeof(T);
             var array = GetComponentArray<T>();
             array.Add(entity, newComponent);
-            if (_nodeFilters.TryGetValue(type, out var filterList)) {
+            if (_templateFilters.TryGetValue(type, out var filterList)) {
                 for (int i = 0; i < filterList.Count; i++) {
                     filterList[i].TryAdd(entity);
                 }
@@ -280,7 +280,7 @@ namespace PixelComrades {
             }
             componentArray.RemoveByEntity(entity);
             entity.RemoveReference(reference);
-            if (_nodeFilters.TryGetValue(type, out var filterList)) {
+            if (_templateFilters.TryGetValue(type, out var filterList)) {
                 for (int f = 0; f < filterList.Count; f++) {
                     filterList[f].CheckRemove(entity);
                 }
@@ -430,18 +430,18 @@ namespace PixelComrades {
             return false;
         }
 
-        public static T FindNode<T>(this Entity entity) where T : class, INode, new() {
+        public static T FindNode<T>(this Entity entity) where T : class, IEntityTemplate, new() {
             var type = typeof(T);
             if (!_filterHandler.TryGetValue(type, out var filter)) {
                 return null;
             } 
-            var node = ((NodeFilter<T>) filter).GetNode(entity);
+            var node = ((TemplateFilter<T>) filter).GetNode(entity);
             if (node != null) {
                 return node;
             }
             var parent = entity.GetParent();
             while (parent != null) {
-                node = ((NodeFilter<T>) filter).GetNode(parent);
+                node = ((TemplateFilter<T>) filter).GetNode(parent);
                 if (node != null) {
                     return node;
                 }

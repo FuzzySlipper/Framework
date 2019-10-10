@@ -6,12 +6,12 @@ namespace PixelComrades {
     public struct TakeDamageEvent : IEntityMessage {
         public float Amount { get; }
         public ImpactEvent Impact { get; }
-        public CharacterNode Origin { get; }
-        public CharacterNode Target { get; }
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
         public string DamageType { get; }
         public string TargetVital { get; }
 
-        public TakeDamageEvent(float amount, CharacterNode origin, CharacterNode target, string damageType, string targetVital) {
+        public TakeDamageEvent(float amount, CharacterTemplate origin, CharacterTemplate target, string damageType, string targetVital) {
             Impact = default(ImpactEvent);
             Amount = amount;
             Origin = origin;
@@ -60,11 +60,11 @@ namespace PixelComrades {
     }
 
     public struct DeathEvent : IEntityMessage {
-        public CharacterNode Caused { get; }
-        public CharacterNode Target { get; }
+        public CharacterTemplate Caused { get; }
+        public CharacterTemplate Target { get; }
         public float OverKill { get; }
 
-        public DeathEvent(CharacterNode caused, CharacterNode target, float overKill) {
+        public DeathEvent(CharacterTemplate caused, CharacterTemplate target, float overKill) {
             Caused = caused;
             Target = target;
             OverKill = overKill;
@@ -72,10 +72,10 @@ namespace PixelComrades {
     }
 
     public struct RaiseDeadEvent : IEntityMessage {
-        public CharacterNode Source { get; }
-        public CharacterNode Target { get; }
+        public CharacterTemplate Source { get; }
+        public CharacterTemplate Target { get; }
 
-        public RaiseDeadEvent(CharacterNode source, CharacterNode target) {
+        public RaiseDeadEvent(CharacterTemplate source, CharacterTemplate target) {
             Source = source;
             Target = target;
         }

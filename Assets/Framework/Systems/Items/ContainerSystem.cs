@@ -6,10 +6,10 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class ContainerSystem : SystemBase  {
         
-        private CircularBuffer<ActionStateEvent> _eventLog = new CircularBuffer<ActionStateEvent>(10, true);
+        private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
 
         public ContainerSystem() {
-            NodeFilter<ContainerItemNode>.Setup(ContainerItemNode.GetTypes());
+            TemplateFilter<ContainerItemTemplate>.Setup(ContainerItemTemplate.GetTypes());
         }
 
         public bool TryAdd(IEntityContainer holder, Entity item) {
@@ -88,7 +88,7 @@ namespace PixelComrades {
         
 //
 //        public void HandleGlobal(EntityDestroyed arg) {
-//            var node = arg.Entity.GetNode<ContainerItemNode>();
+//            var node = arg.Entity.GetNode<ContainerItemTemplate>();
 //            if (node != null && node.Item.Inventory != null) {
 //                node.Item.Inventory.Remove(arg.Entity);
 //                node.Item.SetContainer(null);
@@ -96,7 +96,7 @@ namespace PixelComrades {
 //        }
     }
 
-    public class ContainerItemNode : BaseNode {
+    public class ContainerItemTemplate : BaseTemplate {
 
         private CachedComponent<InventoryItem> _item = new CachedComponent<InventoryItem>();
         

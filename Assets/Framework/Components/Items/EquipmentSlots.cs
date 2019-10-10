@@ -121,11 +121,11 @@ namespace PixelComrades {
     }
 
     public struct EquipmentChanged : IEntityMessage {
-        public Entity Owner { get; }
+        public Entity Item { get; }
         public IEquipmentHolder Slot { get; }
 
-        public EquipmentChanged(Entity owner, IEquipmentHolder slot) {
-            Owner = owner;
+        public EquipmentChanged(IEquipmentHolder slot, Entity item) {
+            Item = item;
             Slot = slot;
         }
     }

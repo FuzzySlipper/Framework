@@ -51,10 +51,10 @@ namespace PixelComrades {
             if (msg.Hit <= 0) {
                 return;
             }
-            var actionStateEvent = new ActionStateEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
+            var actionStateEvent = new ActionEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
                 msg.HitNormal == Vector3.zero ? Quaternion.identity :Quaternion.LookRotation(msg.HitNormal), 
-            ActionStateEvents.Impact);
-            msg.Source.PostAll(new ImpactEvent(msg, msg.Origin.Entity.FindNode<CharacterNode>(), msg.Target.Entity.FindNode<CharacterNode>
+            ActionState.Impact);
+            msg.Source.PostAll(new ImpactEvent(msg, msg.Origin.Entity.FindNode<CharacterTemplate>(), msg.Target.Entity.FindNode<CharacterTemplate>
             ()));
             msg.Origin.Post(actionStateEvent);
             if (!_collisionMessage) {
@@ -86,13 +86,13 @@ namespace PixelComrades {
 
     public struct ImpactEvent : IEntityMessage {
         public Entity Source { get; }
-        public CharacterNode Origin { get; }
-        public CharacterNode Target { get; }
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
         public int Hit { get; }
 
-        public ImpactEvent(CollisionEvent collisionEvent, CharacterNode origin, CharacterNode target) {
+        public ImpactEvent(CollisionEvent collisionEvent, CharacterTemplate origin, CharacterTemplate target) {
             Source = collisionEvent.Source;
             Origin = origin;
             Target = target;
@@ -119,12 +119,12 @@ namespace PixelComrades {
     public struct PerformedCollisionEvent : IEntityMessage {
 
         
-        public CollidableNode Origin { get; }
-        public CollidableNode Target { get; }
+        public CollidableTemplate Origin { get; }
+        public CollidableTemplate Target { get; }
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
         public int Hit { get; }
-        public PerformedCollisionEvent(CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, int 
+        public PerformedCollisionEvent(CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, int 
         hit = -1) {
             Origin = origin;
             Target = target;
@@ -137,12 +137,12 @@ namespace PixelComrades {
     [Priority(Priority.Higher)]
     public struct CollisionEvent : IEntityMessage {
         public Entity Source { get; }
-        public CollidableNode Origin { get; }
-        public CollidableNode Target { get; }
+        public CollidableTemplate Origin { get; }
+        public CollidableTemplate Target { get; }
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
         public int Hit;
-        public CollisionEvent(Entity source, CollidableNode origin, CollidableNode target, Vector3 hitPoint, Vector3 hitNormal, int hit = -1) {
+        public CollisionEvent(Entity source, CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, int hit = -1) {
             Source = source;
             Origin = origin;
             Target = target;

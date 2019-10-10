@@ -126,12 +126,12 @@ namespace PixelComrades {
             World.Get<EntityEventSystem>().PostAll<T>(entity, msg);
         }
 
-        public static void Post<T>(this INode node, T msg) where T : struct, IEntityMessage {
-            World.Get<EntityEventSystem>().Post<T>(node.Entity, msg);
+        public static void Post<T>(this IEntityTemplate entityTemplate, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().Post<T>(entityTemplate.Entity, msg);
         }
 
-        public static void PostAll<T>(this INode node, T msg) where T : struct, IEntityMessage {
-            World.Get<EntityEventSystem>().PostAll<T>(node.Entity, msg);
+        public static void PostAll<T>(this IEntityTemplate entityTemplate, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().PostAll<T>(entityTemplate.Entity, msg);
         }
 
         public static void AddObserver<T>(this Entity entity, IReceive<T> handler) {
