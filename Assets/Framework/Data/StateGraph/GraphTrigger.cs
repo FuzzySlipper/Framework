@@ -15,16 +15,17 @@ namespace PixelComrades {
             Triggered = false;
         }
 
-        public void Trigger() {
+        public bool Trigger() {
             if (Triggered) {
-                return;
+                return false;
             }
             var currentTime = TimeManager.TimeUnscaled; 
             if (currentTime - _timeTriggered < _minTriggerTime) {
-                return;
+                return false;
             }
             Triggered = true;
             _timeTriggered = currentTime;
+            return true;
         }
     }
 }

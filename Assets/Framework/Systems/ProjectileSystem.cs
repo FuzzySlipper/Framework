@@ -61,13 +61,15 @@ namespace PixelComrades {
                     spawnPos = tr.position;
                     spawnRot = tr.rotation;
                 }
-                else if (msg.SpawnPivot != null) {
-                    spawnPos = msg.SpawnPivot.position;
-                    spawnRot = msg.SpawnPivot.rotation;
+                else {
+                    var spawnPivot = msg.Origin.CurrentAction.Entity.Get<SpawnPivotComponent>();
+                    if (spawnPivot != null) {
+                        spawnPos = spawnPivot.position;
+                        spawnRot = spawnPivot.rotation;
+                    }
                 }
             }
-            
-            return SpawnProjectile(owner, id, msg.Target, spawnPos, spawnRot);
+            return SpawnProjectile(owner, id, msg.Position, spawnPos, spawnRot);
         }
 
         public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot) {

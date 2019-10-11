@@ -54,7 +54,7 @@ namespace PixelComrades {
             var actionStateEvent = new ActionEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
                 msg.HitNormal == Vector3.zero ? Quaternion.identity :Quaternion.LookRotation(msg.HitNormal), 
             ActionState.Impact);
-            msg.Source.PostAll(new ImpactEvent(msg, msg.Origin.Entity.FindNode<CharacterTemplate>(), msg.Target.Entity.FindNode<CharacterTemplate>
+            msg.Source.PostAll(new ImpactEvent(msg, msg.Origin.Entity.FindTemplate<CharacterTemplate>(), msg.Target.Entity.FindTemplate<CharacterTemplate>
             ()));
             msg.Origin.Post(actionStateEvent);
             if (!_collisionMessage) {

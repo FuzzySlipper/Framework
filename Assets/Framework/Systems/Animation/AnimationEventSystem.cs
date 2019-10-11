@@ -20,10 +20,15 @@ namespace PixelComrades {
             list.Add(receiver);
         }
         public void HandleGlobal(AnimationEventTriggered arg) {
-            var node = arg.Entity.GetTemplate<AnimationEventTemplate>();
-            if (node != null) {
-                node.AnimEvent.CurrentAnimationEvent = arg.Event;
-                FindEventPositionRotation(node);
+            var aeTemplate = arg.Entity.GetTemplate<AnimationEventTemplate>();
+            if (aeTemplate != null) {
+                aeTemplate.AnimEvent.CurrentAnimationEvent = arg.Event;
+                FindEventPositionRotation(aeTemplate);
+                if (aeTemplate.CurrentAction?.Value != null) {
+                    var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
+                    aeTemplate.CurrentAction.Value.PostAnimationEvent(new ActionEvent(character, character, aeTemplate.AnimEvent.LastEventPosition,
+                        aeTemplate.AnimEvent.LastEventRotation, AnimationEvents.ToStateEvent(arg.Event)), arg.Event);
+                }
             }
             if (!_eventReceivers.TryGetValue(arg.Event, out var list)) {
                 return;
@@ -49,10 +54,8 @@ namespace PixelComrades {
                 return;
             }
             if (template.SpawnPivot != null) {
-                var isPrimary =  template.CurrentAction.Value?.Primary ?? false;
-                var spawnPivot = isPrimary ? template.SpawnPivot.PrimaryPivot : template.SpawnPivot.SecondaryPivot;
-                template.AnimEvent.LastEventPosition = spawnPivot.position;
-                template.AnimEvent.LastEventRotation = spawnPivot.rotation;
+                template.AnimEvent.LastEventPosition = template.SpawnPivot.position;
+                template.AnimEvent.LastEventRotation = template.SpawnPivot.rotation;
             }
             else {
                 template.AnimEvent.LastEventPosition = template.Tr.position;
@@ -61,7 +64,7 @@ namespace PixelComrades {
         }
 
         public void SetTrigger(Entity entity, string trigger) {
-            entity.Get<AnimationGraphComponent>()?.Value.Trigger(trigger);
+            entity.Get<AnimationGraphComponent>()?.Value.TriggerGlobal(trigger);
         }
     }
 

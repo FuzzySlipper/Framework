@@ -18,7 +18,7 @@ namespace PixelComrades {
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             if (GUILayout.Button("Add Condition", buttonStyle)) {
-                Conditions.Add(new Config());
+                Conditions.Add(new ConditionExit());
                 CheckSize();
                 changed = true;
             }
@@ -45,6 +45,10 @@ namespace PixelComrades {
                         Graph.ChangeNode(exitNode);
                     }
                 }
+            }
+
+            public override bool TryComplete(float dt) {
+                return true;
             }
         }
     }

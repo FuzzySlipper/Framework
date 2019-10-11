@@ -24,8 +24,8 @@ namespace PixelComrades {
             if (target == null) {
                 return;
             }
-            var sourceNode = entity.FindNode<CollidableTemplate>();
-            var targetNode = target.FindNode<CollidableTemplate>();
+            var sourceNode = entity.FindTemplate<CollidableTemplate>();
+            var targetNode = target.FindTemplate<CollidableTemplate>();
             if (sourceNode == null || targetNode == null) {
                 return;
             }

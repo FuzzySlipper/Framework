@@ -58,7 +58,7 @@ namespace PixelComrades {
         private AnimationCurve _curve;
         private bool _started;
         private List<SavedMuscleInstance> _pose = new List<SavedMuscleInstance>();
-        private PoseAnimator _animator;
+        private PoseAnimatorComponent _poseAnimatorComponent;
         private IRuntimeSequence _owner;
         public float StartTime { get => _originalClip.StartTime; }
         public float EndTime { get => _originalClip.EndTime; }
@@ -67,7 +67,7 @@ namespace PixelComrades {
             _owner = null;
             _originalClip = null;
             _curve = null;
-            _animator = null;
+            _poseAnimatorComponent = null;
             _previous = null;
             _started = false;
             _pose.Clear();
@@ -107,14 +107,17 @@ namespace PixelComrades {
             if (!_started) {
                 Setup();
             }
+            if (_poseAnimatorComponent == null) {
+                return;
+            }
             var time = _owner.CurrentTime - _originalClip.StartTime;
             var percent = time / _originalClip.Duration;
             var animationPercent = _curve.Evaluate(percent);
             for (int i = 0; i < _pose.Count; i++) {
                 var muscle = _pose[i];
-                _animator.HumanPose.muscles[muscle.MuscleIndex] = Mathf.Lerp(muscle.Start, muscle.Target, animationPercent);
+                _poseAnimatorComponent.HumanPose.muscles[muscle.MuscleIndex] = Mathf.Lerp(muscle.Start, muscle.Target, animationPercent);
             }
-            _animator.RefreshPose();
+            _poseAnimatorComponent.RefreshPose();
         }
 
         public void OnExit() {
@@ -123,10 +126,13 @@ namespace PixelComrades {
 
         private void Setup() {
             _started = true;
-            if (_animator == null) {
-                _animator = PoseAnimator.Main;
+            if (_poseAnimatorComponent == null) {
+                _poseAnimatorComponent = _owner.Entity.Get<PoseAnimatorComponent>();
             }
-            _animator.UpdatePose();
+            if (_poseAnimatorComponent == null) {
+                return;
+            }
+            _poseAnimatorComponent.UpdatePose();
             if (_originalClip.TargetPose == null) {
                 _pose.Clear();
                 SetupDefaultPose();
@@ -136,12 +142,12 @@ namespace PixelComrades {
                 return;
             }
             for (int i = 0; i < _pose.Count; i++) {
-                _pose[i].Start = _animator.HumanPose.muscles[_pose[i].MuscleIndex];
+                _pose[i].Start = _poseAnimatorComponent.HumanPose.muscles[_pose[i].MuscleIndex];
             }
         }
 
         private void SetupDefaultPose() {
-            var targetPose = _animator.DefaultPose;
+            var targetPose = _poseAnimatorComponent.DefaultPose;
             for (int i = 0; i < targetPose.Count; i++) {
                 var muscleIndex = targetPose.Pose[i].MuscleIndex;
                 float startPose;
@@ -149,7 +155,7 @@ namespace PixelComrades {
                     startPose = _previous.TargetPose.GetMuscle(muscleIndex).Value;
                 }
                 else {
-                    startPose = _animator.HumanPose.muscles[muscleIndex];
+                    startPose = _poseAnimatorComponent.HumanPose.muscles[muscleIndex];
                 }
                 _pose.Add(new SavedMuscleInstance(targetPose.Pose[i], startPose));
             }

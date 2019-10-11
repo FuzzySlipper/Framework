@@ -169,9 +169,20 @@ namespace PixelComrades {
         }
     }
 
-    public partial class AbilityTypes : GenericEnum<AnimationEvents, string> {
+    public partial class AbilityTypes : GenericEnum<AbilityTypes, string> {
         public const string None = "";
         public const string Attack = "Attack";
+        public override string Parse(string value, string defaultValue) {
+            return value;
+        }
+    }
+
+    public partial class GraphVariables : GenericEnum<GraphVariables, string> {
+        public const string None = "";
+        public const string Reloading = "Reloading";
+        public const string Attacking = "Attacking";
+        public const string UsingAbility = "UsingAbility";
+
         public override string Parse(string value, string defaultValue) {
             return value;
         }
@@ -199,7 +210,7 @@ namespace PixelComrades {
         public const string PullLeftBottom = "PullLeftBottom";
         public const string PullTop = "PullTop";
         public const string PullBottom = "PullBottom";
-        public const string Reload = "Reload";
+        public const string Reload = "Reloading";
         public const string ReloadStop = "ReloadStop";
         public const string Miss = "Miss";
         public const string Impact = "Impact";

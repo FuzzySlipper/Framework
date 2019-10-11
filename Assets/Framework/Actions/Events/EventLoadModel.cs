@@ -17,7 +17,7 @@ namespace PixelComrades {
             if (model != null) {
                 var spawn = ae.Origin.Entity.Get<SpawnPivotComponent>();
                 if (spawn != null) {
-                    model.Transform.SetParentResetPos(ae.Origin.CurrentAction.Primary ? spawn.PrimaryPivot : spawn.SecondaryPivot);
+                    spawn.SetNewChild(model.Transform);
                 }
                 else {
                     ae.Origin.Tr.SetParent(model.Transform);

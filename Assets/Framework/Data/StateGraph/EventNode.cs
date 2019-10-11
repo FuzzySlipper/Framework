@@ -58,7 +58,7 @@ namespace PixelComrades {
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
                 GUILayout.Label("While", textStyle);
-                DrawComparison(textStyle);
+                DrawComparison(textStyle, buttonStyle);
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
@@ -79,6 +79,7 @@ namespace PixelComrades {
 
             private EventNode _originalNode;
             private RuntimeStateNode _exitNode;
+            private RuntimeConditionChecker _loopCondition;
             
             public override RuntimeStateNode GetExitNode() {
                 return _exitNode;
@@ -90,6 +91,9 @@ namespace PixelComrades {
                     _exitNode = graph.GetRuntimeNode(outNode.Id);
                 }
                 _originalNode = node;
+                if (_originalNode.Loop) {
+                    _loopCondition = _originalNode.LoopCondition.GetRuntime();
+                }
             }
 
 
@@ -101,10 +105,13 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
-                if (!_originalNode.Loop) {
+                if (base.TryComplete(dt)) {
                     return true;
                 }
-                if (_originalNode.LoopCondition.IsTrue(Graph)) {
+                if (_loopCondition == null) {
+                    return true;
+                }
+                if (_loopCondition.IsTrue(this)) {
                     Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, _originalNode.EventName));
                     return false;
                 }

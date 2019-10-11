@@ -7,7 +7,6 @@ namespace PixelComrades {
     [System.Serializable]
     public sealed class PoseAnimatorComponent : IComponent {
 
-        private MusclePose _defaultPose;
         private Avatar _avatar;
         
         private CachedTransform _cachedTr = new CachedTransform();
@@ -15,12 +14,12 @@ namespace PixelComrades {
         private HumanPoseHandler _hph = null;
         
         public HumanPose HumanPose { get => _pose; }
-        public MusclePose DefaultPose { get => _defaultPose; }
+        public MusclePose DefaultPose { get; }
 
-        public PoseAnimatorComponent(Avatar avatar, Transform tr, MusclePose defaultPose) {
+        public PoseAnimatorComponent(Avatar avatar, MusclePose defaultPose, Transform tr) {
             _avatar = avatar;
             _cachedTr.Set(tr);
-            _defaultPose = defaultPose;
+            DefaultPose = defaultPose;
         }
 
         public PoseAnimatorComponent(SerializationInfo info, StreamingContext context) {
@@ -39,7 +38,6 @@ namespace PixelComrades {
                 _pose.muscles[i] = 0;
             }
             ResetPose();
-            SetPose(_defaultPose);
         }
 
         public void RefreshPose() {

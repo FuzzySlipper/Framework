@@ -1,36 +1,73 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Object = System.Object;
 
 namespace PixelComrades {
+
     public class RuntimeStateGraph {
+    
+        public System.Action OnComplete;
         
         private Dictionary<int, RuntimeStateNode> _lookup = new Dictionary<int, RuntimeStateNode>();
-        private Dictionary<string, GraphTrigger> _triggers = new Dictionary<string, GraphTrigger>();
         private List<IGlobalRuntimeStateNode> _globals = new List<IGlobalRuntimeStateNode>();
         
-        public System.Action OnComplete;
+        private Dictionary<string, GraphTrigger> GlobalTriggers { get; }
+        private Dictionary<string, System.Object> Variables { get; }
         public float TimeStartGraph { get; protected set; }
         public RuntimeStateNode Current { get; protected set; }
         public RuntimeStateNode StartNode { get; protected set; }
 
         public bool IsActive { get { return Current != null; } }
         public StateGraph OriginalGraph { get; private set; }
+        public RuntimeStateGraph ParentGraph { get; }
         public Entity Entity { get; private set; }
 
         public RuntimeStateGraph(StateGraph graph) {
+            GlobalTriggers = new Dictionary<string, GraphTrigger>();
+            Variables =  new Dictionary<string, System.Object>();
             OriginalGraph = graph;
-            for (int i = 0; i < graph.Triggers.Count; i++) {
-                _triggers.AddOrUpdate(graph.Triggers[i].Key, graph.Triggers[i]);
+            ParentGraph = null;
+            SetupGraph();
+        }
+
+        public RuntimeStateGraph(RuntimeStateGraph parent, StateGraph graph) {
+            GlobalTriggers = parent.GlobalTriggers;
+            Variables = parent.Variables;
+            OriginalGraph = graph;
+            ParentGraph = parent;
+            SetupGraph();
+        }
+
+        private void SetupGraph() {
+            for (int i = 0; i < OriginalGraph.GlobalTriggers.Count; i++) {
+                GlobalTriggers.AddOrUpdate(OriginalGraph.GlobalTriggers[i].Key, OriginalGraph.GlobalTriggers[i]);
             }
-            for (int i = 0; i < graph.Count; i++) {
-                CreateRuntimeNode(graph[i]);
+            for (int i = 0; i < OriginalGraph.Count; i++) {
+                CreateRuntimeNode(OriginalGraph[i]);
             }
-            StartNode = GetRuntimeNode(graph.Default != null ? graph.Default.Id : graph[0].Id);
+            StartNode = GetRuntimeNode(OriginalGraph.Default != null ? OriginalGraph.Default.Id : OriginalGraph[0].Id);
         }
         
         public void SetOwner(Entity owner) {
             Entity = owner;
+        }
+
+        public T GetVariable<T>(string key) {
+            if (Variables.TryGetValue(key, out var variable) && variable is T targetType) {
+                return targetType;
+            }
+            return default(T);
+        }
+
+        public void SetVariable<T>(string key, T value) {
+            if (Variables.ContainsKey(key)) {
+                Variables[key] = value;
+            }
+            else {
+                Variables.Add(key, value);
+            }
         }
 
         public virtual void Start() {
@@ -49,10 +86,8 @@ namespace PixelComrades {
             if (Current == null) {
                 return;
             }
-            if (!Current.BlocksGlobal) {
-                for (int i = 0; i < _globals.Count; i++) {
-                    _globals[i].CheckConditions();
-                }
+            for (int i = 0; i < _globals.Count; i++) {
+                _globals[i].CheckConditions();
             }
             if (Current.TryComplete(dt)) {
                 SetCurrentNode(Current.GetExitNode());
@@ -80,26 +115,21 @@ namespace PixelComrades {
             OnComplete.SafeInvoke();
         }
 
-        public void Trigger(string key) {
-            if (_triggers.TryGetValue(key, out var trigger)) {
-                trigger.Trigger();
+        public void TriggerGlobal(string key) {
+            if (!GlobalTriggers.TryGetValue(key, out var trigger)) {
+                return;
             }
+            if (!trigger.Trigger()) {
+                return;
+            }
+            for (int i = 0; i < _globals.Count; i++) {
+                _globals[i].CheckConditions();
+            }
+            trigger.Reset();
         }
 
-        public void ResetAllTriggers() {
-            foreach (var trigger in _triggers) {
-                trigger.Value.Reset();
-            }
-        }
-
-        public void ResetTrigger(string key) {
-            if (_triggers.TryGetValue(key, out var trigger)) {
-                trigger.Reset();
-            }
-        }
-
-        public bool IsTriggerActive(string key) {
-            return _triggers.TryGetValue(key, out var trigger) && trigger.Triggered;
+        public bool IsGlobalTriggerActive(string key) {
+            return GlobalTriggers.TryGetValue(key, out var trigger) && trigger.Triggered;
         }
 
         public RuntimeStateNode GetRuntimeNode(int id) {

@@ -27,6 +27,7 @@ namespace PixelComrades {
             private bool _isWaiting;
             private ActionFx _fxComponent;
             private float _finalCost;
+            private Entity _actionEntity;
             
             public override RuntimeStateNode GetExitNode() {
                 return _exitNode;
@@ -39,13 +40,19 @@ namespace PixelComrades {
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
+                var action = Graph.Entity.Get<CurrentAction>()?.Value;
+                if (action == null) {
+                    return;
+                }
+                _actionEntity = action.Entity;
                 _owner = Graph.Entity.GetTemplate<ActionUsingTemplate>();
-                _config = Graph.Entity.Get<BlockDamageAction>();
+                _config = _actionEntity.Get<BlockDamageAction>();
                 var model = ItemPool.Spawn(UnityDirs.Models, _config.ModelData, Vector3.zero, Quaternion.identity);
                 if (model != null) {
-                    _owner.ParentSpawn(model.Transform);
-                    _owner.ActionEvent.Action.Entity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
-                    _owner.ActionEvent.Action.Entity.Add(new TransformComponent(model.transform));
+                    var spawnPivot = _actionEntity.Get<SpawnPivotComponent>();
+                    spawnPivot.SetNewChild(model.Transform);
+                    _actionEntity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
+                    _actionEntity.Add(new TransformComponent(model.transform));
                 }
                 var dmgComponent = Graph.Entity.GetOrAdd<BlockDamage>();
                 if (!Graph.Entity.Tags.Contain(EntityTags.Player)) {
@@ -61,18 +68,18 @@ namespace PixelComrades {
                     skillMulti = Mathf.Clamp(1 - (skillValue * CostVital.SkillPercent), CostVital.SkillMaxReduction, 1);
                 }
                 dmgComponent.CollisionHandlers.Add(EvadeDamageWithStats);
-                _fxComponent = _owner.ActionEvent.Action.Fx;
+                _fxComponent = action.Fx;
                 _finalCost = _config.Cost * skillMulti;
             }
 
             public override void OnExit() {
                 base.OnExit();
                 _vitalStat = null;
-                var tr = _owner.ActionEvent.Action.Entity.Get<TransformComponent>();
+                var tr = _actionEntity.Get<TransformComponent>();
                 if (tr != null) {
                     ItemPool.Despawn(tr.gameObject);
-                    _owner.ActionEvent.Action.Entity.Remove(tr);
-                    _owner.ActionEvent.Action.Entity.Remove<RenderingComponent>();
+                    _actionEntity.Remove(tr);
+                    _actionEntity.Remove<RenderingComponent>();
                 }
                 var blockDamage = _owner.Entity.Get<BlockDamage>();
                 if (blockDamage != null) {
@@ -86,8 +93,14 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
+                if (_owner == null) {
+                    return true;
+                }
                 if (_isWaiting) {
-                    if (TimeManager.Time >= _owner.ActionEvent.TimeStart + _originalNode.WaitTime) {
+                    if (TimeManager.Time >= TimeEntered + _originalNode.WaitTime) {
                         return true;
                     }
                     return false;

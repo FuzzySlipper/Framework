@@ -6,7 +6,7 @@ namespace PixelComrades {
     public sealed class CompletedGraphNode : StateGraphNode {
         public override int OutputMin { get => 0; }
         public override int OutputMax { get => 0; }
-        protected override Vector2 GetNodeSize { get { return base.GetNodeSize * 0.5f; } }
+        public override int MaxConditions { get => 0; }
 
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
             return false;

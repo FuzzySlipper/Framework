@@ -5,14 +5,14 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class ActionPivotComponent : IComponent {
+    public sealed class ActionPivotsComponent : IComponent {
     
         public Transform PrimaryPivot = null;
         public Transform SecondaryPivot = null;
         
-        public ActionPivotComponent(){}
+        public ActionPivotsComponent(){}
         
-        public ActionPivotComponent(SerializationInfo info, StreamingContext context) {
+        public ActionPivotsComponent(SerializationInfo info, StreamingContext context) {
             //BuildingIndex = info.GetValue(nameof(BuildingIndex), BuildingIndex);
         }
                 

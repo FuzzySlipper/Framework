@@ -4,28 +4,11 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public sealed class ReloadStateNode : StateGraphNode {
-        public string Trigger;
-        public bool ExitWhenTriggerActive;
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
-#if UNITY_EDITOR
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            var animationLabels = AnimationEvents.GetNames().ToArray();
-            var index = System.Array.IndexOf(animationLabels, Trigger);
-            var newIndex = UnityEditor.EditorGUILayout.Popup("Event", index, animationLabels);
-            if (newIndex >= 0) {
-                Trigger = animationLabels[newIndex];
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
-            GUILayout.Label("Exit When Trigger Active", textStyle);
-            ExitWhenTriggerActive = UnityEditor.EditorGUILayout.Toggle(ExitWhenTriggerActive, textStyle);
-            GUILayout.Space(20);
-            GUILayout.EndHorizontal();
-#endif
             return false;
         }
 
-        public override string Title { get { return "Reload"; } }
+        public override string Title { get { return "Reloading"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
             return new RuntimeNode(this, graph);
@@ -52,7 +35,7 @@ namespace PixelComrades {
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                Graph.ResetTrigger(AnimationEvents.ReloadStop);
+                Graph.SetVariable(GraphVariables.Reloading, true);
                 _reload = Graph.Entity.Get<ReloadWeaponComponent>();
                 UIChargeCircle.ManualStart(_reload.Ammo.Template.ReloadText);
                 _reloadPerAmmo = _reload.Ammo.ReloadSpeed / _reload.Ammo.Amount.MaxValue;
@@ -63,15 +46,16 @@ namespace PixelComrades {
 
             public override void OnExit() {
                 base.OnExit();
+                Graph.SetVariable(GraphVariables.Reloading, false);
                 UIChargeCircle.StopCharge();
             }
 
             public override bool TryComplete(float dt) {
-                if (!string.IsNullOrEmpty(_originalNode.Trigger)) {
-                    var isActive = Graph.IsTriggerActive(_originalNode.Trigger);
-                    if (isActive == _originalNode.ExitWhenTriggerActive) {
-                        return true;
-                    }
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
+                if (!Graph.GetVariable<bool>(GraphVariables.Reloading)) {
+                    return true;
                 }
                 if (_reloadTimer > 0) {
                     _reloadTimer -= dt;

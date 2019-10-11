@@ -13,6 +13,9 @@ namespace PixelComrades {
             tr.SetParentResetPos(_tr.Tr);
         }
         
+        public Vector3 position { get { return _tr.Tr.position; } }
+        public Quaternion rotation { get { return _tr.Tr.rotation; } }
+        
         public SpawnPivotComponent(Transform tr) {
             _tr = new CachedTransform(tr);
         }

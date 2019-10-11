@@ -132,8 +132,8 @@ namespace PixelComrades {
 #if DEBUG
             DebugLog.Add(entity.DebugId + " hit actor " + tr.name);
 #endif
-            sourceTemplate = entity.FindNode<CollidableTemplate>();
-            targetTemplate = hitEntity.FindNode<CollidableTemplate>();
+            sourceTemplate = entity.FindTemplate<CollidableTemplate>();
+            targetTemplate = hitEntity.FindTemplate<CollidableTemplate>();
             if (sourceTemplate == null || targetTemplate == null || sourceTemplate == targetTemplate) {
                 return false;
             }

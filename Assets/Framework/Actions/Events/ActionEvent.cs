@@ -33,16 +33,16 @@ namespace PixelComrades {
         }
 
         public ActionEvent(BaseTemplate origin, BaseTemplate focus, Vector3 position, Quaternion rotation, ActionState state) {
-            Origin = origin.Entity.FindNode<CharacterTemplate>();
-            Target = focus.Entity.FindNode<CharacterTemplate>();
+            Origin = origin.Entity.FindTemplate<CharacterTemplate>();
+            Target = focus.Entity.FindTemplate<CharacterTemplate>();
             Position = position;
             Rotation = rotation;
             State = state;
         }
 
         public ActionEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionState state) {
-            Origin = origin.FindNode<CharacterTemplate>();
-            Target = focus.FindNode<CharacterTemplate>();
+            Origin = origin.FindTemplate<CharacterTemplate>();
+            Target = focus.FindTemplate<CharacterTemplate>();
             Position = position;
             Rotation = rotation;
             State = state;

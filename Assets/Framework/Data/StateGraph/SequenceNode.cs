@@ -44,6 +44,9 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
                 _sequence.Update(dt);
                 return _sequence.IsComplete;
             }

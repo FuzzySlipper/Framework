@@ -406,7 +406,9 @@ namespace PixelComrades {
 
         private IEnumerator PlayAnimation() {
             _cancelPlay = false;
-            var player = new RuntimeSequence(Entity.New("Tester"),  _currentSequence);
+            var entity = Entity.New("Tester");
+            var player = new RuntimeSequence(entity,  _currentSequence);
+            entity.Add(new PoseAnimatorComponent(PoseAnimator.Main.Avatar, PoseAnimator.Main.DefaultPose, PoseAnimator.Main.transform));
             player.Play();
             _playLimiter.Reset();
             var lastPauseTime = 1f;
@@ -430,7 +432,7 @@ namespace PixelComrades {
                 }
                 yield return null;
             }
-            player.Entity.Destroy();
+            entity.Destroy();
             _playTask = null;
         }
 

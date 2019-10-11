@@ -45,6 +45,9 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
                 var elapsed = (TimeManager.Time - TimeEntered);
                 if (elapsed >= _originalNode.MaxChargeTime || (_input != null && !_input.Handler.GetButton(_originalNode.ChargeInput))) {
                     var currentAction = Graph.Entity.Get<CurrentAction>().Value;

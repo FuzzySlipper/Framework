@@ -18,10 +18,9 @@ namespace PixelComrades {
             var node = ae.Origin;
             var spawnPivot = ae.Origin.Get<SpawnPivotComponent>();
             if (spawnPivot != null) {
-                var pivot = ae.Origin.CurrentAction.Primary ? spawnPivot.PrimaryPivot : spawnPivot.SecondaryPivot;
                 spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(
-                    node.CurrentAction.Entity, Data, target, 
-                    pivot.position, pivot.rotation);
+                    node.CurrentAction.Entity, Data, target,
+                    spawnPivot.position, spawnPivot.rotation);
             }
             else {
                 var animData = node.Animator.Value;

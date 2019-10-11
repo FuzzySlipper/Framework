@@ -6,19 +6,24 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public abstract class StateGraphNode : ScriptableObject {
         
-        protected const int MaxConnections = 4;
+        protected const int MaxConnections = 5;
         protected const int MinConnectionId = 100;
         
-        protected static Vector2 DefaultNodeSize = new Vector2(125, 100);
+        public static Vector2 DefaultNodeSize = new Vector2(225, 100);
         
         public Rect Rect;
         public List<ConnectionPoint> InPoints = new List<ConnectionPoint>();
         public List<ConnectionPoint> OutPoints = new List<ConnectionPoint>();
+        public List<ConditionExit> Conditions = new List<ConditionExit>();
+        public int DefaultExit = 0;
         public int Id;
         public StateGraph Graph;
-        public bool BlockAnyStateChecks = false;
+        public bool AllowEarlyExit = false;
+        public string EnterEvent = AnimationEvents.None;
+        public string ExitEvent = AnimationEvents.None;
         
         protected virtual Vector2 GetNodeSize { get { return DefaultNodeSize; } }
+        public virtual bool HasConditions { get { return Conditions.Count > 0; } }
 
         public void Set(Vector2 position, int id, StateGraph graph) {
             Rect = new Rect(position.x, position.y, GetNodeSize.x, GetNodeSize.y);
@@ -70,6 +75,15 @@ namespace PixelComrades {
             id++;
             return id;
         }
+
+        public void Remove(ConditionExit config) {
+            Conditions.Remove(config);
+            CheckSize();
+        }
+
+        public void CheckSize() {
+            Rect.size = new Vector2(GetNodeSize.x, GetNodeSize.y + ((GetNodeSize.y * 0.8f) * Conditions.Count));
+        }
         
         public abstract RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph);
         public abstract bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle);
@@ -77,8 +91,9 @@ namespace PixelComrades {
         public virtual int InputMin { get => 1; }
         public virtual int InputMax { get => MaxConnections; }
         public virtual int OutputMin { get => 1; }
-        public virtual int OutputMax { get => 1; }
+        public virtual int OutputMax { get => MaxConnections; }
         public virtual bool IsGlobal { get { return false; } }
+        public virtual int MaxConditions { get => 4; }
 
     }
 

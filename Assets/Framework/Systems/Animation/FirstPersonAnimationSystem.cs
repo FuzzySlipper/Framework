@@ -17,7 +17,8 @@ namespace PixelComrades {
             _animTemplates = EntityController.GetTemplateList<FirstPersonAnimationTemplate>();
             _animDel = HandleAnimNodes;
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
-                typeof(WeaponModelComponent)
+                typeof(WeaponModelComponent),
+                typeof(AbilityConfig)
             }));
         }
 
@@ -42,11 +43,22 @@ namespace PixelComrades {
             }
             var weaponModelComponent = arg.Item.Get<WeaponModelComponent>();
             if (weaponModelComponent == null) {
+                if (arg.Slot == null) {
+                    arg.Item.Remove<SpawnPivotComponent>();
+                }
+                else {
+                    var action = arg.Item.Get<Action>();
+                    var actionPivots = arg.Slot.Owner.Get<ActionPivotsComponent>();
+                    if (action != null && actionPivots != null) {
+                        arg.Item.Add(new SpawnPivotComponent(action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot));
+                    }
+                }
                 return;
             }
             if (arg.Slot == null) {
                 ItemPool.Despawn(weaponModelComponent.Loaded.Tr.gameObject);
                 arg.Item.Remove<TransformComponent>();
+                arg.Item.Remove<SpawnPivotComponent>();
                 weaponModelComponent.Set(null);
             }
             else {
@@ -56,12 +68,13 @@ namespace PixelComrades {
                     return;
                 }
                 bool isPrimary = arg.Item.Get<Action>()?.Primary ?? false;
-                var projectileSpawn = arg.Slot.Owner.Get<SpawnPivotComponent>();
+                var projectileSpawn = arg.Slot.Owner.Get<ActionPivotsComponent>();
                 if (projectileSpawn != null) {
                     weaponModel.Transform.SetParentResetPos(isPrimary? projectileSpawn.PrimaryPivot : projectileSpawn.SecondaryPivot);
                 }
                 weaponModelComponent.Set(weaponModel.GetComponent<IWeaponModel>());
                 arg.Item.Add(new TransformComponent(weaponModel.transform));
+                arg.Item.Add(new SpawnPivotComponent(weaponModel.Transform));
             }
         }
 

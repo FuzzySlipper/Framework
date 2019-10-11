@@ -41,6 +41,7 @@ namespace PixelComrades {
         public SteeringInput Steering => _steering.Value;
         public RuntimeStateGraph AnimGraph => _animGraph.Value.Value;
         public Action CurrentAction => _currentAction.Value?.Value;
+        public CurrentAction CurrentActionComponent => _currentAction.Value;
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {

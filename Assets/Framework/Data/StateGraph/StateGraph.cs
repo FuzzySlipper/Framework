@@ -7,7 +7,7 @@ namespace PixelComrades {
     public class StateGraph : ScriptableObject {
         public List<StateGraphNode> Nodes = new List<StateGraphNode>();
         public List<Connection> Connections = new List<Connection>();
-        public List<GraphTrigger> Triggers = new List<GraphTrigger>();
+        public List<GraphTrigger> GlobalTriggers = new List<GraphTrigger>();
         public StateGraphNode Default;
         
         public StateGraphNode this[int index] { get { return Nodes[index]; } }
@@ -40,6 +40,12 @@ namespace PixelComrades {
 
         public RuntimeStateGraph GetRuntimeGraph(Entity entity) {
             var runtime = new RuntimeStateGraph(this);
+            runtime.SetOwner(entity);
+            return runtime;
+        }
+
+        public RuntimeStateGraph GetRuntimeGraph(RuntimeStateGraph parent, Entity entity) {
+            var runtime = new RuntimeStateGraph(parent, this);
             runtime.SetOwner(entity);
             return runtime;
         }

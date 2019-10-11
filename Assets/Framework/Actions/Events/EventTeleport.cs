@@ -10,7 +10,8 @@ namespace PixelComrades {
             Distance = distance;
         }
 
-        public void Trigger(ActionUsingTemplate template, string eventName) {
+        public void Trigger(ActionEvent ae, string eventName) {
+            var template = ae.Origin;
             template.Entity.Post(new ChangePositionEvent(template.Entity, FindPosition(template.Tr.position, template.Tr.forward, Distance)));
             //Player.Controller.Teleport(FindPosition(msg.Owner.Tr.position, msg.Owner.Tr.forward, current.Distance));
         }

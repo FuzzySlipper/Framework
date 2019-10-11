@@ -430,7 +430,7 @@ namespace PixelComrades {
             return false;
         }
 
-        public static T FindNode<T>(this Entity entity) where T : class, IEntityTemplate, new() {
+        public static T FindTemplate<T>(this Entity entity) where T : class, IEntityTemplate, new() {
             var type = typeof(T);
             if (!_filterHandler.TryGetValue(type, out var filter)) {
                 return null;

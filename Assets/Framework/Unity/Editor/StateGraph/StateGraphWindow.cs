@@ -6,8 +6,10 @@ using UnityEngine;
 namespace PixelComrades {
     public class StateGraphWindow : EditorWindow {
 
-        private const int StyleIndexDefault = 3;
-        private const int StyleBlockGlobal = 2;
+        private const int StyleArraySize = 5;
+        private const int StyleHasEarlyExit = 4;
+        private const int StyleHasConditions = 3;
+        private const int StyleIndexDefault = 2;
         private const int StyleIndexGlobal = 1;
         
         private StateGraph _graph;
@@ -53,8 +55,8 @@ namespace PixelComrades {
         }
 
         private void SetupStyles() {
-            _nodeStyles = new GUIStyle[4];
-            _nodeSelectedStyles = new GUIStyle[4];
+            _nodeStyles = new GUIStyle[StyleArraySize];
+            _nodeSelectedStyles = new GUIStyle[StyleArraySize];
             var path = "builtin skins/darkskin/images/node";
             for (int i = 0; i < _nodeStyles.Length; i++) {
                 int index = i;
@@ -176,6 +178,7 @@ namespace PixelComrades {
             if (_graph == null) {
                 return;
             }
+            var animationLabels = AnimationEvents.GetNames().ToArray();
             for (int i = 0; i < _graph.Nodes.Count; i++) {
                 var node = _graph.Nodes[i];
                 var maxWidth = node.Rect.x * 0.8f;
@@ -186,8 +189,8 @@ namespace PixelComrades {
                 else if (node.IsGlobal) {
                     styleIndex = StyleIndexGlobal;
                 }
-                else if (node.BlockAnyStateChecks) {
-                    styleIndex = StyleBlockGlobal;
+                else if (node.HasConditions) {
+                    styleIndex = node.AllowEarlyExit ? StyleHasEarlyExit : StyleHasConditions;
                 }
                 var style = node == _selected ? _nodeSelectedStyles[styleIndex] : _nodeStyles[styleIndex];
                 GUILayout.BeginArea(node.Rect, style);
@@ -197,6 +200,48 @@ namespace PixelComrades {
                 EditorGUI.BeginChangeCheck();
                 if (node.DrawGui(_nodeTextStyle, _nodeButtonStyle)) {
                     Repaint();
+                }
+                for (int c = 0; c < node.Conditions.Count; c++) {
+                    node.Conditions[c].DrawGui(node, _nodeTextStyle, _nodeButtonStyle);
+                    GUILayout.Space(10);
+                }
+                if (node.Conditions.Count > 0) {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(20);
+                    GUILayout.Label("Else exit ", _nodeTextStyle);
+                    var indices = new string[node.OutPoints.Count];
+                    for (int idx = 0; idx < indices.Length; idx++) {
+                        indices[idx] = idx.ToString();
+                    }
+                    node.DefaultExit = UnityEditor.EditorGUILayout.Popup(node.DefaultExit, indices, _nodeTextStyle);
+                    GUILayout.Space(20);
+                    GUILayout.EndHorizontal();
+                }
+                GUILayout.BeginHorizontal();
+                GUILayout.Space(20);
+                var enterIndex = System.Array.IndexOf(animationLabels, node.EnterEvent);
+                var exitIndex = System.Array.IndexOf(animationLabels, node.ExitEvent);
+                GUILayout.Label("Enter");
+                var newEnter = UnityEditor.EditorGUILayout.Popup(enterIndex, animationLabels);
+                if (newEnter != enterIndex) {
+                    node.EnterEvent = animationLabels[newEnter];
+                }
+                GUILayout.Label("Exit");
+                var newExit = UnityEditor.EditorGUILayout.Popup(exitIndex, animationLabels);
+                if (newExit != exitIndex) {
+                    node.ExitEvent = animationLabels[newExit];
+                }
+                GUILayout.Space(20);
+                GUILayout.EndHorizontal();
+                if (node.Conditions.Count < node.MaxConditions) {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Space(20);
+                    if (GUILayout.Button("Add Condition", _nodeButtonStyle)) {
+                        node.Conditions.Add(new ConditionExit());
+                        node.CheckSize();
+                    }
+                    GUILayout.Space(20);
+                    GUILayout.EndHorizontal();
                 }
                 if (EditorGUI.EndChangeCheck()) {
                     EditorUtility.SetDirty(node);
@@ -324,9 +369,8 @@ namespace PixelComrades {
                                     GenericMenu genericMenu = new GenericMenu();
                                     genericMenu.AddItem(new GUIContent("Remove node"), false, () => OnClickRemoveNode(node));
                                     genericMenu.AddItem(new GUIContent("Toggle Default"), false, () => OnClickSetDefault(node));
-                                    genericMenu.AddItem(new GUIContent((node.BlockAnyStateChecks ? "Disable" : "Enable") + " Any State Checking"),
-                                        false, () => OnClickToggleGlobalBlock
-                                    (node));
+                                    genericMenu.AddItem(new GUIContent(node.AllowEarlyExit? "Disable Early Exit" : "Enable Early Exit"), false, () => 
+                                    OnSetEarlyExit(node));
                                     genericMenu.ShowAsContext();
                                     e.Use();
                                 }
@@ -445,6 +489,12 @@ namespace PixelComrades {
             Repaint();
         }
 
+        private void OnSetEarlyExit(StateGraphNode node) {
+            node.AllowEarlyExit = !node.AllowEarlyExit;
+            EditorUtility.SetDirty(_graph);
+            Repaint();
+        }
+        
         private void OnClickSetDefault(StateGraphNode node) {
             if (_graph.Default == node) {
                 _graph.Default = null;
@@ -453,12 +503,6 @@ namespace PixelComrades {
                 _graph.Default = node;
             }
             EditorUtility.SetDirty(_graph);
-            Repaint();
-        }
-
-        private void OnClickToggleGlobalBlock(StateGraphNode node) {
-            node.BlockAnyStateChecks = !node.BlockAnyStateChecks;
-            EditorUtility.SetDirty(node);
             Repaint();
         }
 

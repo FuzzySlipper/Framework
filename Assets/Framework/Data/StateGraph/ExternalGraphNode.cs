@@ -37,7 +37,7 @@ namespace PixelComrades {
 
             public RuntimeExternalGraphNode(ExternalGraphNode node, RuntimeStateGraph graph) : base(node,graph) {
                 _exitNode = GetOriginalNodeExit();
-                _runtimeGraph = node.ExternalGraph.GetRuntimeGraph(graph.Entity);
+                _runtimeGraph = node.ExternalGraph.GetRuntimeGraph(graph, graph.Entity);
                 _runtimeGraph.OnComplete += ExternalGraphCompleted;
             }
 
@@ -57,6 +57,9 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
                 if (_completed) {
                     return true;
                 }
