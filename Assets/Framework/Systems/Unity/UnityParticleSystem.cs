@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class UnityParticleSystem : SystemBase, IMainSystemUpdate, IReceive<CollisionEvent>, IReceive<DeathEvent>, 
+    public sealed class UnityParticleSystem : SystemBase, IMainSystemUpdate, IReceive<CollisionEvent>,  
         IReceive<EnvironmentCollisionEvent>, IReceive<PerformedCollisionEvent>, IReceive<ProjectileSpawned>, IReceive<ProjectileDespawned> {
         
         public UnityParticleSystem() {
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
-                typeof(SpriteDissolveParticlesComponent), typeof(HitParticlesComponent), typeof(ParticleTrailComponent),
+                typeof(HitParticlesComponent), typeof(ParticleTrailComponent),
             }));
         }
 
@@ -28,22 +28,11 @@ namespace PixelComrades {
         }
 
         public void Handle(CollisionEvent arg) {
-            var dissolve = arg.Target.Get<SpriteDissolveParticlesComponent>();
-            if (dissolve != null) {
-                dissolve.LastCollision = arg;
-            }
             var hitParticles = arg.Target.Get<HitParticlesComponent>();
             if (hitParticles != null) {
                 UnityFxManager.main.EmitHitParticles(arg.HitPoint, arg.HitNormal, hitParticles.Color);
             }
 
-        }
-
-        public void Handle(DeathEvent arg) {
-            var dissolve = arg.Target.Get<SpriteDissolveParticlesComponent>();
-            if (dissolve != null) {
-                UnityFxManager.StartFx(arg.Target, dissolve.LastCollision, dissolve.SpriteRenderer, arg.OverKill);
-            }
         }
 
         public void Handle(EnvironmentCollisionEvent arg) {

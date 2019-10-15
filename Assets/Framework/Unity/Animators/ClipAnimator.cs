@@ -32,7 +32,6 @@ namespace PixelComrades {
 #endif
         protected Dictionary<string, AnimationClipState> _animDictionary = new Dictionary<string, AnimationClipState>();
         protected Queue<AnimationClipState> _animationClipQueue = new Queue<AnimationClipState>();
-        private float _currentClipTime = 0;
         
         private int _lastClipFrame = -1;
         
@@ -229,7 +228,6 @@ namespace PixelComrades {
                 return;
             }
             if (_animationClipQueue.Count == 0 && _currentAnimation!= null && _currentAnimation.Clip.isLooping) {
-                _currentClipTime = 0;
                 _lastClipFrame = -1;
             }
         }

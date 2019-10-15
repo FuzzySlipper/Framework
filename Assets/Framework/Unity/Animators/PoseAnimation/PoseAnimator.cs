@@ -12,7 +12,7 @@ namespace PixelComrades {
         [SerializeField] private bool _isMain = true;
         [SerializeField] private Transform _primaryPivot = null;
         [SerializeField] private Transform _secondaryPivot = null;
-        [SerializeField] private MusclePose _defaultPose;
+        [SerializeField] private MusclePose _defaultPose = null;
         
         private HumanPose _pose;
         private HumanPoseHandler _hph = null;

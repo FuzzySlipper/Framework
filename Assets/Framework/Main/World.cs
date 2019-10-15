@@ -44,7 +44,6 @@ namespace PixelComrades {
             TemplateFilter<VisibleTemplate>.Setup(VisibleTemplate.GetTypes());
             TemplateFilter<CharacterTemplate>.Setup(CharacterTemplate.GetTypes());
             TemplateFilter<CollidableTemplate>.Setup(CollidableTemplate.GetTypes());
-            Get<AnimatorSystem>();
             Get<CommandSystem>();
             Get<CollisionCheckSystem>();
             Get<DespawnEntitySystem>();

@@ -19,7 +19,7 @@ namespace PixelComrades {
 
         public static ManagedArray<Entity> EntitiesArray { get => _entities; }
 
-        public static void RegisterNodeFilter(TemplateFilter filter, System.Type handleType) {
+        public static void RegisterTemplateFilter(TemplateFilter filter, System.Type handleType) {
             for (int i = 0; i < filter.RequiredTypes.Length; i++) {
                 var type = filter.RequiredTypes[i];
                 _templateFilters.GetOrAdd(type).Add(filter);

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [AutoRegister]
+    [AutoRegister, Priority(Priority.Highest)]
     public sealed class SpriteSystem : SystemBase, IMainSystemUpdate, IReceive<TakeDamageEvent>, IReceive<TagChangeEvent>,
         IReceive<ConfusionEvent> {
         
@@ -15,6 +15,8 @@ namespace PixelComrades {
         private GenericPool<TweenFloat> _floatPool = new GenericPool<TweenFloat>(0, null, SetupTween);
         private BufferedList<SpriteColorWatch> _colorList = new BufferedList<SpriteColorWatch>();
         private ManagedArray<SpriteColorWatch>.RefDelegate _del;
+        private ManagedArray<SpriteBillboardTemplate>.RefDelegate _billboardDel;
+        private TemplateList<SpriteBillboardTemplate> _billboardList;
         private struct SpriteColorWatch {
             public SpriteColorComponent ColorComponent;
             public TweenFloat Tween;
@@ -41,10 +43,24 @@ namespace PixelComrades {
                 typeof(SpriteColorComponent)
             }));
             _del = UpdateSprite;
+            TemplateFilter<SpriteBillboardTemplate>.Setup(SpriteBillboardTemplate.GetTypes());
+            _billboardList = EntityController.GetTemplateList<SpriteBillboardTemplate>();
+            _billboardDel = UpdateBillboards;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _colorList.Run(_del);
+            _billboardList.Run(_billboardDel);
+        }
+
+        private void UpdateBillboards(ref SpriteBillboardTemplate template) {
+            template.Billboard.Billboard.Apply(template.Renderer.SpriteTr, template.Billboard.Backwards, ref template.Billboard.LastAngleHeight);
+            var orientation = SpriteFacingControl.GetCameraSide(template.Billboard.Facing, template.Renderer.SpriteTr,
+                template.Renderer.BaseTr, 5, out var inMargin);
+            if ((inMargin && (orientation.IsAdjacent(template.Billboard.Orientation)))) {
+                return;
+            }
+            template.Billboard.Orientation = orientation;
         }
 
         private void UpdateSprite(ref SpriteColorWatch colorStage) {
@@ -144,6 +160,25 @@ namespace PixelComrades {
             Stun,
             Slow,
             Confuse
+        }
+    }
+
+    public class SpriteBillboardTemplate : BaseTemplate {
+
+        private CachedComponent<SpriteRendererComponent> _renderer = new CachedComponent<SpriteRendererComponent>();
+        private CachedComponent<SpriteBillboardComponent> _billboard = new CachedComponent<SpriteBillboardComponent>();
+
+        public SpriteRendererComponent Renderer { get => _renderer.Value; }
+        public SpriteBillboardComponent Billboard { get => _billboard.Value; }
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _renderer, _billboard,
+        };
+
+        public static System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(SpriteRendererComponent),
+                typeof(SpriteBillboardComponent),
+            };
         }
     }
 }

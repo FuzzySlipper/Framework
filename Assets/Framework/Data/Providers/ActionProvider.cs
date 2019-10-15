@@ -26,7 +26,6 @@ namespace PixelComrades {
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue
             (DatabaseFields.PowerMax, 1f));
             stats.Add(power);
-            var animation = data.TryGetValue("Animation", "");
             bool generateCollision = false;
             var targeting = ParseUtilities.TryParseEnum(data.TryGetValue("TargetType", "Enemy"), TargetType.Enemy);
             if (targeting == TargetType.Self || targeting == TargetType.Friendly) {
@@ -36,6 +35,8 @@ namespace PixelComrades {
             var config = data.Get<DataList>("Config");
             var abilityType = data.TryGetValue("Type", "Attack");
             if (type != null && type.TargetID == "Ability") {
+                action.AnimationTrigger = data.TryGetValue("Animation", GraphTriggers.UseAbility);
+                action.EquipVariable = "";
                 var secondaryType = data.TryGetValue("SecondaryType", "");
                 switch (abilityType) {
                     default:
@@ -95,6 +96,8 @@ namespace PixelComrades {
                 }
             }
             else {
+                action.AnimationTrigger = GraphTriggers.Attack;
+                action.EquipVariable = data.TryGetValue("EquipVariable", "");
                 entity.Add(
                     new DamageImpact(data.TryGetValue(DatabaseFields.DamageType,
                             GameData.DamageTypes.GetID(0)), Stats.Health, 1));

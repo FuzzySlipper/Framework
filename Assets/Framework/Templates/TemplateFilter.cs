@@ -61,11 +61,11 @@ namespace PixelComrades {
         public TemplateFilter(System.Type[] types) : base(types) {}
 
         public static void Setup(System.Type[] types) {
-            EntityController.RegisterNodeFilter(new TemplateFilter<T>(types), typeof(T));
+            EntityController.RegisterTemplateFilter(new TemplateFilter<T>(types), typeof(T));
         }
 
         public override void RegisterType(System.Type[] types) {
-            EntityController.RegisterNodeFilter(new TemplateFilter<T>(types), typeof(T));
+            EntityController.RegisterTemplateFilter(new TemplateFilter<T>(types), typeof(T));
             Debug.LogFormat("Registered {0} with {1}", typeof(T), types.Length);
         }
 

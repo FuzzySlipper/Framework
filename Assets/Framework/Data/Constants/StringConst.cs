@@ -177,20 +177,56 @@ namespace PixelComrades {
         }
     }
 
-    public partial class GraphVariables : GenericEnum<GraphVariables, string> {
+    public class GraphVariables : GenericEnum<GraphVariables, string> {
         public const string None = "";
         public const string Reloading = "Reloading";
         public const string Attacking = "Attacking";
         public const string UsingAbility = "UsingAbility";
+        public const string IsMoving = "IsMoving";
+        public const string Equipment = "Equipment";
 
         public override string Parse(string value, string defaultValue) {
             return value;
         }
     }
 
+    public class GraphTriggers : GenericEnum<GraphTriggers, string> {
+        public const string None = "";
+        public const string Death = "Death";
+        public const string GetHit = "GetHit";
+        public const string Reload = "Reload";
+        public const string Attack = "Attack";
+        public const string UseAbility = "UseAbility";
+        public const string ChangeEquipment = "ChangeEquipment";
+        public const string CastSpell = "CastSpell";
+        public const string Punch = "Punch";
+
+        public override string Parse(string value, string defaultValue) {
+            return value;
+        }
+    }
+
+//    public partial class GraphTags : GenericEnum<GraphVariables, string> {
+//        public const string None = "";
+//        public const string Idle = "Idle";
+//        public const string GetHit = "GetHit";
+//        public const string Action = "Action";
+//        public const string Death = "Death";
+//        public const string Move = "Move";
+//        public const string Attack = "Attack";
+//        public const string CastSpell = "CastSpell";
+//        public const string RangedAttack = "RangedAttack";
+//        public const string SpecialAttack = "SpecialAttack";
+//
+//        public override string Parse(string value, string defaultValue) {
+//            return value;
+//        }
+//    }
+
     public partial class AnimationEvents : GenericEnum<AnimationEvents, string> {
         public const string None = "";
         public const string Start = "Start";
+        public const string Stop = "Stop";
         public const string Default = "Default";
         public const string FxOn = "FxOn";
         public const string FxOff = "FxOff";
@@ -210,12 +246,14 @@ namespace PixelComrades {
         public const string PullLeftBottom = "PullLeftBottom";
         public const string PullTop = "PullTop";
         public const string PullBottom = "PullBottom";
-        public const string Reload = "Reloading";
-        public const string ReloadStop = "ReloadStop";
+        public const string Reload = "Reload";
         public const string Miss = "Miss";
         public const string Impact = "Impact";
         public const string Collision = "Collision";
         public const string CollisionOrImpact = "CollisionOrImpact";
+        public const string StopMovement = "StopMovement";
+        public const string AllowMovement = "AllowMovement";
+        public const string Dead = "Dead";
 
         public static ActionState ToStateEvent(string eventName) {
             switch (eventName) {
@@ -225,6 +263,8 @@ namespace PixelComrades {
                     return ActionState.FxOff;
                 case AnimationEvents.Default:
                     return ActionState.Activate;
+                case AnimationEvents.Start:
+                    return ActionState.Start;
             }
             return ActionState.None;
         }

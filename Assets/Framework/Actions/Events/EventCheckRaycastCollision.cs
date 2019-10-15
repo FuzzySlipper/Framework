@@ -24,8 +24,7 @@ namespace PixelComrades {
                 originPos = PlayerInputSystem.GetLookTargetRay.origin;
             }
             else {
-                var animData = origin.Entity.Find<AnimatorComponent>();
-                originPos = animData?.Value?.GetEventPosition ?? (origin.Tr != null ? origin.Tr.position : Vector3.zero);
+                originPos = ae.Position;
             }
             var target = ae.Position;
             var actionEntity = origin.CurrentAction.GetEntity();

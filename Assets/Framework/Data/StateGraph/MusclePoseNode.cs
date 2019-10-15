@@ -5,15 +5,17 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public sealed class MusclePoseNode : StateGraphNode {
 
-        public AnimationCurve Curve;
+        public AnimationCurve Curve = new AnimationCurve();
         public MusclePose TargetPose;
         public float Duration = 0.2f;
+        protected override Vector2 GetNodeSize { get { return new Vector2(base.GetNodeSize.x, base.GetNodeSize.y * 1.5f);} }
+
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            TargetPose = UnityEditor.EditorGUILayout.ObjectField(TargetPose, typeof(GenericSequence), false) as MusclePose;
+            TargetPose = UnityEditor.EditorGUILayout.ObjectField(TargetPose, typeof(MusclePose), false) as MusclePose;
             Curve = UnityEditor.EditorGUILayout.CurveField(Curve);
             GUILayout.Space(20);
             GUILayout.EndHorizontal();

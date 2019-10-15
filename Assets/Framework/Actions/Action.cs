@@ -9,11 +9,12 @@ namespace PixelComrades {
 	public sealed class Action : IComponent {
 
         [SerializeField] private Dictionary<string, List<IActionEventHandler>> _events = new Dictionary<string, List<IActionEventHandler>>();
+        
         public List<ICommandCost> Costs = new List<ICommandCost>();
         public string ActionType;
         public float Range;
         public ActionFx Fx;
-        public string EquipTrigger;
+        public string EquipVariable;
         public string AnimationTrigger;
         public bool Primary;
         public int EquippedSlot = -1;
@@ -68,15 +69,12 @@ namespace PixelComrades {
             if (state == ActionState.Activate) {
                 ae.Origin.Entity.Post(
                     new ActionEvent(
-                        ae.Origin.Entity, ae.Origin.Entity, ae.Origin.Animator.Value.GetEventPosition, ae.Origin.Animator.Value
-                            .GetEventRotation,
-                        ActionState.Activate));
+                        ae.Origin.Entity, ae.Origin.Entity, ae.Position, ae.Rotation, ActionState.Activate));
             }
             if (state == ActionState.None) {
                 return;
             }
-            var stateEvent = new ActionEvent(
-                ae.Origin.Entity, Entity, ae.Origin.Animator.Value.GetEventPosition, ae.Origin.Animator.Value.GetEventRotation, state);
+            var stateEvent = new ActionEvent(ae.Origin.Entity, Entity, ae.Position, ae.Rotation, state);
             if (Fx != null) {
                 Fx.TriggerEvent(stateEvent);
             }

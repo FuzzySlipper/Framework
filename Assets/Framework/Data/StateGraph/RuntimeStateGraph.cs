@@ -14,7 +14,7 @@ namespace PixelComrades {
         private List<IGlobalRuntimeStateNode> _globals = new List<IGlobalRuntimeStateNode>();
         
         private Dictionary<string, GraphTrigger> GlobalTriggers { get; }
-        private Dictionary<string, System.Object> Variables { get; }
+        public Dictionary<string, System.Object> Variables { get; }
         public float TimeStartGraph { get; protected set; }
         public RuntimeStateNode Current { get; protected set; }
         public RuntimeStateNode StartNode { get; protected set; }
@@ -24,22 +24,24 @@ namespace PixelComrades {
         public RuntimeStateGraph ParentGraph { get; }
         public Entity Entity { get; private set; }
 
-        public RuntimeStateGraph(StateGraph graph) {
+        public RuntimeStateGraph(StateGraph graph, Entity entity) {
             GlobalTriggers = new Dictionary<string, GraphTrigger>();
             Variables =  new Dictionary<string, System.Object>();
             OriginalGraph = graph;
             ParentGraph = null;
+            Entity = entity;
             SetupGraph();
         }
 
-        public RuntimeStateGraph(RuntimeStateGraph parent, StateGraph graph) {
+        public RuntimeStateGraph(RuntimeStateGraph parent, StateGraph graph, Entity entity) {
             GlobalTriggers = parent.GlobalTriggers;
             Variables = parent.Variables;
             OriginalGraph = graph;
             ParentGraph = parent;
+            Entity = entity;
             SetupGraph();
         }
-
+        
         private void SetupGraph() {
             for (int i = 0; i < OriginalGraph.GlobalTriggers.Count; i++) {
                 GlobalTriggers.AddOrUpdate(OriginalGraph.GlobalTriggers[i].Key, OriginalGraph.GlobalTriggers[i]);
@@ -48,10 +50,6 @@ namespace PixelComrades {
                 CreateRuntimeNode(OriginalGraph[i]);
             }
             StartNode = GetRuntimeNode(OriginalGraph.Default != null ? OriginalGraph.Default.Id : OriginalGraph[0].Id);
-        }
-        
-        public void SetOwner(Entity owner) {
-            Entity = owner;
         }
 
         public T GetVariable<T>(string key) {
@@ -92,6 +90,10 @@ namespace PixelComrades {
             if (Current.TryComplete(dt)) {
                 SetCurrentNode(Current.GetExitNode());
             }
+        }
+
+        public void ChangeNode(int id) {
+            ChangeNode(GetRuntimeNode(id));
         }
 
         public void ChangeNode(RuntimeStateNode node) {

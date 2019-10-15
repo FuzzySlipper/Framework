@@ -9,7 +9,7 @@ namespace PixelComrades {
     public class InputDebuggerEditor : OdinEditor {
     public override void OnInspectorGUI() {
             var script = (InputDebugger) target;
-            if (!Game.GameActive) {
+            if (!Game.GameActive || !Application.isPlaying) {
                 EditorGUILayout.LabelField("Game Not Active");
                 return;
             }

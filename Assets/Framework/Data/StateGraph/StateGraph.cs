@@ -21,9 +21,19 @@ namespace PixelComrades {
             }
         }
 
+        public void ClearConnectsWith(ConnectionPoint newInPnt, ConnectionPoint newOutPnt) {
+            for (int i = Connections.Count - 1; i >= 0; i--) {
+                var inPnt = Connections[i].GetIn();
+                var outPnt = Connections[i].GetOut();
+                if (inPnt == newInPnt || inPnt == newOutPnt || outPnt == newInPnt || outPnt == newOutPnt) {
+                    Connections.RemoveAt(i);
+                }
+            }
+        }
+
         public StateGraphNode GetConnectionEndpoint(ConnectionPoint point) {
             for (int i = 0; i < Connections.Count; i++) {
-                if (Connections[i].GetIn() == point) {
+                if (Connections[i].GetIn().Id == point.Id) {
                     return Connections[i].OutNode;
                 }
             }
@@ -39,14 +49,12 @@ namespace PixelComrades {
         }
 
         public RuntimeStateGraph GetRuntimeGraph(Entity entity) {
-            var runtime = new RuntimeStateGraph(this);
-            runtime.SetOwner(entity);
+            var runtime = new RuntimeStateGraph(this, entity);
             return runtime;
         }
 
         public RuntimeStateGraph GetRuntimeGraph(RuntimeStateGraph parent, Entity entity) {
-            var runtime = new RuntimeStateGraph(parent, this);
-            runtime.SetOwner(entity);
+            var runtime = new RuntimeStateGraph(parent, this, entity);
             return runtime;
         }
         

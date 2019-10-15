@@ -11,7 +11,7 @@ namespace PixelComrades {
             return false;
         }
 
-        public override string Title { get { return "Node"; } }
+        public override string Title { get { return "Block Damage Node"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
             return new RuntimeNode(this, graph);

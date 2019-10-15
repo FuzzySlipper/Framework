@@ -9,26 +9,7 @@ namespace PixelComrades {
         public override int InputMax { get => 0; }
 
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
-            bool changed = false;
-#if UNITY_EDITOR
-            for (int i = 0; i < Conditions.Count; i++) {
-                Conditions[i].DrawGui(this, textStyle, buttonStyle);
-                GUILayout.Space(10);
-            }
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            if (GUILayout.Button("Add Condition", buttonStyle)) {
-                Conditions.Add(new ConditionExit());
-                CheckSize();
-                changed = true;
-            }
-            GUILayout.Space(20);
-            GUILayout.EndHorizontal();
-            if (changed) {
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
-#endif
-            return changed;
+            return false;
         }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {

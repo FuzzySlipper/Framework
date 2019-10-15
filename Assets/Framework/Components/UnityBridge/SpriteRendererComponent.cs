@@ -34,7 +34,7 @@ namespace PixelComrades {
         }
 
         private void Setup() {
-            MaterialBlocks = new MaterialPropertyBlock[1] { new MaterialPropertyBlock()};
+            MaterialBlocks = new[] { new MaterialPropertyBlock()};
             Value.GetPropertyBlock(MaterialBlocks[0]);
             SpriteTr = Value.transform;
         }

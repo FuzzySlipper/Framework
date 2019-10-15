@@ -12,7 +12,7 @@ namespace PixelComrades {
         public AnimationGraphComponent(RuntimeStateGraph value) {
             Value = value;
         }
-        
+
         public AnimationGraphComponent(SerializationInfo info, StreamingContext context) {
             //BuildingIndex = info.GetValue(nameof(BuildingIndex), BuildingIndex);
         }

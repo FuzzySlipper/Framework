@@ -116,7 +116,7 @@ namespace PixelComrades {
                 msg.Impact.Source.PostAll(new CausedDamageEvent(damageAmount, msg));
             }
             if (vital != null && vital.Current <= 0 && msg.TargetVital == Stats.Health) {
-                node.Entity.Post(new DeathEvent(msg.Origin, msg.Target, damageAmount - previousValue));
+                node.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Impact,  damageAmount - previousValue));
             }
         }
         

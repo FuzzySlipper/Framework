@@ -9,7 +9,7 @@ namespace PixelComrades {
         protected const int MaxConnections = 5;
         protected const int MinConnectionId = 100;
         
-        public static Vector2 DefaultNodeSize = new Vector2(225, 100);
+        public static Vector2 DefaultNodeSize = new Vector2(225, 125);
         
         public Rect Rect;
         public List<ConnectionPoint> InPoints = new List<ConnectionPoint>();
@@ -21,6 +21,7 @@ namespace PixelComrades {
         public bool AllowEarlyExit = false;
         public string EnterEvent = AnimationEvents.None;
         public string ExitEvent = AnimationEvents.None;
+        
         
         protected virtual Vector2 GetNodeSize { get { return DefaultNodeSize; } }
         public virtual bool HasConditions { get { return Conditions.Count > 0; } }
@@ -44,7 +45,7 @@ namespace PixelComrades {
             Rect.position += delta;
         }
 
-        public ConnectionPoint GetConnectionPoint(int id) {
+        public ConnectionPoint GetConnectionPointById(int id) {
             for (int i = 0; i < InPoints.Count; i++) {
                 if (InPoints[i].Id == id) {
                     return InPoints[i];
@@ -82,7 +83,7 @@ namespace PixelComrades {
         }
 
         public void CheckSize() {
-            Rect.size = new Vector2(GetNodeSize.x, GetNodeSize.y + ((GetNodeSize.y * 0.8f) * Conditions.Count));
+            Rect.size = new Vector2(GetNodeSize.x, GetNodeSize.y + ((DefaultNodeSize.y * 0.5f) * Conditions.Count));
         }
         
         public abstract RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph);
@@ -112,11 +113,11 @@ namespace PixelComrades {
         }
 
         public ConnectionPoint GetIn() {
-            return InNode.GetConnectionPoint(In);
+            return InNode.GetConnectionPointById(In);
         }
 
         public ConnectionPoint GetOut() {
-            return OutNode.GetConnectionPoint(Out);
+            return OutNode.GetConnectionPointById(Out);
         }
     }
 

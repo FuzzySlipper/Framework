@@ -18,6 +18,7 @@ namespace PixelComrades {
             entity.Add(new CommandTarget());
             entity.Add(new FactionComponent(faction));
             entity.Add(new PronounComponent(PlayerPronouns.They));
+            entity.Add(new CurrentAction());
             return entity;
         }
     }

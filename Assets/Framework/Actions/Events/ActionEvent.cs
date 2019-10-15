@@ -48,4 +48,39 @@ namespace PixelComrades {
             State = state;
         }
     }
+    
+    public static class ActionEventExtensions{
+        public static bool GetSpawnPositionRotation(this ActionEvent ae, out Vector3 pos, out Quaternion rot) {
+            if (ae.Origin.CurrentAction != null) {
+                var actionEntity = ae.Origin.CurrentAction.Entity;
+                var spawnPivot = actionEntity.Get<SpawnPivotComponent>();
+                if (spawnPivot != null) {
+                    pos = spawnPivot.position;
+                    rot = spawnPivot.rotation;
+                    return true;
+                }
+                var actionTr = actionEntity.Get<TransformComponent>();
+                if (actionTr != null) {
+                    pos = actionTr.position;
+                    rot = actionTr.rotation;
+                    return true;
+                }
+                var actionPivots = ae.Origin.Entity.Get<ActionPivotsComponent>();
+                if (actionPivots != null) {
+                    pos = (ae.Origin.CurrentAction.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).position;
+                    rot = (ae.Origin.CurrentAction.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).rotation;
+                    return true;
+                }
+            }
+            var transformComponent = ae.Origin.Tr;
+            if (transformComponent != null) {
+                pos = transformComponent.position;
+                rot = transformComponent.rotation;
+                return true;
+            }
+            pos = ae.Position;
+            rot = ae.Rotation;
+            return false;
+        }
+    }
 }

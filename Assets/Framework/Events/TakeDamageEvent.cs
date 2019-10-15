@@ -62,12 +62,14 @@ namespace PixelComrades {
     public struct DeathEvent : IEntityMessage {
         public CharacterTemplate Caused { get; }
         public CharacterTemplate Target { get; }
+        public ImpactEvent Impact { get; }
         public float OverKill { get; }
 
-        public DeathEvent(CharacterTemplate caused, CharacterTemplate target, float overKill) {
+        public DeathEvent(CharacterTemplate caused, CharacterTemplate target, ImpactEvent impact, float overKill) {
             Caused = caused;
             Target = target;
             OverKill = overKill;
+            Impact = impact;
         }
     }
 

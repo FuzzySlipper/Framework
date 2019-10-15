@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class FirstPersonAnimationSystem : SystemBase, IMainSystemUpdate, IReceive<EquipmentChanged>, IReceive<AnimationEventTriggered> {
+    public sealed class FirstPersonAnimationSystem : SystemBase, IMainSystemUpdate, IReceive<ReadyActionsChanged>, IReceive<AnimationEventTriggered> {
         
         private GameOptions.CachedBool _useWeaponBob = new GameOptions.CachedBool("UseWeaponBob");
         
@@ -37,28 +37,28 @@ namespace PixelComrades {
             }
         }
 
-        public void Handle(EquipmentChanged arg) {
-            if (arg.Item == null) {
+        public void Handle(ReadyActionsChanged arg) {
+            if (arg.Action == null) {
                 return;
             }
-            var weaponModelComponent = arg.Item.Get<WeaponModelComponent>();
-            if (weaponModelComponent == null) {
-                if (arg.Slot == null) {
-                    arg.Item.Remove<SpawnPivotComponent>();
+            var entity = arg.Action.Entity;
+            var weaponModelComponent = entity.Get<WeaponModelComponent>();
+            if (arg.Index != 0 || weaponModelComponent == null) {
+                if (arg.Container == null) {
+                    entity.Remove<SpawnPivotComponent>();
                 }
                 else {
-                    var action = arg.Item.Get<Action>();
-                    var actionPivots = arg.Slot.Owner.Get<ActionPivotsComponent>();
-                    if (action != null && actionPivots != null) {
-                        arg.Item.Add(new SpawnPivotComponent(action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot));
+                    var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
+                    if (actionPivots != null) {
+                        entity.Add(new SpawnPivotComponent(arg.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot));
                     }
                 }
                 return;
             }
-            if (arg.Slot == null) {
+            if (arg.Container == null) {
                 ItemPool.Despawn(weaponModelComponent.Loaded.Tr.gameObject);
-                arg.Item.Remove<TransformComponent>();
-                arg.Item.Remove<SpawnPivotComponent>();
+                entity.Remove<TransformComponent>();
+                entity.Remove<SpawnPivotComponent>();
                 weaponModelComponent.Set(null);
             }
             else {
@@ -67,14 +67,13 @@ namespace PixelComrades {
                 if (weaponModel == null) {
                     return;
                 }
-                bool isPrimary = arg.Item.Get<Action>()?.Primary ?? false;
-                var projectileSpawn = arg.Slot.Owner.Get<ActionPivotsComponent>();
+                var projectileSpawn = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                 if (projectileSpawn != null) {
-                    weaponModel.Transform.SetParentResetPos(isPrimary? projectileSpawn.PrimaryPivot : projectileSpawn.SecondaryPivot);
+                    weaponModel.Transform.SetParentResetPos(arg.Action.Primary? projectileSpawn.PrimaryPivot : projectileSpawn.SecondaryPivot);
                 }
                 weaponModelComponent.Set(weaponModel.GetComponent<IWeaponModel>());
-                arg.Item.Add(new TransformComponent(weaponModel.transform));
-                arg.Item.Add(new SpawnPivotComponent(weaponModel.Transform));
+                entity.Add(new TransformComponent(weaponModel.transform));
+                entity.Add(new SpawnPivotComponent(weaponModel.Transform));
             }
         }
 

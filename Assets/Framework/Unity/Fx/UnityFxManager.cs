@@ -22,10 +22,7 @@ namespace PixelComrades {
         //[SerializeField] private GameObject _particlePrefab = null;
         //[SerializeField] private int _particleCount = 5000;
         //[SerializeField] private float _extraForce = 3f;
-        [SerializeField] private float _maxDamage = 1.5f;
         //[SerializeField] private float _damageMulti = 0.25f;
-        [SerializeField] private float _minDamage = 0.3f;
-        [SerializeField] private float _maxFinish = 5f;
         [SerializeField] private ParticleSystem _gravityParticles = null;
         [SerializeField] private ParticleSystem _noGravityParticles = null;
         [SerializeField] private ParticleSystem _antiGravityParticles = null;
@@ -46,14 +43,12 @@ namespace PixelComrades {
         [SerializeField] private NormalizedFloatRange _decalBrightness = new NormalizedFloatRange(0.05f, 0.3f);
 
         private ParticleSystem.Particle[] _particles;
-        private MaterialPropertyBlock _block;
         //private List<Decal> _decals = new List<Decal>();
         private List<Decal> _decals = new List<Decal>();
         private int _decalIndex = 0;
         //private Mesh _decalMesh;
         
         void Awake() {
-            _block = new MaterialPropertyBlock();
             //_decalMesh = ProceduralMeshUtility.BuildQuadMesh(_decalSize, _decalSize);
         }
 
@@ -181,82 +176,7 @@ namespace PixelComrades {
             }
         }
 
-        public static void StartFx(Entity entity, CollisionEvent collisionEvent, SpriteRenderer sprite, float amt) {
-            TimeManager.StartUnscaled(main.DissolveFx(entity, collisionEvent, sprite, amt));
-        }
-
-        private IEnumerator DissolveFx(Entity owner, CollisionEvent collisionEvent, SpriteRenderer sprite, float amt) {
-            var power = Mathf.Clamp(amt, _minDamage, _maxDamage);
-            var tr = owner.Get<TransformComponent>();
-            sprite.GetPropertyBlock(_block);
-            var hitPnt = collisionEvent.HitPoint;
-            var localPosition = tr != null ? tr.InverseTransformPoint(hitPnt) : hitPnt;
-            //DebugExtension.DebugWireSphere(hitPnt, power, 2.5f);
-            _block.SetVector("_DissolveMaskPosition", hitPnt);
-            _block.SetFloat("_DissolveMaskRadius", power);
-            sprite.SetPropertyBlock(_block);
-            var start = TimeManager.TimeUnscaled;
-            bool started = false;
-            if (owner.IsDestroyed()) {
-                yield break;
-            }
-            var modelComponent = owner.Get<RenderingComponent>();
-            var animator = owner.Get<AnimatorComponent>()?.Value;
-            if (animator == null) {
-                owner.Destroy();
-                yield break;
-            }
-            var startFx = 0f;
-            var fxTime = 0f;
-            owner.Tags.Remove(EntityTags.CanUnityCollide);
-            if (animator.CurrentAnimation != AnimationIds.Death) {
-                var loopLimiter = new WhileLoopLimiter(500);
-                int lastTried = 0;
-                while (loopLimiter.Advance()) {
-                    if (animator.CurrentAnimation == AnimationIds.Death) {
-                        break;
-                    } 
-                    if (lastTried > 5) {
-                        animator.PlayAnimation(AnimationIds.Death, false, null);
-                        lastTried = 0;
-                    }
-                    lastTried++;
-                    yield return null;
-                }
-                if (loopLimiter.HitLimit) {
-                    Debug.LogFormat("{0} could not start Death animation", owner.Name);
-                    owner.Destroy();
-                    yield break;
-                }
-            }
-            var timeOut = animator.CurrentAnimationLength * 2.5f;
-            while (TimeManager.TimeUnscaled < start + timeOut) {
-                var worldPnt = tr != null ? tr.TransformPoint(localPosition) : hitPnt;
-                //DebugExtension.DebugWireSphere(worldPnt, power, 0.5f);
-                sprite.GetPropertyBlock(_block);
-                _block.SetVector("_DissolveMaskPosition", worldPnt);
-                if (!started) {
-                    if (animator.IsAnimationEventComplete("Death")) {
-                        started = true;
-                        startFx = TimeManager.TimeUnscaled;
-                        fxTime = animator.CurrentAnimationRemaining * 1.5f;
-                    }
-                    else {
-                        sprite.SetPropertyBlock(_block);
-                        yield return null;
-                        continue;
-                    }
-                }
-                var percent = (TimeManager.TimeUnscaled - startFx) / fxTime;
-                _block.SetFloat("_DissolveMaskRadius", Mathf.Lerp(power, _maxFinish, percent));
-                sprite.SetPropertyBlock(_block);
-                yield return null;
-            }
-            _block.SetFloat("_DissolveMaskRadius", 0);
-            sprite.SetPropertyBlock(_block);
-            modelComponent.SetVisible(RenderingMode.None);
-            owner.Destroy();
-        }
+        
 
         //private IEnumerator ExplodeFx(Entity entity, CollisionEvent collisionEvent, SpriteRenderer sprite) {
         //    var holder = GetParticles();

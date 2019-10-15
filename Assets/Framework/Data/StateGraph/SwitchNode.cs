@@ -9,24 +9,30 @@ namespace PixelComrades {
         public override int MaxConditions { get => 0; }
         public override bool HasConditions { get { return true; } }
 
-        public string Variable = "Variable";
+        public string VariableName = "Variable";
         public List<string> Values = new List<string>();
-        public ConditionType Type = ConditionType.StringVariable;
 
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             GUILayout.Label("Variable: ");
-            Variable = GUILayout.TextField(Variable, textStyle);
-            Type = (ConditionType) UnityEditor.EditorGUILayout.EnumPopup(Type, buttonStyle);
+            var graphLabels = GraphVariables.GetNames().ToArray();
+            var index = System.Array.IndexOf(graphLabels, VariableName);
+            var newVar = UnityEditor.EditorGUILayout.Popup(
+                index, graphLabels, buttonStyle, new[] {
+                    GUILayout.MaxWidth
+                        (StateGraphNode.DefaultNodeSize.x * 0.5f)
+                });
+            if (newVar != index) {
+                VariableName = graphLabels[newVar];
+            }
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
             for (int i = 0; i < OutPoints.Count; i++) {
                 if (Values.Count <= i) {
                     Values.Add("");
-                    Rect.size = new Vector2(
-                        GetNodeSize.x * (OutPoints.Count > 0 ? 2f : 1f), GetNodeSize.y + ((GetNodeSize.y * 0.25f) * OutPoints.Count));
+                    CheckSize();
                 }
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
@@ -51,6 +57,13 @@ namespace PixelComrades {
             return false;
         }
 
+        protected override Vector2 GetNodeSize {
+            get {
+                return new Vector2(
+                    DefaultNodeSize.x * (OutPoints.Count > 0 ? 1.5f : 1f),
+                    DefaultNodeSize.y + ((DefaultNodeSize.y * 0.2f) * OutPoints.Count));
+            }
+        }
         public override string Title { get { return "Switch"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
@@ -59,15 +72,26 @@ namespace PixelComrades {
 
         public class RuntimeNode : RuntimeStateNode {
             
-            private RuntimeStateNode _exitNode;
             private SwitchNode _originalNode;
             
             public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
+                var variable = Graph.GetVariable<string>(_originalNode.VariableName);
+                for (int i = 0; i < _originalNode.Values.Count; i++) {
+                    if (variable == _originalNode.Values[i]) {
+                        var exitNode = Graph.OriginalGraph.GetConnectionEndpoint(Node.OutPoints[i]);
+                        if (exitNode != null) {
+                            return Graph.GetRuntimeNode(exitNode.Id);
+                        }
+                    }
+                }
+                var defNode = Graph.OriginalGraph.GetConnectionEndpoint(Node.OutPoints[_originalNode.DefaultExit]);
+                if (defNode != null) {
+                    return Graph.GetRuntimeNode(defNode.Id);
+                }
+                return null;
             }
 
             public RuntimeNode(SwitchNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _exitNode = GetOriginalNodeExit();
                 _originalNode = node;
             }
 
@@ -80,10 +104,7 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
-                if (base.TryComplete(dt)) {
-                    return true;
-                }
-                return false;
+                return true;
             }
         }
     }

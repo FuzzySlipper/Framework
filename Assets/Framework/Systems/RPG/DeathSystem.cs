@@ -25,6 +25,8 @@ namespace PixelComrades {
             logSystem.PostCurrentStrings(GameLogSystem.DeathColor);
             arg.Target.Tags.Add(EntityTags.IsDead);
             arg.Target.Tags.Add(EntityTags.CantMove);
+            arg.Target.Tags.Set(EntityTags.CanUnityCollide, 0);
+
         }
 
         public void HandleGlobal(RaiseDeadEvent arg) {
@@ -38,6 +40,7 @@ namespace PixelComrades {
             var entity = arg.Target;
             entity.Tags.Remove(EntityTags.IsDead);
             entity.Tags.Remove(EntityTags.CantMove);
+            arg.Target.Tags.Set(EntityTags.CanUnityCollide, 1);
         }
         
         public void Handle(ImpactEvent arg) {
@@ -61,7 +64,7 @@ namespace PixelComrades {
             hoverMsg.AppendNewLine(RulesSystem.LastQueryString.ToString());
             logSystem.PostCurrentStrings(!success ? GameLogSystem.NormalColor : GameLogSystem.DeathColor);
             if (success) {
-                arg.Target.Post(new DeathEvent(arg.Origin, arg.Target, 100));
+                arg.Target.Post(new DeathEvent(arg.Origin, arg.Target, arg, 100));
                 arg.Target.Post(new CombatStatusUpdate(arg.Target, "Lethal Hit!", GameLogSystem.DeathColor));
             }
         }

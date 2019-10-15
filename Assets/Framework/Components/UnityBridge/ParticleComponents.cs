@@ -7,22 +7,22 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class SpriteDissolveParticlesComponent : IComponent {
 
+        public float Length { get; }
         public CachedUnityComponent<SpriteRenderer> SpriteRenderer { get; }
-        public CollisionEvent LastCollision;
-        public float CurrentHealth;
 
-        public SpriteDissolveParticlesComponent(SpriteRenderer spriteRenderer) {
+        public SpriteDissolveParticlesComponent(float length, SpriteRenderer spriteRenderer) {
+            Length = length;
             SpriteRenderer = new CachedUnityComponent<SpriteRenderer>(spriteRenderer);
         }
 
         public SpriteDissolveParticlesComponent(SerializationInfo info, StreamingContext context) {
-            CurrentHealth = info.GetValue(nameof(CurrentHealth), CurrentHealth);
             SpriteRenderer = info.GetValue(nameof(SpriteRenderer), SpriteRenderer);
+            Length = info.GetValue(nameof(Length), Length);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(CurrentHealth), CurrentHealth);
             info.AddValue(nameof(SpriteRenderer), SpriteRenderer);
+            info.AddValue(nameof(Length), Length);
         }
     }
 

@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     
-    public class NodeList {
+    public class TemplateList {
         
     }
 
     [System.Serializable]
-    public class TemplateList<T> : NodeList, IEnumerable<T> where T : IEntityTemplate {
+    public class TemplateList<T> : TemplateList, IEnumerable<T> where T : IEntityTemplate {
 
         [SerializeField] private ManagedArray<T> _list;
 

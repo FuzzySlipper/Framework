@@ -15,7 +15,8 @@ namespace PixelComrades {
         private static Dictionary<string, string> _dictString = new Dictionary<string, string>();
         private static Dictionary<string, Color> _dictColor = new Dictionary<string, Color>();
 
-        private static void Init() {
+        [Command("initGameOptions")]
+        public static void Init() {
             GameData.AddInit(Init);
             var row = GameData.GetSheet(SheetName)[Row];
             LoadDictionary(row.Get<DataList>("Text"), _dictString);

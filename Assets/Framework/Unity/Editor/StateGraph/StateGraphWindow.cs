@@ -11,6 +11,7 @@ namespace PixelComrades {
         private const int StyleHasConditions = 3;
         private const int StyleIndexDefault = 2;
         private const int StyleIndexGlobal = 1;
+        private const float MaxDrag = 50f;
         
         private StateGraph _graph;
         private Vector2 _mousePosition;
@@ -93,8 +94,8 @@ namespace PixelComrades {
             }
             DrawGrid(20, 0.2f, Color.gray);
             DrawGrid(100, 0.4f, Color.gray);
-            DrawNodes();
             DrawConnections();
+            DrawNodes();
             DrawConnectionLine(Event.current);
             ProcessNodeEvents(Event.current);
             ProcessEvents(Event.current);
@@ -247,19 +248,21 @@ namespace PixelComrades {
                     EditorUtility.SetDirty(node);
                 }
                 GUILayout.EndArea();
+                var inSpacing = Mathf.Clamp(0.8f/ node.InPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.InPoints.Count; c++) {
                     if (node.InPoints[c] == null) {
                         node.InPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.InPoints[c], c);
+                    DrawConnectionPoint(node.InPoints[c], c, inSpacing);
                 }
+                var outSpacing = Mathf.Clamp(0.8f / node.OutPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.OutPoints.Count; c++) {
                     if (node.OutPoints[c] == null) {
                         node.OutPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.OutPoints[c], c);
+                    DrawConnectionPoint(node.OutPoints[c], c, outSpacing);
                 }
                 if (node.InPoints.Count < node.InputMax) {
                     var addRect = new Rect(
@@ -284,8 +287,8 @@ namespace PixelComrades {
             }
         }
 
-        private void DrawConnectionPoint(ConnectionPoint point, int index) {
-            var height = (point.Node.Rect.height * ((index+1) * 0.2f)); 
+        private void DrawConnectionPoint(ConnectionPoint point, int index, float spacing) {
+            var height = (point.Node.Rect.height * ((index+1) * spacing)); 
             point.Rect.y = point.Node.Rect.y + height - point.Rect.height * 0.5f;
             switch (point.ConnectType) {
                 case ConnectionPointType.In:
@@ -382,7 +385,7 @@ namespace PixelComrades {
                         break;
 
                     case EventType.MouseDrag:
-                        if (e.button == 0 && _dragged == node) {
+                        if (e.button == 0 && _dragged == node && e.clickCount < 2) {
                             node.Drag(e.delta);
                             e.Use();
                             guiChanged = true;
@@ -416,7 +419,7 @@ namespace PixelComrades {
                     }
                     break;
                 case EventType.MouseDrag:
-                    if (e.button == 0) {
+                    if (e.button == 0 && e.clickCount < 1) {
                         OnDrag(e.delta);
                     }
                     break;
@@ -429,10 +432,14 @@ namespace PixelComrades {
         }
 
         private void OnDrag(Vector2 delta) {
-            _drag = delta;
+            if (EditorWindow.mouseOverWindow != this) {
+                GUILayout.Label("Not Active Window");
+                return;
+            }
+            _drag = Vector2.ClampMagnitude(delta, MaxDrag);
             if (_graph != null) {
                 for (int i = 0; i < _graph.Nodes.Count; i++) {
-                    _graph.Nodes[i].Drag(delta);
+                    _graph.Nodes[i].Drag(_drag);
                     EditorUtility.SetDirty(_graph.Nodes[i]);
                 }
             }
@@ -445,6 +452,7 @@ namespace PixelComrades {
         }
 
         private void CreateConnection() {
+            _graph.ClearConnectsWith(_selectedInPoint, _selectedOutPoint);
             _graph.Connections.Add(new Connection(_selectedInPoint, _selectedOutPoint));
         }
 

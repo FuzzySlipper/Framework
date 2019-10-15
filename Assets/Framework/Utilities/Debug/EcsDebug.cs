@@ -105,6 +105,7 @@ namespace PixelComrades {
             Console.Log("Timescale is " + TimeManager.TimeScale.ToString("F2"));
         }
 
+        [Command("importGameData")]
         public static void ImportGameData() {
             GameData.Init();
         }

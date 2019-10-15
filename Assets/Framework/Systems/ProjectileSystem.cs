@@ -48,27 +48,7 @@ namespace PixelComrades {
         }
 
         public Entity SpawnProjectile(Entity owner, string id, ActionEvent msg) {
-            var animData = owner.Find<AnimatorComponent>();
-            Vector3 spawnPos = Vector3.zero;
-            Quaternion spawnRot = Quaternion.identity;
-            if (animData?.Value != null) {
-                spawnPos = animData.Value.GetEventPosition;
-                spawnRot = animData.Value.GetEventRotation;
-            }
-            else {
-                var tr = owner.Get<TransformComponent>();
-                if (tr != null) {
-                    spawnPos = tr.position;
-                    spawnRot = tr.rotation;
-                }
-                else {
-                    var spawnPivot = msg.Origin.CurrentAction.Entity.Get<SpawnPivotComponent>();
-                    if (spawnPivot != null) {
-                        spawnPos = spawnPivot.position;
-                        spawnRot = spawnPivot.rotation;
-                    }
-                }
-            }
+            msg.GetSpawnPositionRotation(out var spawnPos, out var spawnRot);
             return SpawnProjectile(owner, id, msg.Position, spawnPos, spawnRot);
         }
 
