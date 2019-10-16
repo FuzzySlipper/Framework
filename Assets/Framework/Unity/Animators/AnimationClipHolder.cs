@@ -24,7 +24,7 @@ namespace PixelComrades {
         [HideInInspector] public int CurrentIndex = 0;
 
         private ValueDropdownList<string> SignalsList() {
-            return AnimationIds.GetDropdownList();
+            return GraphNodeTags.GetDropdownList();
         }
 
         public void SetRandomIndex() {
@@ -252,7 +252,7 @@ namespace PixelComrades {
         }
 
         private ValueDropdownList<string> SignalsList() {
-            return AnimationIds.GetDropdownList();
+            return GraphNodeTags.GetDropdownList();
         }
 
         public DirectionalAnimationClipHolder(){}

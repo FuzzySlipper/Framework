@@ -99,7 +99,7 @@ namespace PixelComrades {
             Console.Log("Didn't provide a valid Entity ID");
         }
 
-        [Command("timeScale")]
+        [Command("timescale")]
         public static void ChangeTimeScale(float scale) {
             TimeManager.TimeScale = scale;
             Console.Log("Timescale is " + TimeManager.TimeScale.ToString("F2"));

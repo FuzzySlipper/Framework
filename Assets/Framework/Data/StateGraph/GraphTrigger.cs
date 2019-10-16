@@ -15,12 +15,19 @@ namespace PixelComrades {
             Triggered = false;
         }
 
+        public GraphTrigger() {}
+
+        public GraphTrigger(GraphTrigger other) {
+            Key = other.Key;
+            _minTriggerTime = other._minTriggerTime;
+        }
+
         public bool Trigger() {
             if (Triggered) {
                 return false;
             }
-            var currentTime = TimeManager.TimeUnscaled; 
-            if (currentTime - _timeTriggered < _minTriggerTime) {
+            var currentTime = TimeManager.Time; 
+            if (currentTime < _timeTriggered + _minTriggerTime) {
                 return false;
             }
             Triggered = true;

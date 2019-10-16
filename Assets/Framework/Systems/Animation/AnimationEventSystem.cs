@@ -25,6 +25,9 @@ namespace PixelComrades {
                 aeTemplate.AnimEvent.CurrentAnimationEvent = arg.Event;
                 FindEventPositionRotation(aeTemplate);
                 if (aeTemplate.CurrentAction?.Value != null) {
+                    if (arg.Event == AnimationEvents.Default) {
+                        Debug.DrawLine(aeTemplate.AnimEvent.LastEventPosition, aeTemplate.AnimEvent.LastEventRotation.GetPosition(aeTemplate.AnimEvent.LastEventPosition, 2.5f), Color.red, 5f);
+                    }
                     var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
                     aeTemplate.CurrentAction.Value.PostAnimationEvent(new ActionEvent(character, character, aeTemplate.AnimEvent.LastEventPosition,
                         aeTemplate.AnimEvent.LastEventRotation, AnimationEvents.ToStateEvent(arg.Event)), arg.Event);
@@ -46,10 +49,15 @@ namespace PixelComrades {
                     template.AnimEvent.LastEventRotation = weaponModel.Loaded.Tr.rotation;
                     return;
                 }
+                var spawnPivot = template.CurrentAction.Value.Entity.Get<SpawnPivotComponent>();
+                if (spawnPivot != null) {
+                    template.AnimEvent.LastEventPosition = spawnPivot.position;
+                    template.AnimEvent.LastEventRotation = spawnPivot.rotation;
+                    return;
+                }
             }
-            if (template.SpriteAnimator != null) {
-                template.AnimEvent.LastEventPosition = template.SpriteAnimator.CurrentAnimation.GetEventPosition(template.SpriteRenderer.Value,
-                    template.SpriteAnimator.CurrentFrame);
+            if (template.SpriteAnimator?.CurrentFrame != null) {
+                template.AnimEvent.LastEventPosition = template.SpriteRenderer.GetEventPosition(template.SpriteAnimator.CurrentFrame);
                 template.AnimEvent.LastEventRotation = template.SpriteRenderer.BaseTr.rotation;
                 return;
             }

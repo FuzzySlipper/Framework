@@ -17,12 +17,6 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(ActionEvent arg) {
-            if (arg.State == ActionState.Start) {
-                arg.Origin.Tags.Set(EntityTags.PerformingAction, 1);
-            }
-            else if (arg.State == ActionState.Activate) {
-                arg.Origin.Tags.Set(EntityTags.PerformingAction, 0);
-            }
             _eventLog.Add(arg);
         }
 

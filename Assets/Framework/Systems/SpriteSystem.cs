@@ -17,6 +17,8 @@ namespace PixelComrades {
         private ManagedArray<SpriteColorWatch>.RefDelegate _del;
         private ManagedArray<SpriteBillboardTemplate>.RefDelegate _billboardDel;
         private TemplateList<SpriteBillboardTemplate> _billboardList;
+        private ComponentArray<SpriteRendererComponent>.RefDelegate _rendererDel;
+        private ComponentArray<SpriteRendererComponent> _rendererList;
         private struct SpriteColorWatch {
             public SpriteColorComponent ColorComponent;
             public TweenFloat Tween;
@@ -46,11 +48,20 @@ namespace PixelComrades {
             TemplateFilter<SpriteBillboardTemplate>.Setup(SpriteBillboardTemplate.GetTypes());
             _billboardList = EntityController.GetTemplateList<SpriteBillboardTemplate>();
             _billboardDel = UpdateBillboards;
+            _rendererList = EntityController.GetComponentArray<SpriteRendererComponent>();
+            _rendererDel = Update;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _colorList.Run(_del);
             _billboardList.Run(_billboardDel);
+            _rendererList.Run(_rendererDel);
+        }
+
+        private void Update(ref SpriteRendererComponent renderer) {
+            if (renderer.IsDirty) {
+                renderer.UpdateSprite();
+            }
         }
 
         private void UpdateBillboards(ref SpriteBillboardTemplate template) {

@@ -25,16 +25,16 @@ namespace PixelComrades {
         }
 
         public class RuntimeSequenceNode : RuntimeStateNode {
-            private RuntimeStateNode _exitNode;
             private RuntimeSequence _sequence;
-
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
+            public override string DebugInfo {
+                get {
+                    return string.Format(
+                        "Time {0:F3} Remaining {1:F2}", _sequence.CurrentTime,
+                        _sequence.Remaining);
+                }
             }
-
             public RuntimeSequenceNode(SequenceNode node, RuntimeStateGraph graph) : base(node,graph) {
                 _sequence = node.Sequence.GetRuntimeSequence(graph.Entity);
-                _exitNode = GetOriginalNodeExit();
             }
 
 

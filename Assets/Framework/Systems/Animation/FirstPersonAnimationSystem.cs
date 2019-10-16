@@ -18,7 +18,7 @@ namespace PixelComrades {
             _animDel = HandleAnimNodes;
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
                 typeof(WeaponModelComponent),
-                typeof(AbilityConfig)
+                typeof(PlayerComponent)
             }));
         }
 
@@ -28,7 +28,7 @@ namespace PixelComrades {
         
         private void HandleAnimNodes(ref FirstPersonAnimationTemplate template) {
             var dt = TimeManager.DeltaTime;
-            if (template.WeaponBob != null && _useWeaponBob && !template.Entity.Tags.Contain(EntityTags.PerformingAction)) {
+            if (template.WeaponBob != null && _useWeaponBob && template.AnimGraph.Value.CurrentTag != GraphNodeTags.Action) {
                 template.WeaponBob.BobTime += dt;
                 var velocity = Player.FirstPersonController.VelocityPercent;
                 var y = template.WeaponBob.VerticalSwayAmount * Mathf.Sin((template.WeaponBob.SwaySpeed * 2) * template.WeaponBob.BobTime) * velocity;
@@ -43,7 +43,7 @@ namespace PixelComrades {
             }
             var entity = arg.Action.Entity;
             var weaponModelComponent = entity.Get<WeaponModelComponent>();
-            if (arg.Index != 0 || weaponModelComponent == null) {
+            if (weaponModelComponent == null) {
                 if (arg.Container == null) {
                     entity.Remove<SpawnPivotComponent>();
                 }
@@ -62,6 +62,9 @@ namespace PixelComrades {
                 weaponModelComponent.Set(null);
             }
             else {
+                if (weaponModelComponent.Loaded != null) {
+                    return;
+                }
                 var weaponModel = ItemPool.Spawn(UnityDirs.Weapons, weaponModelComponent.Prefab, Vector3.zero, Quaternion.identity, false,
                  false);
                 if (weaponModel == null) {

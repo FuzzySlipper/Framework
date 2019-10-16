@@ -27,16 +27,10 @@ namespace PixelComrades {
 
         public class RuntimeExternalGraphNode : RuntimeStateNode {
             
-            private RuntimeStateNode _exitNode;
             private RuntimeStateGraph _runtimeGraph;
             private bool _completed;
             
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
-
             public RuntimeExternalGraphNode(ExternalGraphNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _exitNode = GetOriginalNodeExit();
                 _runtimeGraph = node.ExternalGraph.GetRuntimeGraph(graph, graph.Entity);
                 _runtimeGraph.OnComplete += ExternalGraphCompleted;
             }

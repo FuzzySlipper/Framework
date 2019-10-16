@@ -15,7 +15,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            var animationLabels = AnimationEvents.GetNames().ToArray();
+            var animationLabels = AnimationEvents.GetValues();
             var index = System.Array.IndexOf(animationLabels, EventName);
             var newIndex = UnityEditor.EditorGUILayout.Popup("Event", index, animationLabels);
             if (newIndex >= 0) {
@@ -78,18 +78,9 @@ namespace PixelComrades {
         public class RuntimeNode : RuntimeStateNode {
 
             private EventNode _originalNode;
-            private RuntimeStateNode _exitNode;
             private RuntimeConditionChecker _loopCondition;
             
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
-
             public RuntimeNode(EventNode node, RuntimeStateGraph graph) : base(node,graph) {
-                var outNode = graph.OriginalGraph.GetConnectionEndpoint(node.OutPoints[0]);
-                if (outNode != null) {
-                    _exitNode = graph.GetRuntimeNode(outNode.Id);
-                }
                 _originalNode = node;
                 if (_originalNode.Loop) {
                     _loopCondition = _originalNode.LoopCondition.GetRuntime();

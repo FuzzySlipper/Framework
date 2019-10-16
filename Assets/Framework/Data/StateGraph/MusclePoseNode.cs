@@ -36,18 +36,18 @@ namespace PixelComrades {
 
         public class RuntimeNode : RuntimeStateNode {
             
-            private RuntimeStateNode _exitNode;
             private MusclePoseNode _originalNode;
             private PoseAnimatorComponent _poseAnimator;
             private List<SavedMuscleInstance> _pose = new List<SavedMuscleInstance>();
             private float _time;
-            
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
+            public override string DebugInfo {
+                get {
+                    return string.Format(
+                        "Time {0:F3} Percent {1:F2}", _time,
+                        _time / _originalNode.Duration);
+                }
             }
-
             public RuntimeNode(MusclePoseNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _exitNode = GetOriginalNodeExit();
                 _originalNode = node;
             }
 
@@ -57,10 +57,6 @@ namespace PixelComrades {
                     _poseAnimator = Graph.Entity.Get<PoseAnimatorComponent>();
                 }
                 Setup();
-            }
-
-            public override void OnExit() {
-                base.OnExit();
             }
 
             public override bool TryComplete(float dt) {

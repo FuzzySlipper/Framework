@@ -7,12 +7,14 @@ using UnityEditor;
 namespace PixelComrades {
     public class StateGraphDebugWindow : EditorWindow {
 
-        private const float MaxDrag = 50f;
+        private const float Border = 300;
+        private const float MaxRectSize = 2500;
 
-        private AnimationGraphComponent _graph;
-        private Vector2 _mousePosition;
-        private Vector2 _drag;
-        private Vector2 _offset;
+        private AnimationGraphComponent _graph = null;
+        private Vector2 _scrollPosition;
+        private Rect _scrollRect;
+        private Vector2 _scrollPosition1;
+        
         private GUIStyle _inPointStyle;
         private GUIStyle _outPointStyle;
         private GUIStyle _nodeTextStyle;
@@ -54,13 +56,16 @@ namespace PixelComrades {
         private List<AnimationGraphComponent> _smallerList = new List<AnimationGraphComponent>();
 
         private void OnGUI() {
+            if (!Application.isPlaying) {
+                return;
+            }
             if (_inPointStyle == null || _nodeStyle == null || _nodeTextStyle == null) {
                 SetupStyles();
             }
             var list = EntityController.GetComponentArray<AnimationGraphComponent>();
             _entityListing.Clear();
             _smallerList.Clear();
-            int currentIndex = 0;
+            int currentIndex = -1;
             foreach (var graphComponent in list) {
                 if (graphComponent == _graph) {
                     currentIndex = _entityListing.Count;
@@ -72,63 +77,82 @@ namespace PixelComrades {
             if (newIndex != currentIndex) {
                 _graph = _smallerList[newIndex];
             }
+            _scrollRect = new Rect(0, 0, position.width - Border, position.height);
+            _scrollPosition = GUI.BeginScrollView(_scrollRect, _scrollPosition, new Rect(0, 0, MaxRectSize, MaxRectSize));
             DrawGrid(20, 0.2f, Color.gray);
             DrawGrid(100, 0.4f, Color.gray);
             if (_graph == null) {
                 EditorGUILayout.LabelField("No Graph Selected of " + _entityListing.Count);
+                GUI.EndScrollView();
                 return;
             }
             if (_graph.Value == null) {
                 EditorGUILayout.LabelField("Component has no Graph " + _graph.GetEntity()?.DebugId ?? "None");
+                GUI.EndScrollView();
                 return;
-            }
-            foreach (var valueVariable in _graph.Value.Variables) {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(valueVariable.Key + ": ");
-                EditorGUILayout.LabelField(valueVariable.Value.ToString());
-                EditorGUILayout.EndHorizontal();
             }
             DrawConnections();
             DrawNodes();
+            GUI.EndScrollView();
+            
             ProcessEvents(Event.current);
-            if (GUI.changed) {
-                Repaint();
+            var sideRect = new Rect(position.width - Border, 0, Border - 10, position.height);
+            _scrollPosition1 = GUI.BeginScrollView(sideRect, _scrollPosition1, new Rect(0, 0, Border, MaxRectSize));
+            EditorGUILayout.LabelField("IsActive " + _graph.Value.IsActive);
+            EditorGUILayout.LabelField("Variables");
+            EditorGUILayout.LabelField(" ");
+            foreach (var valueVariable in _graph.Value.Variables) {
+                EditorGUILayout.LabelField(valueVariable.Key + ": ");
+                EditorGUILayout.LabelField(valueVariable.Value.ToString());
             }
+            EditorGUILayout.LabelField("Triggers");
+            EditorGUILayout.LabelField(" ");
+            foreach (string trigger in _graph.Value.TriggerLog.InOrder()) {
+                EditorGUILayout.LabelField( _graph.Value.TriggerLog.GetTime(trigger).ToString("F3") + ": ");
+                EditorGUILayout.LabelField(trigger);
+            }
+            GUI.EndScrollView();
+            Repaint();
         }
 
         private void DrawConnections() {
-            for (int c = 0; c < _graph.Value.OriginalGraph.Connections.Count; c++) {
-                var connect = _graph.Value.OriginalGraph.Connections[c];
-                var connectIn = connect.GetIn();
-                var connectOut = connect.GetOut();
-                Handles.DrawBezier(
-                    connectIn.Rect.center,
-                    connectOut.Rect.center,
-                    connectIn.Rect.center + Vector2.left * 50f,
-                    connectOut.Rect.center - Vector2.left * 50f,
-                    Color.white,
-                    null,
-                    2f
-                );
+            for (int i = 0; i < _graph.Value.OriginalGraph.Count; i++) {
+                var node = _graph.Value.OriginalGraph[i];
+                for (int c = 0; c < node.OutPoints.Count; c++) {
+                    var connectOut = node.OutPoints[c];
+                    if (connectOut.Target == null) {
+                        continue;
+                    }
+                    var connectIn = connectOut.Target.GetConnectionPointById(connectOut.TargetId);
+                    Handles.DrawBezier(
+                        connectIn.Rect.center,
+                        connectOut.Rect.center,
+                        connectIn.Rect.center + Vector2.left * 50f,
+                        connectOut.Rect.center - Vector2.left * 50f,
+                        Color.white,
+                        null,
+                        2f
+                    );
+                }
             }
         }
 
         private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor) {
-            int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
-            int heightDivs = Mathf.CeilToInt(position.height / gridSpacing);
+            int widthDivs = Mathf.CeilToInt(MaxRectSize / gridSpacing);
+            int heightDivs = Mathf.CeilToInt(MaxRectSize / gridSpacing);
             Handles.BeginGUI();
             Handles.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridOpacity);
-            _offset += _drag * 0.5f;
-            Vector3 newOffset = new Vector3(_offset.x % gridSpacing, _offset.y % gridSpacing, 0);
+            //_offset += _drag * 0.5f;
+            //Vector3 newOffset = new Vector3(_offset.x % gridSpacing, _offset.y % gridSpacing, 0);
             for (int i = 0; i < widthDivs; i++) {
                 Handles.DrawLine(
-                    new Vector3(gridSpacing * i, -gridSpacing, 0) + newOffset,
-                    new Vector3(gridSpacing * i, position.height, 0f) + newOffset);
+                    new Vector3(gridSpacing * i, -gridSpacing, 0),
+                    new Vector3(gridSpacing * i, MaxRectSize, 0f));
             }
             for (int j = 0; j < heightDivs; j++) {
                 Handles.DrawLine(
-                    new Vector3(-gridSpacing, gridSpacing * j, 0) + newOffset,
-                    new Vector3(position.width, gridSpacing * j, 0f) + newOffset);
+                    new Vector3(-gridSpacing, gridSpacing * j, 0),
+                    new Vector3(MaxRectSize, gridSpacing * j, 0f));
             }
             Handles.color = Color.white;
             Handles.EndGUI();
@@ -138,7 +162,7 @@ namespace PixelComrades {
             if (_graph == null) {
                 return;
             }
-            var currentNode = _graph.Value.Current.Node;
+            var currentNode = _graph.Value.Current?.Node;
             for (int i = 0; i < _graph.Value.OriginalGraph.Count; i++) {
                 var node = _graph.Value.OriginalGraph.Nodes[i];
                 var maxWidth = node.Rect.x * 0.8f;
@@ -155,6 +179,7 @@ namespace PixelComrades {
                 EditorGUILayout.LabelField(node.ExitEvent);
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
+                GUILayout.Label(_graph.Value.GetRuntimeNode(node.Id).DebugInfo);
                 GUILayout.EndArea();
                 var inSpacing = Mathf.Clamp(0.8f / node.InPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.InPoints.Count; c++) {
@@ -176,15 +201,15 @@ namespace PixelComrades {
         }
 
         private void DrawConnectionPoint(ConnectionPoint point, int index, float spacing) {
-            var height = (point.Node.Rect.height * ((index + 1) * spacing));
-            point.Rect.y = point.Node.Rect.y + height - point.Rect.height * 0.5f;
+            var height = (point.Owner.Rect.height * ((index + 1) * spacing));
+            point.Rect.y = point.Owner.Rect.y + height - point.Rect.height * 0.5f;
             switch (point.ConnectType) {
                 case ConnectionPointType.In:
-                    point.Rect.x = point.Node.Rect.x - point.Rect.width + 8f;
+                    point.Rect.x = point.Owner.Rect.x - point.Rect.width + 8f;
                     break;
 
                 case ConnectionPointType.Out:
-                    point.Rect.x = point.Node.Rect.x + point.Node.Rect.width - 8f;
+                    point.Rect.x = point.Owner.Rect.x + point.Owner.Rect.width - 8f;
                     break;
             }
             var labelRect = new Rect(point.Rect);
@@ -192,14 +217,14 @@ namespace PixelComrades {
             var buttonRect = new Rect(point.Rect);
             switch (point.ConnectType) {
                 case ConnectionPointType.In:
-                    if (point.Node.InPoints.Count <= point.Node.InputMin) {
+                    if (point.Owner.InPoints.Count <= point.Owner.InputMin) {
                         return;
                     }
                     buttonRect.x += point.Rect.width + 1;
                     break;
 
                 case ConnectionPointType.Out:
-                    if (point.Node.OutPoints.Count <= point.Node.OutputMin) {
+                    if (point.Owner.OutPoints.Count <= point.Owner.OutputMin) {
                         return;
                     }
                     buttonRect.x -= point.Rect.width + 1;
@@ -208,14 +233,12 @@ namespace PixelComrades {
         }
 
         private void ProcessEvents(Event e) {
-            _drag = Vector2.zero;
-            _mousePosition = e.mousePosition;
             switch (e.type) {
-//                case EventType.MouseDrag:
-//                    if (e.button == 0 && e.clickCount < 1) {
-//                        OnDrag(e.delta);
-//                    }
-//                    break;
+                case EventType.MouseDrag:
+                    if (e.button == 0 && e.clickCount < 1) {
+                        OnDrag(e.delta);
+                    }
+                    break;
                 case EventType.KeyDown:
                     if (e.keyCode == KeyCode.Escape) {
                         Close();
@@ -229,14 +252,10 @@ namespace PixelComrades {
                 GUILayout.Label("Not Active Window");
                 return;
             }
-            _drag = Vector2.ClampMagnitude(delta, MaxDrag);
-            if (_graph != null) {
-                for (int i = 0; i < _graph.Value.OriginalGraph.Nodes.Count; i++) {
-                    _graph.Value.OriginalGraph.Nodes[i].Drag(_drag);
-                    EditorUtility.SetDirty(_graph.Value.OriginalGraph.Nodes[i]);
-                }
+            if (_scrollRect.Contains(Event.current.mousePosition)) {
+                _scrollPosition += -delta;
+                Event.current.Use();
             }
-            GUI.changed = true;
         }
     }
 }

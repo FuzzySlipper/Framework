@@ -82,7 +82,7 @@ namespace PixelComrades {
                 case ConditionType.EntityTag:
                     break;
                 default:
-                    var graphLabels = GraphVariables.GetNames().ToArray();
+                    var graphLabels = GraphVariables.GetValues();
                     var index = System.Array.IndexOf(graphLabels, VariableName);
                     var newVar = UnityEditor.EditorGUILayout.Popup(index, graphLabels, buttonStyle, new []{GUILayout.MaxWidth
                     (StateGraphNode.DefaultNodeSize.x * 0.5f)});
@@ -112,7 +112,7 @@ namespace PixelComrades {
                     break;
                 case ConditionType.EntityTag:
                     int.TryParse(Value, out int oldTagInt);
-                    var animationLabels = AnimationEvents.GetNames().ToArray();
+                    var animationLabels = AnimationEvents.GetValues();
                     var newTag = UnityEditor.EditorGUILayout.Popup(oldTagInt, animationLabels);
                     if (newTag != oldTagInt) {
                         Value = newTag.ToString();

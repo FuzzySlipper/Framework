@@ -83,10 +83,10 @@ namespace PixelComrades {
                     continue;
                 }
                 var hearingChance = HearingChance;
-                if (enemy.Tags.Contain(EntityTags.PerformingAction)) {
-                    hearingChance *= 4;
-                }
-                else if (enemy.Tags.Contain(EntityTags.Moving)) {
+//                if (enemy.AnimGraph.Value.CurrentTag != GraphNodeTags.Action) {
+//                    hearingChance *= 4;
+//                }
+                if (enemy.Tags.Contain(EntityTags.Moving)) {
                     hearingChance *= 2;
                 }
                 if (Game.Random.DiceRollSucess(hearingChance)) {

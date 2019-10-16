@@ -17,11 +17,11 @@ namespace PixelComrades {
         public List<ConditionExit> Conditions = new List<ConditionExit>();
         public int DefaultExit = 0;
         public int Id;
+        public string Tag;
         public StateGraph Graph;
         public bool AllowEarlyExit = false;
         public string EnterEvent = AnimationEvents.None;
         public string ExitEvent = AnimationEvents.None;
-        
         
         protected virtual Vector2 GetNodeSize { get { return DefaultNodeSize; } }
         public virtual bool HasConditions { get { return Conditions.Count > 0; } }
@@ -97,29 +97,29 @@ namespace PixelComrades {
         public virtual int MaxConditions { get => 4; }
 
     }
-
-    [System.Serializable]
-    public class Connection {
-        public int In;
-        public StateGraphNode InNode;
-        public int Out;
-        public StateGraphNode OutNode;
-
-        public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint) {
-            In = inPoint.Id;
-            InNode = inPoint.Node;
-            Out = outPoint.Id;
-            OutNode = outPoint.Node;
-        }
-
-        public ConnectionPoint GetIn() {
-            return InNode.GetConnectionPointById(In);
-        }
-
-        public ConnectionPoint GetOut() {
-            return OutNode.GetConnectionPointById(Out);
-        }
-    }
+//
+//    [System.Serializable]
+//    public class Connection {
+//        public int In;
+//        public StateGraphNode InNode;
+//        public int Out;
+//        public StateGraphNode OutNode;
+//
+//        public Connection(ConnectionPoint inPoint, ConnectionPoint outPoint) {
+//            In = inPoint.Id;
+//            InNode = inPoint.Owner;
+//            Out = outPoint.Id;
+//            OutNode = outPoint.Owner;
+//        }
+//
+//        public ConnectionPoint GetIn() {
+//            return InNode.GetConnectionPointById(In);
+//        }
+//
+//        public ConnectionPoint GetOut() {
+//            return OutNode.GetConnectionPointById(Out);
+//        }
+//    }
 
     public enum ConnectionPointType {
         In,
@@ -132,11 +132,13 @@ namespace PixelComrades {
         public const float Height = 20;
         public Rect Rect;
         public ConnectionPointType ConnectType;
-        public StateGraphNode Node;
+        public StateGraphNode Owner;
+        public StateGraphNode Target;
         public int Id;
+        public int TargetId;
 
         public ConnectionPoint(StateGraphNode node, ConnectionPointType connectType, int id) {
-            Node = node;
+            Owner = node;
             ConnectType = connectType;
             Rect = new Rect(0, 0, Width, Height);
             Id = id;

@@ -25,7 +25,7 @@ namespace PixelComrades {
             GUILayout.Space(20);
             Duration = UnityEditor.EditorGUILayout.Slider(Duration, 0, 2);
             GUILayout.Label("Variable: ");
-            var graphLabels = GraphVariables.GetNames().ToArray();
+            var graphLabels = GraphVariables.GetValues();
             var index = System.Array.IndexOf(graphLabels, VariableName);
             var newVar = UnityEditor.EditorGUILayout.Popup(
                 index, graphLabels, buttonStyle, new[] {
@@ -89,7 +89,8 @@ namespace PixelComrades {
             private PoseAnimatorComponent _poseAnimator;
             private List<SavedMuscleInstance> _pose = new List<SavedMuscleInstance>();
             private float _time;
-            
+            public override string DebugInfo { get { return string.Format("Time {0:F3} Percent {1:F2}", _time,
+                _time / _originalNode.Duration); } }
             public RuntimeNode(SwitchPoseNode node, RuntimeStateGraph graph) : base(node,graph) {
                 _originalNode = node;
             }

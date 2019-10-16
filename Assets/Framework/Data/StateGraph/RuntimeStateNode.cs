@@ -10,6 +10,7 @@ namespace PixelComrades {
         public StateGraphNode Node { get; }
         public int Id { get { return Node.Id; } }
         public float TimeEntered { get; protected set; }
+        public virtual string DebugInfo { get => ""; }
 
         protected RuntimeStateNode(StateGraphNode node, RuntimeStateGraph graph) {
             Node = node;
@@ -37,7 +38,7 @@ namespace PixelComrades {
         }
 
         protected RuntimeStateNode GetOriginalNodeExit() {
-            var outNode = Graph.OriginalGraph.GetConnectionEndpoint(Node.OutPoints[Node.DefaultExit]);
+            var outNode = Node.OutPoints[Node.DefaultExit].Target;
             return outNode != null ? Graph.GetRuntimeNode(outNode.Id) : null;
         }
 
@@ -55,7 +56,7 @@ namespace PixelComrades {
                 var condition = Conditions[i];
                 if (condition.IsTrue(this)) {
                     var endPoint = Node.OutPoints[condition.Original.Output];
-                    var exitNode = Graph.OriginalGraph.GetConnectionEndpoint(endPoint);
+                    var exitNode = endPoint.Target;
                     if (exitNode != null) {
                         return Graph.GetRuntimeNode(exitNode.Id);
                     }

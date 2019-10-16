@@ -48,20 +48,20 @@ namespace PixelComrades {
                 var facing = _billboard.Orientation;
                 if (_billboard.Facing.RequiresFlipping()) {
                     facing = _billboard.Orientation.GetFlippedSide();
-                    Renderer.Value.flipX = _billboard.Orientation.IsFlipped();
+                    Renderer.Flip(_billboard.Orientation.IsFlipped());
                 }
-                Renderer.Value.sprite = _animation.GetSpriteFrame(facing, FrameIndex);
+                Renderer.SetSprite(_animation.GetSpriteFrame(facing, Animator.FrameIndex));
                 if (Collider != null) {
                     Collider.Value.UpdateCollider();
                 }
             }
 
             public override bool TryComplete(float dt) {
-                var idx = FrameIndex;
+                var idx = Animator.FrameIndex;
                 if (base.TryComplete(dt)) {
                     return true;
                 }
-                if (idx == FrameIndex) {
+                if (idx == Animator.FrameIndex) {
                     if (_billboard.Orientation != _lastOrientation) {
                         UpdateSprite();
                     }
@@ -73,50 +73,40 @@ namespace PixelComrades {
         public class RuntimeSpriteAnimationNode : RuntimeStateNode {
             
             private SpriteAnimationNode _node;
-            private RuntimeStateNode _exitNode;
-            private float _frameTimer;
-            protected int FrameIndex = 0;
             protected SpriteRendererComponent Renderer;
             protected SpriteColliderComponent Collider;
-
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
+            protected SpriteAnimatorComponent Animator;
+            
+            public override string DebugInfo { get { return string.Format("Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer)
+            ; } }
 
             public RuntimeSpriteAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base(node, graph) {
-                _exitNode = GetOriginalNodeExit();
                 _node = node;
                 Renderer = graph.Entity.Get<SpriteRendererComponent>();
                 Collider = graph.Entity.Get<SpriteColliderComponent>();
+                Animator = graph.Entity.Get<SpriteAnimatorComponent>();
             }
 
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                var block = Renderer.MaterialBlocks[0];
-                block.SetTexture("_BumpMap", _node.Animation.NormalMap);
-                block.SetTexture("_EmissionMap", _node.Animation.EmissiveMap);
-                if (_node.Animation.EmissiveMap != null) {
-                    Renderer.Value.material.EnableKeyword("_EMISSION");
-                }
-                else {
-                    Renderer.Value.material.DisableKeyword("_EMISSION");
-                }
-                Renderer.Value.SetPropertyBlock(block);
-                FrameIndex = 0;
-                UpdateSprite();
+                Renderer.SetTextures(_node.Animation.NormalMap, _node.Animation.EmissiveMap);
+                Animator.CurrentAnimation = _node.Animation;
+                Animator.FrameIndex = 0;
                 UpdateFrame(_node.Animation.GetFrame(0));
+                UpdateSprite();
             }
 
             protected virtual void UpdateSprite() {
-                Renderer.Value.sprite = _node.Animation.GetSpriteFrame(FrameIndex);
+                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex));
                 if (Collider != null) {
                     Collider.Value.UpdateCollider();
                 }
             }
 
             protected void UpdateFrame(AnimationFrame frame) {
-                _frameTimer = _node.Animation.FrameTime * frame.Length;
+                Animator.FrameTimer = _node.Animation.FrameTime * frame.Length;
+                Animator.CurrentFrame = frame;
                 if (frame.HasEvent) {
                     Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, frame.Event == AnimationFrame.EventType.Default?
                         AnimationEvents.Default : frame.EventName));
@@ -127,21 +117,21 @@ namespace PixelComrades {
                 if (base.TryComplete(dt)) {
                     return true;
                 }
-                _frameTimer -= dt;
-                if (_frameTimer > 0) {
+                Animator.FrameTimer -= dt;
+                if (Animator.FrameTimer > 0) {
                     return false;
                 }
-                FrameIndex++;
-                var frame = _node.Animation.GetFrame(FrameIndex);
+                Animator.FrameIndex++;
+                var frame = _node.Animation.GetFrame(Animator.FrameIndex);
                 if (frame != null) {
-                    UpdateSprite();
                     UpdateFrame(frame);
+                    UpdateSprite();
                     return false;
                 }
                 if (_node.Animation.Looping && _node.AllowLooping) {
-                    FrameIndex = 0;
+                    Animator.FrameIndex = 0;
+                    UpdateFrame(_node.Animation.GetFrame(Animator.FrameIndex));
                     UpdateSprite();
-                    UpdateFrame(_node.Animation.GetFrame(FrameIndex));
                     return false;
                 }
                 return true;

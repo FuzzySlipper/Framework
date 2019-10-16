@@ -20,9 +20,13 @@ namespace PixelComrades {
         public RuntimeStateNode StartNode { get; protected set; }
 
         public bool IsActive { get { return Current != null; } }
+        public string CurrentTag { get { return Current != null ? Current.Node.Tag : ""; } }
         public StateGraph OriginalGraph { get; private set; }
         public RuntimeStateGraph ParentGraph { get; }
         public Entity Entity { get; private set; }
+#if UNITY_EDITOR
+        public CircularBuffer<string> TriggerLog = new CircularBuffer<string>(20, true);
+#endif
 
         public RuntimeStateGraph(StateGraph graph, Entity entity) {
             GlobalTriggers = new Dictionary<string, GraphTrigger>();
@@ -44,7 +48,7 @@ namespace PixelComrades {
         
         private void SetupGraph() {
             for (int i = 0; i < OriginalGraph.GlobalTriggers.Count; i++) {
-                GlobalTriggers.AddOrUpdate(OriginalGraph.GlobalTriggers[i].Key, OriginalGraph.GlobalTriggers[i]);
+                GlobalTriggers.AddOrUpdate(OriginalGraph.GlobalTriggers[i].Key, new GraphTrigger(OriginalGraph.GlobalTriggers[i]));
             }
             for (int i = 0; i < OriginalGraph.Count; i++) {
                 CreateRuntimeNode(OriginalGraph[i]);
@@ -87,8 +91,18 @@ namespace PixelComrades {
             for (int i = 0; i < _globals.Count; i++) {
                 _globals[i].CheckConditions();
             }
-            if (Current.TryComplete(dt)) {
-                SetCurrentNode(Current.GetExitNode());
+            if (!Current.TryComplete(dt)) {
+                return;
+            }
+            var node = Current.GetExitNode();
+            if (node != null) {
+                SetCurrentNode(node);
+            }
+            else {
+#if UNITY_EDITOR
+                TriggerLog.Add(string.Format("{0} had error trying to exit {1}", OriginalGraph.name, Current.Node.name));
+#endif
+                SetCurrentNode(null);
             }
         }
 
@@ -128,6 +142,9 @@ namespace PixelComrades {
                 _globals[i].CheckConditions();
             }
             trigger.Reset();
+#if UNITY_EDITOR
+            TriggerLog.Add(key);
+#endif
         }
 
         public bool IsGlobalTriggerActive(string key) {

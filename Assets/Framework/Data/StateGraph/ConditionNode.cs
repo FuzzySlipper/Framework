@@ -21,10 +21,7 @@ namespace PixelComrades {
         public class RuntimeConditionNode : RuntimeStateNode {
 
             public RuntimeConditionNode(ConditionNode node, RuntimeStateGraph graph) : base(node, graph) {}
-            public override RuntimeStateNode GetExitNode() {
-                return base.GetExitNode();
-            }
-
+            
             public override bool TryComplete(float dt) {
                 return HasTrueCondition();
             }

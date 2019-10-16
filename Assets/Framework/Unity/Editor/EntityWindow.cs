@@ -13,7 +13,7 @@ using Sirenix.OdinInspector;
 
 public class EntityWindow : OdinEditorWindow {
     [MenuItem("Tools/Entity Window")]
-    private static void OpenWindow() {
+    public static void ShowWindow() {
         var window = GetWindow<EntityWindow>();
         window.position = GUIHelper.GetEditorWindowRect().AlignCenter(1200, 1000);
         window.Show();

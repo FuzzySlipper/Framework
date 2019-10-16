@@ -8,9 +8,9 @@ namespace PixelComrades {
     public sealed class SpriteAnimatorComponent : IComponent {
 
         public SpriteAnimation CurrentAnimation;
-        public int CurrentFrameIndex = 0;
-        public Timer FrameTimer;
+        public int FrameIndex = 0;
         public AnimationFrame CurrentFrame;
+        public float FrameTimer;
         
         public SpriteAnimatorComponent(){}
         

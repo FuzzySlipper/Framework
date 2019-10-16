@@ -22,16 +22,10 @@ namespace PixelComrades {
 
         public class RuntimeNode : RuntimeStateNode {
             
-            private RuntimeStateNode _exitNode;
             private PlayerInputComponent _input;
             private WaitChargeNode _originalNode;
             
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
-
             public RuntimeNode(WaitChargeNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _exitNode = GetOriginalNodeExit();
                 _originalNode = node;
             }
 

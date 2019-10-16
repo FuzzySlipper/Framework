@@ -17,19 +17,13 @@ namespace PixelComrades {
         public class RuntimeNode : RuntimeStateNode {
 
             private ReloadStateNode _originalNode;
-            private RuntimeStateNode _exitNode;
             private ReloadWeaponComponent _reload;
             private int _totalAmmo;
             private float _reloadPerAmmo;
             private int _current;
             private float _reloadTimer;
             
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
-
             public RuntimeNode(ReloadStateNode node, RuntimeStateGraph graph) : base(node, graph) {
-                _exitNode = GetOriginalNodeExit();
                 _originalNode = node;
             }
 

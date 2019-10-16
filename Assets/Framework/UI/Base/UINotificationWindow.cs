@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UINotificationWindow : MonoSingleton<UINotificationWindow> {
+    public class UINotificationWindow : MonoBehaviour {
 
         private enum State {
             Disabled,

@@ -30,7 +30,6 @@ namespace PixelComrades {
             if (!CollisionCheckSystem.IsValidCollision(entity, _limitToEnemy, hitEntity, other, out var sourceNode, out var targetNode)) {
                 return;
             }
-            Debug.LogFormat("Trigger collision {0} {1} {2}", name, sourceNode.Entity.DebugId, targetNode.Entity.DebugId);
             var position = transform.position;
             var hitPnt = other.ClosestPointOnBounds(position);
             var hitNormal = (hitPnt - position).normalized;

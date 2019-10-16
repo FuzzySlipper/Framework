@@ -232,10 +232,6 @@ namespace PixelComrades {
             }
         }
 
-        private static HashSet<string> _animationsIgnorePlaying = new HashSet<string>() {
-            AnimationIds.Idle, AnimationIds.Move, PlayerAnimationIds.Idle1H, PlayerAnimationIds.Idle2H, 
-            PlayerAnimationIds.IdleMelee1H, PlayerAnimationIds.IdleMelee2H
-        };
         protected IEnumerator LowerArms() {
             yield break;
         }

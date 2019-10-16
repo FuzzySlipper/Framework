@@ -19,7 +19,6 @@ namespace PixelComrades {
 
         public class RuntimeNode : RuntimeStateNode {
             
-            private RuntimeStateNode _exitNode;
             private BlockDamageNode _originalNode;
             private BlockDamageAction _config;
             private ActionUsingTemplate _owner;
@@ -29,12 +28,7 @@ namespace PixelComrades {
             private float _finalCost;
             private Entity _actionEntity;
             
-            public override RuntimeStateNode GetExitNode() {
-                return _exitNode;
-            }
-
             public RuntimeNode(BlockDamageNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _exitNode = GetOriginalNodeExit();
                 _originalNode = node;
             }
 

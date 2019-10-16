@@ -21,6 +21,7 @@ namespace PixelComrades {
         private CachedComponent<SteeringInput> _steering = new CachedComponent<SteeringInput>();
         private CachedComponent<AnimationGraphComponent> _animGraph = new CachedComponent<AnimationGraphComponent>();
         private CachedComponent<CurrentAction> _currentAction = new CachedComponent<CurrentAction>();
+        private CachedComponent<AnimationEventComponent> _animationEvent = new CachedComponent<AnimationEventComponent>();
         
         public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
@@ -40,11 +41,12 @@ namespace PixelComrades {
         public RuntimeStateGraph AnimGraph => _animGraph.Value.Value;
         public Action CurrentAction => _currentAction.Value?.Value;
         public CurrentAction CurrentActionComponent => _currentAction.Value;
+        public AnimationEventComponent AnimationEvent => _animationEvent.Value;
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
-            _collider, _stats, _tr, _steering, _animGraph, _currentAction
+            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent
         };
 
         public VitalStat GetVital(int vital) {

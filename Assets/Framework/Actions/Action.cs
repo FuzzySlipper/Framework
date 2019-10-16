@@ -66,10 +66,8 @@ namespace PixelComrades {
                 }
             }
             ActionState state = AnimationEvents.ToStateEvent(eventName);
-            if (state == ActionState.Activate) {
-                ae.Origin.Entity.Post(
-                    new ActionEvent(
-                        ae.Origin.Entity, ae.Origin.Entity, ae.Position, ae.Rotation, ActionState.Activate));
+            if (state != ActionState.None) {
+                ae.Origin.Entity.Post(new ActionEvent(ae.Origin.Entity, ae.Origin.Entity, ae.Position, ae.Rotation, state));
             }
             if (state == ActionState.None) {
                 return;

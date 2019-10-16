@@ -1397,6 +1397,13 @@ namespace PixelComrades {
         }
     }
 
+    public static class QuaternionExtensions {
+        public static Vector3 GetPosition(this Quaternion rotation, Vector3 position, float distance) {
+            Vector3 direction = rotation * Vector3.forward;
+            return position + (direction * distance);
+        }
+    }
+
     public static class V3Extensions {
 
         public static Point3 toPoint3(this Vector3 v3) {

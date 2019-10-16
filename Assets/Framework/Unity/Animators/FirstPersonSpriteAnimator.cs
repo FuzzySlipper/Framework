@@ -134,9 +134,7 @@ namespace PixelComrades {
 
         public void PlayAnimation(string clip, bool overrideClip, Action action) {
             switch (clip) {
-                case AnimationIds.Attack:
-                case AnimationIds.Action:
-                case AnimationIds.RangedAttack:
+                case GraphNodeTags.Action:
                     if (_current != null) {
                         CurrentAnimation = clip;
                         //Play(_current);
@@ -267,7 +265,6 @@ namespace PixelComrades {
         }
 
         private IEnumerator LoadWeaponProcess() {
-            Player.Entities[0].Tags.Add(EntityTags.PerformingAction);
             yield return LowerWeapon(false);
             _state = State.Reloading;
             UIChargeCircle.ManualStart(_current.Ammo.Template.ReloadText);

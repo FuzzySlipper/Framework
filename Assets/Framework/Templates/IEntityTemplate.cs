@@ -95,14 +95,10 @@ namespace PixelComrades {
         }
     }
 
-    public static class NodeExtensions {
+    public static class TemplateExtensions {
 
         public static bool IsPlayer(this IEntityTemplate entityTemplate) {
             return entityTemplate.Entity.Tags.Contain(EntityTags.Player);
-        }
-
-        public static bool IsPerformingAction(this IEntityTemplate entityTemplate) {
-            return entityTemplate.Entity.Tags.Contain(EntityTags.PerformingAction);
         }
         
 //        public static T Find<T>(this IEntityTemplate entityTemplate) where T : IComponent {

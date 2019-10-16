@@ -17,7 +17,7 @@ namespace PixelComrades {
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             GUILayout.Label("Variable: ");
-            var graphLabels = GraphVariables.GetNames().ToArray();
+            var graphLabels = GraphVariables.GetValues();
             var index = System.Array.IndexOf(graphLabels, VariableName);
             var newVar = UnityEditor.EditorGUILayout.Popup(
                 index, graphLabels, buttonStyle, new[] {
@@ -78,13 +78,13 @@ namespace PixelComrades {
                 var variable = Graph.GetVariable<string>(_originalNode.VariableName);
                 for (int i = 0; i < _originalNode.Values.Count; i++) {
                     if (variable == _originalNode.Values[i]) {
-                        var exitNode = Graph.OriginalGraph.GetConnectionEndpoint(Node.OutPoints[i]);
+                        var exitNode = Node.OutPoints[i].Target;
                         if (exitNode != null) {
                             return Graph.GetRuntimeNode(exitNode.Id);
                         }
                     }
                 }
-                var defNode = Graph.OriginalGraph.GetConnectionEndpoint(Node.OutPoints[_originalNode.DefaultExit]);
+                var defNode = Node.OutPoints[_originalNode.DefaultExit].Target;
                 if (defNode != null) {
                     return Graph.GetRuntimeNode(defNode.Id);
                 }

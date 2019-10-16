@@ -153,16 +153,13 @@ namespace PixelComrades {
         public const string CritMulti = "CritMulti";
     }
 
-    public partial class AnimationIds : GenericEnum<AnimationIds, string> {
+    public partial class GraphNodeTags : GenericEnum<GraphNodeTags, string> {
+        public const string None = "";
         public const string Idle = "Idle";
         public const string GetHit = "GetHit";
         public const string Action = "Action";
         public const string Death = "Death";
         public const string Move = "Move";
-        public const string Attack = "Attack";
-        public const string CastSpell = "CastSpell";
-        public const string RangedAttack = "RangedAttack";
-        public const string SpecialAttack = "SpecialAttack";
 
         public override string Parse(string value, string defaultValue) {
             return value;

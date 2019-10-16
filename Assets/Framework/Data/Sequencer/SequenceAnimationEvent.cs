@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class SequenceAnimationEvent : SequenceEvent {
         public override void DrawEditorGui() {
 #if UNITY_EDITOR
-            var animationLabels = AnimationEvents.GetNames().ToArray();
+            var animationLabels = AnimationEvents.GetValues();
             var index = System.Array.IndexOf(animationLabels, EventName);
             var newIndex = UnityEditor.EditorGUILayout.Popup("Event", index, animationLabels);
             if (newIndex >= 0) {

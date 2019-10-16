@@ -56,8 +56,10 @@ namespace PixelComrades {
             if (_actions.Length <= slot) {
                 System.Array.Resize(ref _actions, slot +1);
             }
-            if (action == null) {
+            if (_actions[slot].Value != null) {
                 RemoveAction(slot);
+            }
+            if (action == null) {
                 return;
             }
             _actions[slot].Set(action);
@@ -70,7 +72,9 @@ namespace PixelComrades {
                 return;
             }
             if (_actions[slot].Value != null && _actions[slot].Value.EquippedSlot == slot) {
-                _actions[slot].Value.EquippedSlot = -1;
+                var action = _actions[slot].Value;
+                action.EquippedSlot = -1;
+                action.Entity.Post(new ReadyActionsChanged(-1, action, null));
             }
             _actions[slot].Clear();
             this.GetEntity().Post(new ReadyActionsChanged(slot, null, this));

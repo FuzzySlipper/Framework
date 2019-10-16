@@ -47,11 +47,6 @@ namespace PixelComrades {
             return false;
         }
 
-        public Entity SpawnProjectile(Entity owner, string id, ActionEvent msg) {
-            msg.GetSpawnPositionRotation(out var spawnPos, out var spawnRot);
-            return SpawnProjectile(owner, id, msg.Position, spawnPos, spawnRot);
-        }
-
         public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot) {
             if (_templates.Count == 0) {
                 Init();

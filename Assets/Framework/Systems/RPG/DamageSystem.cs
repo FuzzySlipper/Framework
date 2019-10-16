@@ -7,7 +7,6 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class DamageSystem : SystemBase, IReceiveGlobal<TakeDamageEvent>, IReceive<ImpactEvent> {
         
-
         public DamageSystem() {
             EntityController.RegisterReceiver(
                 new EventReceiverFilter(
@@ -115,6 +114,7 @@ namespace PixelComrades {
                 node.Entity.Post(new CombatStatusUpdate(node.Entity,damageAmount.ToString("F1"), Color.red));
                 msg.Impact.Source.PostAll(new CausedDamageEvent(damageAmount, msg));
             }
+            logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
             if (vital != null && vital.Current <= 0 && msg.TargetVital == Stats.Health) {
                 node.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Impact,  damageAmount - previousValue));
             }

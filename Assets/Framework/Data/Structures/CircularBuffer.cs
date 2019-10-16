@@ -56,6 +56,9 @@ namespace PixelComrades {
             var startIndex = _nextIndex - 1;
             int index = startIndex;
             while (true) {
+                if (index >= _buffer.Length) {
+                    break;
+                }
                 yield return _buffer[index];
                 index--;
                 if (index < 0) {
