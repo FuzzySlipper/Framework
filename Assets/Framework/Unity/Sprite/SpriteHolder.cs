@@ -7,7 +7,7 @@ namespace PixelComrades.DungeonCrawler {
 
         [SerializeField] private BillboardMode _billboard = BillboardMode.CamFwd;
         [SerializeField] private bool _unscaled = true;
-        [SerializeField] private SpriteRenderer _renderer = null;
+        //[SerializeField] private SpriteRenderer _renderer = null;
         [SerializeField] private Transform _spriteBaseTr = null;
         [SerializeField] private Transform _spriteTr = null;
         [SerializeField] private SpriteFacing _facing = SpriteFacing.EightwayFlipped;
@@ -16,7 +16,7 @@ namespace PixelComrades.DungeonCrawler {
 
         public BillboardMode Billboard { get => _billboard; }
         public bool Unscaled { get => _unscaled; }
-        public SpriteRenderer Renderer { get => _renderer; }
+        //public SpriteRenderer Renderer { get => _renderer; }
         public Transform SpriteBaseTr { get => _spriteBaseTr; }
         public Transform SpriteTr { get => _spriteTr; }
         public SpriteFacing Facing { get => _facing; }

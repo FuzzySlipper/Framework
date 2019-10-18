@@ -34,14 +34,14 @@ namespace PixelComrades {
         }
 
         public void Handle(ActionEvent arg) {
-            var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Fx;
+            var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Value;
             if (data != null) {
                 data.TriggerEvent(arg);
             }
         }
 
         public void Handle(PerformedCollisionEvent arg) {
-            var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Fx;
+            var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Value;
             if (data != null) {
                 data.TriggerEvent(
                     new ActionEvent(
@@ -51,7 +51,7 @@ namespace PixelComrades {
         }
 
         public void Handle(EnvironmentCollisionEvent arg) {
-            var data = arg.EntityHit.Find<ActionFxComponent>()?.Fx;
+            var data = arg.EntityHit.Find<ActionFxComponent>()?.Value;
             if (data != null) {
                 data.TriggerEvent(
                     new ActionEvent(
@@ -61,7 +61,7 @@ namespace PixelComrades {
         }
 
         public void Handle(CollisionEvent arg) {
-            var data = arg.Target.Entity.Find<ActionFxComponent>()?.Fx;
+            var data = arg.Target.Entity.Find<ActionFxComponent>()?.Value;
             if (data != null) {
                 data.TriggerEvent(
                     new ActionEvent(

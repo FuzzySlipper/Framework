@@ -10,7 +10,6 @@ namespace PixelComrades {
 
         private CachedEntity _target = new CachedEntity(-1);
         private Vector3? _explicitPosition;
-        private Quaternion? _explicitRotation;
         
         public VisibleTemplate TargetTr { get; private set; }
         public Entity Target {
@@ -21,7 +20,6 @@ namespace PixelComrades {
                 _target.Set(value);
                 TargetTr = value != null ? value.GetTemplate<VisibleTemplate>() : null;
                 if (value != null) {
-                    _explicitRotation = null;
                     _explicitPosition = null;
                 }
             }
@@ -37,18 +35,12 @@ namespace PixelComrades {
                 return Target?.GetPosition() ?? this.GetEntity().GetPosition();
             }
         }
-        public Quaternion GetRotation {
-            get {
-                if (_explicitRotation != null) {
-                    return _explicitRotation.Value;
-                }
-                if (TargetTr != null) {
-                    return TargetTr.rotation;
-                }
-                return Target?.GetRotation() ?? this.GetEntity().GetRotation();
-            }
-        }
         public bool Valid { get { return _explicitPosition != null || _target != null; } }
+
+        public Quaternion GetLookAtTarget(Vector3 start) {
+            Vector3 relativePos = GetPosition - start;
+            return Quaternion.LookRotation(relativePos, Vector3.up);
+        }
 
         public CommandTarget(Entity target, Vector3? explicitPosition, VisibleTemplate targetTr) {
             _target.Set(target);
@@ -62,18 +54,22 @@ namespace PixelComrades {
             _explicitPosition = null;
         }
 
+        public void Set(Vector3 explicitPosition) {
+            _explicitPosition = explicitPosition;
+            _target.Clear();
+            TargetTr = null;
+        }
+
         public CommandTarget(){}
 
         public CommandTarget(SerializationInfo info, StreamingContext context) {
             _target = info.GetValue(nameof(_target), _target);
             _explicitPosition = ((SerializedV3) info.GetValue(nameof(_explicitPosition), typeof(SerializedV3))).Value;
-            _explicitRotation = ((SerializedQuaternion) info.GetValue(nameof(_explicitRotation), typeof(SerializedQuaternion))).Value;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_target), _target);
             info.AddValue(nameof(_explicitPosition), new SerializedV3(_explicitPosition));
-            info.AddValue(nameof(_explicitRotation), new SerializedQuaternion(_explicitRotation));
         }
     }
 }

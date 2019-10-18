@@ -31,6 +31,18 @@ namespace PixelComrades {
             _spriteRenderer.SetPropertyBlock(matBlocks[0]);
         }
 
+        public void SetFloat(int id, float value) {
+            for (int i = 0; i < MaterialBlocks.Length; i++) {
+                MaterialBlocks[i].SetFloat(id, value);
+            }
+        }
+
+        public void ApplyMaterialBlock() {
+            for (int i = 0; i < Renderers.Length; i++) {
+                Renderers[i].SetPropertyBlock(MaterialBlocks[i]);
+            }
+        }
+
         public void SetRendering(RenderingMode status) {
             _spriteRenderer.SetMode(status);
         }

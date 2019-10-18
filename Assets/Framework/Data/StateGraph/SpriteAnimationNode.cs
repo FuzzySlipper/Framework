@@ -50,10 +50,7 @@ namespace PixelComrades {
                     facing = _billboard.Orientation.GetFlippedSide();
                     Renderer.Flip(_billboard.Orientation.IsFlipped());
                 }
-                Renderer.SetSprite(_animation.GetSpriteFrame(facing, Animator.FrameIndex));
-                if (Collider != null) {
-                    Collider.Value.UpdateCollider();
-                }
+                Renderer.SetSprite(_animation.GetSpriteFrame(facing, Animator.FrameIndex), _animation.NormalMap, _animation.EmissiveMap);
             }
 
             public override bool TryComplete(float dt) {
@@ -74,7 +71,6 @@ namespace PixelComrades {
             
             private SpriteAnimationNode _node;
             protected SpriteRendererComponent Renderer;
-            protected SpriteColliderComponent Collider;
             protected SpriteAnimatorComponent Animator;
             
             public override string DebugInfo { get { return string.Format("Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer)
@@ -83,14 +79,13 @@ namespace PixelComrades {
             public RuntimeSpriteAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base(node, graph) {
                 _node = node;
                 Renderer = graph.Entity.Get<SpriteRendererComponent>();
-                Collider = graph.Entity.Get<SpriteColliderComponent>();
                 Animator = graph.Entity.Get<SpriteAnimatorComponent>();
             }
 
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                Renderer.SetTextures(_node.Animation.NormalMap, _node.Animation.EmissiveMap);
+                //Renderer.SetTextures(_node.Animation.NormalMap, _node.Animation.EmissiveMap);
                 Animator.CurrentAnimation = _node.Animation;
                 Animator.FrameIndex = 0;
                 UpdateFrame(_node.Animation.GetFrame(0));
@@ -98,10 +93,7 @@ namespace PixelComrades {
             }
 
             protected virtual void UpdateSprite() {
-                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex));
-                if (Collider != null) {
-                    Collider.Value.UpdateCollider();
-                }
+                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex), _node.Animation.NormalMap, _node.Animation.EmissiveMap);
             }
 
             protected void UpdateFrame(AnimationFrame frame) {

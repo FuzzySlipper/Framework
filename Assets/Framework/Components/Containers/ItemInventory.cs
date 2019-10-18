@@ -17,7 +17,7 @@ namespace PixelComrades {
         public Entity Owner { get { return this.GetEntity(); } }
         public Entity this[int index] {
             get {
-                if (index < 0 || index >= _array.Max) {
+                if (index < 0 || index >= _array.ArrayCount) {
                     return null;
                 }
                 return _array[index];

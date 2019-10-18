@@ -21,21 +21,18 @@ namespace PixelComrades {
             info.AddValue(nameof(_ammoComponent), _ammoComponent);
         }
 
-        public override void ProcessCost(Entity entity) {
-            if (!entity.HasComponent<PlayerComponent>()) {
-                return;
-            }
+        public override void ProcessCost(Entity owner, Entity action) {
             _ammoComponent.Value.Amount.ReduceValue(1);
         }
 
-        public override bool CanAct(Entity entity) {
-            if (!entity.HasComponent<PlayerComponent>()) {
+        public override bool CanAct(Entity owner, Entity action) {
+            if (!owner.HasComponent<PlayerComponent>()) {
                 return true;
             }
             if (_ammoComponent.Value.Amount > 0) {
                 return true;
             }
-            entity.PostAll(new StatusUpdate(entity, "Not enough " + _ammoComponent.Value.Template.Name));
+            owner.PostAll(new StatusUpdate(owner, "Not enough " + _ammoComponent.Value.Template.Name));
             return false;
         }
     }

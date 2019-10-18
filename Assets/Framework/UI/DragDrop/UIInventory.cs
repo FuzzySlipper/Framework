@@ -63,11 +63,12 @@ namespace PixelComrades {
         }
 
         protected void SetItemStatus(int index) {
-            if (_inventory[index] == null) {
+            var item = _inventory[index];
+            if (item == null) {
                 _slots[index].Clear();
                 return;
             }
-            _slots[index].SetItem(_inventory[index]);
+            _slots[index].SetItem(item);
         }
 
         private void ClearOld() {

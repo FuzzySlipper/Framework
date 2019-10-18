@@ -104,21 +104,22 @@ namespace PixelComrades {
             var dragInventoryData = UIDragDropHandler.CurrentData.Get<InventoryItem>();
             if (dragInventoryData.Inventory == Player.MainInventory) {
                 if (World.Get<ContainerSystem>().TrySwap(Player.MainInventory, dragInventoryData.Index, Index)) {
+                    StatusMessages("TrySwap");
                     UIDragDropHandler.Take();
                 }
                 else {
+                    StatusMessages("Rejected same inventory");
                     RejectDrag();
                 }
                 return;
             }
             if (World.Get<ContainerSystem>().TryAdd(Player.MainInventory, UIDragDropHandler.CurrentData, Index)) {
+                StatusMessages("TryAdd)");
                 UIDragDropHandler.Take();
             }
             else {
-                if (PlayAudio) {
-                    AudioPool.PlayClip(StringConst.AudioDefaultItemReturn, transform.position, 0, AudioVolume);
-                }
-                UIDragDropHandler.Return();
+                StatusMessages("Rejected different inventory");
+                RejectDrag();
             }
         }
 
@@ -128,27 +129,14 @@ namespace PixelComrades {
                 return;
             }
             Entity oldItem = Data;
-            var dragInventoryData = UIDragDropHandler.CurrentData.Get<InventoryItem>();
             var currentInventoryData = oldItem.Get<InventoryItem>();
-            if (dragInventoryData == null || currentInventoryData == null) {
-                RejectDrag();
-                return;
-            }
-            if (dragInventoryData.Inventory == Player.MainInventory &&
-                currentInventoryData.Inventory == Player.MainInventory) {
-                if (World.Get<ContainerSystem>().TrySwap(Player.MainInventory, dragInventoryData.Index, Index)) {
-                    UIDragDropHandler.Take();
-                }
-                else {
-                    RejectDrag();
-                }
-                return;
-            }
             if (World.Get<ContainerSystem>().TryReplace(Player.MainInventory, UIDragDropHandler.CurrentData, currentInventoryData.Index)) {
+                StatusMessages("World.Get<ContainerSystem>().TryReplace(Player.MainInventory, UIDragDropHandler.CurrentData, currentInventoryData.Index)");
                 UIDragDropHandler.Take();
                 UIDragDropHandler.SetItem(oldItem);
             }
             else {
+                StatusMessages("Rejected different inventory");
                 RejectDrag();
             }
         }
@@ -187,9 +175,9 @@ namespace PixelComrades {
             _tooltip = item.Get<TooltipComponent>();
             InventoryItem = Data.Get<InventoryItem>();
             SetSprite(item.Get<IconComponent>()?.Sprite);
-            var action = item.Get<Action>();
-            if (action != null && action.Ammo != null) {
-                _currentAmmo = action.Ammo.Amount;
+            var ammo = item.Get<AmmoComponent>();
+            if (ammo != null) {
+                _currentAmmo = ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;
                 CheckAmmo();
             }
@@ -227,7 +215,7 @@ namespace PixelComrades {
             Data = null;
         }
 
-        protected void StatusMessages(Entity item, string message) {
+        protected void StatusMessages(string message) {
             if (_statusTimer.IsActive) {
                 return;
             }
@@ -312,7 +300,7 @@ namespace PixelComrades {
 
         public void Handle(StatusUpdate arg) {
             if (_postStatusUpdates && gameObject != null && gameObject.activeInHierarchy) {
-                StatusMessages(Data, arg.Update);
+                StatusMessages(arg.Update);
             }
         }
 

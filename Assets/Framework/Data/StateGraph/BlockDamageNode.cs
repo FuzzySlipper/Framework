@@ -62,7 +62,7 @@ namespace PixelComrades {
                     skillMulti = Mathf.Clamp(1 - (skillValue * CostVital.SkillPercent), CostVital.SkillMaxReduction, 1);
                 }
                 dmgComponent.CollisionHandlers.Add(EvadeDamageWithStats);
-                _fxComponent = action.Fx;
+                _fxComponent = action.Fx?.Value;
                 _finalCost = _config.Cost * skillMulti;
             }
 

@@ -42,7 +42,7 @@ namespace PixelComrades {
         }
 
         public bool IsInvalid(int index) {
-            if (_list.IsInvalid(index) || _list[index].Disposed) {
+            if (_list.IsInvalid(index) || _list[index].Disposed || _list[index].Entity.Pooled) {
                 return true;
             }
             return false;
@@ -66,11 +66,48 @@ namespace PixelComrades {
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return _list.GetEnumerator();
+            return new Enumerator(this);
         }
 
         public IEnumerator<T> GetEnumerator() {
-            return _list.GetEnumerator();
+            return new Enumerator(this);
+        }
+
+        public struct Enumerator : IEnumerator<T> {
+
+            private readonly TemplateList<T> _array;
+            private int _position;
+
+            public Enumerator(TemplateList<T> array) {
+                _array = array;
+                _position = -1;
+            }
+
+            public void Reset() {
+                _position = -1;
+            }
+
+            public ref T Current { get { return ref _array[_position]; } }
+
+            System.Object IEnumerator.Current { get { return _array[_position]; } }
+
+            T IEnumerator<T>.Current { get { return _array[_position]; } }
+
+            public void Dispose() {}
+
+            public bool MoveNext() {
+                while (true) {
+                    unchecked {
+                        _position++;
+                    }
+                    if (_position >= _array.Max) {
+                        return false;
+                    }
+                    if (!_array.IsInvalid(_position)) {
+                        return true;
+                    }
+                }
+            }
         }
     }
 }

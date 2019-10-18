@@ -67,8 +67,8 @@ namespace PixelComrades {
                 }
                 var actionPivots = ae.Origin.Entity.Get<ActionPivotsComponent>();
                 if (actionPivots != null) {
-                    pos = (ae.Origin.CurrentAction.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).position;
-                    rot = (ae.Origin.CurrentAction.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).rotation;
+                    pos = (ae.Origin.CurrentAction.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).position;
+                    rot = (ae.Origin.CurrentAction.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).rotation;
                     return true;
                 }
             }

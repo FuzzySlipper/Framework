@@ -36,7 +36,7 @@ namespace PixelComrades {
                 return false;
             }
             for (int i = 0; i < Costs.Count; i++) {
-                if (!Costs[i].CanAct(EntityOwner)) {
+                if (!Costs[i].CanAct(EntityOwner, null)) {
                     return false;
                 }
             }
@@ -55,7 +55,7 @@ namespace PixelComrades {
 
         public virtual void ProcessCost() {
             for (int i = 0; i < Costs.Count; i++) {
-                Costs[i].ProcessCost(EntityOwner);
+                Costs[i].ProcessCost(EntityOwner, null);
             }
         }
 

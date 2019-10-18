@@ -7,14 +7,14 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class FakeFlightEngine : IComponent {
 
-        public FakeFlightEngineConfig Config { get; }
+        public FakeFlightEngineConfig Config { get; private set; }
 
         public FakeFlightEngine(FakeFlightEngineConfig config) {
             Config = config;
         }
 
         public FakeFlightEngine(SerializationInfo info, StreamingContext context) {
-            Config = ItemPool.LoadAsset<FakeFlightEngineConfig>(info.GetValue(nameof(Config), ""));
+            ItemPool.LoadAsset<FakeFlightEngineConfig>(info.GetValue(nameof(Config), ""), a => Config = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

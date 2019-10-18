@@ -222,8 +222,8 @@ namespace PixelComrades {
 
     public partial class AnimationEvents : GenericEnum<AnimationEvents, string> {
         public const string None = "";
-        public const string Start = "Start";
-        public const string Stop = "Stop";
+        public const string ActionStart = "ActionStart";
+        public const string ActionStop = "ActionStop";
         public const string Default = "Default";
         public const string FxOn = "FxOn";
         public const string FxOff = "FxOff";
@@ -260,7 +260,7 @@ namespace PixelComrades {
                     return ActionState.FxOff;
                 case AnimationEvents.Default:
                     return ActionState.Activate;
-                case AnimationEvents.Start:
+                case AnimationEvents.ActionStart:
                     return ActionState.Start;
             }
             return ActionState.None;

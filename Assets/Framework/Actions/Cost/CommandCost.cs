@@ -8,7 +8,7 @@ namespace PixelComrades {
 
     [Serializable]
     public abstract class CommandCost : ICommandCost {
-        public abstract void ProcessCost(Entity entity);
-        public abstract bool CanAct(Entity entity);
+        public abstract void ProcessCost(Entity owner, Entity action);
+        public abstract bool CanAct(Entity owner, Entity action);
     }
 }

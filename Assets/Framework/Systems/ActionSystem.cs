@@ -14,6 +14,7 @@ namespace PixelComrades {
         
         public ActionSystem() {
             TemplateFilter<ActionUsingTemplate>.Setup(ActionUsingTemplate.GetTypes());
+            TemplateFilter<ActionTemplate>.Setup(ActionTemplate.GetTypes());
         }
 
         public void HandleGlobal(ActionEvent arg) {
@@ -30,6 +31,35 @@ namespace PixelComrades {
                         msg.Origin?.Entity.DebugId ?? "null",
                         msg.Target?.Entity.DebugId ?? "null",
                         msg.Position, msg.Rotation, msg.State, log.GetTime(msg)));
+            }
+        }
+
+        public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, string animEvent) {
+            var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
+            var ae = new ActionEvent(character, character, aeTemplate.AnimEvent.Position,
+                aeTemplate.AnimEvent.Rotation, AnimationEvents.ToStateEvent(animEvent));
+            if (ae.State == ActionState.Activate) {
+                Debug.DrawLine(
+                    aeTemplate.AnimEvent.Position, aeTemplate.AnimEvent.Rotation.GetPosition(aeTemplate.AnimEvent.Position, 2.5f),
+                    Color.red, 5f);
+            }
+            var animationList = action.Action.GetEventHandler(animEvent);
+            if (animationList != null) {
+                for (int i = 0; i < animationList.Count; i++) {
+                    animationList[i].Trigger(ae, animEvent);
+                }
+            }
+            if (ae.State != ActionState.None) {
+                aeTemplate.Entity.Post(ae);
+                // are these already being triggered?
+//                if (action.Fx != null) {
+//                    action.Fx.Fx.TriggerEvent(ae);
+//                }
+            }
+            if (ae.State == ActionState.Activate) {
+                for (int i = 0; i < action.Action.Costs.Count; i++) {
+                    action.Action.Costs[i].ProcessCost(ae.Origin, action.Entity);
+                }
             }
         }
     }

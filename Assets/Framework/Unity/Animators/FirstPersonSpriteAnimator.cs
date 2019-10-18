@@ -70,7 +70,7 @@ namespace PixelComrades {
         }
 
         public void ReloadWeapon() {
-            if (_current == null || !_current.Ammo.CanLoadAmmo() || _state != State.None){
+            if (_current == null || _state != State.None){
                 return;
             }
             TimeManager.StartTask(LoadWeaponProcess(), false);
@@ -267,21 +267,6 @@ namespace PixelComrades {
         private IEnumerator LoadWeaponProcess() {
             yield return LowerWeapon(false);
             _state = State.Reloading;
-            UIChargeCircle.ManualStart(_current.Ammo.Template.ReloadText);
-            var reloadPerAmmo = _current.Ammo.ReloadSpeed / _current.Ammo.Amount.MaxValue;
-            var totalAmmo = _current.Ammo.Amount.MaxValue - _current.Ammo.Amount.Value;
-            int current = 0;
-            while (true) {
-                if (_current == null || _state != State.Reloading) {
-                    break;
-                }
-                current++;
-                UIChargeCircle.ManualSetPercent((float) current/totalAmmo);
-                if (!_current.Ammo.TryLoadOneAmmo(Player.Entities[0])) {
-                    break;
-                }
-                yield return reloadPerAmmo;
-            }
             UIChargeCircle.StopCharge();
             if (_state == State.None || _state == State.Reloading) {
                 yield return RaiseWeapon();

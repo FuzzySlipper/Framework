@@ -16,24 +16,24 @@ namespace PixelComrades {
 
         public class RuntimeNode : RuntimeStateNode {
 
-            private ReloadStateNode _originalNode;
-            private ReloadWeaponComponent _reload;
+            private AmmoComponent _ammo;
             private int _totalAmmo;
             private float _reloadPerAmmo;
             private int _current;
             private float _reloadTimer;
             
-            public RuntimeNode(ReloadStateNode node, RuntimeStateGraph graph) : base(node, graph) {
-                _originalNode = node;
-            }
+            public RuntimeNode(ReloadStateNode node, RuntimeStateGraph graph) : base(node, graph) {}
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 Graph.SetVariable(GraphVariables.Reloading, true);
-                _reload = Graph.Entity.Get<ReloadWeaponComponent>();
-                UIChargeCircle.ManualStart(_reload.Ammo.Template.ReloadText);
-                _reloadPerAmmo = _reload.Ammo.ReloadSpeed / _reload.Ammo.Amount.MaxValue;
-                _totalAmmo = _reload.Ammo.Amount.MaxValue - _reload.Ammo.Amount.Value;
+                _ammo = Graph.Entity.Get<CurrentAction>().Value?.Ammo;
+                if (_ammo == null) {
+                    return;
+                }
+                UIChargeCircle.ManualStart(_ammo.Template.ReloadText);
+                _reloadPerAmmo = _ammo.ReloadSpeed / _ammo.Amount.MaxValue;
+                _totalAmmo = _ammo.Amount.MaxValue - _ammo.Amount.Value;
                 _current = 0;
                 _reloadTimer = 0;
             }
@@ -45,7 +45,7 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
-                if (base.TryComplete(dt)) {
+                if (base.TryComplete(dt) || _ammo == null) {
                     return true;
                 }
                 if (!Graph.GetVariable<bool>(GraphVariables.Reloading)) {
@@ -58,7 +58,7 @@ namespace PixelComrades {
                 _current++;
                 UIChargeCircle.ManualSetPercent((float) _current / _totalAmmo);
                 _reloadTimer = _reloadPerAmmo;
-                if (!_reload.Ammo.TryLoadOneAmmo(Graph.Entity)) {
+                if (!_ammo.TryLoadOneAmmo(Graph.Entity)) {
                     return true;
                 }
                 return false;

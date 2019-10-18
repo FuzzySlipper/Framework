@@ -23,14 +23,10 @@ namespace PixelComrades {
             var aeTemplate = arg.Entity.GetTemplate<AnimationEventTemplate>();
             if (aeTemplate != null) {
                 aeTemplate.AnimEvent.CurrentAnimationEvent = arg.Event;
-                FindEventPositionRotation(aeTemplate);
-                if (aeTemplate.CurrentAction?.Value != null) {
-                    if (arg.Event == AnimationEvents.Default) {
-                        Debug.DrawLine(aeTemplate.AnimEvent.LastEventPosition, aeTemplate.AnimEvent.LastEventRotation.GetPosition(aeTemplate.AnimEvent.LastEventPosition, 2.5f), Color.red, 5f);
-                    }
-                    var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
-                    aeTemplate.CurrentAction.Value.PostAnimationEvent(new ActionEvent(character, character, aeTemplate.AnimEvent.LastEventPosition,
-                        aeTemplate.AnimEvent.LastEventRotation, AnimationEvents.ToStateEvent(arg.Event)), arg.Event);
+                var action = aeTemplate.CurrentAction?.Value;
+                FindEventPositionRotation(aeTemplate, action);
+                if (action != null) {
+                    World.Get<ActionSystem>().ProcessAnimationAction(aeTemplate, action, arg.Event);
                 }
             }
             if (!_eventReceivers.TryGetValue(arg.Event, out var list)) {
@@ -41,33 +37,32 @@ namespace PixelComrades {
             }
         }
 
-        private void FindEventPositionRotation(AnimationEventTemplate template) {
-            if (template.CurrentAction.Value != null) {
-                var weaponModel = template.CurrentAction.Value.Entity.Get<WeaponModelComponent>();
-                if (weaponModel?.Loaded != null) {
-                    template.AnimEvent.LastEventPosition = weaponModel.Loaded.Tr.position;
-                    template.AnimEvent.LastEventRotation = weaponModel.Loaded.Tr.rotation;
+        private void FindEventPositionRotation(AnimationEventTemplate aet, ActionTemplate action) {
+            var target = aet.Target;
+            if (action != null) {
+                if (action.Weapon?.Loaded != null) {
+                    aet.AnimEvent.Position = action.Weapon.Loaded.Spawn.position;
+                    aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? action.Weapon.Loaded.Spawn.rotation;
                     return;
                 }
-                var spawnPivot = template.CurrentAction.Value.Entity.Get<SpawnPivotComponent>();
-                if (spawnPivot != null) {
-                    template.AnimEvent.LastEventPosition = spawnPivot.position;
-                    template.AnimEvent.LastEventRotation = spawnPivot.rotation;
+                if (action.SpawnPivot != null) {
+                    aet.AnimEvent.Position = action.SpawnPivot.position;
+                    aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? action.SpawnPivot.rotation;
                     return;
                 }
             }
-            if (template.SpriteAnimator?.CurrentFrame != null) {
-                template.AnimEvent.LastEventPosition = template.SpriteRenderer.GetEventPosition(template.SpriteAnimator.CurrentFrame);
-                template.AnimEvent.LastEventRotation = template.SpriteRenderer.BaseTr.rotation;
+            if (aet.SpriteAnimator?.CurrentFrame != null) {
+                aet.AnimEvent.Position = aet.SpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame);
+                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpriteRenderer.BaseTr.rotation;
                 return;
             }
-            if (template.SpawnPivot != null) {
-                template.AnimEvent.LastEventPosition = template.SpawnPivot.position;
-                template.AnimEvent.LastEventRotation = template.SpawnPivot.rotation;
+            if (aet.SpawnPivot != null) {
+                aet.AnimEvent.Position = aet.SpawnPivot.position;
+                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpawnPivot.rotation;
             }
             else {
-                template.AnimEvent.LastEventPosition = template.Tr.position;
-                template.AnimEvent.LastEventRotation = template.Tr.rotation;
+                aet.AnimEvent.Position = aet.Tr.position;
+                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.Tr.rotation;
             }
         }
 
@@ -85,7 +80,7 @@ namespace PixelComrades {
         private CachedComponent<AnimationEventComponent> _animEvent = new CachedComponent<AnimationEventComponent>();
         private CachedComponent<SpriteAnimatorComponent> _spriteAnimator = new CachedComponent<SpriteAnimatorComponent>();
         private CachedComponent<SpriteRendererComponent> _spriteRenderer = new CachedComponent<SpriteRendererComponent>();
-
+        private CachedComponent<CommandTarget> _target = new CachedComponent<CommandTarget>();
         public TransformComponent Tr { get => _tr.Value; }
         public SpawnPivotComponent SpawnPivot { get => _spawnPivot.Value; }
         public CurrentAction CurrentAction { get => _currentAction; }
@@ -93,8 +88,9 @@ namespace PixelComrades {
         public AnimationEventComponent AnimEvent { get => _animEvent; }
         public SpriteAnimatorComponent SpriteAnimator { get => _spriteAnimator; }
         public SpriteRendererComponent SpriteRenderer { get => _spriteRenderer; }
+        public CommandTarget Target => _target.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer
+            _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer, _target
         };
 
         public static System.Type[] GetTypes() {

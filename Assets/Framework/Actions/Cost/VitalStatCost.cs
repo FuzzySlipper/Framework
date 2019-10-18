@@ -26,16 +26,16 @@ namespace PixelComrades {
             info.AddValue(nameof(_stat), _stat);
         }
 
-        public override void ProcessCost(Entity entity) {
+        public override void ProcessCost(Entity owner, Entity action) {
             _stat.Stat.Current -= _amount;
         }
 
-        public override bool CanAct(Entity entity) {
+        public override bool CanAct(Entity owner, Entity action) {
             if (_stat != null && _stat.Stat.Current >= _amount) {
                 return true;
             }
             //entity.Get<StatusUpdateComponent>(e => e.Status = string.Format("Not enough {0}", Vitals.GetDescriptionAt(TargetVital)));
-            entity.PostAll(new StatusUpdate(entity,"Not enough " + _stat.Stat.Label));
+            owner.PostAll(new StatusUpdate(owner,"Not enough " + _stat.Stat.Label));
             return false;
         }
     }

@@ -8,8 +8,8 @@ namespace PixelComrades {
     [Serializable]
     public class CostUse : CommandCost, ISerializable {
 
-        public override void ProcessCost(Entity entity) {
-            entity.Get<LimitedUses>()?.Use();
+        public override void ProcessCost(Entity owner, Entity action) {
+            owner.Get<LimitedUses>()?.Use();
         }
 
         public CostUse() {}
@@ -18,10 +18,10 @@ namespace PixelComrades {
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {}
 
-        public override bool CanAct(Entity entity) {
-            var uses = entity.Get<LimitedUses>();
+        public override bool CanAct(Entity owner, Entity action) {
+            var uses = owner.Get<LimitedUses>();
             if (uses == null || uses.Current == 0) {
-                entity.PostAll(new StatusUpdate( entity,"No more uses", Color.yellow));
+                owner.PostAll(new StatusUpdate( owner,"No more uses", Color.yellow));
                 return false;
             }
             return true;

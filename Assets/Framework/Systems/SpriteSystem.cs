@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [AutoRegister, Priority(Priority.Highest)]
+    [AutoRegister, Priority(Priority.Higher)]
     public sealed class SpriteSystem : SystemBase, IMainSystemUpdate, IReceive<TakeDamageEvent>, IReceive<TagChangeEvent>,
         IReceive<ConfusionEvent> {
         
@@ -15,29 +15,21 @@ namespace PixelComrades {
         private GenericPool<TweenFloat> _floatPool = new GenericPool<TweenFloat>(0, null, SetupTween);
         private BufferedList<SpriteColorWatch> _colorList = new BufferedList<SpriteColorWatch>();
         private ManagedArray<SpriteColorWatch>.RefDelegate _del;
-        private ManagedArray<SpriteBillboardTemplate>.RefDelegate _billboardDel;
-        private TemplateList<SpriteBillboardTemplate> _billboardList;
-        private ComponentArray<SpriteRendererComponent>.RefDelegate _rendererDel;
-        private ComponentArray<SpriteRendererComponent> _rendererList;
         private struct SpriteColorWatch {
             public SpriteColorComponent ColorComponent;
+            public SpriteRendererComponent Renderer;
             public TweenFloat Tween;
             public int Stage;
             public Vector3 Scale;
 
-            public SpriteColorWatch(SpriteColorComponent colorComponent, TweenFloat tween, Vector3 scale) {
+            public SpriteColorWatch(SpriteColorComponent colorComponent, SpriteRendererComponent renderer, TweenFloat tween, Vector3 scale) {
                 ColorComponent = colorComponent;
                 Tween = tween;
                 Scale = scale;
+                Renderer = renderer;
                 Stage = 0;
             }
 
-            public SpriteColorWatch(SpriteColorComponent colorComponent, TweenFloat tween, Vector3 scale, int stage) {
-                ColorComponent = colorComponent;
-                Tween = tween;
-                Scale = scale;
-                Stage = stage;
-            }
         } 
         
         public SpriteSystem() {
@@ -45,33 +37,10 @@ namespace PixelComrades {
                 typeof(SpriteColorComponent)
             }));
             _del = UpdateSprite;
-            TemplateFilter<SpriteBillboardTemplate>.Setup(SpriteBillboardTemplate.GetTypes());
-            _billboardList = EntityController.GetTemplateList<SpriteBillboardTemplate>();
-            _billboardDel = UpdateBillboards;
-            _rendererList = EntityController.GetComponentArray<SpriteRendererComponent>();
-            _rendererDel = Update;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _colorList.Run(_del);
-            _billboardList.Run(_billboardDel);
-            _rendererList.Run(_rendererDel);
-        }
-
-        private void Update(ref SpriteRendererComponent renderer) {
-            if (renderer.IsDirty) {
-                renderer.UpdateSprite();
-            }
-        }
-
-        private void UpdateBillboards(ref SpriteBillboardTemplate template) {
-            template.Billboard.Billboard.Apply(template.Renderer.SpriteTr, template.Billboard.Backwards, ref template.Billboard.LastAngleHeight);
-            var orientation = SpriteFacingControl.GetCameraSide(template.Billboard.Facing, template.Renderer.SpriteTr,
-                template.Renderer.BaseTr, 5, out var inMargin);
-            if ((inMargin && (orientation.IsAdjacent(template.Billboard.Orientation)))) {
-                return;
-            }
-            template.Billboard.Orientation = orientation;
         }
 
         private void UpdateSprite(ref SpriteColorWatch colorStage) {
@@ -79,7 +48,7 @@ namespace PixelComrades {
                 _colorList.Remove(colorStage);
                 return;
             }
-            colorStage.ColorComponent.Renderer.transform.localScale = new Vector3(
+            colorStage.Renderer.SpriteTr.localScale = new Vector3(
                 colorStage.Scale.x * colorStage.Tween.Get(),
                 colorStage.Scale.y, colorStage.Scale.z);
             if (colorStage.Stage == 1) {
@@ -116,10 +85,11 @@ namespace PixelComrades {
             if (colorComponent == null) {
                 return;
             }
-            if (!colorComponent.AnimatingColor && colorComponent.Renderer != null) {
-                StartColorDamageTween(colorComponent);
+            var renderer = arg.Target.Get<SpriteRendererComponent>();
+            if (!colorComponent.AnimatingColor && renderer != null) {
+                StartColorDamageTween(colorComponent, renderer);
             }
-            else if (colorComponent.AnimatingColor && colorComponent.Renderer != null) {
+            else if (colorComponent.AnimatingColor && renderer != null) {
                 for (int i = 0; i < _colorList.Count; i++) {
                     if (_colorList[i].ColorComponent == colorComponent) {
                         _colorList[i].Tween.Restart(colorComponent.DmgMaxScale, 1);
@@ -128,12 +98,12 @@ namespace PixelComrades {
             }
         }
         
-        private void StartColorDamageTween(SpriteColorComponent colorComponent) {
+        private void StartColorDamageTween(SpriteColorComponent colorComponent, SpriteRendererComponent renderer) {
             colorComponent.AnimatingColor = true;
             colorComponent.UpdateCurrentColor(Color.red);
             var tween = _floatPool.New();
             tween.Restart(1, colorComponent.DmgMaxScale);
-            _colorList.Add(new SpriteColorWatch(colorComponent, tween, colorComponent.Renderer.transform.localScale));
+            _colorList.Add(new SpriteColorWatch(colorComponent, renderer, tween, renderer.SpriteTr.localScale));
         }
 
         public void Handle(TagChangeEvent arg) {
@@ -171,25 +141,6 @@ namespace PixelComrades {
             Stun,
             Slow,
             Confuse
-        }
-    }
-
-    public class SpriteBillboardTemplate : BaseTemplate {
-
-        private CachedComponent<SpriteRendererComponent> _renderer = new CachedComponent<SpriteRendererComponent>();
-        private CachedComponent<SpriteBillboardComponent> _billboard = new CachedComponent<SpriteBillboardComponent>();
-
-        public SpriteRendererComponent Renderer { get => _renderer.Value; }
-        public SpriteBillboardComponent Billboard { get => _billboard.Value; }
-        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _renderer, _billboard,
-        };
-
-        public static System.Type[] GetTypes() {
-            return new System.Type[] {
-                typeof(SpriteRendererComponent),
-                typeof(SpriteBillboardComponent),
-            };
         }
     }
 }

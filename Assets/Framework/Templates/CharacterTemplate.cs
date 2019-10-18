@@ -28,7 +28,6 @@ namespace PixelComrades {
         public StatsContainer Stats => _stats.Value;
         public DefendDamageWithStats StatDefend => _statDefend.Value;
         public DamageAbsorb DamageAbsorb => _damageAbsorb.Value;
-        public CommandTarget CommandTarget => _target.Value;
         public EquipmentSlots EquipmentSlots => _slots.Value;
         public ReadyActions ReadyActions => _currentActions.Value;
         public FactionComponent Faction => _faction.Value;
@@ -39,7 +38,7 @@ namespace PixelComrades {
         public TagsComponent Tags => Entity.Tags;
         public SteeringInput Steering => _steering.Value;
         public RuntimeStateGraph AnimGraph => _animGraph.Value.Value;
-        public Action CurrentAction => _currentAction.Value?.Value;
+        public ActionTemplate CurrentAction => _currentAction.Value?.Value;
         public CurrentAction CurrentActionComponent => _currentAction.Value;
         public AnimationEventComponent AnimationEvent => _animationEvent.Value;
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);

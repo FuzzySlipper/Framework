@@ -41,24 +41,24 @@ namespace PixelComrades {
             if (arg.Action == null) {
                 return;
             }
-            var entity = arg.Action.Entity;
-            var weaponModelComponent = entity.Get<WeaponModelComponent>();
+            var weaponModelComponent = arg.Action.Weapon;
             if (weaponModelComponent == null) {
                 if (arg.Container == null) {
-                    entity.Remove<SpawnPivotComponent>();
+                    arg.Action.Entity.Remove<SpawnPivotComponent>();
                 }
                 else {
                     var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                     if (actionPivots != null) {
-                        entity.Add(new SpawnPivotComponent(arg.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot));
+                        arg.Action.Entity.Add(new SpawnPivotComponent(arg.Action.Action.Primary ? actionPivots.PrimaryPivot : actionPivots
+                        .SecondaryPivot));
                     }
                 }
                 return;
             }
             if (arg.Container == null) {
                 ItemPool.Despawn(weaponModelComponent.Loaded.Tr.gameObject);
-                entity.Remove<TransformComponent>();
-                entity.Remove<SpawnPivotComponent>();
+                arg.Action.Entity.Remove<TransformComponent>();
+                arg.Action.Entity.Remove<SpawnPivotComponent>();
                 weaponModelComponent.Set(null);
             }
             else {
@@ -72,11 +72,12 @@ namespace PixelComrades {
                 }
                 var projectileSpawn = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                 if (projectileSpawn != null) {
-                    weaponModel.Transform.SetParentResetPos(arg.Action.Primary? projectileSpawn.PrimaryPivot : projectileSpawn.SecondaryPivot);
+                    weaponModel.Transform.SetParentResetPos(arg.Action.Action.Primary? projectileSpawn.PrimaryPivot : projectileSpawn
+                    .SecondaryPivot);
                 }
                 weaponModelComponent.Set(weaponModel.GetComponent<IWeaponModel>());
-                entity.Add(new TransformComponent(weaponModel.transform));
-                entity.Add(new SpawnPivotComponent(weaponModel.Transform));
+                arg.Action.Entity.Add(new TransformComponent(weaponModel.transform));
+                arg.Action.Entity.Add(new SpawnPivotComponent(weaponModel.Transform));
             }
         }
 
@@ -85,15 +86,13 @@ namespace PixelComrades {
                 case AnimationEvents.Default:
                     break;
                 case AnimationEvents.FxOn:
-                    var weaponModelOn = arg.Entity.Get<CurrentAction>()?.Value?.Entity.Get<WeaponModelComponent>() ?? 
-                                      arg.Entity.Get<WeaponModelComponent>();
+                    var weaponModelOn = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
                     if (weaponModelOn?.Loaded != null) {
                         weaponModelOn.Loaded.SetFx(true);
                     }
                     break;
                 case AnimationEvents.FxOff:
-                    var weaponModelOff = arg.Entity.Get<CurrentAction>()?.Value?.Entity.Get<WeaponModelComponent>() ??
-                                      arg.Entity.Get<WeaponModelComponent>();
+                    var weaponModelOff = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
                     if (weaponModelOff?.Loaded != null) {
                         weaponModelOff.Loaded.SetFx(false);
                     }

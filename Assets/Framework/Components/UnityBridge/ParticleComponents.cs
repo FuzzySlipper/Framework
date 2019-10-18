@@ -8,20 +8,15 @@ namespace PixelComrades {
 	public sealed class SpriteDissolveParticlesComponent : IComponent {
 
         public float Length { get; }
-        public CachedUnityComponent<SpriteRenderer> SpriteRenderer { get; }
-
-        public SpriteDissolveParticlesComponent(float length, SpriteRenderer spriteRenderer) {
+        public SpriteDissolveParticlesComponent(float length) {
             Length = length;
-            SpriteRenderer = new CachedUnityComponent<SpriteRenderer>(spriteRenderer);
         }
 
         public SpriteDissolveParticlesComponent(SerializationInfo info, StreamingContext context) {
-            SpriteRenderer = info.GetValue(nameof(SpriteRenderer), SpriteRenderer);
             Length = info.GetValue(nameof(Length), Length);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(SpriteRenderer), SpriteRenderer);
             info.AddValue(nameof(Length), Length);
         }
     }

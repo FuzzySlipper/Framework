@@ -20,14 +20,16 @@ namespace PixelComrades {
         public void Trigger(ActionEvent ae, string eventName) {
             var origin = ae.Origin;
             Vector3 originPos;
+            Vector3 target;
             if (origin.Tags.Contain(EntityTags.Player)) {
                 originPos = PlayerInputSystem.GetLookTargetRay.origin;
+                target = PlayerInputSystem.GetMouseRaycastPosition(ae.Origin.CurrentAction.Action.Range);
             }
             else {
                 originPos = ae.Position;
+                target = ae.Origin.Target.GetPosition;
             }
-            var target = ae.Position;
-            var actionEntity = origin.CurrentAction.GetEntity();
+            var actionEntity = origin.CurrentAction.Entity;
             var ray = new Ray(originPos, (target - originPos).normalized);
             CollisionEvent? ce = CollisionCheckSystem.Raycast(actionEntity, ray, RayDistance, LimitToEnemy);
             if (ce == null && RaySize > 0.01f) {

@@ -34,6 +34,18 @@ namespace PixelComrades {
             }
         }
 
+        public void SetFloat(int id, float value) {
+            for (int i = 0; i < _blocks.Length; i++) {
+                _blocks[i].SetFloat(id, value);
+            }
+        }
+
+        public void ApplyMaterialBlock() {
+            for (int i = 0; i < _renderers.Length; i++) {
+                _renderers[i].SetPropertyBlock(_blocks[i]);
+            }
+        }
+
         public void SetRendering(RenderingMode status) {
             _entity.SetVisible(status != RenderingMode.None);
         }

@@ -29,7 +29,7 @@ namespace PixelComrades {
             NormalizedPercent = info.GetValue(nameof(NormalizedPercent), NormalizedPercent);
             ID = info.GetValue(nameof(ID), ID);
             _iconLocation = info.GetValue(nameof(_iconLocation), _iconLocation);
-            Icon = ItemPool.LoadAsset<Sprite>(_iconLocation);
+            ItemPool.LoadAsset<Sprite>(_iconLocation, a => Icon = a);
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

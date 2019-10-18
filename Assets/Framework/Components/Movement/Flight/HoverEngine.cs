@@ -13,7 +13,7 @@ namespace PixelComrades {
         public float Drag;
         public Vector3 GroundNormal = Vector3.up;
         public PIDController HoverPid = new PIDController();
-        public HoverEngineConfig Config { get; }
+        public HoverEngineConfig Config { get; private set; }
 
         public HoverEngine(HoverEngineConfig config) {
             Config = config;
@@ -28,7 +28,7 @@ namespace PixelComrades {
         }
 
         public HoverEngine(SerializationInfo info, StreamingContext context) {
-            Config = ItemPool.LoadAsset<HoverEngineConfig>(info.GetValue(nameof(Config), ""));
+            ItemPool.LoadAsset<HoverEngineConfig>(info.GetValue(nameof(Config), ""), a => Config = a);
             Drag = Config.DriveForce / Config.MaxForwardSpeed;
             RefreshPid();
         }

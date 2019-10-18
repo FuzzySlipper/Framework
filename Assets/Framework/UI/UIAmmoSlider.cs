@@ -21,9 +21,9 @@ namespace PixelComrades {
                 return;
             }
             _actor.Entity.AddObserver(this);
-            var action = _actor.ReadyActions.GetAction(_targetUsable);
-            if (action != null) {
-                _currentAmmo = action.Ammo.Amount;
+            var ammo = _actor.ReadyActions.GetAction(_targetUsable)?.Entity.Get<AmmoComponent>();
+            if (ammo != null) {
+                _currentAmmo = ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;
                 _statSlider.value = _currentAmmo.CurrentPercent;
             }
@@ -58,9 +58,9 @@ namespace PixelComrades {
                 return;
             }
             RemoveAmmo();
-            var usable = arg.Action;
-            if (usable != null) {
-                _currentAmmo = usable.Ammo.Amount;
+            var ammo = arg.Action.Entity.Get<AmmoComponent>();
+            if (ammo != null) {
+                _currentAmmo = ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;
             }
         }

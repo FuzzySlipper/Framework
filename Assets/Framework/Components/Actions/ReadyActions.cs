@@ -8,10 +8,10 @@ namespace PixelComrades {
 
     public struct ReadyActionsChanged : IEntityMessage {
         public int Index { get; }
-        public Action Action { get; }
+        public ActionTemplate Action { get; }
         public ReadyActions Container { get; }
 
-        public ReadyActionsChanged(int index, Action action, ReadyActions container) {
+        public ReadyActionsChanged(int index, ActionTemplate action, ReadyActions container) {
             Index = index;
             Action = action;
             Container = container;
@@ -21,14 +21,11 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class ReadyActions : IComponent {
 
-        private CachedComponent<Action>[] _actions;
+        private ActionTemplate[] _actions;
 
-        public Action this[int index] { get { return _actions[index].Value; } }
+        public ActionTemplate this[int index] { get { return _actions[index]; } }
         public ReadyActions(int actionsCnt) {
-            _actions = new CachedComponent<Action>[actionsCnt];
-            for (int i = 0; i < _actions.Length; i++) {
-                _actions[i] = new CachedComponent<Action>();
-            }
+            _actions = new ActionTemplate[actionsCnt];
         }
 
         public ReadyActions(SerializationInfo info, StreamingContext context) {
@@ -39,7 +36,7 @@ namespace PixelComrades {
             info.AddValue(nameof(_actions), _actions);
         }
 
-        public Action GetAction(int index) {
+        public ActionTemplate GetAction(int index) {
             return _actions[index];
         }
 
@@ -56,27 +53,31 @@ namespace PixelComrades {
             if (_actions.Length <= slot) {
                 System.Array.Resize(ref _actions, slot +1);
             }
-            if (_actions[slot].Value != null) {
+            if (_actions[slot] != null) {
                 RemoveAction(slot);
             }
             if (action == null) {
                 return;
             }
-            _actions[slot].Set(action);
+            var template = action.GetEntity().GetTemplate<ActionTemplate>();
+            if (template == null) {
+                return;
+            }
+            _actions[slot] = template;
             action.EquippedSlot = slot;
-            this.GetEntity().Post(new ReadyActionsChanged(slot, action, this));
+            this.GetEntity().Post(new ReadyActionsChanged(slot, template, this));
         }
 
         public void RemoveAction(int slot) {
             if (_actions.Length <= slot) {
                 return;
             }
-            if (_actions[slot].Value != null && _actions[slot].Value.EquippedSlot == slot) {
-                var action = _actions[slot].Value;
-                action.EquippedSlot = -1;
+            if (_actions[slot] != null && _actions[slot].Action.EquippedSlot == slot) {
+                var action = _actions[slot];
+                action.Action.EquippedSlot = -1;
                 action.Entity.Post(new ReadyActionsChanged(-1, action, null));
             }
-            _actions[slot].Clear();
+            _actions[slot] = null;
             this.GetEntity().Post(new ReadyActionsChanged(slot, null, this));
         }
     }

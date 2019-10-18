@@ -8,8 +8,8 @@ namespace PixelComrades {
     public sealed class AnimationEventComponent : IComponent {
         
         public string CurrentAnimationEvent;
-        public Vector3 LastEventPosition;
-        public Quaternion LastEventRotation;
+        public Vector3 Position;
+        public Quaternion Rotation;
         
         public AnimationEventComponent(){}
         

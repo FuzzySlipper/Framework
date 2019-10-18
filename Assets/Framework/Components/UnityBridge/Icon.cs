@@ -15,13 +15,13 @@ namespace PixelComrades {
         }
 
         public IconComponent(string iconLocation) {
-            Sprite = ItemPool.LoadAsset<Sprite>(iconLocation);
             IconLocation = iconLocation;
+            Sprite = ItemPool.LoadAssetOld<Sprite>(IconLocation);
         }
 
         public IconComponent(string dir, string icon) {
             IconLocation = ItemPool.GetCombinedLocator(dir, icon);
-            Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
+            Sprite = ItemPool.LoadAssetOld<Sprite>(IconLocation);
         }
 
         public IconComponent(){}
@@ -35,7 +35,7 @@ namespace PixelComrades {
 
         public IconComponent(SerializationInfo info, StreamingContext context) {
             IconLocation = info.GetValue(nameof(IconLocation), IconLocation);
-            Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
+            ItemPool.LoadAsset<Sprite>(IconLocation, a => Sprite = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

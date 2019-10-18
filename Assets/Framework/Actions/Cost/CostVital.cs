@@ -34,27 +34,27 @@ namespace PixelComrades {
             info.AddValue(nameof(_skill), _skill);
         }
 
-        public override void ProcessCost(Entity entity) {
-            var vital = entity.FindStat<VitalStat>(TargetVital);
+        public override void ProcessCost(Entity owner, Entity action) {
+            var vital = owner.FindStat<VitalStat>(TargetVital);
             if (vital == null) {
                 return;
                 
             }
             var skillMulti = 1f;
             if (!string.IsNullOrEmpty(_skill)) {
-                var skillValue = entity.FindStatValue(_skill);
+                var skillValue = owner.FindStatValue(_skill);
                 skillMulti = Mathf.Clamp(1 - (skillValue * SkillPercent.Value), SkillMaxReduction, 1);
             }
             vital.Current -= VitalAmount * skillMulti;
         }
 
-        public override bool CanAct(Entity entity) {
-            var stat = entity.FindStat<VitalStat>(GameData.Vitals.GetID(TargetVital));
+        public override bool CanAct(Entity owner, Entity action) {
+            var stat = owner.FindStat<VitalStat>(GameData.Vitals.GetID(TargetVital));
             if (stat != null && stat.Current >= VitalAmount) {
                 return true;
             }
             //entity.Get<StatusUpdateComponent>(e => e.Status = string.Format("Not enough {0}", Vitals.GetDescriptionAt(TargetVital)));
-            entity.PostAll(new StatusUpdate(entity, "Not enough " + GameData.Vitals.GetNameAt(TargetVital)));
+            owner.PostAll(new StatusUpdate(owner, "Not enough " + GameData.Vitals.GetNameAt(TargetVital)));
             return false;
         }
     }

@@ -26,7 +26,7 @@ namespace PixelComrades {
         }
 
         public FlightEngine(SerializationInfo info, StreamingContext context) {
-            Config = ItemPool.LoadAsset<FlightEngineConfig>(info.GetValue(nameof(Config), ""));
+            ItemPool.LoadAsset<FlightEngineConfig>(info.GetValue(nameof(Config), ""), a => Config = a);
             AvailableBoostForces = info.GetValue(nameof(AvailableBoostForces), AvailableBoostForces);
             AvailableRotationForces = info.GetValue(nameof(AvailableRotationForces), AvailableRotationForces);
             AvailableTranslationForces = info.GetValue(nameof(AvailableTranslationForces), AvailableTranslationForces);

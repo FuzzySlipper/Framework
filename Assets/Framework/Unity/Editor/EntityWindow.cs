@@ -15,7 +15,7 @@ public class EntityWindow : OdinEditorWindow {
     [MenuItem("Tools/Entity Window")]
     public static void ShowWindow() {
         var window = GetWindow<EntityWindow>();
-        window.position = GUIHelper.GetEditorWindowRect().AlignCenter(1200, 1000);
+        window.position = GUIHelper.GetEditorWindowRect().AlignCenter(1600, 1200);
         window.Show();
     }
 
@@ -35,7 +35,7 @@ public class EntityWindow : OdinEditorWindow {
             _activeEntities.Add(e);
         }
         //_entityTable = GUITable.Create<Entity>(_activeEntities, "Entities");
-        _entityTable = GUITable.Create(_rows.Length, entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels);
+        _entityTable = GUITable.Create(_rows.Length, entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels, true);
     }
 
     protected override void OnGUI() {

@@ -7,7 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class AudioClipSetData : IComponent {
 
-        public AudioClipSet Set { get; }
+        public AudioClipSet Set { get; private set; }
 
         public AudioClipSetData(AudioClipSet set) {
             Set = set;
@@ -18,7 +18,7 @@ namespace PixelComrades {
         }
 
         public AudioClipSetData(SerializationInfo info, StreamingContext context) {
-            Set = ItemPool.LoadAsset<AudioClipSet>(info.GetValue(nameof(Set), ""));
+            ItemPool.LoadAsset<AudioClipSet>(info.GetValue(nameof(Set), ""), a => Set = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

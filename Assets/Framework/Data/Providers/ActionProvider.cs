@@ -104,18 +104,20 @@ namespace PixelComrades {
                 var reload = data.TryGetValue("ReloadType", "Repair");
                 var reloadSpeed = data.TryGetValue("ReloadSpeed", 1f);
                 var ammo = AmmoFactory.GetTemplate(data.Get<DataReference>("Ammo"));
+                AmmoComponent ammoComponent;
                 switch (reload) {
                     case "Repair":
-                        action.Ammo = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, power, _brokenWeaponPercent));
+                        ammoComponent = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, power, _brokenWeaponPercent));
                         break;
+                    default:
                     case "Reload":
-                        action.Ammo = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, null));
+                        ammoComponent = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, null));
                         break;
 
                 }
-                action.Ammo.Amount.SetLimits(0, data.TryGetValue("AmmoAmount", 5));
-                action.Ammo.Amount.SetMax();
-                action.Costs.Add(new CostAmmo(action.Ammo));
+                ammoComponent.Amount.SetLimits(0, data.TryGetValue("AmmoAmount", 5));
+                ammoComponent.Amount.SetMax();
+                action.Costs.Add(new CostAmmo(ammoComponent));
             }
             switch (abilityType) {
                 default:
@@ -169,7 +171,6 @@ namespace PixelComrades {
             if (!string.IsNullOrEmpty(afx)) {
                 var actionFx = ItemPool.LoadAsset<ActionFx>(UnityDirs.ActionFx, afx);
                 if (actionFx != null) {
-                    action.Fx = actionFx;
                     if (actionFx.TryGetColor(out var actionColor)) {
                         entity.Add(new HitParticlesComponent(actionColor));
                     }

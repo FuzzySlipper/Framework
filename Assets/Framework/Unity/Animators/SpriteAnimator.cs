@@ -95,7 +95,7 @@ namespace PixelComrades {
             }
             _renderer.sprite = sprite;
             if (_spriteCollider != null) {
-                _spriteCollider.UpdateCollider();
+                _spriteCollider.UpdateSpriteRendererCollider();
             }
         }
 

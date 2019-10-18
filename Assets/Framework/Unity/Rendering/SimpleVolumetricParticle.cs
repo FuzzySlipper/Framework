@@ -30,6 +30,12 @@ namespace PixelComrades {
             Tr = transform;
         }
 
+        public void SetFloat(int id, float value) {
+        }
+
+        public void ApplyMaterialBlock() {
+        }
+
         [Button]
         public void UpdateParticles() {
             var lengthShape = _lengthParticles.shape;

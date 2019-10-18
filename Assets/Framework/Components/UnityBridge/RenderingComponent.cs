@@ -23,14 +23,16 @@ namespace PixelComrades {
             _component.Clear();
         }
 
-        public MaterialPropertyBlock[] GetMatBlocks { get { return Rendering.MaterialBlocks; } }
-        
-        public void ApplyMaterialBlocks(MaterialPropertyBlock[] matBlocks) {
-            Rendering.ApplyMaterialBlocks(matBlocks);
+        public void SetFloat(int id, float value) {
+            Rendering.SetFloat(id, value);
         }
 
         public void SetVisible(RenderingMode status) {
             Rendering.SetRendering(status);
+        }
+
+        public void ApplyMaterialBlock() {
+            Rendering.ApplyMaterialBlock();
         }
 
         public RenderingComponent(SerializationInfo info, StreamingContext context) {
@@ -43,8 +45,8 @@ namespace PixelComrades {
     }
 
     public interface IRenderingComponent {
-        MaterialPropertyBlock[] MaterialBlocks { get; }
-        void ApplyMaterialBlocks(MaterialPropertyBlock[] matBlocks);
+        void SetFloat(int id, float value);
+        void ApplyMaterialBlock();
         void SetRendering(RenderingMode status);
     }
 

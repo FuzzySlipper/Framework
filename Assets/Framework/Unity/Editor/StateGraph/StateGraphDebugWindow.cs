@@ -55,8 +55,18 @@ namespace PixelComrades {
         private List<string> _entityListing = new List<string>();
         private List<AnimationGraphComponent> _smallerList = new List<AnimationGraphComponent>();
 
+        private void Update() {
+            if (!Application.isPlaying) {
+                Close();
+                return;
+            }
+            // This is necessary to make the framerate normal for the editor window.
+            Repaint();
+        }
+        
         private void OnGUI() {
             if (!Application.isPlaying) {
+                Close();
                 return;
             }
             if (_inPointStyle == null || _nodeStyle == null || _nodeTextStyle == null) {
@@ -99,14 +109,14 @@ namespace PixelComrades {
             var sideRect = new Rect(position.width - Border, 0, Border - 10, position.height);
             _scrollPosition1 = GUI.BeginScrollView(sideRect, _scrollPosition1, new Rect(0, 0, Border, MaxRectSize));
             EditorGUILayout.LabelField("IsActive " + _graph.Value.IsActive);
-            EditorGUILayout.LabelField("Variables");
             EditorGUILayout.LabelField(" ");
+            EditorGUILayout.LabelField("-Variables-");
             foreach (var valueVariable in _graph.Value.Variables) {
                 EditorGUILayout.LabelField(valueVariable.Key + ": ");
                 EditorGUILayout.LabelField(valueVariable.Value.ToString());
             }
-            EditorGUILayout.LabelField("Triggers");
             EditorGUILayout.LabelField(" ");
+            EditorGUILayout.LabelField("-Triggers-");
             foreach (string trigger in _graph.Value.TriggerLog.InOrder()) {
                 EditorGUILayout.LabelField( _graph.Value.TriggerLog.GetTime(trigger).ToString("F3") + ": ");
                 EditorGUILayout.LabelField(trigger);

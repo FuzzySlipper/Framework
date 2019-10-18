@@ -61,6 +61,7 @@ namespace PixelComrades {
             _array[index] = item;
             _freeIndices.Remove(index);
             _invalidPositionIndex[index] = false;
+            _max = Mathf.Max(index, _max);
         }
 
         public bool IndexFree(int index) {

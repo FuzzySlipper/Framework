@@ -10,7 +10,7 @@ namespace PixelComrades {
         private CachedComponent<CurrentAction> _currentAction = new CachedComponent<CurrentAction>();
         public StatsContainer Stats => _stats.Value;
         public TransformComponent Tr { get => _tr.Value; }
-        public Action Current => _currentAction.Value.Value;
+        public ActionTemplate Current => _currentAction.Value.Value;
         
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _stats, _tr, _currentAction

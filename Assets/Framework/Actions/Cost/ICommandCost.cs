@@ -1,6 +1,6 @@
 ﻿namespace PixelComrades {
     public interface ICommandCost {
-        bool CanAct(Entity entity);
-        void ProcessCost(Entity entity);
+        bool CanAct(Entity owner, Entity action);
+        void ProcessCost(Entity owner, Entity action);
     }
 }

@@ -31,7 +31,7 @@ namespace PixelComrades {
             materialBlock.SetTexture("_MainTex", _renderer.sprite.texture);
             _renderer.SetPropertyBlock(materialBlock);
             if (_spriteCollider != null) {
-                _spriteCollider.UpdateCollider();
+                _spriteCollider.UpdateSpriteRendererCollider();
             }
         }
 
@@ -80,7 +80,7 @@ namespace PixelComrades {
             }
             _renderer.sprite = sprite;
             if (_spriteCollider != null) {
-                _spriteCollider.UpdateCollider();
+                _spriteCollider.UpdateSpriteRendererCollider();
             }
         }
 
@@ -178,7 +178,7 @@ namespace PixelComrades {
                     _spriteAnimator.ResetAnimation(_sprite);
                 }
                 if (_spriteCollider != null) {
-                    _spriteCollider.UpdateCollider();
+                    _spriteCollider.UpdateSpriteRendererCollider();
                 }
                 yield return null;
             }

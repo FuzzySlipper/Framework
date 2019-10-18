@@ -12,7 +12,7 @@ namespace PixelComrades {
         
         private CachedUnityComponent<SpriteRenderer> _component;
         public SpriteRenderer Renderer { get { return _component.Value; } }
-        public SpriteAnimation Animation { get; }
+        public SpriteAnimation Animation { get; private set; }
         public bool Unscaled { get;}
         public BillboardMode Billboard { get; }
 
@@ -27,7 +27,7 @@ namespace PixelComrades {
             NextUpdateTime = info.GetValue(nameof(NextUpdateTime), NextUpdateTime);
             CurrentFrameIndex = info.GetValue(nameof(CurrentFrameIndex), CurrentFrameIndex);
             LastAngleHeight = info.GetValue(nameof(LastAngleHeight), LastAngleHeight);
-            Animation = ItemPool.LoadAsset<SpriteAnimation>(info.GetValue(nameof(Animation), ""));
+            ItemPool.LoadAsset<SpriteAnimation>(info.GetValue(nameof(Animation), ""), a => Animation = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

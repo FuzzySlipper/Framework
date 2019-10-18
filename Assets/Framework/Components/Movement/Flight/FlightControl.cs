@@ -29,7 +29,7 @@ namespace PixelComrades {
         }
 
         public FlightControl(SerializationInfo info, StreamingContext context) {
-            Config = ItemPool.LoadAsset<FlightControlConfig>(info.GetValue(nameof(Config), ""));
+            ItemPool.LoadAsset<FlightControlConfig>(info.GetValue(nameof(Config), ""), a => Config = a);
             CurrentMode = info.GetValue(nameof(CurrentMode), CurrentMode);
             EnginesActivated = info.GetValue(nameof(EnginesActivated), EnginesActivated);
             ClearValues();

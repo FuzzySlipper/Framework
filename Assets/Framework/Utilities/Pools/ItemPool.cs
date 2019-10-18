@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 
 namespace PixelComrades {
@@ -145,15 +146,25 @@ namespace PixelComrades {
             _stringBuilder.Append(file);
             return _stringBuilder.ToString();
         }
+
+        private static Dictionary<int, string> _loadedAssets = new Dictionary<int, string>();
         
-        public static T LoadAsset<T>(string fullFilePath) where T : UnityEngine.Object {
+        public static void LoadAsset<T>(string fullFilePath, Action<T> del) where T : UnityEngine.Object {
+            //return Resources.Load<T>(fullFilePath);
+            var op = Addressables.LoadAssetsAsync<T>(fullFilePath, del);
+            if (op.IsDone && op.Result.Count > 0) {
+                _loadedAssets.AddOrUpdate(op.Result[0].GetInstanceID(), fullFilePath);
+            }
+        }
+
+        public static T LoadAssetOld<T>(string fullFilePath) where T : UnityEngine.Object {
             return Resources.Load<T>(fullFilePath);
         }
-
+        
         public static string GetAssetLocation<T>(T target) where T : UnityEngine.Object {
-            return "";
+            return _loadedAssets.TryGetValue(target.GetInstanceID(), out var ar) ? ar : "";
         }
-
+        
         public static PrefabEntity Spawn(string itemName, bool isSceneObject = false, bool isCulled = true) {
             return Main.SpawnByString(itemName, isSceneObject, Vector3.zero, Quaternion.identity, null, isCulled);
         }

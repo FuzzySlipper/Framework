@@ -6,22 +6,22 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [System.Serializable]
 	public sealed class ActionFxComponent : IComponent {
-        public ActionFx Fx { get; private set; }
+        public ActionFx Value { get; private set; }
 
         public ActionFxComponent(ActionFx fx) {
-            Fx = fx;
+            Value = fx;
         }
 
         public ActionFxComponent(SerializationInfo info, StreamingContext context) {
-            Fx = ItemPool.LoadAsset<ActionFx>(info.GetValue(nameof(Fx), ""));
+            ItemPool.LoadAsset<ActionFx>(info.GetValue(nameof(Value), ""), a => Value = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(Fx), ItemPool.GetAssetLocation(Fx));
+            info.AddValue(nameof(Value), ItemPool.GetAssetLocation(Value));
         }
         
         public void ChangeFx(ActionFx fx) {
-            Fx = fx;
+            Value = fx;
         }
     }
 }

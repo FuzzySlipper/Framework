@@ -18,14 +18,14 @@ namespace PixelComrades {
         public CollisionCheckSystem() {
             TemplateFilter<CollisionCheckForwardTemplate>.Setup(CollisionCheckForwardTemplate.GetTypes());
             _list = EntityController.GetTemplateList<CollisionCheckForwardTemplate>();
-            _del = UpdateNode;
+            _del = RunUpdate;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _list.Run(_del);
         }
 
-        private void UpdateNode(ref CollisionCheckForwardTemplate template) {
+        private void RunUpdate(ref CollisionCheckForwardTemplate template) {
             var tr = template.Tr;
             if (tr == null) {
                 template.Forward.LastPos = null;

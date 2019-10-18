@@ -11,7 +11,7 @@ namespace PixelComrades {
         private const int StyleHasConditions = 3;
         private const int StyleIndexDefault = 2;
         private const int StyleIndexGlobal = 1;
-        private const float Border = 125;
+        private const float Border = 150;
         private const float MaxRectSize = 2500;
 
         private StateGraph _graph = null;

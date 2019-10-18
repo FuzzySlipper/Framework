@@ -10,7 +10,7 @@ namespace PixelComrades {
         private static GameOptions.CachedFloat _defaultSpeed = new GameOptions.CachedFloat("ProjectileSpeed");
         private static GameOptions.CachedFloat _defaultRotation = new GameOptions.CachedFloat("ProjectileRotation");
         private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePool");
-        private static Dictionary<string, ProjectileConfig> _templates = new Dictionary<string, ProjectileConfig>();
+        private static Dictionary<string, ProjectileConfig> _configs = new Dictionary<string, ProjectileConfig>();
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
 
         public ProjectileSystem() {
@@ -21,7 +21,7 @@ namespace PixelComrades {
             GameData.AddInit(Init);
             foreach (var loadedDataEntry in GameData.GetSheet("ActionSpawn")) {
                 var data = loadedDataEntry.Value;
-                _templates.AddOrUpdate(data.ID, new ProjectileConfig(data));
+                _configs.AddOrUpdate(data.ID, new ProjectileConfig(data));
             }
         }
 
@@ -48,46 +48,47 @@ namespace PixelComrades {
         }
 
         public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot) {
-            if (_templates.Count == 0) {
+            if (_configs.Count == 0) {
                 Init();
             }
-            if (!_templates.TryGetValue(id, out var template)) {
+            if (!_configs.TryGetValue(id, out var config)) {
 #if DEBUG
                 DebugLog.Add("Couldn't find project config " + id, false);
 #endif
                 return null;
             }
-            var entity = GetProjectile(template);
-            var node = entity.GetTemplate<ProjectileTemplate>();
-            node.MoveTarget.SetMoveTarget(target);
-            if (template.ActionFx != null) {
-                node.ActionFx.ChangeFx(template.ActionFx);
+            var entity = GetProjectile(config);
+            var template = entity.GetTemplate<ProjectileTemplate>();
+            template.MoveTarget.SetMoveTarget(target);
+            if (config.ActionFx != null) {
+                template.ActionFx.ChangeFx(config.ActionFx);
             }
-            var prefab = ItemPool.Spawn(UnityDirs.ActionSpawn, template.Type, spawnPos, spawnRot);
+            var prefab = ItemPool.Spawn(UnityDirs.ActionSpawn, config.Type, spawnPos, spawnRot);
             if (prefab == null) {
                 return entity;
             }
             var spawn = prefab.GetComponent<IProjectile>();
             entity.Add(new TransformComponent(prefab.Transform));
-            switch (template.Type) {
+            switch (config.Type) {
                 default:
                 case "Simple":
                     break;
                 case "SpriteAnimation":
-                    spawn.SetColor(template.MainColor, Color.white * template.GlowPower);
-                    if (template.Animation != null) {
+                    spawn.SetColor(config.MainColor, Color.white * config.GlowPower);
+                    if (config.Animation != null) {
                         var spriteRenderer = prefab.Renderers[0] as SpriteRenderer;
-                        entity.Add(new SpriteAnimationComponent(spriteRenderer, template.Animation, false, template.Billboard));
+                        entity.Add(new SpriteAnimationComponent(spriteRenderer, config.Animation, false, config.Billboard));
                     }
                     break;
                 case "VolumeLaser":
-                    spawn.SetColor(template.MainColor, template.OffsetColor);
+                    spawn.SetColor(config.MainColor, config.OffsetColor);
                     break;
             }
-            spawn.SetSize(template.Size, template.Length);
-            switch (template.Movement) {
+            spawn.SetSize(config.Size, config.Length);
+            switch (config.Movement) {
                 case "Forward":
                 case "Arc":
+                    template.CollisionCheckForward.LastPos = null;
                     prefab.Transform.LookAt(target, prefab.Transform.up);
                     break;
                 case "Force":
@@ -95,13 +96,13 @@ namespace PixelComrades {
                     break;
             }
             if (spawn.Rigidbody != null) {
-                node.Rb.SetRb(spawn.Rigidbody);
+                template.Rb.SetRb(spawn.Rigidbody);
             }
             entity.Tags.Add(EntityTags.Moving);
-            node.Rendering.Set(spawn);
+            template.Rendering.Set(spawn);
             UnityToEntityBridge.RegisterToEntity(prefab.Transform.gameObject, entity);
             entity.ParentId = owner.Id;
-            entity.Post(new ProjectileSpawned(template, entity));
+            entity.Post(new ProjectileSpawned(config, entity));
             return entity;
         }
 
@@ -171,30 +172,36 @@ namespace PixelComrades {
             entity.Add(new RotationSpeed(_defaultRotation.Value));
             entity.Add(new RigidbodyComponent(null));
             entity.Add(new MoveTarget());
+            entity.Add(new ProjectileComponent(name));
             return entity;
         }
 
         public sealed class ProjectileTemplate : BaseTemplate {
+            private CachedComponent<ProjectileComponent> _projectile = new CachedComponent<ProjectileComponent>();
             private CachedComponent<MoveTarget> _moveTarget = new CachedComponent<MoveTarget>();
             private CachedComponent<RigidbodyComponent> _rb = new CachedComponent<RigidbodyComponent>();
             private CachedComponent<MoveSpeed> _moveSpeed = new CachedComponent<MoveSpeed>();
             private CachedComponent<RotationSpeed> _rotationSpeed = new CachedComponent<RotationSpeed>();
             private CachedComponent<RenderingComponent> _rendering = new CachedComponent<RenderingComponent>();
             private CachedComponent<ActionFxComponent> _actionFx = new CachedComponent<ActionFxComponent>();
-            
+            private CachedComponent<CollisionCheckForward> _checkForward = new CachedComponent<CollisionCheckForward>();
+
+            public ProjectileComponent ProjectileComponent { get => _projectile; }
             public MoveTarget MoveTarget { get => _moveTarget; }
             public RigidbodyComponent Rb { get => _rb; }
             public MoveSpeed MoveSpeed { get => _moveSpeed; }
             public RotationSpeed RotationSpeed { get => _rotationSpeed; }
             public RenderingComponent Rendering { get => _rendering; }
             public ActionFxComponent ActionFx { get => _actionFx; }
+            public CollisionCheckForward CollisionCheckForward { get => _checkForward; }
             
             public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-                _moveTarget, _rotationSpeed, _rb, _moveSpeed, _rendering, _actionFx
+                _projectile, _moveTarget, _rotationSpeed, _rb, _moveSpeed, _rendering, _actionFx, _checkForward
             };
 
             public static System.Type[] GetTypes() {
                 return new System.Type[] {
+                    typeof(ProjectileComponent),
                     typeof(MoveTarget),
                     typeof(RigidbodyComponent),
                     typeof(RotationSpeed),

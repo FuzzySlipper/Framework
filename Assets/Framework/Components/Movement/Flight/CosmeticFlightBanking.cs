@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         private CachedTransform _bankTransform;
         public Transform BankTransform { get { return _bankTransform; } }
-        public FlightControlConfig Config { get; }
+        public FlightControlConfig Config { get; private set; }
 
         public CosmeticFlightBanking(Transform bankTransform, FlightControlConfig config) {
             _bankTransform = new CachedTransform(bankTransform);
@@ -18,7 +18,7 @@ namespace PixelComrades {
 
         public CosmeticFlightBanking(SerializationInfo info, StreamingContext context) {
             _bankTransform = info.GetValue(nameof(_bankTransform), _bankTransform);
-            Config = ItemPool.LoadAsset<FlightControlConfig>(info.GetValue(nameof(Config), ""));
+            ItemPool.LoadAsset<FlightControlConfig>(info.GetValue(nameof(Config), ""), a => Config = a);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

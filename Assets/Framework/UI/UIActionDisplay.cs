@@ -66,9 +66,9 @@ namespace PixelComrades {
             _tooltip = item.Get<TooltipComponent>();
             _iconDisplay.sprite = item.Get<IconComponent>().Sprite;
             _iconDisplay.enabled = _iconDisplay.sprite != null;
-            var action = item.Get<Action>();
-            if (action != null && action.Ammo != null) {
-                _currentAmmo = action.Ammo.Amount;
+            var ammo = item.Get<AmmoComponent>();
+            if (ammo != null) {
+                _currentAmmo = ammo.Amount;
                 _currentAmmo.OnResourceChanged += CheckAmmo;
                 CheckAmmo();
             }

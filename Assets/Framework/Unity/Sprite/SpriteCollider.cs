@@ -3,22 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [RequireComponent(typeof(SpriteRenderer))]
     public class SpriteCollider : MonoBehaviour, IOnCreate {
 
         private const float ColliderDepth = 0.5f;
+        [SerializeField] private SpriteRenderer _spriteRenderer = null;
 
         private Vector3[] _meshColliderVerts;
         private Mesh _mesh;
         private BoxCollider _boxCollider;
         private MeshCollider _mc;
-        private SpriteRenderer _renderer;
         private Vector2 _bottomLeft, _bottomRight, _topLeft, _topRight;
 
         public Collider UnityCollider { get; private set; }
 
         public void OnCreate(PrefabEntity entity) {
-            _renderer = GetComponent<SpriteRenderer>();
             _boxCollider = GetComponent<BoxCollider>();
             _mc = GetComponent<MeshCollider>();
             if (_mc != null) {
@@ -30,11 +28,20 @@ namespace PixelComrades {
             }
         }
 
-        public void UpdateCollider() {
-            if (!_renderer || !_renderer.sprite) {
+        public void UpdateSpriteRendererCollider() {
+            if (!_spriteRenderer || !_spriteRenderer.sprite) {
                 return;
             }
-            UpdateOffsets();
+            UpdateOffsets(_spriteRenderer.sprite, _spriteRenderer.transform.localScale, _spriteRenderer.flipX);
+            UpdateCollider();
+        }
+
+        public void UpdateSprite(Sprite sprite, bool flipX) {
+            UpdateOffsets(sprite, transform.localScale, flipX);
+            UpdateCollider();
+        }
+
+        private void UpdateCollider() {
             if (_mc != null) {
                 UpdateMeshCollider();
             }
@@ -42,24 +49,23 @@ namespace PixelComrades {
                 UpdateBoxCollider();
             }
         }
-
-        private void UpdateOffsets() {
-            var pixelsPerUnit = _renderer.sprite.pixelsPerUnit;
-            var width = (_renderer.sprite.rect.width / 2) / pixelsPerUnit;
-            var height = (_renderer.sprite.rect.height / 2) / pixelsPerUnit;
-
-            Vector4 padding = UnityEngine.Sprites.DataUtility.GetPadding(_renderer.sprite);
-
-            float leftPadding = (padding.x / _renderer.sprite.pixelsPerUnit) * _renderer.transform.localScale.x;
+        
+        private void UpdateOffsets(Sprite sprite, Vector3 localScale, bool flipX) {
+            var pixelsPerUnit = sprite.pixelsPerUnit;
+            var width = (sprite.rect.width / 2) / pixelsPerUnit;
+            var height = (sprite.rect.height / 2) / pixelsPerUnit;
+            Vector4 padding = UnityEngine.Sprites.DataUtility.GetPadding(sprite);
+            
+            float leftPadding = (padding.x / pixelsPerUnit) * localScale.x;
             float leftOffset = width - leftPadding;
-            float rightPadding = (padding.z / _renderer.sprite.pixelsPerUnit) * _renderer.transform.localScale.x;
+            float rightPadding = (padding.z / pixelsPerUnit) * localScale.x;
             float rightOffset = width - rightPadding;
-            float bottomPadding = (padding.y / _renderer.sprite.pixelsPerUnit) * _renderer.transform.localScale.x;
+            float bottomPadding = (padding.y / pixelsPerUnit) * localScale.x;
             float bottomOffset = height - bottomPadding;
-            float topPadding = (padding.w / _renderer.sprite.pixelsPerUnit) * _renderer.transform.localScale.x;
+            float topPadding = (padding.w / pixelsPerUnit) * localScale.x;
             float topOffset = height - topPadding;
 
-            if (_renderer.flipX) {
+            if (flipX) {
                 var tempLeft = leftOffset;
                 leftOffset = rightOffset;
                 rightOffset = tempLeft;
