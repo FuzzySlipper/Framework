@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister, Priority(Priority.Lowest)]
-    public sealed class AnimationGraphSystem : SystemBase, IMainSystemUpdate, IReceive<DeathEvent>, IReceive<TakeDamageEvent> {
+    public sealed class AnimationGraphSystem : SystemBase, IMainSystemUpdate, IReceive<DeathEvent>, IReceive<ReceivedDamageEvent> {
 
         private ComponentArray<AnimationGraphComponent> _graphList;
         private ComponentArray<AnimationGraphComponent>.RefDelegate _graphDel;
@@ -29,7 +29,7 @@ namespace PixelComrades {
             arg.Target.AnimGraph.TriggerGlobal(GraphTriggers.Death);
         }
 
-        public void Handle(TakeDamageEvent arg) {
+        public void Handle(ReceivedDamageEvent arg) {
             if (arg.Amount <= 0) {
                 return;
             }

@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         
         public EquipmentSystem() {
-            TemplateFilter<EquipmentTemplate>.Setup(EquipmentTemplate.GetTypes());
+            TemplateFilter<EquipmentTemplate>.Setup();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(Equipment)
             }));
@@ -232,7 +232,7 @@ namespace PixelComrades {
             _equip, _item, _skillRequirement
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(InventoryItem),
             };

@@ -4,54 +4,25 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class HealingSystem : SystemBase, IReceive<ImpactEvent>, IReceiveGlobal<HealingEvent> {
+    public sealed class HealingSystem : SystemBase, IRuleEventRun<HealingEvent> {
 
         public HealingSystem() {
-            EntityController.RegisterReceiver(
-                new EventReceiverFilter(
-                    this, new[] {
-                        typeof(HealImpact)
-                    }));
+            World.Get<RulesSystem>().AddHandler<HealingEvent>(this);
         }
 
-        public void HandleGlobal(HealingEvent arg) {
-            var entity = arg.Target;
-            var stats = entity.Get<StatsContainer>();
-            var vital = stats.GetVital(arg.TargetVital);
+        public void RuleEventRun(ref HealingEvent context) {
+            var stats = context.Target.Stats;
+            var vital = stats.GetVital(context.TargetVital);
             if (vital == null) {
-                vital = stats.GetVital(GameData.Vitals.GetID(arg.TargetVital));
+                vital = stats.GetVital(GameData.Vitals.GetID(context.TargetVital));
             }
             if (vital != null) {
-                vital.Current += arg.Amount;
-                if (arg.Amount > 0) {
-                    Color color = arg.TargetVital == Stats.Health ? Color.green : Color.yellow;
-                    entity.Post(new CombatStatusUpdate(entity, arg.Amount.ToString("F1"), color));
+                vital.Current += context.Amount;
+                if (context.Amount > 0) {
+                    Color color = context.TargetVital == Stats.Health ? Color.green : Color.yellow;
+                    context.Target.Post(new CombatStatusUpdate(context.Target, context.Amount.ToString("F1"), color));
                 }
             }
-        }
-
-        public void Handle(ImpactEvent arg) {
-            if (arg.Hit <= 0) {
-                return;
-            }
-            var component = arg.Source.Find<HealImpact>();
-            var sourceEntity = component.GetEntity();
-            var stats = sourceEntity.Get<StatsContainer>();
-            if (component == null || stats == null) {
-                return;
-            }
-            var target = component.HealSelf ? arg.Origin : arg.Target;
-            var power = RulesSystem.CalculateTotal(stats, Stats.Power, component.NormalizedPercent);
-            var logSystem = World.Get<GameLogSystem>();
-            logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
-            logMsg.Append(arg.Origin.GetName());
-            logMsg.Append(" healed ");
-            logMsg.Append(target.GetName());
-            logMsg.Append(" for ");
-            logMsg.Append(power.ToString("F0"));
-            hoverMsg.Append(RulesSystem.LastQueryString);
-            logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
-            target.Post(new HealingEvent(power, arg.Origin, target, component.TargetVital));
         }
     }
 }

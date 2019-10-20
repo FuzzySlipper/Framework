@@ -22,7 +22,7 @@ namespace PixelComrades {
             return BuildEntity(id, ignoreCost);
         }
 
-        public static AbilityConfig GetTemplate(string id) {
+        public static AbilityConfig GetConfig(string id) {
             if (_abilities.Count == 0) {
                 Init();
             }
@@ -45,9 +45,9 @@ namespace PixelComrades {
             if (_abilities.Count == 0) {
                 Init();
             }
-            var data = GetTemplate(id);
+            var data = GetConfig(id);
             if (data == null) {
-                Debug.LogFormat("{0} {1} didn't load Ability", id);
+                Debug.LogFormat("{0} didn't load Ability", id);
                 return null;
             }
             return BuildAbility(data, ignoreVitalCost);
@@ -74,7 +74,6 @@ namespace PixelComrades {
             //if (!ignoreVitalCost) {
             //    cmd.Costs.Add(new CostVital(data.TargetVital, data.Cost));
             //}
-            //World.Get<DataFactory>().AddComponent(entity, data.Data, typeof(Action));
             entity.Add(new DataDescriptionComponent(data.DataDescription));
             if (data.TypeComponents != null) {
                 World.Get<DataFactory>().AddComponentList(entity, data.Data, data.TypeComponents);

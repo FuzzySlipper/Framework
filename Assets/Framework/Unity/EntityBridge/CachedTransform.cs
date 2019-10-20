@@ -117,6 +117,9 @@ namespace PixelComrades {
         }
 
         public static implicit operator Transform(CachedTransform reference) {
+            if (reference == null) {
+                return null;
+            }
             return reference.Tr;
         }
     }

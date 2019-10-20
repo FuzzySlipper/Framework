@@ -14,7 +14,7 @@ namespace PixelComrades {
         public override List<CachedComponent> GatherComponents =>
             new List<CachedComponent>() { _position, _tr};
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(GridPosition),
             };

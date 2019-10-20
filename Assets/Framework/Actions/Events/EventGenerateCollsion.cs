@@ -5,12 +5,6 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class EventGenerateCollisionEvent : IActionEventHandler {
 
-        public ActionState State { get; }
-
-        public EventGenerateCollisionEvent(ActionState state) {
-            State = state;
-        }
-
         public void Trigger(ActionEvent ae, string eventName) {
             var entity = ae.Origin.Entity;
             var cmdTarget = entity.Get<CommandTarget>();
@@ -33,7 +27,8 @@ namespace PixelComrades {
             var ce = new CollisionEvent(entity, sourceNode, targetNode, hitPoint, dir);
             target.Post(ce);
             entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, ce.HitPoint, ce.HitNormal));
-            var stateEvent = new ActionEvent(ae.Origin.Entity, ce.Target.Entity, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), State);
+            var stateEvent = new ActionEvent(ae.Origin.Entity, ce.Target.Entity, ce.HitPoint, Quaternion.LookRotation(ce.HitNormal), 
+            ActionState.Impact );
             ae.Origin.Entity.Post(stateEvent);
         }
     }

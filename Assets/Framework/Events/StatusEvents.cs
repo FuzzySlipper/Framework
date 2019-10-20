@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
-    public struct TagTimerEvent {
+    public struct TagTimerEvent : IEntityMessage {
 
         public Entity Entity { get; }
         public float TimeEnd { get; }

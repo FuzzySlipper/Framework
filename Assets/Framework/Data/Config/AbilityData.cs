@@ -13,7 +13,7 @@ namespace PixelComrades {
         }
 
         public AbilityData(SerializationInfo info, StreamingContext context) {
-            Template = AbilityFactory.GetTemplate(info.GetValue(nameof(Template), ""));
+            Template = AbilityFactory.GetConfig(info.GetValue(nameof(Template), ""));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

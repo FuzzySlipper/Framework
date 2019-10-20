@@ -22,6 +22,7 @@ namespace PixelComrades {
         private CachedComponent<AnimationGraphComponent> _animGraph = new CachedComponent<AnimationGraphComponent>();
         private CachedComponent<CurrentAction> _currentAction = new CachedComponent<CurrentAction>();
         private CachedComponent<AnimationEventComponent> _animationEvent = new CachedComponent<AnimationEventComponent>();
+        private CachedComponent<RuleEventListenerComponent> _ruleEvent = new CachedComponent<RuleEventListenerComponent>();
         
         public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
@@ -41,18 +42,19 @@ namespace PixelComrades {
         public ActionTemplate CurrentAction => _currentAction.Value?.Value;
         public CurrentAction CurrentActionComponent => _currentAction.Value;
         public AnimationEventComponent AnimationEvent => _animationEvent.Value;
+        public RuleEventListenerComponent RuleEvents => _ruleEvent.Value;
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
-            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent
+            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent
         };
 
         public VitalStat GetVital(int vital) {
             return _stats.Value.GetVital(GameData.Vitals.GetID(vital));
         }
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(DamageComponent),
                 typeof(FactionComponent),

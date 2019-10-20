@@ -13,7 +13,7 @@ namespace PixelComrades {
         private ManagedArray<FirstPersonAnimationTemplate>.RefDelegate _animDel;
         
         public FirstPersonAnimationSystem(){
-            TemplateFilter<FirstPersonAnimationTemplate>.Setup(FirstPersonAnimationTemplate.GetTypes());
+            TemplateFilter<FirstPersonAnimationTemplate>.Setup();
             _animTemplates = EntityController.GetTemplateList<FirstPersonAnimationTemplate>();
             _animDel = HandleAnimNodes;
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
@@ -49,7 +49,7 @@ namespace PixelComrades {
                 else {
                     var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                     if (actionPivots != null) {
-                        arg.Action.Entity.Add(new SpawnPivotComponent(arg.Action.Action.Primary ? actionPivots.PrimaryPivot : actionPivots
+                        arg.Action.Entity.Add(new SpawnPivotComponent(arg.Action.Config.Primary ? actionPivots.PrimaryPivot : actionPivots
                         .SecondaryPivot));
                     }
                 }
@@ -72,7 +72,7 @@ namespace PixelComrades {
                 }
                 var projectileSpawn = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                 if (projectileSpawn != null) {
-                    weaponModel.Transform.SetParentResetPos(arg.Action.Action.Primary? projectileSpawn.PrimaryPivot : projectileSpawn
+                    weaponModel.Transform.SetParentResetPos(arg.Action.Config.Primary? projectileSpawn.PrimaryPivot : projectileSpawn
                     .SecondaryPivot);
                 }
                 weaponModelComponent.Set(weaponModel.GetComponent<IWeaponModel>());
@@ -123,7 +123,7 @@ namespace PixelComrades {
             _tr, _collider, _weaponBob, _currentAction, _animGraph
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
             };

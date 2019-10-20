@@ -13,8 +13,8 @@ namespace PixelComrades {
         private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
         
         public ActionSystem() {
-            TemplateFilter<ActionUsingTemplate>.Setup(ActionUsingTemplate.GetTypes());
-            TemplateFilter<ActionTemplate>.Setup(ActionTemplate.GetTypes());
+            TemplateFilter<ActionUsingTemplate>.Setup();
+            TemplateFilter<ActionTemplate>.Setup();
         }
 
         public void HandleGlobal(ActionEvent arg) {
@@ -43,7 +43,7 @@ namespace PixelComrades {
                     aeTemplate.AnimEvent.Position, aeTemplate.AnimEvent.Rotation.GetPosition(aeTemplate.AnimEvent.Position, 2.5f),
                     Color.red, 5f);
             }
-            var animationList = action.Action.GetEventHandler(animEvent);
+            var animationList = action.Config.GetEventHandler(animEvent);
             if (animationList != null) {
                 for (int i = 0; i < animationList.Count; i++) {
                     animationList[i].Trigger(ae, animEvent);
@@ -57,8 +57,8 @@ namespace PixelComrades {
 //                }
             }
             if (ae.State == ActionState.Activate) {
-                for (int i = 0; i < action.Action.Costs.Count; i++) {
-                    action.Action.Costs[i].ProcessCost(ae.Origin, action.Entity);
+                for (int i = 0; i < action.Config.Costs.Count; i++) {
+                    action.Config.Costs[i].ProcessCost(ae.Origin, action.Entity);
                 }
             }
         }

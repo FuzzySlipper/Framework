@@ -136,7 +136,7 @@
 //        //if (Player.Animator.ActiveSlot.EquippedItem == null) {
 //        //    return;
 //        //}
-//        //var weapon = Player.Animator.ActiveSlot.EquippedItem.Template as RangedWeaponItemTemplate;
+//        //var weapon = Player.Animator.ActiveSlot.EquippedItem.Config as RangedWeaponItemTemplate;
 //        //if (weapon == null || weapon.Ammo == AmmoTypes.None) {
 //        //    return;
 //        //}
@@ -145,7 +145,7 @@
 //        //    if (item== null) {
 //        //        continue;
 //        //    }
-//        //    var ammo = item.Template as AmmoItemTemplate;
+//        //    var ammo = item.Config as AmmoItemTemplate;
 //        //    if (ammo == null || ammo.AmmoType != weapon.Ammo) {
 //        //        continue;
 //        //    }

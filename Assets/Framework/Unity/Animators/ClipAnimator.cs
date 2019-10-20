@@ -149,7 +149,7 @@ namespace PixelComrades {
             return CurrentClipID == clip;
         }
 
-        public void PlayAnimation(string clip, bool overrideClip, Action action) {
+        public void PlayAnimation(string clip, bool overrideClip, ActionConfig actionConfig) {
             var state = CanPlayClip(clip, overrideClip);
             if (state != null) {
                 PlayAnimation(state);

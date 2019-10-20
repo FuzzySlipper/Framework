@@ -32,7 +32,7 @@ namespace PixelComrades {
             _flight, _control, _rigidBody, _fakeFlight, _hover, _banking, _playerInput, _flightMoveInput, _projectile, _tr,_moveInput
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(FlightControl),
                 typeof(RigidbodyComponent)

@@ -23,7 +23,7 @@ namespace PixelComrades {
                     ae.Origin.Tr.SetParent(model.Transform);
                     model.Transform.ResetPos();
                 }
-                ae.Origin.CurrentAction.Entity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
+                ae.Action.Entity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
             }
         }
     }

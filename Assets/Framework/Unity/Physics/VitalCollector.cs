@@ -10,17 +10,18 @@ namespace PixelComrades {
 
         void OnCollisionEnter(Collision collision) {
             if (collision.transform.CompareTag(StringConst.TagPlayer)) {
-                var entity = UnityToEntityBridge.GetEntity(collision.collider);
+                var entity = UnityToEntityBridge.GetEntity(collision.collider).GetTemplate<CharacterTemplate>();
                 if (entity != null) {
-                    entity.Post(new HealingEvent(_amount, entity, entity, _vital));
+                    World.Get<RulesSystem>().Post(new HealingEvent(_amount, entity, entity, _vital));
                     ItemPool.Despawn(gameObject);
                 }
             }
         }
 
-        public void Collision(Entity entity) {
-            if (entity != null && entity.Tags.Contain(EntityTags.Player)) {
-                entity.Post(new HealingEvent(_amount, entity, entity, _vital));
+        public void Collision(Entity hitEntity) {
+            var template = hitEntity.GetTemplate<CharacterTemplate>();
+            if (template != null && template.Tags.Contain(EntityTags.Player)) {
+                World.Get<RulesSystem>().Post(new HealingEvent(_amount, template, template, _vital));
                 ItemPool.Despawn(gameObject);
             }
         }

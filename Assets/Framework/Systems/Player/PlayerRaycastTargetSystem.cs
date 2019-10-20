@@ -9,7 +9,7 @@ namespace PixelComrades {
         private ManagedArray<PlayerRaycastTargetTemplate>.RefDelegate _del;
 
         public PlayerRaycastTargetSystem() {
-            TemplateFilter<PlayerRaycastTargetTemplate>.Setup(PlayerRaycastTargetTemplate.GetTypes());
+            TemplateFilter<PlayerRaycastTargetTemplate>.Setup();
             _list = EntityController.GetTemplateList<PlayerRaycastTargetTemplate>();
             _del = Update;
         }
@@ -20,7 +20,7 @@ namespace PixelComrades {
 
         private void Update(ref PlayerRaycastTargetTemplate template) {
             if (template.Graph.CurrentTag == GraphNodeTags.Action && template.CurrentAction.Value != null) {
-                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.CurrentAction.Value.Action.Range));
+                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.CurrentAction.Value.Config.Range));
             }
         }
     }
@@ -38,7 +38,7 @@ namespace PixelComrades {
             _graph, _target, _current
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(AnimationGraphComponent),
                 typeof(CommandTarget),

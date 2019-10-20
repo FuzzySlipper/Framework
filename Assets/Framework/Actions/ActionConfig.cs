@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     
     [System.Serializable]
-	public sealed class Action : IComponent {
+	public sealed class ActionConfig : IComponent {
 
         [SerializeField] private Dictionary<string, List<IActionEventHandler>> _events = new Dictionary<string, List<IActionEventHandler>>();
         
@@ -16,10 +16,9 @@ namespace PixelComrades {
         public string AnimationTrigger;
         public bool Primary;
         public int EquippedSlot = -1;
-        public Entity Entity { get { return this.GetEntity(); } }
-        public Action() {}
+        public ActionConfig() {}
 
-        public Action(SerializationInfo info, StreamingContext context) {
+        public ActionConfig(SerializationInfo info, StreamingContext context) {
             _events = info.GetValue(nameof(_events), _events);
             Costs = info.GetValue(nameof(Costs), Costs);
             Range = info.GetValue(nameof(Range), Range);
@@ -46,7 +45,5 @@ namespace PixelComrades {
             info.AddValue(nameof(Primary), Primary);
             info.AddValue(nameof(EquippedSlot), EquippedSlot);
         }
-
     }
-
 }

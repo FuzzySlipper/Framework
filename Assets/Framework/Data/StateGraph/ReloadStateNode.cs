@@ -31,7 +31,7 @@ namespace PixelComrades {
                 if (_ammo == null) {
                     return;
                 }
-                UIChargeCircle.ManualStart(_ammo.Template.ReloadText);
+                UIChargeCircle.ManualStart(_ammo.Config.ReloadText);
                 _reloadPerAmmo = _ammo.ReloadSpeed / _ammo.Amount.MaxValue;
                 _totalAmmo = _ammo.Amount.MaxValue - _ammo.Amount.Value;
                 _current = 0;

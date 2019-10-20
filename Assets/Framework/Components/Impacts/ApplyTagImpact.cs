@@ -13,11 +13,13 @@ namespace PixelComrades {
         public float Chance { get; }
         public float Length { get; }
         public string Description { get; }
+        public string Defense { get; }
 
-        public ApplyTagImpact(int tag, float chance, float length, string description) {
+        public ApplyTagImpact(int tag, float chance, float length, string defense, string description) {
             Tag = tag;
             Chance = chance;
             Length = length;
+            Defense = defense;
             Description = description;
         }
 

@@ -9,7 +9,7 @@ namespace PixelComrades {
         private Dictionary<string, List<IReceive<AnimationEventTriggered>>> _eventReceivers = new Dictionary<string, List<IReceive<AnimationEventTriggered>>>();
 
         public AnimationEventSystem() {
-            TemplateFilter<AnimationEventTemplate>.Setup(AnimationEventTemplate.GetTypes());
+            TemplateFilter<AnimationEventTemplate>.Setup();
         }
 
         public void Register(string eventName, IReceive<AnimationEventTriggered> receiver) {
@@ -92,8 +92,7 @@ namespace PixelComrades {
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer, _target
         };
-
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(AnimationEventComponent),

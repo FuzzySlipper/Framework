@@ -4,13 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public class RadiusSystem : SystemBase, IReceive<ImpactEvent>, IReceive<EnvironmentCollisionEvent> {
+    public class RadiusSystem : SystemBase, IRuleEventEnded<ImpactEvent>, IReceive<EnvironmentCollisionEvent> {
         public RadiusSystem() {
-            EntityController.RegisterReceiver(
-                new EventReceiverFilter(
-                    this, new[] {
-                        typeof(ImpactRadius)
-                    }));
+            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {typeof(ImpactRadius)}));
+            World.Get<RulesSystem>().AddHandler<ImpactEvent>(this);
         }
         private Dictionary<int, IRadiusHandler> _radiusHandlers = new Dictionary<int, IRadiusHandler>();
 
@@ -23,14 +20,18 @@ namespace PixelComrades {
         public void AddHandler(ImpactRadiusTypes radius, IRadiusHandler handler) {
             _radiusHandlers.Add((int)radius, handler);
         }
-
-        public void Handle(ImpactEvent arg) {
-            var component = arg.Source.Find<ImpactRadius>();
+        
+        public void RuleEventEnded(ref ImpactEvent context) {
+            var component = context.Source.Find<ImpactRadius>();
             if (component == null) {
                 return;
             }
-            CollisionCheckSystem.OverlapSphere(arg.Origin, arg.Target, arg.HitPoint, 
-                component.Radius.ToFloat(),component.LimitToEnemy);
+            if (component.Radius == ImpactRadiusTypes.Single) {
+                return;
+            }
+            CollisionCheckSystem.OverlapSphere(
+                context.Origin, context.Target, context.HitPoint,
+                component.Radius.ToFloat(), component.LimitToEnemy);
         }
 
         public void Handle(EnvironmentCollisionEvent arg) {

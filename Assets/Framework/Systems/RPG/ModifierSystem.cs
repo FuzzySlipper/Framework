@@ -5,12 +5,12 @@ using System.Text;
 
 namespace PixelComrades {
     [AutoRegister]
-    public class ModifierSystem : SystemBase, IMainSystemUpdate, IReceive<ImpactEvent> {
+    public class ModifierSystem : SystemBase, IMainSystemUpdate, IRuleEventRun<TryApplyEntityTag>, IRuleEventRun<TryApplyMod>,
+    IRuleEventStart<TryApplyEntityTag> {
         
         public ModifierSystem() {
-            EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
-                typeof(AddModImpact)
-            }));
+            World.Get<RulesSystem>().AddHandler<TryApplyEntityTag>(this);
+            World.Get<RulesSystem>().AddHandler<TryApplyMod>(this);
         }
 
         private static FastString _fastString = new FastString();
@@ -44,25 +44,54 @@ namespace PixelComrades {
             }
         }
 
-        public void Handle(ImpactEvent arg) {
-            if (arg.Hit <= 0) {
-                return;
+
+        public bool CanRuleEventStart(ref TryApplyEntityTag context) {
+            var success = RulesSystem.DiceRollSuccess(context.Chance);
+            PrintLog(success, context);
+            return success;
+        }
+
+        public void RuleEventRun(ref TryApplyEntityTag context) {
+            context.Target.Tags.Add(context.Tag);
+            context.Target.Post(new TagChangeEvent(context.Target.Entity, context.Tag, true));
+            if (context.Length > 0) {
+                context.Target.Post(new TagTimerEvent(context.Target, TimeManager.Time + context.Length,
+                    context.Tag));
             }
-            var addMod = arg.Source.Find<AddModImpact>();
-            var sourceEntity = addMod.GetEntity();
-            var stats = sourceEntity.Get<StatsContainer>();
-            if (addMod == null || stats == null) {
-                return;
+        }
+
+        private void PrintLog(bool success, TryApplyEntityTag context) {
+            var logSystem = World.Get<GameLogSystem>();
+            logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
+            logMsg.Append(context.Origin.GetName());
+            logMsg.Append(!success ? " failed to apply " : " applied ");
+            logMsg.Append(context.Description);
+            logMsg.Append(" on ");
+            logMsg.Append(context.Target.GetName());
+            hoverMsg.AppendNewLine(RulesSystem.LastQueryString.ToString());
+            if (success) {
+                hoverMsg.Append(context.Target.GetName());
+                hoverMsg.Append(" has ");
+                hoverMsg.Append(context.Description);
+                hoverMsg.Append(" for ");
+                hoverMsg.Append(context.Length);
+                hoverMsg.Append(" ");
+                hoverMsg.Append(StringConst.TimeUnits);
             }
-            var stat = stats.Get(addMod.TargetStat);
+            logSystem.PostCurrentStrings(!success ? GameLogSystem.NormalColor : GameLogSystem.DamageColor);
+        }
+
+        public void RuleEventRun(ref TryApplyMod context) {
+            var stats = context.Origin.Stats;
+            var stat = stats.Get(context.TargetStat);
             if (stat == null) {
                 return;
             }
-            if (stat.HasMod(addMod.ID)) {
-                RemoveStatMod(addMod.ID);
+            if (stat.HasMod(context.ID)) {
+                RemoveStatMod(context.ID);
             }
-            var power = RulesSystem.CalculateTotal(stats, Stats.Power, addMod.NormalizedPercent);
-            stat.AddValueMod(new BaseStat.StatValueMod(power, addMod.ID));
+            var power = RulesSystem.CalculateImpactTotal(stats, Stats.Power, context.NormalizedPercent);
+            stat.AddValueMod(new BaseStat.StatValueMod(power, context.ID));
             _fastString.Clear();
             _fastString.Append("+");
             _fastString.Append(power);
@@ -72,21 +101,21 @@ namespace PixelComrades {
             AddStatRemovalTimer(
                 new RemoveStatModifier(
                     stat, new ModEntry(
-                        label, label, addMod.ID, addMod.Length,
-                        arg.Origin.Entity, arg.Target.Entity, addMod.Icon)));
-            arg.Target.Post(new ModifiersChanged(arg.Target.Entity));
+                        label, label, context.ID, context.Length,
+                        context.Origin.Entity, context.Target.Entity, context.Icon)));
+            context.Target.Post(new ModifiersChanged(context.Target.Entity));
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
-            logMsg.Append(arg.Origin.GetName());
+            logMsg.Append(context.Origin.GetName());
             logMsg.Append(" added ");
             logMsg.Append(stat.Label);
             logMsg.Append(" modifier to ");
-            logMsg.Append(arg.Target.GetName());
+            logMsg.Append(context.Target.GetName());
 
             hoverMsg.AppendNewLine(RulesSystem.LastQueryString.ToString());
             hoverMsg.Append(label);
             hoverMsg.Append(" for ");
-            hoverMsg.Append(addMod.Length);
+            hoverMsg.Append(context.Length);
             hoverMsg.Append(" ");
             hoverMsg.Append(StringConst.TimeUnits);
             logSystem.PostCurrentStrings( power > 0 ? GameLogSystem.HealColor : GameLogSystem.DamageColor);
@@ -134,6 +163,50 @@ namespace PixelComrades {
         public RemoveStatModifier(BaseStat stat, ModEntry modEntry) {
             Stat = stat;
             Entry = modEntry;
+        }
+    }
+
+    public struct TryApplyMod : IRuleEvent {
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
+        public ActionTemplate Action { get; }
+        public float Length { get; }
+        public string TargetStat { get; }
+        public float NormalizedPercent { get; }
+        public Sprite Icon { get; }
+        public string ID { get; }
+
+        public TryApplyMod(ImpactEvent impactEvent, AddModImpact component) {
+            Action = impactEvent.Action;
+            Origin = impactEvent.Origin;
+            Target = impactEvent.Target;
+            TargetStat = component.TargetStat;
+            NormalizedPercent = component.NormalizedPercent;
+            Length = component.Length;
+            Icon = component.Icon;
+            ID = component.ID;
+        }
+    }
+    
+    public struct TryApplyEntityTag : IRuleEvent {
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
+        public ActionTemplate Action { get; }
+        public int Tag { get; }
+        public float Chance { get; }
+        public float Length { get; }
+        public string Description { get; }
+        public string Defense { get; }
+
+        public TryApplyEntityTag(ImpactEvent impactEvent, ApplyTagImpact component) {
+            Action = impactEvent.Action;
+            Origin = impactEvent.Origin;
+            Target = impactEvent.Target;
+            Tag = component.Tag;
+            Chance = component.Chance;
+            Length = component.Length;
+            Description = component.Description;
+            Defense = component.Defense;
         }
     }
 }

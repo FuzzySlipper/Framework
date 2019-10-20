@@ -18,7 +18,7 @@ namespace PixelComrades {
         [SerializeField] private EasingTypes _raiseEasing = EasingTypes.ElasticOut;
 
         private TweenV3 _positionAnimator;
-        private Action _current;
+        private ActionConfig _current;
         private SpriteAnimation _currentAnim = null;
         private float _timer;
         private Vector3 _resetPoint;
@@ -95,20 +95,20 @@ namespace PixelComrades {
             Play(anim);
         }
 
-        public void ChangeAction(Action newAction) {
-            if (_current != null && newAction != null) {
-                TimeManager.StartTask(SwapWeapons(newAction));
+        public void ChangeAction(ActionConfig newActionConfig) {
+            if (_current != null && newActionConfig != null) {
+                TimeManager.StartTask(SwapWeapons(newActionConfig));
             }
-            else if (_current != null && newAction == null) {
+            else if (_current != null && newActionConfig == null) {
                 TimeManager.StartTask(LowerWeapon(true));
             }
             else {
-                SetupUsable(newAction);
+                SetupUsable(newActionConfig);
                 TimeManager.StartTask(RaiseWeapon());
             }
         }
 
-        private void SetupUsable(Action usable) {
+        private void SetupUsable(ActionConfig usable) {
             //SetSprite(usable.FpSprite);
             _current = usable;
         }
@@ -132,7 +132,7 @@ namespace PixelComrades {
             return DefaultEventTriggered;
         }
 
-        public void PlayAnimation(string clip, bool overrideClip, Action action) {
+        public void PlayAnimation(string clip, bool overrideClip, ActionConfig actionConfig) {
             switch (clip) {
                 case GraphNodeTags.Action:
                     if (_current != null) {
@@ -258,9 +258,9 @@ namespace PixelComrades {
             CheckQueue();
         }
 
-        private IEnumerator SwapWeapons(Action newAction) {
+        private IEnumerator SwapWeapons(ActionConfig newActionConfig) {
             yield return LowerWeapon(true);
-            SetupUsable(newAction);
+            SetupUsable(newActionConfig);
             yield return RaiseWeapon();
         }
 

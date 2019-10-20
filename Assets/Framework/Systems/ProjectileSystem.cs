@@ -14,7 +14,7 @@ namespace PixelComrades {
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
 
         public ProjectileSystem() {
-            TemplateFilter<ProjectileTemplate>.Setup(ProjectileTemplate.GetTypes());
+            TemplateFilter<ProjectileTemplate>.Setup();
         }
 
         private static void Init() {
@@ -199,7 +199,7 @@ namespace PixelComrades {
                 _projectile, _moveTarget, _rotationSpeed, _rb, _moveSpeed, _rendering, _actionFx, _checkForward
             };
 
-            public static System.Type[] GetTypes() {
+            public override System.Type[] GetTypes() {
                 return new System.Type[] {
                     typeof(ProjectileComponent),
                     typeof(MoveTarget),

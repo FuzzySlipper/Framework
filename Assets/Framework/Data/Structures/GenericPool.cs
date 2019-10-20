@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-
-public class GenericPool<T> where T : class, new() {
+public class GenericPool{}
+public class GenericPool<T> : GenericPool where T : class, new() {
     private Queue<T> _objectStack;
     private Action<T> _onetimeInitAction;
     private Action<T> _clearAction;

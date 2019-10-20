@@ -5,14 +5,17 @@ using System.Text;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class DamageSystem : SystemBase, IReceiveGlobal<TakeDamageEvent>, IReceive<ImpactEvent> {
+    public sealed class DamageSystem : SystemBase, IRuleEventRun<TakeDamageEvent>, IRuleEventEnded<PrepareDamageEvent> {
         
         public DamageSystem() {
-            EntityController.RegisterReceiver(
-                new EventReceiverFilter(
-                    this, new[] {
-                        typeof(DamageImpact)
-                    }));
+            World.Get<RulesSystem>().AddHandler<TakeDamageEvent>(this);
+            World.Get<RulesSystem>().AddHandler<PrepareDamageEvent>(this);
+        }
+
+        public void RuleEventEnded(ref PrepareDamageEvent context) {
+            if (context.CurrentTotal() > 0) {
+                World.Get<RulesSystem>().Post(new TakeDamageEvent(ref context));
+            }
         }
         
         private CircularBuffer<TakeDamageEvent> _eventLog = new CircularBuffer<TakeDamageEvent>(10, true);
@@ -23,101 +26,100 @@ namespace PixelComrades {
             foreach (var msg in log.InOrder()) {
                 Console.Log(
                     string.Format(
-                        "{5}: Damage {0} hit {1} Amount {2} Type {3} Vital {4}",
+                        "{0}: Damage {1} hit {2} Amount {3}",
+                        log.GetTime(msg),
                         msg.Origin?.Entity.DebugId ?? "null",
                         msg.Target?.Entity.DebugId ?? "null",
-                        msg.Amount, msg.DamageType, msg.TargetVital, log.GetTime(msg)));
+                        msg.Amount));
             }
         }
-        
-        public void HandleGlobal(TakeDamageEvent msg) {
+
+        public void RuleEventRun(ref TakeDamageEvent msg) {
             _eventLog.Add(msg);
-            if (msg.Amount <= 0) {
-                return;
-            }
-            var node = msg.Target;
-            if (node == null) {
-                return;
-            }
+            var target = msg.Target;
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var dmgMsg, out var dmgHoverMsg);
-            var blockDamage = node.Entity.Get<BlockDamage>();
-            if (blockDamage != null) {
-                for (int i = 0; i < blockDamage.DamageBlockers.Count; i++) {
-                    if (blockDamage.DamageBlockers[i](msg)) {
-                        dmgMsg.Append(msg.Target.GetName());
-                        dmgMsg.Append(" completely blocked damage from ");
-                        dmgMsg.Append(msg.Origin.GetName());
-                        logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
-                        return;
+            if (target.StatDefend != null) {
+                for (int i = 0; i < target.StatDefend.Count; i++) {
+                    for (int d = msg.Entries.Count - 1; d >= 0; d--) {
+                        var dmg = msg.Entries[d];
+                        if (target.StatDefend[i].DamageType != dmg.DamageType) {
+                            continue;
+                        }
+                        var defAmt = RulesSystem.GetDefenseAmount(dmg.Amount, target.StatDefend[i].Stat.Value);
+                        if (defAmt <= 0) {
+                            continue;
+                        }
+                        var amount = Mathf.Max(0, dmg.Amount - defAmt);
+                        dmgHoverMsg.Append(target.StatDefend[i].Stat.Stat.Label);
+                        dmgHoverMsg.Append(" Reduced Damage by ");
+                        dmgHoverMsg.AppendNewLine(defAmt.ToString("F1"));
+                        msg.Entries.Remove(dmg);
+                        msg.Entries.Add(new DamageEntry(amount, dmg.DamageType, dmg.TargetVital, dmg.Description));
                     }
                 }
             }
-            var damageAmount = msg.Amount;
-            if (node.StatDefend != null) {
-                for (int i = 0; i < node.StatDefend.Count; i++) {
-                    if (node.StatDefend[i].DamageType != msg.DamageType) {
-                        continue;
+            if (target.DamageAbsorb != null) {
+                for (int i = 0; i < target.DamageAbsorb.Count; i++) {
+                    for (int d = msg.Entries.Count - 1; d >= 0; d--) {
+                        var dmg = msg.Entries[d];
+                        if (target.DamageAbsorb[i].DamageType != dmg.DamageType) {
+                            continue;
+                        }
+                        var defAmt = RulesSystem.GetDefenseAmount(dmg.Amount, target.DamageAbsorb[i].Amount);
+                        if (defAmt <= 0) {
+                            continue;
+                        }
+                        if (defAmt > target.DamageAbsorb[i].Remaining) {
+                            defAmt = target.DamageAbsorb[i].Remaining;
+                        }
+                        var amount = Mathf.Max(0, dmg.Amount - defAmt);
+                        dmgHoverMsg.Append(target.DamageAbsorb[i].Source);
+                        dmgHoverMsg.Append(" Absorbed ");
+                        dmgHoverMsg.Append(defAmt.ToString("F1"));
+                        dmgHoverMsg.AppendNewLine(" Damage");
+                        target.DamageAbsorb[i].Remaining -= defAmt;
+                        target.DamageAbsorb.CheckLimits();
+                        msg.Entries.Remove(dmg);
+                        msg.Entries.Add(new DamageEntry(amount, dmg.DamageType, dmg.TargetVital, dmg.Description));
                     }
-                    var defAmt = RulesSystem.GetDefenseAmount(damageAmount, node.StatDefend[i].Stat.Value);
-                    if (defAmt <= 0) {
-                        continue;
-                    }
-                    damageAmount = Mathf.Max(0, damageAmount - defAmt);
-                    dmgHoverMsg.Append(node.StatDefend[i].Stat.Stat.Label);
-                    dmgHoverMsg.Append(" Reduced Damage by ");
-                    dmgHoverMsg.AppendNewLine(defAmt.ToString("F1"));
                 }
             }
-            if (node.DamageAbsorb != null) {
-                for (int i = 0; i < node.DamageAbsorb.Count; i++) {
-                    if (node.DamageAbsorb[i].DamageType != msg.DamageType) {
-                        continue;
-                    }
-                    var defAmt = RulesSystem.GetDefenseAmount(damageAmount, node.DamageAbsorb[i].Amount);
-                    if (defAmt <= 0) {
-                        continue;
-                    }
-                    if (defAmt > node.DamageAbsorb[i].Remaining) {
-                        defAmt = node.DamageAbsorb[i].Remaining;
-                    }
-                    damageAmount = Mathf.Max(0, damageAmount - defAmt);
-                    dmgHoverMsg.Append(node.DamageAbsorb[i].Source);
-                    dmgHoverMsg.Append(" Absorbed ");
-                    dmgHoverMsg.Append(defAmt.ToString("F1"));
-                    dmgHoverMsg.AppendNewLine(" Damage");
-                    node.DamageAbsorb[i].Remaining -= defAmt;
+            float totalDmg = 0;
+            for (int i = 0; i < msg.Entries.Count; i++) {
+                var dmg = msg.Entries[i];
+                var damageAmount = dmg.Amount;
+                totalDmg += damageAmount;
+                float previousValue = 0;
+                var stats = target.Stats;
+                var vital = stats.GetVital(dmg.TargetVital);
+                if (vital == null) {
+                    vital = stats.GetVital(GameData.Vitals.GetID(dmg.TargetVital));
                 }
-                node.DamageAbsorb.CheckLimits();
+                if (vital != null) {
+                    dmgHoverMsg.Append(vital.ToLabelString());
+                    dmgHoverMsg.Append(" - ");
+                    dmgHoverMsg.Append(damageAmount);
+                    dmgHoverMsg.Append(" = ");
+                    previousValue = vital.Current;
+                    vital.Current -= damageAmount;
+                    dmgHoverMsg.Append(vital.ToLabelString());
+                }
+                dmgMsg.Append(msg.Target.GetName());
+                dmgMsg.Append(" took ");
+                dmgMsg.Append(damageAmount.ToString("F1"));
+                dmgMsg.Append(" damage ");
+                if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stats.Health) {
+                    target.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Impact, damageAmount - previousValue));
+                }
             }
-            
-            float previousValue = 0;
-            var stats = node.Stats;
-            var vital = stats.GetVital(msg.TargetVital);
-            if (vital == null) {
-                vital = stats.GetVital(GameData.Vitals.GetID(msg.TargetVital));
-            }
-            if (vital != null) {
-                dmgHoverMsg.Append(vital.ToLabelString());
-                dmgHoverMsg.Append(" - ");
-                dmgHoverMsg.Append(damageAmount);
-                dmgHoverMsg.Append(" = ");
-                previousValue = vital.Current;
-                vital.Current -= damageAmount;
-                dmgHoverMsg.Append(vital.ToLabelString());
-            }
-            dmgMsg.Append(msg.Target.GetName());
-            dmgMsg.Append(" took ");
-            dmgMsg.Append(damageAmount.ToString("F1"));
-            dmgMsg.Append(" damage ");
-            if (damageAmount > 0) {
-                node.Entity.Post(new CombatStatusUpdate(node.Entity,damageAmount.ToString("F1"), Color.red));
-                msg.Impact.Source.PostAll(new CausedDamageEvent(damageAmount, msg));
+            if (totalDmg > 0) {
+                target.Entity.Post(new CombatStatusUpdate(target.Entity, totalDmg.ToString("F1"), Color.red));
+                msg.Impact.Origin.Post(new CausedDamageEvent(totalDmg, msg));
+                msg.Impact.Target.Post(new ReceivedDamageEvent(totalDmg, msg));
             }
             logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
-            if (vital != null && vital.Current <= 0 && msg.TargetVital == Stats.Health) {
-                node.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Impact,  damageAmount - previousValue));
-            }
+            msg.Clear();
         }
         
         /*
@@ -134,34 +136,5 @@ namespace PixelComrades {
             }
          */
 
-        public void Handle(ImpactEvent arg) {
-            if (arg.Hit <= 0) {
-                return;
-            }
-            var component = arg.Source.Find<DamageImpact>();
-            var sourceEntity = component.GetEntity();
-            var stats = sourceEntity.Get<StatsContainer>();
-            if (component == null || stats == null) {
-                return;
-            }
-            var targetStat = arg.Target.Stats.GetVital(component.TargetVital);
-            if (targetStat == null) {
-                return;
-            }
-            var power = RulesSystem.CalculateTotal(stats, Stats.Power, component.NormalizedPercent);
-            var logSystem = World.Get<GameLogSystem>();
-            logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
-            logMsg.Append(arg.Origin.GetName());
-            logMsg.Append(" hit ");
-            logMsg.Append(power.ToString("F0"));
-            logMsg.Append(" ");
-            logMsg.Append(targetStat.Label);
-            logMsg.Append(" for ");
-            logMsg.Append(arg.Target.GetName());
-            hoverMsg.Append(RulesSystem.LastQueryString);
-            logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
-            //CollisionExtensions.GetHitMultiplier(impact.Hit, impact.Target)
-            arg.Target.Post(new TakeDamageEvent(power, arg, component.DamageType, component.TargetVital));
-        }
     }
 }

@@ -18,13 +18,24 @@ namespace PixelComrades {
     }
 
     public struct ActionEvent : IEntityMessage {
+        public ActionTemplate Action { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
         public Vector3 Position { get; }
         public Quaternion Rotation { get; }
         public ActionState State { get; }
 
+        public ActionEvent(ActionTemplate action, CharacterTemplate origin, CharacterTemplate target, Vector3 position, Quaternion rotation, ActionState state) {
+            Action = action;
+            Origin = origin;
+            Target = target;
+            Position = position;
+            Rotation = rotation;
+            State = state;
+        }
+
         public ActionEvent(CharacterTemplate origin, CharacterTemplate target, Vector3 position, Quaternion rotation, ActionState state) {
+            Action = origin.CurrentAction;
             Origin = origin;
             Target = target;
             Position = position;
@@ -35,6 +46,7 @@ namespace PixelComrades {
         public ActionEvent(BaseTemplate origin, BaseTemplate focus, Vector3 position, Quaternion rotation, ActionState state) {
             Origin = origin.Entity.FindTemplate<CharacterTemplate>();
             Target = focus.Entity.FindTemplate<CharacterTemplate>();
+            Action = Origin.CurrentAction;
             Position = position;
             Rotation = rotation;
             State = state;
@@ -43,6 +55,7 @@ namespace PixelComrades {
         public ActionEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionState state) {
             Origin = origin.FindTemplate<CharacterTemplate>();
             Target = focus.FindTemplate<CharacterTemplate>();
+            Action = Origin.CurrentAction;
             Position = position;
             Rotation = rotation;
             State = state;
@@ -51,8 +64,8 @@ namespace PixelComrades {
     
     public static class ActionEventExtensions{
         public static bool GetSpawnPositionRotation(this ActionEvent ae, out Vector3 pos, out Quaternion rot) {
-            if (ae.Origin.CurrentAction != null) {
-                var actionEntity = ae.Origin.CurrentAction.Entity;
+            if (ae.Action != null) {
+                var actionEntity = ae.Action.Entity;
                 var spawnPivot = actionEntity.Get<SpawnPivotComponent>();
                 if (spawnPivot != null) {
                     pos = spawnPivot.position;
@@ -67,8 +80,8 @@ namespace PixelComrades {
                 }
                 var actionPivots = ae.Origin.Entity.Get<ActionPivotsComponent>();
                 if (actionPivots != null) {
-                    pos = (ae.Origin.CurrentAction.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).position;
-                    rot = (ae.Origin.CurrentAction.Action.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).rotation;
+                    pos = (ae.Action.Config.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).position;
+                    rot = (ae.Action.Config.Primary ? actionPivots.PrimaryPivot : actionPivots.SecondaryPivot).rotation;
                     return true;
                 }
             }

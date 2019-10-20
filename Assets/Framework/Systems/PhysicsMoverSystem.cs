@@ -17,6 +17,7 @@ namespace PixelComrades {
             _rbDel = CheckPaused;
             _moverDel = HandleVelocityMover;
             MessageKit.addObserver(Messages.PauseChanged, CheckPause);
+            _moverList = EntityController.GetTemplateList<RigidbodyMoverTemplate>();
         }
 
         public override void Dispose() {
@@ -25,9 +26,6 @@ namespace PixelComrades {
         }
 
         public void OnFixedSystemUpdate(float dt) {
-            if (_moverList == null) {
-                _moverList = EntityController.GetTemplateList<RigidbodyMoverTemplate>();
-            }
             if (_moverList != null) {
                 _moverList.Run(_moverDel);
             }

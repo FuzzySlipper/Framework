@@ -40,31 +40,31 @@ namespace PixelComrades {
             return _actions[index];
         }
 
-        public void EquipToEmpty(Action action) {
+        public void EquipToEmpty(ActionConfig actionConfig) {
             for (int i = 0; i < _actions.Length; i++) {
                 if (_actions[i] == null) {
-                    EquipAction(action, i);
+                    EquipAction(actionConfig, i);
                     return;
                 }
             }
         }
 
-        public void EquipAction(Action action, int slot) {
+        public void EquipAction(ActionConfig actionConfig, int slot) {
             if (_actions.Length <= slot) {
                 System.Array.Resize(ref _actions, slot +1);
             }
             if (_actions[slot] != null) {
                 RemoveAction(slot);
             }
-            if (action == null) {
+            if (actionConfig == null) {
                 return;
             }
-            var template = action.GetEntity().GetTemplate<ActionTemplate>();
+            var template = actionConfig.GetEntity().GetTemplate<ActionTemplate>();
             if (template == null) {
                 return;
             }
             _actions[slot] = template;
-            action.EquippedSlot = slot;
+            actionConfig.EquippedSlot = slot;
             this.GetEntity().Post(new ReadyActionsChanged(slot, template, this));
         }
 
@@ -72,9 +72,9 @@ namespace PixelComrades {
             if (_actions.Length <= slot) {
                 return;
             }
-            if (_actions[slot] != null && _actions[slot].Action.EquippedSlot == slot) {
+            if (_actions[slot] != null && _actions[slot].Config.EquippedSlot == slot) {
                 var action = _actions[slot];
-                action.Action.EquippedSlot = -1;
+                action.Config.EquippedSlot = -1;
                 action.Entity.Post(new ReadyActionsChanged(-1, action, null));
             }
             _actions[slot] = null;

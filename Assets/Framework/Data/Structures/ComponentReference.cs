@@ -49,6 +49,14 @@ namespace PixelComrades {
         public static Entity GetEntity<T>(this T component) where T : IComponent {
             return EntityController.GetComponentArray<T>().GetEntity(component);
         }
+
+        public static bool IsDestroyed<T>(this T component) where T : IComponent {
+            var entity = EntityController.GetComponentArray<T>().GetEntity(component);
+            if (entity == null) {
+                return true;
+            }
+            return entity.IsDestroyed();
+        }
         
         //public static bool ContainsType(this IList<ComponentReference> compList, System.Type type) {
         //    for (int i = 0; i < compList.Count; i++) {

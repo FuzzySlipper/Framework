@@ -6,28 +6,16 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
 
     [AutoRegister]
-    public sealed class ConvertVitalSystem : SystemBase, IReceive<ImpactEvent> {
+    public sealed class ConvertVitalSystem : SystemBase, IRuleEventRun<ConvertVitalEvent> {
 
         public ConvertVitalSystem() {
-            EntityController.RegisterReceiver(
-                new EventReceiverFilter(
-                    this, new[] {
-                        typeof(ConvertVitalImpact)
-                    }));
+            World.Get<RulesSystem>().AddHandler<ConvertVitalEvent>(this);
         }
 
-        public void Handle(ImpactEvent arg) {
-            if (arg.Hit <= 0) {
-                return;
-            }
-            var component = arg.Source.Find<ConvertVitalImpact>();
-            var sourceEntity = component.GetEntity();
-            var stats = sourceEntity.Get<StatsContainer>();
-            if (component == null || stats == null) {
-                return;
-            }
-            var originStat = arg.Origin.Stats.GetVital(component.SourceVital);
-            var targetStat = arg.Target.Stats.GetVital(component.TargetVital);
+        public void RuleEventRun(ref ConvertVitalEvent context) {
+            var component = context.ConvertVital;
+            var originStat = context.Origin.Stats.GetVital(component.SourceVital);
+            var targetStat = context.Target.Stats.GetVital(component.TargetVital);
             if (originStat == null || targetStat == null) {
                 return;
             }
@@ -36,15 +24,29 @@ namespace PixelComrades {
             originStat.Current += power;
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
-            logMsg.Append(arg.Origin.GetName());
+            logMsg.Append(context.Origin.GetName());
             logMsg.Append(" Converted ");
             logMsg.Append(power.ToString("F0"));
             logMsg.Append(" ");
             logMsg.Append(targetStat.Label);
             logMsg.Append(" from ");
-            logMsg.Append(arg.Target.GetName());
+            logMsg.Append(context.Target.GetName());
             hoverMsg.Append(RulesSystem.LastQueryString);
             logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
+        }
+    }
+
+    public struct ConvertVitalEvent : IRuleEvent {
+        public CharacterTemplate Origin { get; }
+        public CharacterTemplate Target { get; }
+        public ActionTemplate Action { get; }
+        public ConvertVitalImpact ConvertVital { get; }
+
+        public ConvertVitalEvent(ImpactEvent impactEvent, ConvertVitalImpact convertVital) {
+            Action = impactEvent.Action;
+            Origin = impactEvent.Origin;
+            Target = impactEvent.Target;
+            ConvertVital = convertVital;
         }
     }
     

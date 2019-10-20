@@ -4,15 +4,15 @@ using System;
 namespace PixelComrades {
     public interface IReceive {}
     
-    public interface IReceive<in T> : IReceive {
+    public interface IReceive<in T> : IReceive where T : IEntityMessage {
         void Handle(T arg);
     }
 
-    public interface IReceiveGlobalArray<T> : IReceive {
+    public interface IReceiveGlobalArray<T> : IReceive where T : IEntityMessage {
         void HandleGlobal(BufferedList<T> arg);
     }
 
-    public interface IReceiveGlobal<in T> : IReceive {
+    public interface IReceiveGlobal<in T> : IReceive where T : IEntityMessage {
         void HandleGlobal(T arg);
     }
 

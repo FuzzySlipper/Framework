@@ -41,9 +41,9 @@ namespace PixelComrades {
             if (Instance == null) {
                 return;
             }
-            TemplateFilter<VisibleTemplate>.Setup(VisibleTemplate.GetTypes());
-            TemplateFilter<CharacterTemplate>.Setup(CharacterTemplate.GetTypes());
-            TemplateFilter<CollidableTemplate>.Setup(CollidableTemplate.GetTypes());
+            TemplateFilter<VisibleTemplate>.Setup();
+            TemplateFilter<CharacterTemplate>.Setup();
+            TemplateFilter<CollidableTemplate>.Setup();
             Get<CommandSystem>();
             Get<CollisionCheckSystem>();
             Get<DespawnEntitySystem>();
@@ -195,7 +195,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Add<T>(IReceive receive) {
+        public void Add<T>(IReceive receive) where T : IEntityMessage {
             if (receive is IReceiveGlobalArray<T>) {
                 var list = GetArrayList(typeof(T));
                 list.Add(receive);
@@ -262,7 +262,7 @@ namespace PixelComrades {
             }
         }
         
-        public void Remove<T>(IReceive receive) {
+        public void Remove<T>(IReceive receive) where T : IEntityMessage {
             if (receive is IReceiveGlobalArray<T>) {
                 var list = GetArrayList(typeof(T));
                 list.Remove(receive);
@@ -305,7 +305,7 @@ namespace PixelComrades {
             return list;
         }
 
-        private static TypedMessageQueue GetMessageQueueGeneric<T>() {
+        private static TypedMessageQueue GetMessageQueueGeneric<T>() where T : IEntityMessage {
             var type = typeof(T);
             if (!_msgLists.TryGetValue(type, out var queue)) {
                 if (type.InheritsFrom(typeof(IEntityMessage)) && type.IsValueType) {
@@ -356,7 +356,7 @@ namespace PixelComrades {
             public abstract void RemoveReceiver(IReceive receiver);
         }
 
-        private class TypedMessageQueue<T> : TypedMessageQueue {
+        private class TypedMessageQueue<T> : TypedMessageQueue where T : IEntityMessage {
             private BufferedList<T> _msgs = new BufferedList<T>();
             private List<ManagedArray<T>.Delegate> _globalDel = new List<ManagedArray<T>.Delegate>();
             private SortByPriorityClass<T> _sorter = new SortByPriorityClass<T>();

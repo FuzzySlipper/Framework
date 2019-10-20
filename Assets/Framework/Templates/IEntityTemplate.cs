@@ -9,15 +9,18 @@ namespace PixelComrades {
         void Register(Entity entity);
         void Dispose();
         bool Disposed { get; }
+        System.Type[] GetTypes();
     }
 
     public abstract class BaseTemplate : IEntityTemplate, IEquatable<Entity> {
         public Entity Entity { get; private set; }
 
         public abstract List<CachedComponent> GatherComponents { get; }
+        public abstract Type[] GetTypes();
+
         public bool Disposed { get; private set; }
 
-        public void Register(Entity entity) {
+        public virtual void Register(Entity entity) {
             Entity = entity;
             Disposed = false;
             var components = GatherComponents;
@@ -26,7 +29,7 @@ namespace PixelComrades {
             }
         }
 
-        public void Dispose() {
+        public virtual void Dispose() {
             Disposed = true;
             var components = GatherComponents;
             for (int i = 0; i < components.Count; i++) {

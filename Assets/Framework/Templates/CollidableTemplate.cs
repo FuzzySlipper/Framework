@@ -14,7 +14,7 @@ namespace PixelComrades {
             _tr, _collider
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(ColliderComponent)

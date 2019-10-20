@@ -40,7 +40,7 @@ namespace PixelComrades {
         public Vector3 position { get { return Tr?.position ?? Vector3.zero; } }
         public Quaternion rotation { get { return Tr?.rotation ?? Quaternion.identity; } }
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(DescriptionComponent),
                 typeof(LabelComponent),

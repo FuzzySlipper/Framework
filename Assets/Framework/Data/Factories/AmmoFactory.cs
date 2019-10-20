@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class AmmoFactory : MonoBehaviour {
-        private static Dictionary<string, AmmoTemplate> _templates = new Dictionary<string, AmmoTemplate>();
+        private static Dictionary<string, AmmoConfig> _templates = new Dictionary<string, AmmoConfig>();
 
         private static void Init() {
             GameData.AddInit(Init);
             foreach (var loadedDataEntry in GameData.GetSheet("Ammo")) {
                 var data = loadedDataEntry.Value;
-                _templates.AddOrUpdate(data.ID, new AmmoTemplate(data));
+                _templates.AddOrUpdate(data.ID, new AmmoConfig(data));
             }
         }
 
-        public static AmmoTemplate GetTemplate(string name) {
+        public static AmmoConfig GetTemplate(string name) {
             if (_templates.Count == 0) {
                 Init();
             }
@@ -25,7 +25,7 @@ namespace PixelComrades {
             return null;
         }
 
-        public static AmmoTemplate GetTemplate(DataReference dRef) {
+        public static AmmoConfig GetTemplate(DataReference dRef) {
             if (_templates.Count == 0) {
                 Init();
             }
@@ -40,14 +40,14 @@ namespace PixelComrades {
         }
     }
 
-    public class AmmoTemplate {
+    public class AmmoConfig {
         public string ID;
         public string Name;
         public string ReloadText;
         public float ReloadSpeed;
         public List<KeyValuePair<string, float>> Cost = new List<KeyValuePair<string, float>>();
 
-        public AmmoTemplate(DataEntry data) {
+        public AmmoConfig(DataEntry data) {
             ID = data.ID;
             Name = data.TryGetValue(DatabaseFields.Name, data.ID);
             ReloadText = data.TryGetValue("ReloadText", data.ID);

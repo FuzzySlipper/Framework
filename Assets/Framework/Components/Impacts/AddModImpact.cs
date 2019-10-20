@@ -12,7 +12,7 @@ namespace PixelComrades {
         public float NormalizedPercent;
         public Sprite Icon;
         public string ID;
-        [SerializeField] private string _iconLocation;
+        private string _iconLocation;
 
         public AddModImpact(float length, string targetStat, float normalizedPercent, IconComponent icon) {
             Length = length;

@@ -23,7 +23,7 @@ namespace PixelComrades {
             _tr, _velocityMover, _rb, _moveSpeed, _moveTarget, _rotationSpeed
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(RigidbodyComponent),

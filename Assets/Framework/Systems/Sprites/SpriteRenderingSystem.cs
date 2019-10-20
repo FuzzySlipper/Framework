@@ -21,14 +21,12 @@ namespace PixelComrades {
         private Material _material;
         private Dictionary<Texture2D, RenderBlock> _blocks = new Dictionary<Texture2D, RenderBlock>();
         private List<Texture2D> _textureList = new List<Texture2D>();
-        private MaterialPropertyBlock _materialPropertyBlock;
 
         public SpriteRenderingSystem() {
-            TemplateFilter<SpriteRendererTemplate>.Setup(SpriteRendererTemplate.GetTypes());
+            TemplateFilter<SpriteRendererTemplate>.Setup();
             _list = EntityController.GetTemplateList<SpriteRendererTemplate>();
             _del = RunUpdate;
             ItemPool.LoadAsset<Material>(_materialAddress, (m)=> _material = m);
-            _materialPropertyBlock = new MaterialPropertyBlock();
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
@@ -37,14 +35,14 @@ namespace PixelComrades {
             _list.Run(_del);
             for (int i = 0; i < _textureList.Count; i++) {
                 var block = _blocks[_textureList[i]];
-                _materialPropertyBlock.SetVectorArray(_shaderPropertyUv, block.UvList);
-                _materialPropertyBlock.SetVectorArray(_shaderPropertyColor, block.Colors);
+                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyUv, block.UvList);
+                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyColor, block.Colors);
                 Graphics.DrawMeshInstanced(
                     block.Quad,
                     0,
                     block.Material,
                     block.MatrixList,
-                    _materialPropertyBlock, ShadowCastingMode.TwoSided, true, _renderLayer);
+                    block.MaterialPropertyBlock, ShadowCastingMode.TwoSided, true, _renderLayer);
                 _renderPool.Enqueue(block);
             }
         }
@@ -55,10 +53,9 @@ namespace PixelComrades {
             var orientation = SpriteFacingControl.GetCameraSide(
                 template.Billboard.Facing, template.Renderer.SpriteTr,
                 template.Renderer.BaseTr, 5, out var inMargin);
-            if ((inMargin && (orientation.IsAdjacent(template.Billboard.Orientation)))) {
-                return;
+            if (!inMargin || !(orientation.IsAdjacent(template.Billboard.Orientation))){
+                template.Billboard.Orientation = orientation;
             }
-            template.Billboard.Orientation = orientation;
             if (template.Renderer.IsDirty) {
                 template.Renderer.UpdatedSprite();
                 var sprite = template.Renderer.Sprite;
@@ -107,6 +104,7 @@ namespace PixelComrades {
             }
             var block = new RenderBlock();
             block.Material = new Material(_material);
+            block.MaterialPropertyBlock = new MaterialPropertyBlock();
             return block;
         }
 
@@ -116,11 +114,14 @@ namespace PixelComrades {
             public List<Vector4> Colors = new List<Vector4>();
             public Material Material;
             public Mesh Quad;
+            public  MaterialPropertyBlock MaterialPropertyBlock;
+
 
             public void Clear() {
                 MatrixList.Clear();
                 UvList.Clear();
                 Colors.Clear();
+                MaterialPropertyBlock.Clear();
             }
         }
     }
@@ -140,7 +141,7 @@ namespace PixelComrades {
             _renderer, _collider, _billboard, _spriteColor
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(SpriteRendererComponent),
                 typeof(SpriteColliderComponent),

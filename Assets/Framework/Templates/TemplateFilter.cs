@@ -43,8 +43,6 @@ namespace PixelComrades {
             }
         }
 
-        public abstract void RegisterType(System.Type[] types);
-
         protected abstract void AddEntity(Entity entity);
         public abstract void RemoveEntity(Entity entity);
         public abstract bool ContainsEntity(Entity entity);
@@ -58,17 +56,15 @@ namespace PixelComrades {
 
         public TemplateList<T> AllTemplates { get => _allTemplates; }
 
-        public TemplateFilter(System.Type[] types) : base(types) {}
+        protected TemplateFilter(System.Type[] types) : base(types) {}
 
-        public static void Setup(System.Type[] types) {
-            EntityController.RegisterTemplateFilter(new TemplateFilter<T>(types), typeof(T));
+        public static TemplateFilter<T> Setup() {
+            var instance = new T();
+            var filter = new TemplateFilter<T>(instance.GetTypes());
+            EntityController.RegisterTemplateFilter(filter, typeof(T));
+            return filter;
         }
-
-        public override void RegisterType(System.Type[] types) {
-            EntityController.RegisterTemplateFilter(new TemplateFilter<T>(types), typeof(T));
-            Debug.LogFormat("Registered {0} with {1}", typeof(T), types.Length);
-        }
-
+        
         public override bool ContainsEntity(Entity entity) {
             return _templates.ContainsKey(entity);
         }

@@ -74,7 +74,7 @@ namespace PixelComrades {
         public bool IsDestroyed() {
             return Id < 0 || Pooled;
         }
-        
+       
         public void Destroy() {
             if (IsDestroyed() || _toDeleteList.Contains(this)) {
                 return;

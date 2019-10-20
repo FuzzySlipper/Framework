@@ -16,7 +16,7 @@ namespace PixelComrades {
         private List<BaseCell> _occupiedCells = new List<BaseCell>(50);
         private ManagedArray<UnitOccupyingCellTemplate>.RefDelegate _del;
         public MapSystem() {
-            TemplateFilter<UnitOccupyingCellTemplate>.Setup(UnitOccupyingCellTemplate.GetTypes());
+            TemplateFilter<UnitOccupyingCellTemplate>.Setup();
             _templateList = EntityController.GetTemplateList<UnitOccupyingCellTemplate>();
             _del = UpdateNode;
         }

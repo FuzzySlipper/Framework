@@ -16,7 +16,7 @@ namespace PixelComrades {
             _stats, _tr, _currentAction
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(CurrentAction)
             };

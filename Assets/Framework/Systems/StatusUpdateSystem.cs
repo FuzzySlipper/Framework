@@ -34,10 +34,10 @@ namespace PixelComrades {
         }
 
         public void Handle(HealingEvent arg) {
-            if (!arg.Target.HasComponent<FloatingText>()) {
+            if (!arg.Target.Entity.HasComponent<FloatingText>()) {
                 return;
             }
-            UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.GetPosition(), Color.green);
+            UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.Entity.GetPosition(), Color.green);
         }
 
         public void Handle(CombatStatusUpdate arg) {

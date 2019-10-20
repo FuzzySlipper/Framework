@@ -11,16 +11,16 @@ namespace PixelComrades {
         private static GameOptions.CachedFloat _skillMaxReduction = new GameOptions.CachedFloat("SkillAmmoMaxMultiplier");
 
         public IntValueHolder Amount = new IntValueHolder();
-        public AmmoTemplate Template { get; }
+        public AmmoConfig Config { get; }
         public float RepairSpeedPercent { get; }
         private CachedStat<BaseStat> _damageModStat;
         private float _damagePercent;
         private string _damageModId;
         private string _skill;
-        public float ReloadSpeed { get { return Template.ReloadSpeed * RepairSpeedPercent; } }
+        public float ReloadSpeed { get { return Config.ReloadSpeed * RepairSpeedPercent; } }
 
-        public AmmoComponent(AmmoTemplate template, string skill, float repairSpeed, BaseStat damageModStat, float damagePercent = 0f) {
-            Template = template;
+        public AmmoComponent(AmmoConfig config, string skill, float repairSpeed, BaseStat damageModStat, float damagePercent = 0f) {
+            Config = config;
             RepairSpeedPercent = repairSpeed;
             _skill = skill;
             _damageModStat = new CachedStat<BaseStat>(damageModStat);
@@ -32,7 +32,7 @@ namespace PixelComrades {
 
         public AmmoComponent(SerializationInfo info, StreamingContext context) {
             Amount = info.GetValue(nameof(Amount), Amount);
-            Template = AmmoFactory.GetTemplate(info.GetValue(nameof(Template), Template.ID));
+            Config = AmmoFactory.GetTemplate(info.GetValue(nameof(Config), Config.ID));
             RepairSpeedPercent = info.GetValue(nameof(RepairSpeedPercent), RepairSpeedPercent);
             _damageModStat = info.GetValue(nameof(_damageModStat), _damageModStat);
             _damagePercent = info.GetValue(nameof(_damagePercent), _damagePercent);
@@ -42,7 +42,7 @@ namespace PixelComrades {
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(Amount), Amount);
-            info.AddValue(nameof(Template), Template.ID);
+            info.AddValue(nameof(Config), Config.ID);
             info.AddValue(nameof(RepairSpeedPercent), RepairSpeedPercent);
             info.AddValue(nameof(_damageModStat), _damageModStat);
             info.AddValue(nameof(_damagePercent), _damagePercent);
@@ -54,8 +54,8 @@ namespace PixelComrades {
             if (Amount.Value == Amount.MaxValue) {
                 return false;
             }
-            for (int i = 0; i < Template.Cost.Count; i++) {
-                if (Player.GetCurrency(Template.Cost[i].Key).Value < Template.Cost[i].Value) {
+            for (int i = 0; i < Config.Cost.Count; i++) {
+                if (Player.GetCurrency(Config.Cost[i].Key).Value < Config.Cost[i].Value) {
                     return false;
                 }
             }
@@ -70,8 +70,8 @@ namespace PixelComrades {
             if (!string.IsNullOrEmpty(_skill) && context.Get<StatsContainer>().GetValue(_skill, out var skillValue)) {
                 skillMulti = Mathf.Clamp(1 - (skillValue * _skillPercent.Value), _skillMaxReduction, 1);
             }
-            for (int i = 0; i < Template.Cost.Count; i++) {
-                Player.GetCurrency(Template.Cost[i].Key).ReduceValue(Template.Cost[i].Value * skillMulti);
+            for (int i = 0; i < Config.Cost.Count; i++) {
+                Player.GetCurrency(Config.Cost[i].Key).ReduceValue(Config.Cost[i].Value * skillMulti);
             }
             Amount.AddToValue(1);
             return true;

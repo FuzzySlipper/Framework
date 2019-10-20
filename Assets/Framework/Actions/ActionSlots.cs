@@ -107,14 +107,14 @@ namespace PixelComrades {
         private bool _isSecondary;
         private bool _isHidden;
         private CachedComponent<ActionSlots> _owner;
-        private CachedComponent<Action> _action = new CachedComponent<Action>();
+        private CachedComponent<ActionConfig> _action = new CachedComponent<ActionConfig>();
         
         public Entity Owner { get { return _owner.Value.GetEntity(); } }
         public string[] CompatibleSlots { get; }
         public Type[] RequiredTypes { get; }
         public List<StatModHolder> CurrentStats { get; }
         public IEntityContainer Container { get { return _owner.Value; } }
-        public Action Action { get { return _action.Value; } }
+        public ActionConfig Action { get { return _action.Value; } }
         public string LastEquipStatus { get; set; }
         public string TargetSlot { get { return "Usable"; } }
         public Transform EquipTr { get { return null; } }
@@ -141,7 +141,7 @@ namespace PixelComrades {
             _isHidden = isHidden;
             CompatibleSlots = null;
             CurrentStats = null;
-            RequiredTypes = new[] {typeof(Action)};
+            RequiredTypes = new[] {typeof(ActionConfig)};
         }
 
         public ActionSlot(SerializationInfo info, StreamingContext context) {
@@ -153,7 +153,7 @@ namespace PixelComrades {
             LastEquipStatus = info.GetValue(nameof(LastEquipStatus), LastEquipStatus);
             CompatibleSlots = null;
             CurrentStats = null;
-            RequiredTypes = new[] {typeof(Action)};
+            RequiredTypes = new[] {typeof(ActionConfig)};
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
@@ -166,7 +166,7 @@ namespace PixelComrades {
         }
 
         public bool FinalCheck(Entity item, out string error) {
-            var action = item.Get<Action>();
+            var action = item.Get<ActionConfig>();
             if (action.Primary && IsSecondary) {
                 error = "Requires Primary Slot";
                 return false;

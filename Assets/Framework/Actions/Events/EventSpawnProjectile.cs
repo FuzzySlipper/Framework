@@ -4,29 +4,26 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class EventSpawnProjectile : IActionEventHandler {
-        public ActionState State { get; }
         public string Data { get; }
 
-        public EventSpawnProjectile(ActionState state, string data) {
-            State = state;
+        public EventSpawnProjectile(string data) {
             Data = data;
         }
 
         public void Trigger(ActionEvent ae, string eventName) {
-            var node = ae.Origin;
-            var spawnPos = node.AnimationEvent.Position;
-            var spawnRot = node.AnimationEvent.Rotation;
+            var spawnPos = ae.Origin.AnimationEvent.Position;
+            var spawnRot = ae.Origin.AnimationEvent.Rotation;
             var spawnEntity = World.Get<ProjectileSystem>().SpawnProjectile(
-                node.CurrentAction.Entity, Data, ae.Position,
+                ae.Action.Entity, Data, ae.Position,
                 spawnPos, spawnRot);
             if (spawnEntity != null) {
-                if (node.CurrentAction.Fx != null) {
+                if (ae.Action.Fx != null) {
                     var afx = spawnEntity.Get<ActionFxComponent>();
                     if (afx != null) {
-                        afx.ChangeFx(node.CurrentAction.Fx.Value);
+                        afx.ChangeFx(ae.Action.Fx.Value);
                     }
                     else {
-                        spawnEntity.Add(new ActionFxComponent(node.CurrentAction.Fx.Value));
+                        spawnEntity.Add(new ActionFxComponent(ae.Action.Fx.Value));
                     }
                 }
             }

@@ -75,7 +75,7 @@ namespace PixelComrades {
         Quaternion GetEventRotation { get; }
         bool IsAnimationComplete(string clip);
         bool IsAnimationEventComplete(string clip);
-        void PlayAnimation(string clip, bool overrideClip, Action action);
+        void PlayAnimation(string clip, bool overrideClip, ActionConfig actionConfig);
     }
 
 

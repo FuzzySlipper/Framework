@@ -17,7 +17,7 @@ namespace PixelComrades {
             return new RuntimeNode(this, graph);
         }
 
-        public class RuntimeNode : RuntimeStateNode {
+        public class RuntimeNode : RuntimeStateNode, IRuleEventStart<PrepareDamageEvent> {
             
             private BlockDamageNode _originalNode;
             private BlockDamageAction _config;
@@ -48,9 +48,8 @@ namespace PixelComrades {
                     _actionEntity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
                     _actionEntity.Add(new TransformComponent(model.transform));
                 }
-                var dmgComponent = Graph.Entity.GetOrAdd<BlockDamage>();
                 if (!Graph.Entity.Tags.Contain(EntityTags.Player)) {
-                    dmgComponent.DamageBlockers.Add(BlockDamageFlat);
+                    Graph.Entity.Add(new BlockDamageFlat());
                     _isWaiting = true;
                     _vitalStat = null;
                     return;
@@ -61,7 +60,7 @@ namespace PixelComrades {
                     var skillValue = _owner.Entity.FindStatValue(_config.Skill);
                     skillMulti = Mathf.Clamp(1 - (skillValue * CostVital.SkillPercent), CostVital.SkillMaxReduction, 1);
                 }
-                dmgComponent.CollisionHandlers.Add(EvadeDamageWithStats);
+                Graph.Entity.GetOrAdd<RuleEventListenerComponent>().Handlers.Add(this);
                 _fxComponent = action.Fx?.Value;
                 _finalCost = _config.Cost * skillMulti;
             }
@@ -75,14 +74,11 @@ namespace PixelComrades {
                     _actionEntity.Remove(tr);
                     _actionEntity.Remove<RenderingComponent>();
                 }
-                var blockDamage = _owner.Entity.Get<BlockDamage>();
-                if (blockDamage != null) {
-                    if (_isWaiting) {
-                        blockDamage.DamageBlockers.Remove(BlockDamageFlat);
-                    }
-                    else {
-                        blockDamage.CollisionHandlers.Remove(EvadeDamageWithStats);
-                    }
+                if (_isWaiting) {
+                    Graph.Entity.Remove<BlockDamageFlat>();
+                }
+                else {
+                    Graph.Entity.Get<RuleEventListenerComponent>().Handlers.Remove(this);
                 }
             }
 
@@ -105,23 +101,22 @@ namespace PixelComrades {
                 return false;
             }
 
-            private bool BlockDamageFlat(TakeDamageEvent dmgEvent) {
-                return true;
-            }
-
-            private int EvadeDamageWithStats(CollisionEvent arg) {
+            public bool CanRuleEventStart(ref PrepareDamageEvent arg) {
                 if (_vitalStat == null) {
-                    return arg.Hit;
+                    return true;
                 }
                 if (_fxComponent != null) {
                     _fxComponent.TriggerEvent(
-                        new ActionEvent(
-                            arg.Origin, arg.Target, arg.HitPoint, Quaternion.LookRotation(arg.HitNormal),
+                        new ActionEvent(arg.Origin, arg.Target, arg.Impact.HitPoint, Quaternion.LookRotation(arg.Impact.HitNormal),
                             ActionState.Collision));
                 }
-
                 _vitalStat.Current -= _finalCost;
-                return CollisionResult.Miss;
+                World.Get<GameLogSystem>().StartNewMessage(out var log, out var hover);
+                log.Append(arg.Target.GetName());
+                log.Append(" completely blocked damage from ");
+                log.Append(arg.Origin.GetName());
+                World.Get<GameLogSystem>().PostCurrentStrings(GameLogSystem.DamageColor);
+                return false;
             }
         }
     }

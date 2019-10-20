@@ -78,8 +78,10 @@ namespace PixelComrades {
         public void SetSize(float size, float length) {
             _lengthMulti = length;
             _sizeMulti = size;
-            _capsuleCollider.height = (_baseLength * length) * 2;
-            _capsuleCollider.radius = _baseSize.Min * size;
+            if (_capsuleCollider != null) {
+                _capsuleCollider.height = (_baseLength * length) * 2;
+                _capsuleCollider.radius = _baseSize.Min * size;
+            }
             UpdateParticles();
         }
     }

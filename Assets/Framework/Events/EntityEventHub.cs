@@ -8,7 +8,7 @@ namespace PixelComrades {
     public class EntityEventHub {
 
         private static SortByPriorityReceiver _msgSorter = new SortByPriorityReceiver();
-
+        //TODO: should this be pooled?
         private Dictionary<int, List<System.Action>> _simpleHub = new Dictionary<int, List<System.Action>>();
         private BufferedList<IReceive> _messageReceivers = new BufferedList<IReceive>();
 
@@ -16,7 +16,7 @@ namespace PixelComrades {
 
         public int Count { get { return _simpleHub.Count + _messageReceivers.Count; } }
         
-        public void AddObserver<T>(IReceive<T> handler) {
+        public void AddObserver<T>(IReceive<T> handler) where T : IEntityMessage {
             if (_messageReceivers.Contains(handler)) {
                 return;
             }
@@ -48,7 +48,7 @@ namespace PixelComrades {
             }
         }
 
-        public void RemoveObserver<T>(IReceive<T> handler) {
+        public void RemoveObserver<T>(IReceive<T> handler) where T : IEntityMessage {
             _messageReceivers.Remove(handler);
         }
 

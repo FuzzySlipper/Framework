@@ -16,7 +16,7 @@ namespace PixelComrades {
         
 
         public CollisionCheckSystem() {
-            TemplateFilter<CollisionCheckForwardTemplate>.Setup(CollisionCheckForwardTemplate.GetTypes());
+            TemplateFilter<CollisionCheckForwardTemplate>.Setup();
             _list = EntityController.GetTemplateList<CollisionCheckForwardTemplate>();
             _del = RunUpdate;
         }
@@ -241,7 +241,7 @@ namespace PixelComrades {
             _tr, _collider, _forward
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(CollisionCheckForward),

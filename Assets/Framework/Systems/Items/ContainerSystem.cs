@@ -9,7 +9,7 @@ namespace PixelComrades {
         private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
 
         public ContainerSystem() {
-            TemplateFilter<ContainerItemTemplate>.Setup(ContainerItemTemplate.GetTypes());
+            TemplateFilter<ContainerItemTemplate>.Setup();
         }
 
         public bool TryAdd(IEntityContainer holder, Entity item) {
@@ -106,7 +106,7 @@ namespace PixelComrades {
             _item, 
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(InventoryItem),
             };

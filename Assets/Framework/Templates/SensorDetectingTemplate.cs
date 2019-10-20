@@ -14,7 +14,7 @@ namespace PixelComrades {
         
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() { _position, _sensor, _tr };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(GridPosition), typeof(SensorComponent), typeof(TransformComponent)
             };
@@ -35,7 +35,7 @@ namespace PixelComrades {
             _targets, _sensor, _faction, _tr
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(SensorTargetsComponent), typeof(UnitySensorComponent), typeof(FactionComponent), typeof(TransformComponent)
             };

@@ -9,7 +9,7 @@ namespace PixelComrades {
         private ManagedArray<NpcFlyingTemplate>.RefDelegate _del;
 
         public FlightNpcSystem() {
-            TemplateFilter<NpcFlyingTemplate>.Setup(NpcFlyingTemplate.GetTypes());
+            TemplateFilter<NpcFlyingTemplate>.Setup();
             _flyingList = EntityController.GetTemplateList<NpcFlyingTemplate>();
             _del = UpdateNode;
         }

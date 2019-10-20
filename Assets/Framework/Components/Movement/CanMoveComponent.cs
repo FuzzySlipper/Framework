@@ -22,6 +22,7 @@ namespace PixelComrades {
 
         public CanMoveComponent(SerializationInfo info, StreamingContext context) {
             _moveEnabled = info.GetValue(nameof(_moveEnabled), _moveEnabled);
+            _moveEnabled.OnResourceChanged += SendMessage;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

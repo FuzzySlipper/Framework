@@ -54,7 +54,7 @@ namespace PixelComrades {
             if (!_setup) {
                 Init();
             }
-            return AbilityFactory.GetTemplate(templateName);
+            return AbilityFactory.GetConfig(templateName);
         }
 
         public static SpellData GetRandomExact(int level) {

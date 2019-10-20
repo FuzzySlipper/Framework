@@ -9,7 +9,7 @@ namespace PixelComrades {
         private GenericPool<EntityEventHub> _eventPool = new GenericPool<EntityEventHub>(25, e => e.Clear());
         private Dictionary<int, EntityEventHub> _entityEvents = new Dictionary<int, EntityEventHub>();
         
-        public void AddObserver<T>(int entity, IReceive<T> handler) {
+        public void AddObserver<T>(int entity, IReceive<T> handler) where T : IEntityMessage {
             GetHub(entity).AddObserver(handler);
         }
 
@@ -32,7 +32,7 @@ namespace PixelComrades {
             }
         }
 
-        public void RemoveObserver<T>(int entity, IReceive<T> handler) {
+        public void RemoveObserver<T>(int entity, IReceive<T> handler) where T : IEntityMessage {
             if (!_entityEvents.TryGetValue(entity, out var hub)) {
                 return;
             }
@@ -134,7 +134,7 @@ namespace PixelComrades {
             World.Get<EntityEventSystem>().PostAll<T>(entityTemplate.Entity, msg);
         }
 
-        public static void AddObserver<T>(this Entity entity, IReceive<T> handler) {
+        public static void AddObserver<T>(this Entity entity, IReceive<T> handler) where T : IEntityMessage {
             World.Get<EntityEventSystem>().AddObserver(entity, handler);
         }
 
@@ -146,7 +146,7 @@ namespace PixelComrades {
             World.Get<EntityEventSystem>().AddObserver(entity, message, handler);
         }
 
-        public static void RemoveObserver<T>(this Entity entity, IReceive<T> handler) {
+        public static void RemoveObserver<T>(this Entity entity, IReceive<T> handler) where T : IEntityMessage {
             World.Get<EntityEventSystem>().RemoveObserver<T>(entity, handler);
         }
 

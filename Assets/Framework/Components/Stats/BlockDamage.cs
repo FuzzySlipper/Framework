@@ -6,19 +6,25 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     
     [System.Serializable]
-	public sealed class BlockDamage : IComponent, IDisposable {
+	public sealed class BlockDamageFlat : IComponent {
 
-        public List<Func<TakeDamageEvent, bool>> DamageBlockers = new List<Func<TakeDamageEvent, bool>>();
-        public List<Func<CollisionEvent, int>> CollisionHandlers = new List<Func<CollisionEvent, int>>();
-        public BlockDamage(){}
+        public BlockDamageFlat(){}
 
-        public BlockDamage(SerializationInfo info, StreamingContext context) {}
+        public BlockDamageFlat(SerializationInfo info, StreamingContext context) {}
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {}
+    }
 
-        public void Dispose() {
-            DamageBlockers = null;
-            CollisionHandlers = null;
+    [System.Serializable]
+    public sealed class BlockDamageWithStats : IComponent {
+
+        public BlockDamageWithStats() {
+        }
+
+        public BlockDamageWithStats(SerializationInfo info, StreamingContext context) {
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
     }
 }

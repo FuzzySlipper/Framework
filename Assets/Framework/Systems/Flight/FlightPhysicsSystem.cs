@@ -9,7 +9,7 @@ namespace PixelComrades {
         private ManagedArray<FlyingTemplate>.RefDelegate _del;
         
         public FlightPhysicsSystem() {
-            TemplateFilter<FlyingTemplate>.Setup(FlyingTemplate.GetTypes());
+            TemplateFilter<FlyingTemplate>.Setup();
             _flyingList = EntityController.GetTemplateList<FlyingTemplate>();
             _del = UpdateNode;
         }
@@ -76,17 +76,17 @@ namespace PixelComrades {
 
         private void CalculateFakeFlightMovement(FlyingTemplate template) {
             var position = template.Rigidbody.position;
-            //position.x = Mathf.Clamp(position.x + (template.Control.Yaw * template.FakeFlight.Config.FakeFlightSpeed) + (template.Control.StrafeHorizontal * template.FakeFlight.Config.FakeFlightStrafe), -template.FakeFlight.Config.FakeFlightLimitX, template.FakeFlight.Config.FakeFlightLimitX);
-            //position.y = Mathf.Clamp(position.y + (-template.Control.Pitch * template.FakeFlight.Config.FakeFlightSpeed), -template.FakeFlight.Config.FakeFlightLimitY, template.FakeFlight.Config.FakeFlightLimitY);
-            //template.Rigidbody.MovePosition(position);
+            //position.x = Mathf.Clamp(position.x + (config.Control.Yaw * config.FakeFlight.Config.FakeFlightSpeed) + (config.Control.StrafeHorizontal * config.FakeFlight.Config.FakeFlightStrafe), -config.FakeFlight.Config.FakeFlightLimitX, config.FakeFlight.Config.FakeFlightLimitX);
+            //position.y = Mathf.Clamp(position.y + (-config.Control.Pitch * config.FakeFlight.Config.FakeFlightSpeed), -config.FakeFlight.Config.FakeFlightLimitY, config.FakeFlight.Config.FakeFlightLimitY);
+            //config.Rigidbody.MovePosition(position);
             position.x = template.FakeFlight.Config.FakeFlightLimitX.Clamp(position.x + (template.Control.Yaw * template.FakeFlight.Config.FakeFlightSpeed) + (template.Control.StrafeHorizontal * template.FakeFlight.Config.FakeFlightStrafe));
             position.y = template.FakeFlight.Config.FakeFlightLimitY.Clamp(position.y + (-template.Control.Pitch * template.FakeFlight.Config.FakeFlightSpeed));
-            //template.Rigidbody.MovePosition(position);
-            //template.Entity.Tr.position = position;
+            //config.Rigidbody.MovePosition(position);
+            //config.Entity.Tr.position = position;
             var pitchBank = template.FakeFlight.Config.AngleOfPitch * template.Control.Pitch;
             var pitchRotation = Quaternion.Lerp(template.Rigidbody.rotation, Quaternion.Euler(pitchBank, 0f, 0), Time.deltaTime * template.FakeFlight.Config.PitchSpeed);
-            //template.Rigidbody.MoveRotation(pitchRotation);
-            //template.Entity.Tr.rotation = pitchRotation;
+            //config.Rigidbody.MoveRotation(pitchRotation);
+            //config.Entity.Tr.rotation = pitchRotation;
             template.Entity.Post(new ChangePositionEvent(template.Entity, position, pitchRotation));
         }
 

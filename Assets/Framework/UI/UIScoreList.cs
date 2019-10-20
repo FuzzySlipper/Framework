@@ -42,7 +42,7 @@ namespace PixelComrades {
             newScore.Score = score;
             newScore.LevelReached = level;
             newScore.KilledBy = killedBy;
-            //newScore.Class = Player.Actor.Class.Current.Template.Name;
+            //newScore.Class = Player.Actor.Class.Current.Config.Name;
             var scores = RetrieveScores();
             if (scores == null || scores.Length == 0) {
                 scores = new ScoreEntry[1];

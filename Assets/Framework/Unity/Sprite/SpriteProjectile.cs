@@ -63,6 +63,9 @@ namespace PixelComrades {
         }
 
         public void SetSize(float size, float length) {
+            if (_sphereCollider == null) {
+                return;
+            }
             _sphereCollider.radius = size;
         }
     }

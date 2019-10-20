@@ -79,8 +79,8 @@ namespace PixelComrades {
             for (int i = 0; i < count; i++) {
                 var spawnPos = position + Random.insideUnitSphere * (spawnComponent.Radius * 0.5f);
                 spawnPos.y = position.y;
-                var spawn = ItemPool.Spawn(
-                    UnityDirs.Items, spawnComponent.Prefab, Vector3.Lerp(spawnPos, spawnPos + Vector3.up, Random.value), Quaternion.identity, true);
+                var spawn = ItemPool.Spawn(UnityDirs.Items, spawnComponent.Prefab, 
+                    Vector3.Lerp(spawnPos, spawnPos + Vector3.up, Random.value), Quaternion.identity, true);
                 if (spawn == null) {
                     continue;
                 }

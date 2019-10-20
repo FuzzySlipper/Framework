@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
-    public class ActionProvider : IDataFactory<Action> {
+    public class ActionProvider : IDataFactory<ActionConfig> {
         private static GameOptions.CachedFloat _defaultAnimationTimeout = new GameOptions.CachedFloat("DefaultAnimationTimeout");
         private static GameOptions.CachedFloat _brokenWeaponPercent = new GameOptions.CachedFloat("WeaponBrokenPercentDamage");
 
@@ -13,7 +13,7 @@ namespace PixelComrades {
         
 
         public void AddComponent(Entity entity, DataEntry data) {
-            var action = entity.Add(new Action());
+            var action = entity.Add(new ActionConfig());
             
             var type = data.Get<DataReference>(DatabaseFields.ItemType);
             var skill = data.TryGetValue<string>(DatabaseFields.Skill, "");
@@ -34,6 +34,8 @@ namespace PixelComrades {
             bool limitEnemy = true;
             var config = data.Get<DataList>("Config");
             var abilityType = data.TryGetValue("Type", "Attack");
+            var damageType = data.TryGetValue(DatabaseFields.DamageType,
+                GameData.DamageTypes.GetID(0));
             if (type != null && type.TargetID == "Ability") {
                 action.AnimationTrigger = data.TryGetValue("Animation", GraphTriggers.UseAbility);
                 action.EquipVariable = "";
@@ -42,9 +44,7 @@ namespace PixelComrades {
                     default:
                     case "Attack":
                         entity.Add(
-                            new DamageImpact(data.TryGetValue(
-                                    DatabaseFields.DamageType,
-                                    GameData.DamageTypes.GetID(0)), Stats.Health, 1));
+                            new DamageImpact(damageType, Stats.Health, 1));
                         break;
                     case "Heal":
                         entity.Add(AddHealImpact( config, false));
@@ -75,15 +75,17 @@ namespace PixelComrades {
                         entity.Add(new InstantKillImpact(config.FindFloat("Chance", 1f)));
                         break;
                     case "Confuse":
-                        entity.Add(new ConfuseImpact(data.TryGetValue("SecondaryPower", EffectChance), config.FindFloat("Length", EffectTime)));
+                        entity.Add(
+                            new ApplyTagImpact(EntityTags.IsConfused, data.TryGetValue("SecondaryPower", EffectChance), config
+                                    .FindFloat("Length", EffectTime), damageType, "Confusion"));
                         break;
                     case "Slow":
                         entity.Add(new ApplyTagImpact(EntityTags.IsSlowed, data.TryGetValue("SecondaryPower", EffectChance), config
-                            .FindFloat("Length",EffectTime), "Slow"));
+                            .FindFloat("Length",EffectTime), damageType, "Slow"));
                         break;
                     case "Stun":
                         entity.Add(new ApplyTagImpact(EntityTags.IsStunned, data.TryGetValue("SecondaryPower", EffectChance), config
-                            .FindFloat("Length",EffectTime), "Stun"));
+                            .FindFloat("Length",EffectTime), damageType, "Stun"));
                         break;
                 }
                 switch (abilityType) {
@@ -128,11 +130,11 @@ namespace PixelComrades {
                     action.Range = GameData.ActionDistance.GetAssociatedValue(data.TryGetValue("Range", "Medium"));
                     var spawn = data.Get<DataReference>(DatabaseFields.ActionSpawn);
                     if (spawn != null) {
-                        action.AddEvent(AnimationEvents.Default, new EventSpawnProjectile(ActionState.None, spawn.TargetID));
+                        action.AddEvent(AnimationEvents.Default, new EventSpawnProjectile(spawn.TargetID));
                     }
                     else {
                         if (generateCollision) {
-                            action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent(ActionState.None));
+                            action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent());
                         }
                         else {
                             var collisionType = data.TryGetValue("CollisionType", "Point");
@@ -146,7 +148,7 @@ namespace PixelComrades {
 
                             }
                             //melee or hitscan need to make that clearer
-                            action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(ActionState.None,  action.Range, raycastSize, limitEnemy));
+                            action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(action.Range, raycastSize, limitEnemy));
                         }
                     }
                     break;

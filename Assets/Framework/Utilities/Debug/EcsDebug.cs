@@ -48,13 +48,12 @@ namespace PixelComrades {
         public static void GodMode() {
             bool added = false;
             for (int i = 0; i < Player.Entities.Length; i++) {
-                var block = Player.Entities[i].GetOrAdd<BlockDamage>();
-                if (block.DamageBlockers.Contains(GodModeDamage)) {
-                    block.DamageBlockers.Remove(GodModeDamage);
+                if (Player.Entities[i].HasComponent<BlockDamageFlat>()) {
+                    Player.Entities[i].Remove<BlockDamageFlat>();
                 }
                 else {
                     added = true;
-                    block.DamageBlockers.Add(GodModeDamage);
+                    Player.Entities[i].Add(new BlockDamageFlat());
                 }
             }
             Console.Log(added ? "Enabled god mode" : "Disabled god mode");
@@ -67,7 +66,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            entity.Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
+            World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString());
         }
         
@@ -79,7 +78,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            entity.Post(new HealingEvent(amount, null, null, "Vitals.Health"));
+            World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Health"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString());
         }
 

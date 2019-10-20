@@ -40,7 +40,7 @@ namespace PixelComrades {
             hoverMsg.Append(" = ");
             hoverMsg.Append(amt.ToString("F0"));
             logSystem.PostCurrentStrings(GameLogSystem.HealColor);
-            arg.TakeDamage.Origin.Post(new HealingEvent(amt, arg.TakeDamage.Target, arg.TakeDamage.Origin, component.TargetVital));
+            World.Get<RulesSystem>().Post(new HealingEvent(amt, arg.TakeDamage.Target, arg.TakeDamage.Origin, component.TargetVital));
         }
     }
 

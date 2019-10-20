@@ -32,7 +32,7 @@ namespace PixelComrades {
             if (_ammoComponent.Value.Amount > 0) {
                 return true;
             }
-            owner.PostAll(new StatusUpdate(owner, "Not enough " + _ammoComponent.Value.Template.Name));
+            owner.PostAll(new StatusUpdate(owner, "Not enough " + _ammoComponent.Value.Config.Name));
             return false;
         }
     }

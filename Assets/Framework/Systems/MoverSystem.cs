@@ -20,16 +20,16 @@ namespace PixelComrades {
         private ManagedArray<ArcMoverTemplate>.RefDelegate _arcDel;
 
         public MoverSystem() {
-            TemplateFilter<ForwardMoverTemplate>.Setup(ForwardMoverTemplate.GetTypes());
+            TemplateFilter<ForwardMoverTemplate>.Setup();
             _forwardMovers = EntityController.GetTemplateList<ForwardMoverTemplate>();
             _forwardDel = HandleForwardMovement;
-            TemplateFilter<RotateToTemplate>.Setup(RotateToTemplate.GetTypes());
+            TemplateFilter<RotateToTemplate>.Setup();
             _rotators = EntityController.GetTemplateList<RotateToTemplate>();
             _rotateDel = HandleRotation;
-            TemplateFilter<SimpleMoverTemplate>.Setup(SimpleMoverTemplate.GetTypes());
+            TemplateFilter<SimpleMoverTemplate>.Setup();
             _simpleMovers = EntityController.GetTemplateList<SimpleMoverTemplate>();
             _simpleDel = HandleMoveSimple;
-            TemplateFilter<ArcMoverTemplate>.Setup(ArcMoverTemplate.GetTypes());
+            TemplateFilter<ArcMoverTemplate>.Setup();
             _arcMovers = EntityController.GetTemplateList<ArcMoverTemplate>();
             _arcDel = HandleArcMovement;
         }
@@ -267,7 +267,7 @@ namespace PixelComrades {
             _tr, _collider, _forward, _moveSpeed
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(ForwardMover),
@@ -290,7 +290,7 @@ namespace PixelComrades {
             _tr, _collider,  _rotate, _rb
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(RotateToTarget),
@@ -313,7 +313,7 @@ namespace PixelComrades {
             _tr, _collider, _arcMover,_moveSpeed
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(ArcMover),
@@ -340,7 +340,7 @@ namespace PixelComrades {
             _tr, _collider, _simple, _moveSpeed, _moveTarget, _rotationSpeed
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(TransformComponent),
                 typeof(SimplerMover),

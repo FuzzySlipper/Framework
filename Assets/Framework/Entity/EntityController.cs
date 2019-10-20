@@ -37,12 +37,20 @@ namespace PixelComrades {
                 return null;
             }
             var type = typeof(T);
-            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).GetNode(entity);
+            if (!_filterHandler.TryGetValue(type, out var filter)) {
+                filter = TemplateFilter<T>.Setup();
+            }
+            return ((TemplateFilter<T>) filter).GetNode(entity);
+            //return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).GetNode(entity);
         }
 
         public static TemplateList<T> GetTemplateList<T>() where T : class, IEntityTemplate, new() {
             var type = typeof(T);
-            return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).AllTemplates;
+            if (!_filterHandler.TryGetValue(type, out var filter)) {
+                filter = TemplateFilter<T>.Setup();
+            }
+            return ((TemplateFilter<T>) filter).AllTemplates;
+            //return !_filterHandler.TryGetValue(type, out var filter) ? null : ((TemplateFilter<T>) filter).AllTemplates;
         }
 
         public static ComponentArray<T> GetComponentArray<T>() where T : IComponent {

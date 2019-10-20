@@ -21,7 +21,7 @@ namespace PixelComrades {
             _label, _rendering, _tr, _rb,  _collider
         };
 
-        public static System.Type[] GetTypes() {
+        public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(RigidbodyComponent),
                 typeof(RenderingComponent),
