@@ -50,7 +50,13 @@ namespace PixelComrades {
                     facing = _billboard.Orientation.GetFlippedSide();
                     Renderer.Flip(_billboard.Orientation.IsFlipped());
                 }
-                Renderer.SetSprite(_animation.GetSpriteFrame(facing, Animator.FrameIndex), _animation.NormalMap, _animation.EmissiveMap);
+                var animFacing = _animation.GetFacing(facing);
+                if (animFacing == null) {
+                    Debug.LogErrorFormat("No facing for {0} at {1}", facing, _animation.name);
+                    return;
+                }
+                Renderer.SetSprite(animFacing.Frames[Animator.FrameIndex], _animation.NormalMap, _animation.EmissiveMap,
+                    animFacing.Colliders[Animator.FrameIndex]);
             }
 
             public override bool TryComplete(float dt) {
@@ -93,7 +99,8 @@ namespace PixelComrades {
             }
 
             protected virtual void UpdateSprite() {
-                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex), _node.Animation.NormalMap, _node.Animation.EmissiveMap);
+                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex), _node.Animation.NormalMap, _node.Animation.EmissiveMap,
+                    _node.Animation.GetSpriteCollider(Animator.FrameIndex));
             }
 
             protected void UpdateFrame(AnimationFrame frame) {

@@ -7,12 +7,14 @@ namespace PixelComrades {
     public class ActionHolder {
         public int LastRoll { get; private set; }
         public int Chance; // this needs to be in range 0 -100
-        public ActionConfig Action;
+        public ActionTemplate Action;
         public AdvancedTargeting Targeting;
 
-        public ActionHolder(int chanceNotNormalized, ActionConfig actionConfig, AdvancedTargeting targeting) {
+        public ActionHolder(int chanceNotNormalized, Entity actionEntity, AdvancedTargeting targeting) {
             Chance = chanceNotNormalized;
-            Action = actionConfig;
+            if (actionEntity != null) {
+                Action = actionEntity.GetTemplate<ActionTemplate>();
+            }
             Targeting = targeting;
             LastRoll = 0;
         }

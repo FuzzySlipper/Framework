@@ -18,9 +18,6 @@ namespace PixelComrades {
         }
 
         public void RuleEventEnded(ref ImpactEvent context) {
-            if (context.Hit <= 0) {
-                return;
-            }
             World.Get<RulesSystem>().Post(new TryApplyMod(context, _component.Value));
         }
     }

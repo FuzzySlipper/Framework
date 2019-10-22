@@ -18,6 +18,7 @@ namespace PixelComrades {
             _timeControl = new SpriteAnimationPreview((SpriteAnimation)target);
         }
 
+        private float _distance = 0.2f;
 
         public override void OnInspectorGUI() {
             var script = (SpriteAnimation)target;
@@ -29,6 +30,13 @@ namespace PixelComrades {
             EditorGUILayout.LabelField(string.Format("FrameTime: {0}", script.FrameTime.ToString("F1")));
             EditorGUILayout.LabelField(string.Format("Animation Length: {0}", script.LengthFrames));
             base.OnInspectorGUI();
+            _distance = EditorGUILayout.FloatField("Collider Size", _distance);
+            if (GUILayout.Button("Generate Colliders")) {
+                if (script is DirectionalAnimation dirAnim) {
+                    SpriteMeshUtilities.GenerateColliders(dirAnim, _distance);
+                }
+                EditorUtility.SetDirty(script);
+            }
         }
 
         public override void OnPreviewSettings() {

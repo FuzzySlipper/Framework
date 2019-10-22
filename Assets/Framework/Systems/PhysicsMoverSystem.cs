@@ -52,7 +52,7 @@ namespace PixelComrades {
         }
 
         private void CheckPaused(ref RigidbodyComponent component) {
-            if (component.RigidbodySetup.IsFrozen == _frozen) {
+            if (component.RigidbodySetup.IsFrozen == _frozen || component.Rb == null) {
                 return;
             }
             if (_frozen) {

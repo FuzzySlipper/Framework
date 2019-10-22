@@ -34,7 +34,7 @@ namespace PixelComrades {
         }
 
         public void Handle(ActionEvent arg) {
-            var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Value;
+            var data = arg.Action.Entity.Find<ActionFxComponent>()?.Value;
             if (data != null) {
                 data.TriggerEvent(arg);
             }
@@ -43,33 +43,29 @@ namespace PixelComrades {
         public void Handle(PerformedCollisionEvent arg) {
             var data = arg.Origin.Entity.Find<ActionFxComponent>()?.Value;
             if (data != null) {
-                data.TriggerEvent(
-                    new ActionEvent(
-                        arg.Origin, arg.Target, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionState.Collision));
+                TriggerCollisionEvent(data, arg.HitPoint, arg.HitNormal, arg.Target?.Entity);
             }
         }
 
         public void Handle(EnvironmentCollisionEvent arg) {
             var data = arg.EntityHit.Find<ActionFxComponent>()?.Value;
             if (data != null) {
-                data.TriggerEvent(
-                    new ActionEvent(
-                        arg.EntityHit, null, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionState.Collision));
+                TriggerCollisionEvent(data, arg.HitPoint, arg.HitNormal, arg.EntityHit);
             }
         }
 
         public void Handle(CollisionEvent arg) {
-            var data = arg.Target.Entity.Find<ActionFxComponent>()?.Value;
+            var data = arg.Source.Find<ActionFxComponent>()?.Value;
             if (data != null) {
-                data.TriggerEvent(
-                    new ActionEvent(
-                        arg.Origin, arg.Target, arg.HitPoint + (arg.HitNormal * 0.1f), Quaternion.LookRotation(arg.HitNormal),
-                        ActionState.Collision));
+                TriggerCollisionEvent(data, arg.HitPoint, arg.HitNormal, arg.Target?.Entity);
             }
         }
 
+        private void TriggerCollisionEvent(ActionFx data, Vector3 hitPoint, Vector3 hitNormal, Entity target) {
+            data.TriggerEvent(
+                ActionState.Collision, hitPoint + (hitNormal * 0.1f), Quaternion.LookRotation(hitNormal),
+                target?.GetTemplate<CharacterTemplate>());
+        }
         private void SpawnPrefab(SpawnPrefabOnDeath spawnComponent, DeathEvent arg) {
             var position = arg.Target.Tr.position;
             var count = spawnComponent.CountRange.Get();

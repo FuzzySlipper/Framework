@@ -13,10 +13,14 @@ namespace PixelComrades.DungeonCrawler {
         [SerializeField] private SpriteFacing _facing = SpriteFacing.EightwayFlipped;
         [SerializeField] private bool _backwards = true;
         [SerializeField] private List<Collider> _ignoreColliders = new List<Collider>();
+        [SerializeField] private MeshRenderer _meshRenderer = null;
+        [SerializeField] private MeshFilter _meshFilter = null;
 
         public BillboardMode Billboard { get => _billboard; }
         public bool Unscaled { get => _unscaled; }
         //public SpriteRenderer Renderer { get => _renderer; }
+        public MeshRenderer MeshRenderer { get => _meshRenderer; }
+        public MeshFilter MeshFilter { get => _meshFilter; }
         public Transform SpriteBaseTr { get => _spriteBaseTr; }
         public Transform SpriteTr { get => _spriteTr; }
         public SpriteFacing Facing { get => _facing; }

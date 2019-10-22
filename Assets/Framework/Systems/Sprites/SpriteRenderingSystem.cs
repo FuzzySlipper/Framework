@@ -48,8 +48,11 @@ namespace PixelComrades {
         }
 
         private void RunUpdate(ref SpriteRendererTemplate template) {
-            template.Billboard.Billboard.Apply(
-                template.Renderer.SpriteTr, template.Billboard.Backwards, ref template.Billboard.LastAngleHeight);
+            bool backwards = template.Billboard.Backwards;
+            if (template.Renderer.MeshRenderer != null) {
+                backwards = template.Billboard.Backwards && !template.Renderer.FlipX;
+            }
+            template.Billboard.Billboard.Apply(template.Renderer.SpriteTr, backwards, ref template.Billboard.LastAngleHeight);
             var orientation = SpriteFacingControl.GetCameraSide(
                 template.Billboard.Facing, template.Renderer.SpriteTr,
                 template.Renderer.BaseTr, 5, out var inMargin);
@@ -65,7 +68,19 @@ namespace PixelComrades {
                 var uvOffsetX = sprite.rect.x / sprite.texture.width;
                 var uvOffsetY = sprite.rect.y / sprite.texture.height;
                 template.Renderer.Uv = new Vector4(uvWidth, uvHeight, uvOffsetX, uvOffsetY);
-                template.Collider.Value.UpdateSprite(sprite, template.Renderer.FlipX);
+                if (template.Renderer.SavedCollider != null) {
+                    template.Collider.Value.UpdateCollider(template.Renderer.SavedCollider);
+                }
+                else {
+                    template.Collider.Value.UpdateSprite(sprite, template.Renderer.FlipX);
+                }
+                if (template.Renderer.MeshRenderer != null) {
+                    UpdateMeshRenderer(template);
+                    return;
+                }
+            }
+            if (template.Renderer.MeshRenderer != null) {
+                return;
             }
             var texture = template.Renderer.Sprite.texture;
             if (!_blocks.TryGetValue(texture, out var block)) {
@@ -82,6 +97,26 @@ namespace PixelComrades {
             block.MatrixList.Add(matrix);
             block.UvList.Add(template.Renderer.Uv);
             block.Colors.Add(template.SpriteColor?.CurrentColor ?? Color.white);
+        }
+
+        private void UpdateMeshRenderer(SpriteRendererTemplate template) {
+            var renderer = template.Renderer;
+            renderer.MatBlock.SetVector(_shaderPropertyColor, template.SpriteColor.CurrentColor);
+            renderer.MatBlock.SetVector(_shaderPropertyUv, renderer.Uv);
+            renderer.MatBlock.SetTexture(_shaderPropertyTexture, renderer.Sprite.texture);
+            renderer.MatBlock.SetTexture(_shaderPropertyNormal, renderer.Normal);
+            renderer.MatBlock.SetTexture(_shaderPropertyEmissive, renderer.Emissive);
+            renderer.ApplyMaterialBlock();
+            var pixelsPerUnit = renderer.Sprite.pixelsPerUnit;
+            var size = new Vector2(
+                renderer.Sprite.rect.width / pixelsPerUnit,
+                renderer.Sprite.rect.height / pixelsPerUnit);
+            Vector2 scaledPivot = size * new Vector2(0.5f, 0);
+            renderer.MeshVertices[0] = new Vector3(size.x - scaledPivot.x, size.y - scaledPivot.y, 0);
+            renderer.MeshVertices[1] = new Vector3(size.x - scaledPivot.x, -scaledPivot.y, 0);
+            renderer.MeshVertices[2] = new Vector3(-scaledPivot.x, -scaledPivot.y, 0);
+            renderer.MeshVertices[3] = new Vector3(-scaledPivot.x, size.y - scaledPivot.y, 0);
+            renderer.UpdateMesh();
         }
 
         private RenderBlock CreateBlock(SpriteRendererComponent data) {

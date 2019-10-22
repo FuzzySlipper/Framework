@@ -7,7 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
     public sealed class SpriteBillboardComponent : IComponent {
         
-        public DirectionsEight Orientation = DirectionsEight.Top;
+        public DirectionsEight Orientation = DirectionsEight.Front;
         public float LastAngleHeight;
         public SpriteFacing Facing { get; }
         public bool Backwards { get; }

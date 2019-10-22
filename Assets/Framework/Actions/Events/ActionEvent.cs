@@ -55,7 +55,7 @@ namespace PixelComrades {
         public ActionEvent(Entity origin, Entity focus, Vector3 position, Quaternion rotation, ActionState state) {
             Origin = origin.FindTemplate<CharacterTemplate>();
             Target = focus.FindTemplate<CharacterTemplate>();
-            Action = Origin.CurrentAction;
+            Action = Origin?.CurrentAction;
             Position = position;
             Rotation = rotation;
             State = state;

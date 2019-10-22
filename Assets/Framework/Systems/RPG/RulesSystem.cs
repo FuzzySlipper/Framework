@@ -11,9 +11,25 @@ namespace PixelComrades {
         public static readonly FastString LastQueryString = new FastString();
         private Dictionary<System.Type, List<IRuleEventHandler>> _globalHandlers = new Dictionary<System.Type, List<IRuleEventHandler>>();
         private GenericPool<List<IRuleEventHandler>> _listPool = new GenericPool<List<IRuleEventHandler>>(5, t => t.Clear());
-
+        private CircularBuffer<IRuleEvent> _eventLog = new CircularBuffer<IRuleEvent>(10, true);
+        
         public RulesSystem() {
             RegisterRuleTemplates();
+        }
+
+        [Command("printRuleEventLog")]
+        public static void PrintLog() {
+            var log = World.Get<RulesSystem>()._eventLog;
+            foreach (var msg in log.InOrder()) {
+                Console.Log(
+                    string.Format(
+                        "{0}: Rule Event {1} Action {2} Source {3} Target {4}",
+                        log.GetTime(msg),
+                        msg.GetType().Name,
+                        msg.Action?.Entity.DebugId ?? "null",
+                        msg.Origin?.Entity.DebugId ?? "null",
+                        msg.Target?.Entity.DebugId ?? "null"));
+            }
         }
 
         public static bool DiceRollSuccess(float chance) {
@@ -61,6 +77,7 @@ namespace PixelComrades {
         }
 
         public void Post<T>(T context) where T : struct, IRuleEvent {
+            _eventLog.Add(context);
             var list = _listPool.New();
             _globalHandlers.TryGetValue(typeof(T), out var globalList);
             if (globalList != null) {

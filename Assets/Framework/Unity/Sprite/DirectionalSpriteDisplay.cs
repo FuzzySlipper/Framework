@@ -23,11 +23,12 @@ namespace PixelComrades {
         private static float _yMinDiff = 3;
 
         public static void Apply(this BillboardMode mode, Transform transform, bool backwards, ref float lastAngleHeight) {
+            var position = transform.position;
             Vector3 lookPosition = Vector3.zero;
             switch (mode) {
                 case BillboardMode.ForceUp:
                 case BillboardMode.TrUp:
-                    lookPosition = transform.position + Game.SpriteCamera.transform.rotation * Vector3.forward;
+                    lookPosition = position + Game.SpriteCamera.transform.rotation * Vector3.forward;
                     //transform.LookAt(backwards ? lookPos : -lookPos, mode == BillboardMode.TrUp ? transform.up : Game.SpriteCamera.transform.rotation * Vector3.up);
                     break;
                 case BillboardMode.CamFwd:
@@ -35,16 +36,16 @@ namespace PixelComrades {
                     break;
                 case BillboardMode.NoYAxis:
                     Vector3 viewDirection = new Vector3(Game.SpriteCamera.transform.forward.x, 0, Game.SpriteCamera.transform.forward.z);
-                    transform.LookAt(transform.position + (backwards ? viewDirection : -viewDirection));
+                    transform.LookAt(position + (backwards ? viewDirection : -viewDirection));
                     break;
                 case BillboardMode.CamRot:
                     transform.rotation = backwards ?  Quaternion.Inverse(Game.SpriteCamera.transform.rotation) : Game.SpriteCamera.transform.rotation;
                     break;
                 case BillboardMode.FaceCam:
                     lookPosition = Game.SpriteCamera.transform.position;
-                    lookPosition.y = transform.position.y;
+                    lookPosition.y = position.y;
                     //transform.LookAt(position);
-                    //transform.rotation = Quaternion.LookRotation(position - transform.position);
+                    //transform.rotation = Quaternion.LookRotation(position - position);
                     break;
                 case BillboardMode.FaceCamYDiff:
                     lookPosition = Game.SpriteCamera.transform.position;
@@ -72,7 +73,8 @@ namespace PixelComrades {
                     transform.rotation = backwards ? Quaternion.Inverse(rot) : rot;
                     break;
             }
-            Vector3 dir = !backwards ? (lookPosition - transform.position) : (transform.position - lookPosition);
+            
+            Vector3 dir = !backwards ? (lookPosition - position) : (position - lookPosition);
             switch (mode) {
                 case BillboardMode.ForceUp:
                 case BillboardMode.FaceCam:

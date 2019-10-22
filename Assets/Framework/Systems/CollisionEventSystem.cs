@@ -23,10 +23,10 @@ namespace PixelComrades {
         public static void PrintLog() {
             var log = World.Get<CollisionEventSystem>()._eventLog;
             foreach (var msg in log.InOrder()) {
-                Console.Log(string.Format("{6}: {0} hit {1} at {2} eventNum {3} normal {4} source {5}",
+                Console.Log(string.Format("{5}: {0} hit {1} at {2} {3} source {4}",
                     msg.Origin?.Entity.DebugId ?? "null",
                     msg.Target?.Entity.DebugId ?? "null",
-                    msg.HitPoint, msg.Hit, msg.HitNormal, msg.Source.DebugId, log.GetTime(msg)));
+                    msg.HitPoint, msg.HitNormal, msg.Source.DebugId, log.GetTime(msg)));
             }
         }
 
@@ -85,7 +85,6 @@ namespace PixelComrades {
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
         public ActionTemplate Action { get; }
-        public int Hit { get; }
 
         public ImpactEvent(CollisionEvent collisionEvent, ActionTemplate action, CharacterTemplate origin, CharacterTemplate target) {
             Source = collisionEvent.Source;
@@ -93,7 +92,6 @@ namespace PixelComrades {
             Target = target;
             HitPoint = collisionEvent.HitPoint;
             HitNormal = collisionEvent.HitNormal;
-            Hit = collisionEvent.Hit;
             Action = action;
         }
     }

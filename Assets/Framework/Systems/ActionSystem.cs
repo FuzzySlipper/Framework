@@ -27,10 +27,12 @@ namespace PixelComrades {
             foreach (var msg in log.InOrder()) {
                 Console.Log(
                     string.Format(
-                        "{5}: Action source {0} target {1} at {2} {3} State {4}",
+                        "{0}: Action {1} source {2} target {3} at {4} {5} State {6}",
+                        log.GetTime(msg),
+                        msg.Action?.Entity.DebugId ?? "null",
                         msg.Origin?.Entity.DebugId ?? "null",
                         msg.Target?.Entity.DebugId ?? "null",
-                        msg.Position, msg.Rotation, msg.State, log.GetTime(msg)));
+                        msg.Position, msg.Rotation, msg.State ));
             }
         }
 
@@ -51,10 +53,7 @@ namespace PixelComrades {
             }
             if (ae.State != ActionState.None) {
                 aeTemplate.Entity.Post(ae);
-                // are these already being triggered?
-//                if (action.Fx != null) {
-//                    action.Fx.Fx.TriggerEvent(ae);
-//                }
+                action.Entity.PostNoGlobal(ae);
             }
             if (ae.State == ActionState.Activate) {
                 for (int i = 0; i < action.Config.Costs.Count; i++) {

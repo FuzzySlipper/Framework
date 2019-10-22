@@ -27,8 +27,15 @@ namespace PixelComrades {
         //private CachedUnityComponent<SpriteRenderer> _renderer;
         private CachedTransform _baseTr;
         private CachedTransform _spriteTr;
-        public Queue<MaterialValue> MaterialValues = new Queue<MaterialValue>();
+        private CachedUnityComponent<MeshFilter> _filter;
+        private CachedUnityComponent<MeshRenderer> _meshRenderer;
+        
+        public MaterialPropertyBlock MatBlock;
         public Vector4 Uv;
+        public Queue<MaterialValue> MaterialValues = new Queue<MaterialValue>();
+        public List<Vector3> MeshVertices;
+        public SavedSpriteCollider SavedCollider;
+        public MeshRenderer MeshRenderer { get => _meshRenderer?.Value; }
         public bool IsDirty { get; private set; }
         public Sprite Sprite { get; private set; }
         public Texture2D Normal { get; private set; }
@@ -38,43 +45,43 @@ namespace PixelComrades {
         public Transform BaseTr { get => _baseTr; }
         public Transform SpriteTr { get => _spriteTr; }
         
-        private CircularBuffer<string> _spriteChanges = new CircularBuffer<string>(20, true);
-
-        [Command("listSpriteChanges")]
-        public static void ListSpriteChanges(int entity) {
-            var log = EntityController.Get(entity).Get<SpriteRendererComponent>()?._spriteChanges;
-            if (log == null) {
-                Console.Log(entity + " does not have component");
-                return;
-            }
-            foreach (var msg in log.InOrder()) {
-                Console.Log(string.Format("{0}: {1}",log.GetTime(msg), msg));
-            }
-        }
         public void ApplyMaterialBlock() {
-            //Value.SetPropertyBlock(matBlocks[0]);
+            if (MeshRenderer != null) {
+                MeshRenderer.SetPropertyBlock(MatBlock);
+            }
         }
 
         public void SetRendering(RenderingMode status) {
+            if (MeshRenderer != null) {
+                MeshRenderer.SetMode(status);
+            }
             //Value.SetMode(status);
         }
 
         public void SetFloat(int id, float value) {
-            //MaterialBlocks[0].SetFloat(id, value);
-            MaterialValues.Enqueue(new MaterialValue(id, value, null));
+            if (MeshRenderer != null) {
+                MatBlock.SetFloat(id, value);
+            }
+            else {
+                MaterialValues.Enqueue(new MaterialValue(id, value, null));
+            }
         }
 
         public void SetVector(int id, Vector3 value) {
-            //MaterialBlocks[0].SetFloat(id, value);
-            MaterialValues.Enqueue(new MaterialValue(id, -1, value));
+            if (MeshRenderer != null) {
+                MatBlock.SetVector(id, value);
+            }
+            else {
+                MaterialValues.Enqueue(new MaterialValue(id, -1, value));
+            }
         }
 
-        public void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive) {
-            _spriteChanges.Add(sprite.name);
+        public void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider) {
             IsDirty = true;
             Sprite = sprite;
             Normal = normal;
             Emissive = emissive;
+            SavedCollider = spriteCollider;
         }
 
         public void UpdatedSprite() {
@@ -114,19 +121,30 @@ namespace PixelComrades {
             _spriteTr = new CachedTransform(spriteTr);
             _baseTr = new CachedTransform(baseTr);
             IsDirty = false;
-            Setup();
+            _meshRenderer = null;
         }
 
-        private void Setup() {
-            //MaterialBlocks = new[] { new MaterialPropertyBlock()};
-            //Value.GetPropertyBlock(MaterialBlocks[0]);
-            //SpriteTr = Value.transform;
+        public SpriteRendererComponent(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {
+            //_renderer = new CachedUnityComponent<SpriteRenderer>(renderer);
+            _meshRenderer = new CachedUnityComponent<MeshRenderer>(renderer);
+            filter.sharedMesh = ProceduralMeshUtility.GenerateQuad(Vector2.one, new Vector2(0.5f, 0));
+            _filter = new CachedUnityComponent<MeshFilter>(filter);
+            MeshVertices = new List<Vector3>();
+            filter.sharedMesh.GetVertices(MeshVertices);
+            MatBlock = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(MatBlock);
+            _spriteTr = new CachedTransform(renderer.transform);
+            _baseTr = new CachedTransform(baseTr);
+            IsDirty = false;
         }
-        
+
+        public void UpdateMesh() {
+            _filter.Value.sharedMesh.SetVertices(MeshVertices);
+        }
+
         public SpriteRendererComponent(SerializationInfo info, StreamingContext context) {
             _spriteTr = info.GetValue(nameof(_spriteTr), _spriteTr);
             _baseTr = info.GetValue(nameof(_baseTr), _baseTr);
-            Setup();
         }
                 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {

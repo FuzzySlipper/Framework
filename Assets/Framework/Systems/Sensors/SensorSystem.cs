@@ -64,7 +64,7 @@ namespace PixelComrades {
                     continue;
                 }
                 template.Targets.AddWatch(enemy, true);
-                Console.Log(template.Entity.DebugId + " saw " + enemy.DebugId);
+                //Console.Log(template.Entity.DebugId + " saw " + enemy.DebugId);
             }
             if (template.Targets.WatchTargets.Count != 0) {
                 return;
@@ -164,11 +164,11 @@ namespace PixelComrades {
 
         public void Handle(ReceivedDamageEvent arg) {
             var sensorTargets = arg.Target.Entity.Find<SensorTargetsComponent>();
-#if DEBUG
-            DebugLog.Add(
-                sensorTargets.GetEntity().DebugId + " was attacked by " + arg.Origin?.Entity.DebugId + " parent " +
-                arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
-#endif
+//#if DEBUG
+//            DebugLog.Add(
+//                sensorTargets.GetEntity().DebugId + " was attacked by " + arg.Origin?.Entity.DebugId + " parent " +
+//                arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
+//#endif
             sensorTargets.AddWatch(arg.Origin, true);
         }
     }

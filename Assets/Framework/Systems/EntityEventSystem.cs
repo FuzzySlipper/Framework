@@ -77,6 +77,13 @@ namespace PixelComrades {
             hub.Post(msg);
         }
 
+        public void PostNoGlobal<T>(int entity, T msg) where T : struct, IEntityMessage {
+            if (!_entityEvents.TryGetValue(entity, out var hub)) {
+                return;
+            }
+            hub.Post(msg);
+        }
+
         public void PostAll<T>(Entity entity, T msg) where T : struct, IEntityMessage {
 #if DEBUGMSGS
             DebugLog.Add(DebugId + " posted " + msg.GetType().Name);
@@ -121,6 +128,10 @@ namespace PixelComrades {
         public static void Post<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
             World.Get<EntityEventSystem>().Post<T>(entity, msg);
         }
+
+        public static void PostNoGlobal<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
+            World.Get<EntityEventSystem>().PostNoGlobal<T>(entity, msg);
+        }
         
         public static void PostAll<T>(this Entity entity, T msg) where T : struct, IEntityMessage {
             World.Get<EntityEventSystem>().PostAll<T>(entity, msg);
@@ -129,11 +140,7 @@ namespace PixelComrades {
         public static void Post<T>(this IEntityTemplate entityTemplate, T msg) where T : struct, IEntityMessage {
             World.Get<EntityEventSystem>().Post<T>(entityTemplate.Entity, msg);
         }
-
-        public static void PostAll<T>(this IEntityTemplate entityTemplate, T msg) where T : struct, IEntityMessage {
-            World.Get<EntityEventSystem>().PostAll<T>(entityTemplate.Entity, msg);
-        }
-
+        
         public static void AddObserver<T>(this Entity entity, IReceive<T> handler) where T : IEntityMessage {
             World.Get<EntityEventSystem>().AddObserver(entity, handler);
         }

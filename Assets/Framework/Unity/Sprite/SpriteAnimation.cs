@@ -13,6 +13,7 @@ namespace PixelComrades {
         public float FrameTime { get { return 1 / FramesPerSecond; } }
         public virtual int LengthFrames { get { return Frames.Length; } }
         public abstract Sprite GetSpriteFrame(int frame);
+        public abstract SavedSpriteCollider GetSpriteCollider(int frame);
         public float LengthTime {
             get {
                 float time = 0;
@@ -76,5 +77,12 @@ namespace PixelComrades {
             Default = 1,
             Message,
         }
+    }
+
+    [System.Serializable]
+    public class SavedSpriteCollider {
+        public List<Vector3> CollisionVertices = new List<Vector3>();
+        public List<int> CollisionIndices = new List<int>();
+        public Vector3 HighPoint;
     }
 }

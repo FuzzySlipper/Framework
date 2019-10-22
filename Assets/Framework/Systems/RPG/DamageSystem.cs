@@ -10,6 +10,7 @@ namespace PixelComrades {
         public DamageSystem() {
             World.Get<RulesSystem>().AddHandler<TakeDamageEvent>(this);
             World.Get<RulesSystem>().AddHandler<PrepareDamageEvent>(this);
+            GenericPools.Register<List<DamageEntry>>(5, l => l.Clear());
         }
 
         public void RuleEventEnded(ref PrepareDamageEvent context) {
@@ -36,6 +37,9 @@ namespace PixelComrades {
 
         public void RuleEventRun(ref TakeDamageEvent msg) {
             _eventLog.Add(msg);
+            if (msg.Target.IsDead) {
+                return;
+            }
             var target = msg.Target;
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var dmgMsg, out var dmgHoverMsg);
@@ -87,6 +91,9 @@ namespace PixelComrades {
             }
             float totalDmg = 0;
             for (int i = 0; i < msg.Entries.Count; i++) {
+                if (msg.Target.IsDead) {
+                    break;
+                }
                 var dmg = msg.Entries[i];
                 var damageAmount = dmg.Amount;
                 totalDmg += damageAmount;

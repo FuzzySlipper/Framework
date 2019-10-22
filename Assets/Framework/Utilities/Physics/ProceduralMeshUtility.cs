@@ -264,6 +264,69 @@ namespace PixelComrades {
             
         }
 
+        public static Mesh GenerateDoubleSidedQuad(Vector2 size, Vector2 pivot) {
+            Vector2 scaledPivot = size * pivot;
+            Vector3[] vertices = {
+                new Vector3(size.x - scaledPivot.x, size.y - scaledPivot.y, 0),
+                new Vector3(size.x - scaledPivot.x, -scaledPivot.y, 0),
+                new Vector3(-scaledPivot.x, -scaledPivot.y, 0),
+                new Vector3(-scaledPivot.x, size.y - scaledPivot.y, 0),
+                new Vector3(size.x - scaledPivot.x, size.y - scaledPivot.y, 0),
+                new Vector3(size.x - scaledPivot.x, -scaledPivot.y, 0),
+                new Vector3(-scaledPivot.x, -scaledPivot.y, 0),
+                new Vector3(-scaledPivot.x, size.y - scaledPivot.y, 0),
+            };
+
+            Vector2[] uv = {
+                new Vector2(1, 1),
+                new Vector2(1, 0),
+                new Vector2(0, 0),
+                new Vector2(0, 1),
+                new Vector2(1, 1),
+                new Vector2(1, 0),
+                new Vector2(0, 0),
+                new Vector2(0, 1)
+            };
+
+            Vector3[] normals = {
+                _quadNormal,
+                _quadNormal,
+                _quadNormal,
+                _quadNormal,
+                -_quadNormal,
+                -_quadNormal,
+                -_quadNormal,
+                -_quadNormal
+            };
+
+            Vector4[] tangents = {
+                _flatTangent,
+                _flatTangent,
+                _flatTangent,
+                _flatTangent,
+                -_flatTangent,
+                -_flatTangent,
+                -_flatTangent,
+                -_flatTangent
+            };
+
+            int[] triangles = {
+                0, 1, 2,
+                2, 3, 0,
+                4, 5, 6,
+                6, 7, 4
+            };
+
+            return new Mesh {
+                vertices = vertices,
+                uv = uv,
+                triangles = triangles,
+                normals = normals,
+                tangents = tangents
+            };
+
+        }
+
         public static Mesh BuildQuadMesh(int width, int height) {
             var mesh = new Mesh();
             var vertices = new Vector3[4];

@@ -16,10 +16,23 @@ namespace PixelComrades {
             return GetSpriteFrame(frame);
         }
 
+        public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {
+            return GetFacing(facing).Colliders[frame];
+        }
+
         private Sprite[] GetFacingSprites(DirectionsEight side) {
             for (int i = 0; i < DirectionalFrames.Count; i++) {
                 if (DirectionalFrames[i].Side == side) {
                     return DirectionalFrames[i].Frames;
+                }
+            }
+            return null;
+        }
+
+        public DirectionalFrames GetFacing(DirectionsEight side) {
+            for (int i = 0; i < DirectionalFrames.Count; i++) {
+                if (DirectionalFrames[i].Side == side) {
+                    return DirectionalFrames[i];
                 }
             }
             return null;
@@ -30,6 +43,10 @@ namespace PixelComrades {
                 return null;
             }
             return DirectionalFrames[0].Frames[frame];
+        }
+
+        public override SavedSpriteCollider GetSpriteCollider(int frame) {
+            return DirectionalFrames[0].Colliders[frame];
         }
 
         [Button]
