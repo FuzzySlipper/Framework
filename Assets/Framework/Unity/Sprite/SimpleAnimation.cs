@@ -13,6 +13,9 @@ namespace PixelComrades {
         }
 
         public override SavedSpriteCollider GetSpriteCollider(int frame) {
+            if (Colliders == null || Colliders.Length == 0) {
+                return null;
+            }
             return Colliders[Mathf.Clamp(frame, 0, Colliders.Length - 1)];
         }
     }

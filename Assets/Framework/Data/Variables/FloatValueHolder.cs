@@ -362,7 +362,7 @@ public class FloatHolder {
             _del(_value);
         }
     }
-    public float value { get { return _value; } }
+    
 
     public FloatHolder(Action<float> del, float value = 0) {
         _del = del;
@@ -371,6 +371,10 @@ public class FloatHolder {
 
     public static implicit operator float(FloatHolder reference) {
         return reference.Value;
+    }
+
+    public void SetNoDel(float val) {
+        _value = val;
     }
 }
 
@@ -388,10 +392,13 @@ public class IntHolder {
             _del(_value);
         }
     }
-    public int value { get { return _value; } }
 
     public IntHolder(Action<int> del, int value = 0) {
         _del = del;
+        _value = value;
+    }
+
+    public void SetNoDel(int value) {
         _value = value;
     }
 

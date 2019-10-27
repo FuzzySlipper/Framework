@@ -55,6 +55,20 @@ namespace PixelComrades {
             return renderer.transform.TransformPoint(new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
             //return renderer.bounds.center + new Vector3(frame.EventPosition.x * -renderer.bounds.extents.x, frame.EventPosition.y * -renderer.bounds.extents.y);
         }
+
+        public int ConvertAnimationTimeToFrame(float time) {
+            float timeCheck = 0;
+            int lastGood = 0;
+            for (int i = 0; i < Frames.Length; i++) {
+                var frameTime = FrameTime * Frames[i].Length;
+                timeCheck += frameTime;
+                lastGood = i;
+                if (timeCheck >= time) {
+                    return i;
+                }
+            }
+            return lastGood;
+        }
     }
 
 

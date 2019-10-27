@@ -137,7 +137,7 @@ namespace PixelComrades {
             _baseTr = new CachedTransform(baseTr);
             IsDirty = false;
         }
-
+        
         public void UpdateMesh() {
             _filter.Value.sharedMesh.SetVertices(MeshVertices);
         }

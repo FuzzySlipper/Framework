@@ -19,6 +19,7 @@ namespace PixelComrades {
         }
 
         private float _distance = 0.2f;
+        private float _quality = 0.35f;
 
         public override void OnInspectorGUI() {
             var script = (SpriteAnimation)target;
@@ -31,9 +32,13 @@ namespace PixelComrades {
             EditorGUILayout.LabelField(string.Format("Animation Length: {0}", script.LengthFrames));
             base.OnInspectorGUI();
             _distance = EditorGUILayout.FloatField("Collider Size", _distance);
+            _quality = EditorGUILayout.FloatField("Collider Quality", _quality);
             if (GUILayout.Button("Generate Colliders")) {
                 if (script is DirectionalAnimation dirAnim) {
-                    SpriteMeshUtilities.GenerateColliders(dirAnim, _distance);
+                    SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
+                }
+                else if (script is SimpleAnimation simpleAnim) {
+                    SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
                 }
                 EditorUtility.SetDirty(script);
             }

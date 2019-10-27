@@ -17,7 +17,11 @@ namespace PixelComrades {
         }
 
         public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {
-            return GetFacing(facing).Colliders[frame];
+            var facingDir = GetFacing(facing);
+            if (facingDir.Colliders == null || facingDir.Colliders.Length == 0) {
+                return null;
+            }
+            return facingDir.Colliders[Mathf.Clamp(frame, 0, facingDir.Colliders.Length - 1)];
         }
 
         private Sprite[] GetFacingSprites(DirectionsEight side) {

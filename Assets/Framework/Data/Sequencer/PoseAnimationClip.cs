@@ -57,6 +57,7 @@ namespace PixelComrades {
         private PoseAnimationClip _previous;
         private AnimationCurve _curve;
         private bool _started;
+        private float _time;
         private List<SavedMuscleInstance> _pose = new List<SavedMuscleInstance>();
         private PoseAnimatorComponent _poseAnimatorComponent;
         private IRuntimeSequence _owner;
@@ -110,6 +111,7 @@ namespace PixelComrades {
             if (_poseAnimatorComponent == null) {
                 return;
             }
+            
             var time = _owner.CurrentTime - _originalClip.StartTime;
             var percent = time / _originalClip.Duration;
             var animationPercent = _curve.Evaluate(percent);

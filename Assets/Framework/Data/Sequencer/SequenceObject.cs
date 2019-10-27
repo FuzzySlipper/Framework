@@ -10,6 +10,10 @@ namespace PixelComrades {
         
         public float EndTime { get => StartTime + Duration; }
 
+        public bool IsTimeInRange(float time) {
+            return time >= StartTime && time <= EndTime;
+        }
+        
         public abstract float Duration { get; set; }
         public abstract bool CanResize { get; }
         public abstract void DrawTimelineGui(Rect rect);

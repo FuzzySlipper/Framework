@@ -12,12 +12,12 @@ namespace PixelComrades {
         [MenuItem("Window/Sequencer Window %#L")]
         public static SequencerWindow ShowWindow() {
             var window = (SequencerWindow) GetWindow(typeof(SequencerWindow), false, "Sequencer Window");
+            window.Init();
             _myControlId = window.GetInstanceID();
             return window;
         }
 
-        private const float TimelinePositionY = 25f;
-        private const float NotchPosition = 43f;
+        
         private const float LabelWidth = 30;
         private const float LabelOffset = 5f;
         private const float NotchWidth = 5f;
@@ -31,40 +31,41 @@ namespace PixelComrades {
         private GenericSequence _currentSequence;
         private SequenceObject _draggedObject;
         private bool _endHandleDragged;
-        private List<Type> _animationObjectTypes = new List<Type>();
         private float _hScrollPosition;
         private bool _startHandleDragged;
         private float _startPositionX;
         private float _visibleDuration;
         private float _vScrollPosition;
         private int _boxHeight = 100;
-        private Task _playTask;
-        private float _currentTime;
         private float _visibleOffset;
         private float _visibleScale = 1f;
-        private bool _paused = false;
-        private bool _cancelPlay = false;
-        private WhileLoopLimiter _playLimiter = new WhileLoopLimiter(99999);
         
+        protected float CurrentTime;
+        protected bool Paused = false;
+        protected WhileLoopLimiter PlayLimiter = new WhileLoopLimiter(99999);
+        protected bool CancelPlay = false;
+        protected Task PlayTask;
+        protected List<Type> AnimationObjectTypes = new List<Type>();
         private GenericSequence CurrentSequence { get => _currentSequence; set => _currentSequence = value; }
-
-        public SequencerWindow() {
+        protected virtual float TimelinePositionY { get { return 25f; }}
+        private float NotchPosition { get { return TimelinePositionY + 18f; } }
+        protected virtual void Init() {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             for (int a = 0; a < assemblies.Length; a++) {
                 var types = assemblies[a].GetTypes();
                 for (int t = 0; t < types.Length; t++) {
                     var type = types[t];
                     if (type.IsSubclassOf(typeof(SequenceObject))) {
-                        _animationObjectTypes.Add(type);
+                        AnimationObjectTypes.Add(type);
                     }
                 }
             }
         }
-
+        
         void OnDestroy() {
-            if (_playTask != null) {
-                _cancelPlay = true;
-                _playTask = null;
+            if (PlayTask != null) {
+                CancelPlay = true;
+                PlayTask = null;
             }
         }
 
@@ -72,21 +73,15 @@ namespace PixelComrades {
             CurrentSequence = sequence;
         }
         
-        private void OnGUI() {
+        protected virtual void OnGUI() {
             if (Application.isPlaying) {
                 if (RuntimeSequence.DebugSequence != null && _currentSequence != RuntimeSequence.DebugSequence.Sequence) {
                     Set(RuntimeSequence.DebugSequence.Sequence);
                 }
             }
             if (CurrentSequence == null) {
-                GUILayout.Label("Select Sequence");
-                if (Selection.objects.Length == 1) {
-                    OnSelectionChange();
-                }
+                CheckSequence();
                 return;
-            }
-            if (_animationObjectTypes.Count == 0) {
-                GUILayout.Label("No Sequence Types");
             }
             var objs = CurrentSequence.Objects;
             var newBatchSelect = Event.current.command || Event.current.control;
@@ -98,64 +93,17 @@ namespace PixelComrades {
                 _visibleScale = Mathf.Clamp(_visibleScale + Mathf.Sign(Event.current.delta.y) * 0.1f, 0.1f, 100);
                 Repaint();
             }
+            GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            if (!Application.isPlaying) {
-                if (_playTask == null) {
-                    if (GUILayout.Button("PLAY")) {
-                        _playTask = TimeManager.StartUnscaled(PlayAnimation());
-                    }
-                }
-                else {
-                    if (GUILayout.Button("STOP")) {
-                        _cancelPlay = true;
-                        _playTask = null;
-                    }
-                    _paused = GUILayout.Toggle(_paused, "Paused");
-                }
-                
-            }
-            GUILayout.BeginHorizontal();
-            EditorGUIUtility.labelWidth *= 0.75f;
-            _visibleScale = EditorGUILayout.Slider("Scale:", _visibleScale, 0.1f, 10f);
-            CurrentSequence.MaxDuration = EditorGUILayout.FloatField(
-                "Max duration:",
-                CurrentSequence.MaxDuration);
+            DrawToolbar();
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            CurrentSequence.MaxTracks = EditorGUILayout.IntField("Max tracks:", CurrentSequence.MaxTracks);
-            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 50, 150);
-            if (_draggedObject == null) {
-                var newVisibleDuration = CurrentSequence.MaxDuration / _visibleScale;
-                if (Math.Abs(_visibleDuration - newVisibleDuration) > 0) {
-                    _visibleDuration = newVisibleDuration;
-                }
-            }
+            GUILayout.Space(50);
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            CurrentSequence.Looping = EditorGUILayout.Toggle("Looping", CurrentSequence.Looping);
-            EditorGUILayout.LabelField("Current Time: " + _currentTime.ToString("F2"));
+            DrawEditLine();
             GUILayout.EndHorizontal();
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            var barPosition = position;
-            var currentTime = GUILayout.HorizontalSlider(_currentTime, 0, 
-                _currentSequence.MaxDuration, "box", "box", GUILayout.Height(40), GUILayout.ExpandWidth(true));
-            if (Application.isPlaying && RuntimeSequence.DebugSequence != null) {
-                _currentTime = RuntimeSequence.DebugSequence.CurrentTime;
-            }
-            else {
-                _currentTime = currentTime;
-            }
-            var centerStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
-            centerStyle.alignment = TextAnchor.UpperCenter;
-            for (int i = 0; i <= 20; i++) {
-                var percent = i * 0.05f * _visibleScale;
-                if (percent > 1) {
-                    break;
-                }
-                DrawTrackLabel(barPosition, percent , centerStyle);
-            }
-            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
             GUILayout.BeginHorizontal();
             GUILayout.Space(50);
             GUILayout.EndHorizontal();
@@ -195,14 +143,86 @@ namespace PixelComrades {
             if (Event.current.type == EventType.MouseDown && Event.current.button == 1) {
                 if (_addTrackMenu == null) {
                     _addTrackMenu = new GenericMenu();
-                    for (var i = 0; i < _animationObjectTypes.Count; i++) {
-                        _addTrackMenu.AddItem(new GUIContent(_animationObjectTypes[i].ToString()), false, CreateContextItem,
-                            _animationObjectTypes[i]);
+                    for (var i = 0; i < AnimationObjectTypes.Count; i++) {
+                        _addTrackMenu.AddItem(new GUIContent(AnimationObjectTypes[i].ToString()), false, CreateContextItem,
+                            AnimationObjectTypes[i]);
                     }
                 }
                 _addTrackMenu.ShowAsContext();
                 Event.current.Use();
             }
+        }
+
+        protected virtual void CheckSequence() {
+            GUILayout.Label("Select Sequence");
+            if (Selection.objects.Length == 1) {
+                OnSelectionChange();
+            }
+        }
+
+        protected virtual void DrawToolbar() {
+            if (!Application.isPlaying) {
+                if (PlayTask == null) {
+                    if (GUILayout.Button("PLAY")) {
+                        Play();
+                    }
+                }
+                else {
+                    if (GUILayout.Button("STOP")) {
+                        CancelPlay = true;
+                        PlayTask = null;
+                    }
+                    Paused = GUILayout.Toggle(Paused, "Paused");
+                }
+            }
+            GUILayout.BeginHorizontal();
+            EditorGUIUtility.labelWidth *= 0.75f;
+            _visibleScale = EditorGUILayout.Slider("Scale:", _visibleScale, 0.1f, 10f);
+            CurrentSequence.MaxDuration = EditorGUILayout.FloatField(
+                "Max duration:",
+                CurrentSequence.MaxDuration);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            CurrentSequence.MaxTracks = EditorGUILayout.IntField("Max tracks:", CurrentSequence.MaxTracks);
+            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 50, 150);
+            if (_draggedObject == null) {
+                var newVisibleDuration = CurrentSequence.MaxDuration / _visibleScale;
+                if (Math.Abs(_visibleDuration - newVisibleDuration) > 0) {
+                    _visibleDuration = newVisibleDuration;
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            CurrentSequence.Looping = EditorGUILayout.Toggle("Looping", CurrentSequence.Looping);
+            EditorGUILayout.LabelField("Current Time: " + CurrentTime.ToString("F2"));
+            GUILayout.EndHorizontal();
+        }
+
+        protected virtual void DrawEditLine() {
+            var barPosition = position;
+            var currentTime = GUILayout.HorizontalSlider(
+                CurrentTime, 0,
+                _currentSequence.MaxDuration, "box", "box", GUILayout.Height(40), GUILayout.ExpandWidth(true));
+            if (Application.isPlaying && RuntimeSequence.DebugSequence != null) {
+                CurrentTime = RuntimeSequence.DebugSequence.CurrentTime;
+            }
+            else {
+                CurrentTime = currentTime;
+            }
+            var centerStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
+            centerStyle.alignment = TextAnchor.UpperCenter;
+            for (int i = 0; i <= 20; i++) {
+                var percent = i * 0.05f * _visibleScale;
+                if (percent > 1) {
+                    break;
+                }
+                DrawTrackLabel(barPosition, percent, centerStyle);
+            }
+        }
+
+        protected virtual void Play() {
+            TimeManager.ForceCheckEditor();
+            PlayTask = TimeManager.StartUnscaled(PlayAnimation());
         }
 
         private void CreateContextItem(object obj) {
@@ -378,16 +398,14 @@ namespace PixelComrades {
         }
 
         private void DrawTimeline(float yMax) {
-            if (_playTask != null) {
+            if (PlayTask != null) {
                 var horizontalPosStart =
-                    position.width * (_currentTime / _visibleDuration) - _visibleOffset;
+                    position.width * (CurrentTime / _visibleDuration) - _visibleOffset;
                 var timeRect = new Rect(horizontalPosStart, yMax, 1f, position.height - yMax);
                 GUI.Box(timeRect, string.Empty);
                 Repaint();
             }
         }
-
-
 
         private void DrawTrackLabel(Rect barPosition, float absPercent, GUIStyle style) {
             var percent = absPercent * _visibleScale;
@@ -405,26 +423,26 @@ namespace PixelComrades {
         }
 
         private IEnumerator PlayAnimation() {
-            _cancelPlay = false;
+            CancelPlay = false;
             var entity = Entity.New("Tester");
             var player = new RuntimeSequence(entity,  _currentSequence);
             entity.Add(new PoseAnimatorComponent(PoseAnimator.Main.Avatar, PoseAnimator.Main.DefaultPose, PoseAnimator.Main.transform));
             player.Play();
-            _playLimiter.Reset();
+            PlayLimiter.Reset();
             var lastPauseTime = 1f;
-            while (_playLimiter.Advance()) {
-                if (_cancelPlay) {
+            while (PlayLimiter.Advance()) {
+                if (CancelPlay) {
                     break;
                 }
-                var dt = _paused ? 0 : TimeManager.DeltaUnscaled;
-                _currentTime += dt;
-                if (_paused && Math.Abs(_currentTime - lastPauseTime) > 0.0001f) {
-                    lastPauseTime = _currentTime;
-                    player.SetTime(_currentTime);
+                var dt = Paused ? 0 : TimeManager.DeltaUnscaled;
+                CurrentTime += dt;
+                if (Paused && Math.Abs(CurrentTime - lastPauseTime) > 0.0001f) {
+                    lastPauseTime = CurrentTime;
+                    player.SetTime(CurrentTime);
                 }
                 player.Update(dt);
-                if (player.IsComplete && !_paused) {
-                    _currentTime = 0;
+                if (player.IsComplete && !Paused) {
+                    CurrentTime = 0;
                     if (!_currentSequence.Looping) {
                         break;
                     }
@@ -433,7 +451,7 @@ namespace PixelComrades {
                 yield return null;
             }
             entity.Destroy();
-            _playTask = null;
+            PlayTask = null;
         }
 
         private void OnSelectionChange() {

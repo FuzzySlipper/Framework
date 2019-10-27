@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public static class SpriteMeshUtilities {
 
-        public static void GenerateColliders(DirectionalAnimation dirAnim, float distance) {
+        public static void GenerateColliders(DirectionalAnimation dirAnim, float distance, float quality) {
             var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
             spriteRenderer.transform.ResetPos();
             for (int d = 0; d < dirAnim.DirectionalFrames.Count; d++) {
@@ -14,16 +14,42 @@ namespace PixelComrades {
                 for (int f = 0; f < frames.Length; f++) {
                     spriteRenderer.sprite = frames[f];
                     var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
-                    dirAnim.DirectionalFrames[d].Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance);
+                    dirAnim.DirectionalFrames[d].Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
                     UnityEngine.Object.DestroyImmediate(spriteCollider);
                 }
             }
             UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
         }
 
-        private static SavedSpriteCollider GenerateSavedCollider(Vector2[] poly, float distance) {
+        public static void GenerateColliders(SimpleAnimation anim, float distance, float quality) {
+            var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
+            spriteRenderer.transform.ResetPos();
+            anim.Colliders = new SavedSpriteCollider[anim.Sprites.Length];
+            for (int f = 0; f < anim.Sprites.Length; f++) {
+                spriteRenderer.sprite = anim.Sprites[f];
+                var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
+                anim.Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
+                UnityEngine.Object.DestroyImmediate(spriteCollider);
+            }
+            UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
+        }
+
+        private static SavedSpriteCollider GenerateSavedCollider(Vector2[] poly, float distance, float quality) {
             var collider = new SavedSpriteCollider();
-            ExtractMesh(poly, distance, out collider.CollisionVertices, out collider.CollisionIndices, out collider.HighPoint);
+            ExtractMesh(poly, distance, out var verts, out var indices, out collider.HighPoint);
+            var mesh = new Mesh();
+            mesh.SetVertices(verts);
+            mesh.SetTriangles(indices,0, true);
+            mesh.RecalculateNormals();
+            mesh.Optimize();
+            var meshSimplifier = new UnityMeshSimplifier.MeshSimplifier();
+            meshSimplifier.Initialize(mesh);
+            meshSimplifier.SimplifyMesh(quality);
+            var destMesh = meshSimplifier.ToMesh();
+            collider.CollisionIndices = new List<int>();
+            collider.CollisionVertices = new List<Vector3>();
+            collider.CollisionVertices.AddRange(destMesh.vertices);
+            collider.CollisionIndices.AddRange(destMesh.triangles);
             return collider;
         }
 

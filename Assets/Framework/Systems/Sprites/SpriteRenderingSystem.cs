@@ -7,13 +7,13 @@ namespace PixelComrades {
     [AutoRegister, Priority(Priority.Lowest)]
     public sealed class SpriteRenderingSystem : SystemBase, IMainSystemUpdate {
         
-        private static int _shaderPropertyUv = Shader.PropertyToID("_MainTex_UV");
-        private static int _shaderPropertyColor = Shader.PropertyToID("_Color");
-        private static int _shaderPropertyTexture = Shader.PropertyToID("_MainTex");
-        private static int _shaderPropertyNormal = Shader.PropertyToID("_BumpMap");
-        private static int _shaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
-        private static string _materialAddress = "SpriteNpcInstanced.mat";
-        private static int _renderLayer = LayerMasks.NumberEnemy;
+        public static int ShaderPropertyUv = Shader.PropertyToID("_MainTex_UV");
+        public static int ShaderPropertyColor = Shader.PropertyToID("_Color");
+        public static int ShaderPropertyTexture = Shader.PropertyToID("_MainTex");
+        public static int ShaderPropertyNormal = Shader.PropertyToID("_BumpMap");
+        public static int ShaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
+        public static string MaterialAddress = "SpriteNpcInstanced.mat";
+        public static int RenderLayer = LayerMasks.NumberEnemy;
         
         private TemplateList<SpriteRendererTemplate> _list;
         private ManagedArray<SpriteRendererTemplate>.RefDelegate _del;
@@ -26,7 +26,7 @@ namespace PixelComrades {
             TemplateFilter<SpriteRendererTemplate>.Setup();
             _list = EntityController.GetTemplateList<SpriteRendererTemplate>();
             _del = RunUpdate;
-            ItemPool.LoadAsset<Material>(_materialAddress, (m)=> _material = m);
+            ItemPool.LoadAsset<Material>(MaterialAddress, (m)=> _material = m);
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
@@ -35,14 +35,14 @@ namespace PixelComrades {
             _list.Run(_del);
             for (int i = 0; i < _textureList.Count; i++) {
                 var block = _blocks[_textureList[i]];
-                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyUv, block.UvList);
-                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyColor, block.Colors);
+                block.MaterialPropertyBlock.SetVectorArray(ShaderPropertyUv, block.UvList);
+                block.MaterialPropertyBlock.SetVectorArray(ShaderPropertyColor, block.Colors);
                 Graphics.DrawMeshInstanced(
                     block.Quad,
                     0,
                     block.Material,
                     block.MatrixList,
-                    block.MaterialPropertyBlock, ShadowCastingMode.TwoSided, true, _renderLayer);
+                    block.MaterialPropertyBlock, ShadowCastingMode.TwoSided, true, RenderLayer);
                 _renderPool.Enqueue(block);
             }
         }
@@ -62,12 +62,7 @@ namespace PixelComrades {
             if (template.Renderer.IsDirty) {
                 template.Renderer.UpdatedSprite();
                 var sprite = template.Renderer.Sprite;
-                var spriteRect = sprite.rect;
-                float uvWidth = spriteRect.width / sprite.texture.width;
-                float uvHeight = spriteRect.height / sprite.texture.height;
-                var uvOffsetX = sprite.rect.x / sprite.texture.width;
-                var uvOffsetY = sprite.rect.y / sprite.texture.height;
-                template.Renderer.Uv = new Vector4(uvWidth, uvHeight, uvOffsetX, uvOffsetY);
+                template.Renderer.Uv = GetUv(sprite);
                 if (template.Renderer.SavedCollider != null) {
                     template.Collider.Value.UpdateCollider(template.Renderer.SavedCollider);
                 }
@@ -101,11 +96,11 @@ namespace PixelComrades {
 
         private void UpdateMeshRenderer(SpriteRendererTemplate template) {
             var renderer = template.Renderer;
-            renderer.MatBlock.SetVector(_shaderPropertyColor, template.SpriteColor.CurrentColor);
-            renderer.MatBlock.SetVector(_shaderPropertyUv, renderer.Uv);
-            renderer.MatBlock.SetTexture(_shaderPropertyTexture, renderer.Sprite.texture);
-            renderer.MatBlock.SetTexture(_shaderPropertyNormal, renderer.Normal);
-            renderer.MatBlock.SetTexture(_shaderPropertyEmissive, renderer.Emissive);
+            renderer.MatBlock.SetVector(ShaderPropertyColor, template.SpriteColor.CurrentColor);
+            renderer.MatBlock.SetVector(ShaderPropertyUv, renderer.Uv);
+            renderer.MatBlock.SetTexture(ShaderPropertyTexture, renderer.Sprite.texture);
+            renderer.MatBlock.SetTexture(ShaderPropertyNormal, renderer.Normal);
+            renderer.MatBlock.SetTexture(ShaderPropertyEmissive, renderer.Emissive);
             renderer.ApplyMaterialBlock();
             var pixelsPerUnit = renderer.Sprite.pixelsPerUnit;
             var size = new Vector2(
@@ -122,9 +117,9 @@ namespace PixelComrades {
         private RenderBlock CreateBlock(SpriteRendererComponent data) {
             var block = GetRenderBlock();
             block.Clear();
-            block.Material.SetTexture(_shaderPropertyTexture, data.Sprite.texture);
-            block.Material.SetTexture(_shaderPropertyNormal, data.Normal);
-            block.Material.SetTexture(_shaderPropertyEmissive, data.Emissive);
+            block.Material.SetTexture(ShaderPropertyTexture, data.Sprite.texture);
+            block.Material.SetTexture(ShaderPropertyNormal, data.Normal);
+            block.Material.SetTexture(ShaderPropertyEmissive, data.Emissive);
             var pixelsPerUnit = data.Sprite.pixelsPerUnit;
             var size = new Vector2(
                 data.Sprite.rect.width / pixelsPerUnit,
@@ -141,6 +136,15 @@ namespace PixelComrades {
             block.Material = new Material(_material);
             block.MaterialPropertyBlock = new MaterialPropertyBlock();
             return block;
+        }
+
+        public static Vector4 GetUv(Sprite sprite) {
+            var spriteRect = sprite.rect;
+            float uvWidth = spriteRect.width / sprite.texture.width;
+            float uvHeight = spriteRect.height / sprite.texture.height;
+            var uvOffsetX = sprite.rect.x / sprite.texture.width;
+            var uvOffsetY = sprite.rect.y / sprite.texture.height;
+            return new Vector4(uvWidth, uvHeight, uvOffsetX, uvOffsetY);
         }
 
         private class RenderBlock {

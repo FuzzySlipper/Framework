@@ -210,6 +210,11 @@ namespace PixelComrades {
         }
 
 #if UNITY_EDITOR
+
+        public static void ForceCheckEditor() {
+            main.ForceEditorCheck();
+        }
+        
         public void CheckEditor() {
             if (Application.isPlaying) {
                 if (_editorUpdate) {
@@ -228,6 +233,7 @@ namespace PixelComrades {
         public void ForceEditorCheck() {
             EditorApplication.update -= RunUpdate;
             EditorApplication.update += RunUpdate;
+            _lastTime = Time;
             _editorUpdate = true;
         }
 #endif

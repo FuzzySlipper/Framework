@@ -13,6 +13,7 @@ namespace PixelComrades {
         public const string TagDummy = "Dummy";
         public const string TagCreated = "Created";
         public const string TagSensor = "Sensor";
+        public const string TagSpriteRenderer = "SpriteRenderer";
         public const string TagConvertedTexture = "ConvertedTexture";
         public const string TagInvalidCollider = "InvalidCollider";
         public const string TagDeleteObject = "DeleteObject";

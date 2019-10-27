@@ -48,7 +48,7 @@ namespace PixelComrades {
 #endif
             int limit = Physics.RaycastNonAlloc( ray, _rayHits, distance, LayerMasks.DefaultCollision);
             _rayHits.SortByDistanceAsc(limit);
-            return CheckRayList(entity, limit, limitCollision);
+            return CheckRayList(entity, ray, limit, limitCollision);
         }
 
         public static CollisionEvent? SphereCast(Entity entity, Ray ray, float distance, float radius, bool limitCollision) {
@@ -57,7 +57,7 @@ namespace PixelComrades {
 #endif
             var limit = Physics.SphereCastNonAlloc(ray, radius, _rayHits, distance, LayerMasks.DefaultCollision);
             _rayHits.SortByDistanceAsc(limit);
-            return CheckRayList(entity, limit, limitCollision);
+            return CheckRayList(entity, ray, limit, limitCollision);
         }
 
         public static void OverlapSphere(Entity entity, Entity ignoreEntity, Vector3 position, float radius, bool limitEnemy) {
@@ -69,7 +69,7 @@ namespace PixelComrades {
         }
         
 
-        private static CollisionEvent? CheckRayList(Entity originEntity, int limit, bool limitEnemy) {
+        private static CollisionEvent? CheckRayList(Entity originEntity, Ray ray, int limit, bool limitEnemy) {
             for (int i = 0; i < limit; i++) {
                 if (originEntity.IsDestroyed()) {
                     return null;
@@ -103,6 +103,16 @@ namespace PixelComrades {
                     continue;
                 }
                 if (IsValidCollision(originEntity, limitEnemy, hitEntity, _rayHits[i].collider, out var sourceNode, out var targetNode)) {
+                    if (targetNode.DetailCollider != null) {
+                        var detailTr = targetNode.DetailCollider.Collider.transform;
+                        var localPoint = hit.transform.InverseTransformPoint(ray.origin);
+                        var localDir = hit.transform.InverseTransformDirection(ray.direction);
+                        var rayCast = new Ray(detailTr.TransformPoint(localPoint), detailTr.TransformDirection(localDir));
+                        if (!targetNode.DetailCollider.Collider.Raycast(rayCast, out var childHit, 500)) {
+                            DebugExtension.DebugPoint(childHit.point, Color.yellow, 0.25f, 2.5f);
+                            continue;
+                        }
+                    }
                     var ce = new CollisionEvent(originEntity, sourceNode, targetNode, _rayHits[i].point, _rayHits[i].normal);
                     hitEntity.Post(ce);
                     originEntity.Post(new PerformedCollisionEvent(sourceNode, targetNode, _rayHits[i].point, _rayHits[i].normal));

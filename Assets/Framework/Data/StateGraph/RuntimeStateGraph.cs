@@ -131,12 +131,12 @@ namespace PixelComrades {
             OnComplete.SafeInvoke();
         }
 
-        public void TriggerGlobal(string key) {
+        public bool TriggerGlobal(string key) {
             if (!GlobalTriggers.TryGetValue(key, out var trigger)) {
-                return;
+                return false;
             }
             if (!trigger.Trigger()) {
-                return;
+                return false;
             }
             for (int i = 0; i < _globals.Count; i++) {
                 _globals[i].CheckConditions();
@@ -145,6 +145,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
             TriggerLog.Add(key);
 #endif
+            return true;
         }
 
         public bool IsGlobalTriggerActive(string key) {

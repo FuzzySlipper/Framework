@@ -4,6 +4,57 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [System.Serializable]
+    public class SimpleBufferedList<T> : IEnumerable<T> {
+
+        [SerializeField] private List<T>[] _list = new List<T>[2];
+        
+        public SimpleBufferedList(int size = 10){
+            _list[0] = new List<T>(size);
+            _list[1] = new List<T>(size);
+        }
+
+        private List<T> CurrentList { get { return _list[0]; } }
+        private List<T> Pending { get { return _list[1]; } }
+        
+        public T this[int index] { get { return CurrentList[index]; } }
+        public int Count { get { return CurrentList.Count; } }
+
+        public void Add(T newVal) {
+            Pending.Add(newVal);
+        }
+
+        public void Remove(T newVal) {
+            Pending.Remove(newVal);
+        }
+
+        public bool PendingContains(T obj) {
+            return Pending.Contains(obj);
+        }
+
+        public bool CurrentContains(T obj) {
+            return CurrentList.Contains(obj);
+        }
+
+        public void Swap() {
+            CurrentList.Clear();
+            CurrentList.AddRange(Pending);
+        }
+
+        public void Clear() {
+            CurrentList.Clear();
+            Pending.Clear();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return CurrentList.GetEnumerator();
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            return CurrentList.GetEnumerator();
+        }
+    }
+    
     
     [Serializable]
     public abstract class BufferedList : IDisposable {

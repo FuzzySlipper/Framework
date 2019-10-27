@@ -12,8 +12,10 @@ namespace PixelComrades {
         private static int _shaderPropertyTexture = Shader.PropertyToID("_MainTex");
         private static int _shaderPropertyNormal = Shader.PropertyToID("_BumpMap");
         private static int _shaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
+        private static int _shaderPropertyEmissivePower = Shader.PropertyToID("_EmissionPower");
         private static int _dissolveMaskPosition = Shader.PropertyToID("_DissolveMaskPosition");
         private static int _dissolveMaskRadius = Shader.PropertyToID("_DissolveMaskRadius");
+        private static string _shaderEmissiveKeyword = "_EMISSION";
         
         [SerializeField] private Material _material = null;
         [SerializeField] private SpriteData[] _spriteData = new SpriteData[0];
@@ -103,7 +105,13 @@ namespace PixelComrades {
                 blockMaterial.SetFloat(_dissolveMaskRadius, data.DissolveRadius);
                 blockMaterial.SetTexture(_shaderPropertyTexture, data.Sprite.texture);
                 blockMaterial.SetTexture(_shaderPropertyNormal, data.Animation.NormalMap);
-                blockMaterial.SetTexture(_shaderPropertyEmissive, data.Animation.EmissiveMap);
+                if (data.Animation.EmissiveMap != null) {
+                    _testRenderer.material.EnableKeyword(_shaderEmissiveKeyword);
+                    blockMaterial.SetTexture(_shaderPropertyEmissive, data.Animation.EmissiveMap);
+                }
+                else {
+                    _testRenderer.material.DisableKeyword(_shaderEmissiveKeyword);
+                }
                 _testRenderer.SetPropertyBlock(blockMaterial);
                 var pixelsPerUnit = data.Sprite.pixelsPerUnit;
                 var size = new Vector2(data.Sprite.rect.width / pixelsPerUnit,
@@ -182,6 +190,7 @@ namespace PixelComrades {
             block.Material.SetTexture(_shaderPropertyTexture, data.Sprite.texture);
             block.Material.SetTexture(_shaderPropertyNormal, data.Animation.NormalMap);
             block.Material.SetTexture(_shaderPropertyEmissive, data.Animation.EmissiveMap);
+            block.Material.SetFloat(_shaderPropertyEmissivePower, data.Animation.EmissiveMap != null ? 1 : 0);
             var pixelsPerUnit = data.Sprite.pixelsPerUnit;
             var size = new Vector2(
                 data.Sprite.rect.width / (float) pixelsPerUnit,

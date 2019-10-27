@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public class SpriteCollider : MonoBehaviour, IOnCreate {
+    public class SpriteCollider : MonoBehaviour, IOnCreate, IPoolEvents {
 
         private const float ColliderDepth = 0.5f;
         [SerializeField] private SpriteRenderer _spriteRenderer = null;
         [SerializeField] private BoxCollider _boxCollider;
         [SerializeField] private MeshCollider _mc;
+        [SerializeField] private MeshCollider _detailCollider = null;
         
         private Vector3[] _meshColliderVerts;
         private Mesh _mesh;
@@ -17,6 +18,7 @@ namespace PixelComrades {
         private Vector2 _bottomLeft, _bottomRight, _topLeft, _topRight;
 
         public Collider UnityCollider { get; private set; }
+        public MeshCollider DetailCollider { get => _detailCollider; }
 
         public void OnCreate(PrefabEntity entity) {
             if (_mc == null) {
@@ -31,6 +33,21 @@ namespace PixelComrades {
             }
             else {
                 UnityCollider = _boxCollider;
+            }
+        }
+
+        public void OnPoolSpawned() {
+            if (_detailCollider != null) {
+                var detailTr = _detailCollider.transform;
+                detailTr.SetParent(null);
+                detailTr.position = new Vector3(Random.Range(-100,100), -100, 0);
+                detailTr.rotation = Quaternion.identity;
+            }
+        }
+
+        public void OnPoolDespawned() {
+            if (_detailCollider != null) {
+                _detailCollider.transform.SetParent(transform);
             }
         }
 
@@ -111,11 +128,18 @@ namespace PixelComrades {
 
         public void UpdateCollider(SavedSpriteCollider spriteCollider) {
             _mesh.Clear();
+            if (spriteCollider == null) {
+                return;
+            }
             _mesh.SetVertices(spriteCollider.CollisionVertices);
             _mesh.SetTriangles(spriteCollider.CollisionIndices, 0, true);
             _mc.sharedMesh = _mesh;
+            if (_detailCollider != null) {
+                _detailCollider.sharedMesh = _mesh;
+            }
         }
 
+        [Button]
         private void InitMeshCollider() {
             _meshColliderVerts = new Vector3[] {
                 new Vector3(0, 0, 0),
@@ -168,12 +192,6 @@ namespace PixelComrades {
         }
 
         private void UpdateBoxCollider() {
-            //var bounds = new Bounds(_renderer.transform.position, Vector3.zero);
-            //bounds.Encapsulate(_renderer.transform.TransformPoint(_bottomLeft));
-            //bounds.Encapsulate(_renderer.transform.TransformPoint(_bottomRight));
-            //bounds.Encapsulate(_renderer.transform.TransformPoint(_topLeft));
-            //bounds.Encapsulate(_renderer.transform.TransformPoint(_topRight));
-
             var bounds = new Bounds(Vector3.zero, Vector3.zero);
             bounds.Encapsulate(_bottomLeft);
             bounds.Encapsulate(_bottomRight);
@@ -182,10 +200,6 @@ namespace PixelComrades {
 
             _boxCollider.center = bounds.center;
             _boxCollider.size = new Vector3(bounds.size.x, bounds.size.y, ColliderDepth);
-            //var reducedHeight = topOffset * 2;
-            //var finalWidth = Mathf.Max(leftOffset, rightOffset) * 2;
-            //_boxCollider.center = new Vector3(0, reducedHeight * 0.5f, 0);
-            //_boxCollider.size = new Vector3(finalWidth, reducedHeight , ColliderDepth*2);
         }
     }
 }

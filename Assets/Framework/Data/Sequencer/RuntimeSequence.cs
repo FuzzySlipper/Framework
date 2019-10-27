@@ -18,6 +18,7 @@ namespace PixelComrades {
         public float Length { get; }
         public GenericSequence Sequence { get; private set; }
         public bool IsComplete { get; private set; }
+        public bool IsPlaying { get; private set; }
         public Entity Entity { get; private set; }
 
         public RuntimeSequence(Entity owner, GenericSequence sequence) {
@@ -57,6 +58,7 @@ namespace PixelComrades {
         public void Play() {
             Stop();
             IsComplete = false;
+            IsPlaying = true;
             _pendingObjects.AddRange(_allObjects);
 #if UNITY_EDITOR
             if (Application.isPlaying && Sequence.DebugRuntime) {
@@ -72,6 +74,7 @@ namespace PixelComrades {
         
         public void Stop() {
             Reset();
+            IsPlaying = false;
             _currentTime = 0;
         }
 
@@ -85,6 +88,7 @@ namespace PixelComrades {
             }
             CheckAnimationList(false);
             if (_currentObjects.Count == 0 && _pendingObjects.Count == 0) {
+                IsPlaying = false;
                 IsComplete = true;
             }
         }
