@@ -30,10 +30,6 @@ namespace PixelComrades {
             }
         }
 
-        public void SetEntity(Entity owner) {
-            Entity = owner;
-        }
-
         public void SetTimeNormalized(float normalized) {
             _currentTime = Length * normalized;
             CheckAnimationList(true);

@@ -8,6 +8,7 @@ namespace PixelComrades {
         private static string _defaultName = "DefaultPose";
         
         public AnimationCurve Curve;
+        public MusclePose StartPose;
         public MusclePose TargetPose;
         
         [SerializeField] private float _duration = 0.2f;
@@ -40,6 +41,7 @@ namespace PixelComrades {
             
             Curve = UnityEditor.EditorGUILayout.CurveField("Curve", Curve);
             TargetPose = UnityEditor.EditorGUILayout.ObjectField("Pose", TargetPose, typeof(MusclePose), false) as MusclePose;
+            StartPose = UnityEditor.EditorGUILayout.ObjectField("StartPose", StartPose, typeof(MusclePose), false) as MusclePose;
             if (AnimationCurveExtension.ClipBoardAnimationCurve != null) {
                 if (GUILayout.Button("Paste Animation Curve")) {
                     Curve.keys = AnimationCurveExtension.ClipBoardAnimationCurve.keys;
@@ -138,6 +140,25 @@ namespace PixelComrades {
             if (_originalClip.TargetPose == null) {
                 _pose.Clear();
                 SetupDefaultPose();
+                return;
+            }
+            if (_originalClip.StartPose != null) {
+                for (int i = 0; i < _pose.Count; i++) {
+                    var muscleIndex = _pose[i].MuscleIndex;
+                    var muscle = _originalClip.StartPose.GetMuscle(muscleIndex);
+                    if (muscle != null) {
+                        _pose[i].Start = muscle.Value;
+                        continue;
+                    }
+                    if (_previous != null) {
+                        muscle = _previous.TargetPose.GetMuscle(muscleIndex);
+                        if (muscle != null) {
+                            _pose[i].Start = muscle.Value;
+                            continue;
+                        }
+                    }
+                    _pose[i].Start = _poseAnimatorComponent.HumanPose.muscles[muscleIndex];
+                }
                 return;
             }
             if (_previous != null) {
