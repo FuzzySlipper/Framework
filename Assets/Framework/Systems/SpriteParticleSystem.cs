@@ -51,7 +51,7 @@ namespace PixelComrades {
                 }
                 var currentFrame = value.CurrentFrame;
                 value.NextUpdateTime = value.Animation.FrameTime * currentFrame.Length + time;
-                value.Renderer.sprite = value.Animation.GetSpriteFrame(value.CurrentFrameIndex);
+                value.Renderer.sprite = value.Animation.GetSprite(value.CurrentFrameIndex);
             }
         }
 
@@ -105,7 +105,7 @@ namespace PixelComrades {
                 _matBlock.SetColor("_TintColor", Color.white * particle.Glow);
                 Renderer.SetPropertyBlock(_matBlock);
                 Renderer.color = particle.Color;
-                Renderer.sprite = Animation.GetSpriteFrame(CurrentFrameIndex);
+                Renderer.sprite = Animation.GetSprite(CurrentFrameIndex);
                 Renderer.gameObject.name = particle.Animation.name;
             }
         }

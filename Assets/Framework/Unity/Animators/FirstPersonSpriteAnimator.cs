@@ -84,7 +84,7 @@ namespace PixelComrades {
         }
 
         private void UpdateSpriteFrame() {
-            var sprite = _currentAnim != null ? _currentAnim.GetSpriteFrame(_currentFrameIndex) : null;
+            var sprite = _currentAnim != null ? _currentAnim.GetSprite(_currentFrameIndex) : null;
             if (sprite == null) {
                 return;
             }
@@ -154,7 +154,7 @@ namespace PixelComrades {
                 return;
             }
             _currentAnim = anim;
-            _renderer.sprite = _currentAnim.GetSpriteFrame(0);
+            _renderer.sprite = _currentAnim.GetSprite(0);
             if (_currentAnim.NormalMap != null) {
                 _materialBlock.SetTexture("_BumpMap", _currentAnim.NormalMap);
             }

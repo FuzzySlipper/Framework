@@ -30,7 +30,13 @@ namespace PixelComrades {
             if (!arg.Target.Entity.HasComponent<FloatingText>()) {
                 return;
             }
-            UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.Tr.position, Color.red);
+            if (arg.Impact.Hit == CollisionResult.CriticalHit) {
+                UIFloatingText.WorldSpawn(arg.Amount.ToString("F0") + "!", arg.Target.Tr.position, new Color(1f, 0.6f, 0.14f));
+            }
+            else {
+                UIFloatingText.WorldSpawn(arg.Amount.ToString("F0"), arg.Target.Tr.position, Color.red);
+            }
+            
         }
 
         public void Handle(HealingEvent arg) {

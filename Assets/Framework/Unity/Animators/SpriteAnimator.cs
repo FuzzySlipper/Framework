@@ -47,7 +47,7 @@ namespace PixelComrades {
 
         private void SetAnimation(SpriteAnimation anim) {
             _animation = anim;
-            _renderer.sprite = _animation.GetSpriteFrame(0);
+            _renderer.sprite = _animation.GetSprite(0);
             if (_animation.NormalMap != null) {
                 _materialBlock.SetTexture("_BumpMap", _animation.NormalMap);
             }
@@ -89,7 +89,7 @@ namespace PixelComrades {
         }
         
         private void UpdateSpriteFrame() {
-            var sprite = _animation.GetSpriteFrame(_spriteAnimator.FrameIndex);
+            var sprite = _animation.GetSprite(_spriteAnimator.FrameIndex);
             if (sprite == null) {
                 return;
             }

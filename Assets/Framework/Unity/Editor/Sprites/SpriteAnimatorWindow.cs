@@ -594,7 +594,7 @@ namespace PixelComrades {
             float time = 0;
             for (int i = 0; i < _clip.Frames.Length; i++) {
                 _frames.Add(new AnimFrame() {
-                    Sprite = _clip.GetSpriteFrame(i),
+                    Sprite = _clip.GetSprite(i),
                     Event = _clip.Frames[i].Event,
                     LengthMulti = _clip.Frames[i].Length,
                     RealLength = MathEx.Max(GetFrameTime(), SnapTimeToFrameRate(_clip.Frames[i].Length)),

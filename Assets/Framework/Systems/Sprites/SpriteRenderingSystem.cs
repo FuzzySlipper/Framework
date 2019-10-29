@@ -63,14 +63,19 @@ namespace PixelComrades {
                 template.Renderer.UpdatedSprite();
                 var sprite = template.Renderer.Sprite;
                 template.Renderer.Uv = GetUv(sprite);
+                var size = new Vector2(sprite.rect.width / sprite.pixelsPerUnit,
+                    sprite.rect.height / sprite.pixelsPerUnit);
                 if (template.Renderer.SavedCollider != null) {
                     template.Collider.Value.UpdateCollider(template.Renderer.SavedCollider);
+                    if (template.CriticalHitCollider != null) {
+                        template.CriticalHitCollider.Assign(template.Renderer.SavedCollider.CriticalRect, size);
+                    }
                 }
                 else {
                     template.Collider.Value.UpdateSprite(sprite, template.Renderer.FlipX);
                 }
                 if (template.Renderer.MeshRenderer != null) {
-                    UpdateMeshRenderer(template);
+                    UpdateMeshRenderer(template, size);
                     return;
                 }
             }
@@ -94,7 +99,7 @@ namespace PixelComrades {
             block.Colors.Add(template.SpriteColor?.CurrentColor ?? Color.white);
         }
 
-        private void UpdateMeshRenderer(SpriteRendererTemplate template) {
+        private void UpdateMeshRenderer(SpriteRendererTemplate template, Vector2 size) {
             var renderer = template.Renderer;
             renderer.MatBlock.SetVector(ShaderPropertyColor, template.SpriteColor.CurrentColor);
             renderer.MatBlock.SetVector(ShaderPropertyUv, renderer.Uv);
@@ -102,10 +107,6 @@ namespace PixelComrades {
             renderer.MatBlock.SetTexture(ShaderPropertyNormal, renderer.Normal);
             renderer.MatBlock.SetTexture(ShaderPropertyEmissive, renderer.Emissive);
             renderer.ApplyMaterialBlock();
-            var pixelsPerUnit = renderer.Sprite.pixelsPerUnit;
-            var size = new Vector2(
-                renderer.Sprite.rect.width / pixelsPerUnit,
-                renderer.Sprite.rect.height / pixelsPerUnit);
             Vector2 scaledPivot = size * new Vector2(0.5f, 0);
             renderer.MeshVertices[0] = new Vector3(size.x - scaledPivot.x, size.y - scaledPivot.y, 0);
             renderer.MeshVertices[1] = new Vector3(size.x - scaledPivot.x, -scaledPivot.y, 0);
@@ -171,13 +172,15 @@ namespace PixelComrades {
         private CachedComponent<SpriteColliderComponent> _collider = new CachedComponent<SpriteColliderComponent>();
         private CachedComponent<SpriteBillboardComponent> _billboard = new CachedComponent<SpriteBillboardComponent>();
         private CachedComponent<SpriteColorComponent> _spriteColor = new CachedComponent<SpriteColorComponent>();
+        private CachedComponent<CriticalHitCollider> _criticalHit = new CachedComponent<CriticalHitCollider>();
         
         public SpriteRendererComponent Renderer { get => _renderer.Value; }
         public SpriteColliderComponent Collider { get => _collider.Value; }
         public SpriteBillboardComponent Billboard => _billboard.Value;
         public SpriteColorComponent SpriteColor => _spriteColor.Value;
+        public CriticalHitCollider CriticalHitCollider => _criticalHit.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _renderer, _collider, _billboard, _spriteColor
+            _renderer, _collider, _billboard, _spriteColor, _criticalHit
         };
 
         public override System.Type[] GetTypes() {

@@ -5,10 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class SimpleAnimation : SpriteAnimation {
 
-        public Sprite[] Sprites;
-        public SavedSpriteCollider[] Colliders;
-
-        public override Sprite GetSpriteFrame(int frame) {
+        public override Sprite GetSprite(int frame) {
             return Sprites[Mathf.Clamp(frame, 0, Sprites.Length - 1)];
         }
 

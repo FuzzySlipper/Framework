@@ -45,6 +45,10 @@ namespace PixelComrades {
             if (msg.Hit <= 0) {
                 return;
             }
+            var criticalHit = msg.Target.Entity.Get<CriticalHitCollider>();
+            if (criticalHit != null && criticalHit.IsCritical(msg.Target.Tr, msg.HitPoint)) {
+                msg.Hit = CollisionResult.CriticalHit;
+            }
             var ae = new ActionEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
                 msg.HitNormal == Vector3.zero ? Quaternion.identity :Quaternion.LookRotation(msg.HitNormal), 
             ActionState.Impact);
@@ -56,7 +60,12 @@ namespace PixelComrades {
             }
             _collisionString.Clear();
             _collisionString.Append(msg.Origin.GetName());
-            _collisionString.Append(" struck ");
+            if (msg.Hit == CollisionResult.CriticalHit) {
+                _collisionString.Append(" critically hit ");
+            }
+            else {
+                _collisionString.Append(" struck ");
+            }
             _collisionString.Append(msg.Target.GetName());
             MessageKit<UINotificationWindow.Msg>.post(Messages.MessageLog, new UINotificationWindow.Msg(
                 _collisionString.ToString(),"", Color.blue));
@@ -85,9 +94,11 @@ namespace PixelComrades {
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
         public ActionTemplate Action { get; }
+        public int Hit { get; }
 
         public ImpactEvent(CollisionEvent collisionEvent, ActionTemplate action, CharacterTemplate origin, CharacterTemplate target) {
             Source = collisionEvent.Source;
+            Hit = collisionEvent.Hit;
             Origin = origin;
             Target = target;
             HitPoint = collisionEvent.HitPoint;

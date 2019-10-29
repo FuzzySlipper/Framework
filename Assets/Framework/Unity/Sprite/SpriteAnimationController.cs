@@ -21,7 +21,7 @@ namespace PixelComrades {
         public int FrameIndex { get { return _currentFrameIndex; } }
         public bool Active { get { return Animation != null && _playing; } }
         public float TimeRemaining { get { return (Animation.LengthFrames - _currentFrameIndex) * Animation.FrameTime; } }
-        public Sprite GetFrameSprite { get { return CurrentFrame != null ? Animation.GetSpriteFrame(_currentFrameIndex) : null; } }
+        public Sprite GetFrameSprite { get { return CurrentFrame != null ? Animation.GetSprite(_currentFrameIndex) : null; } }
 
         public void ResetAnimation(SpriteAnimation spriteAnimation) {
             _currentFrameIndex = 0;

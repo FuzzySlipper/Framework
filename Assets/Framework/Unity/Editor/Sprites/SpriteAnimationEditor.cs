@@ -2,10 +2,11 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector.Editor;
+using Sirenix.Utilities;
 using UnityEditor;
 
 namespace PixelComrades {
-    [CustomEditor(typeof(SpriteAnimation), true)]
+    [CustomEditor(typeof(SpriteAnimation), true), CanEditMultipleObjects]
     public class SpriteAnimationEditor : OdinEditor {
 
         private TextureDrawType _selectedTextureDrawType = TextureDrawType.Transparent;
@@ -20,28 +21,60 @@ namespace PixelComrades {
 
         private float _distance = 0.2f;
         private float _quality = 0.35f;
+        private SpriteAnimation _copyAnimation;
 
         public override void OnInspectorGUI() {
             var script = (SpriteAnimation)target;
             if (GUILayout.Button("Edit Animations")) {
+                if (targets.Length > 1) {
+                    return;
+                }
                 SpriteAnimatorWindow.ShowWindow();
             }
+            if (GUILayout.Button("Generate Colliders")) {
+                if (targets.Length > 1) {
+                    for (int i = 0; i < targets.Length; i++) {
+                        if (targets[i] is DirectionalAnimation dirAnim) {
+                            SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
+                        }
+                        else if (targets[i] is SimpleAnimation simpleAnim) {
+                            SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
+                        }
+                        EditorUtility.SetDirty(targets[i]);
+                    }
+                }
+                else {
+                    if (script is DirectionalAnimation dirAnim) {
+                        SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
+                    }
+                    else if (script is SimpleAnimation simpleAnim) {
+                        SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
+                    }
+                    EditorUtility.SetDirty(script);
+                }
+            }
+            if (GUILayout.Button("Edit Critical Colliders")) {
+                SpriteColliderCriticalWindow.ShowCriticalWindow().Set(script);
+            }
+            if (_copyAnimation != null && GUILayout.Button("Clone To This Animation")) {
+                var cnt = _copyAnimation.LengthSprites;
+                if (cnt != script.LengthSprites) {
+                    Debug.LogErrorFormat("{0} has {1} sprites different from our sprite cnt {2}", _copyAnimation.name, cnt, script.LengthSprites);
+                }
+                else {
+                    var colliders = _copyAnimation.Colliders;
+                    script.Colliders = new SavedSpriteCollider[colliders.Length];
+                    script.Colliders.AddRange(colliders);
+                }
+            }
+            base.OnInspectorGUI();
             EditorGUILayout.LabelField(string.Format("Last Modified {0}", script.LastModified));
             EditorGUILayout.LabelField(string.Format("Length: {0}", script.LengthTime.ToString("F1")));
             EditorGUILayout.LabelField(string.Format("FrameTime: {0}", script.FrameTime.ToString("F1")));
             EditorGUILayout.LabelField(string.Format("Animation Length: {0}", script.LengthFrames));
-            base.OnInspectorGUI();
             _distance = EditorGUILayout.FloatField("Collider Size", _distance);
             _quality = EditorGUILayout.FloatField("Collider Quality", _quality);
-            if (GUILayout.Button("Generate Colliders")) {
-                if (script is DirectionalAnimation dirAnim) {
-                    SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
-                }
-                else if (script is SimpleAnimation simpleAnim) {
-                    SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
-                }
-                EditorUtility.SetDirty(script);
-            }
+            _copyAnimation = (SpriteAnimation) EditorGUILayout.ObjectField("Clone Source", _copyAnimation, typeof(SpriteAnimation), false);
         }
 
         public override void OnPreviewSettings() {

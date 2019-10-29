@@ -55,8 +55,8 @@ namespace PixelComrades {
                     Debug.LogErrorFormat("No facing for {0} at {1}", facing, _animation.name);
                     return;
                 }
-                Renderer.SetSprite(animFacing.Frames[Animator.FrameIndex], _animation.NormalMap, _animation.EmissiveMap,
-                    animFacing.Colliders[Animator.FrameIndex]);
+                var idx = animFacing.FrameIndices[Animator.FrameIndex];
+                Renderer.SetSprite(_animation.GetSprite(idx), _animation.NormalMap, _animation.EmissiveMap, _animation.GetSpriteCollider(idx));
             }
 
             public override bool TryComplete(float dt) {
@@ -99,7 +99,7 @@ namespace PixelComrades {
             }
 
             protected virtual void UpdateSprite() {
-                Renderer.SetSprite(_node.Animation.GetSpriteFrame(Animator.FrameIndex), _node.Animation.NormalMap, _node.Animation.EmissiveMap,
+                Renderer.SetSprite(_node.Animation.GetSprite(Animator.FrameIndex), _node.Animation.NormalMap, _node.Animation.EmissiveMap,
                     _node.Animation.GetSpriteCollider(Animator.FrameIndex));
             }
 

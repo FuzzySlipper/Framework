@@ -6,14 +6,6 @@ using UnityEditor;
 using UnityEngine;
 
 namespace PixelComrades {
-    
-    [CustomEditor(typeof(WeaponPositionMarker))]
-    public class WeaponPositionMarkerEditor : OdinEditor {}
-
-    [CustomEditor(typeof(AnimationEventMarker))]
-    public class AnimationEventMarkerEditor : OdinEditor {
-    }
-
     [CustomEditor(typeof(MuscleController))]
     public class MuscleControllerEditor : OdinEditor {
 

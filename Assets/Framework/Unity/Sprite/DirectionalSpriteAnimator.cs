@@ -26,7 +26,7 @@ namespace PixelComrades {
             if (_sprite == null) {
                 return;
             }
-            _renderer.sprite = _sprite.GetSpriteFrame(0);
+            _renderer.sprite = _sprite.GetSprite(0);
             materialBlock.SetTexture("_BumpMap", _sprite.NormalMap);
             materialBlock.SetTexture("_MainTex", _renderer.sprite.texture);
             _renderer.SetPropertyBlock(materialBlock);
@@ -74,7 +74,7 @@ namespace PixelComrades {
                 facing = _orientation.GetFlippedSide();
                 _renderer.flipX = _orientation.IsFlipped();
             }
-            var sprite = _sprite.GetSpriteFrame(facing, _spriteAnimator.FrameIndex);
+            var sprite = _sprite.GetSprite(facing, _spriteAnimator.FrameIndex);
             if (sprite == null) {
                 return;
             }

@@ -77,7 +77,7 @@ namespace PixelComrades {
                         frame = spriteData.Animation.GetFrame(spriteData.Frame);
                     }
                     spriteData.FrameTimer = spriteData.Animation.FrameTime * frame.Length;
-                    spriteData.Sprite = spriteData.Animation.GetSpriteFrame(spriteData.Frame);
+                    spriteData.Sprite = spriteData.Animation.GetSprite(spriteData.Frame);
                     var width = spriteData.Sprite.rect.width;
                     var height = spriteData.Sprite.rect.height;
                     //var gridY = Mathf.FloorToInt(spriteData.Frame / spriteData.FrameGridX);
@@ -106,7 +106,7 @@ namespace PixelComrades {
                 blockMaterial.SetTexture(_shaderPropertyTexture, data.Sprite.texture);
                 blockMaterial.SetTexture(_shaderPropertyNormal, data.Animation.NormalMap);
                 if (data.Animation.EmissiveMap != null) {
-                    _testRenderer.material.EnableKeyword(_shaderEmissiveKeyword);
+                    _testRenderer.sharedMaterial.EnableKeyword(_shaderEmissiveKeyword);
                     blockMaterial.SetTexture(_shaderPropertyEmissive, data.Animation.EmissiveMap);
                 }
                 else {
@@ -125,7 +125,15 @@ namespace PixelComrades {
                 }
                 Resize(size);
                 if (_spriteCollider != null) {
-                    _spriteCollider.UpdateCollider(data.Animation.GetSpriteCollider(data.Frame));
+                    var savedCollider = data.Animation.GetSpriteCollider(data.Frame);
+                    _spriteCollider.UpdateCollider(savedCollider);
+                    if (savedCollider != null) {
+                        var center = _spriteCollider.transform.TransformPoint(Mathf.Lerp(-(size.x *0.5f), (size.x * 0.5f), savedCollider
+                        .CriticalRect.x),size.y * savedCollider.CriticalRect.y,0);
+                        var colliderSize = new Vector3(savedCollider.CriticalRect.size.x * size.x,
+                            savedCollider.CriticalRect.size.y * size.y, 0.5f);
+                        DebugExtension.DebugBounds(new Bounds(center,colliderSize), Color.red);
+                    }
                 }
             }
         }

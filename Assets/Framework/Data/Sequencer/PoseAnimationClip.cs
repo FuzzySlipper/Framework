@@ -6,7 +6,7 @@ namespace PixelComrades {
     public class PoseAnimationClip : SequenceObject {
 
         private static string _defaultName = "DefaultPose";
-        
+
         public AnimationCurve Curve;
         public MusclePose StartPose;
         public MusclePose TargetPose;
@@ -21,7 +21,9 @@ namespace PixelComrades {
         }
 
         public override void DrawTimelineGui(Rect rect) {
-            
+            if (Curve == null) {
+                Curve = new AnimationCurve();
+            }
 #if UNITY_EDITOR
             if (TargetPose != null && name != TargetPose.name) {
                 name = TargetPose.name;

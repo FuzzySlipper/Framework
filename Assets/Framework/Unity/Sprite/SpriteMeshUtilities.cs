@@ -4,19 +4,18 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public static class SpriteMeshUtilities {
+        
+        private static Vector2 _defaultCriticalSize = new Vector2(0.15f, 0.15f);
 
         public static void GenerateColliders(DirectionalAnimation dirAnim, float distance, float quality) {
             var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
             spriteRenderer.transform.ResetPos();
-            for (int d = 0; d < dirAnim.DirectionalFrames.Count; d++) {
-                var frames = dirAnim.DirectionalFrames[d].Frames;
-                dirAnim.DirectionalFrames[d].Colliders = new SavedSpriteCollider[frames.Length];
-                for (int f = 0; f < frames.Length; f++) {
-                    spriteRenderer.sprite = frames[f];
-                    var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
-                    dirAnim.DirectionalFrames[d].Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
-                    UnityEngine.Object.DestroyImmediate(spriteCollider);
-                }
+            dirAnim.Colliders = new SavedSpriteCollider[dirAnim.Sprites.Length];
+            for (int f = 0; f < dirAnim.Sprites.Length; f++) {
+                spriteRenderer.sprite = dirAnim.Sprites[f];
+                var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
+                dirAnim.Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
+                UnityEngine.Object.DestroyImmediate(spriteCollider);
             }
             UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
         }
@@ -36,7 +35,7 @@ namespace PixelComrades {
 
         private static SavedSpriteCollider GenerateSavedCollider(Vector2[] poly, float distance, float quality) {
             var collider = new SavedSpriteCollider();
-            ExtractMesh(poly, distance, out var verts, out var indices, out collider.HighPoint);
+            ExtractMesh(poly, distance, out var verts, out var indices);
             var mesh = new Mesh();
             mesh.SetVertices(verts);
             mesh.SetTriangles(indices,0, true);
@@ -50,11 +49,11 @@ namespace PixelComrades {
             collider.CollisionVertices = new List<Vector3>();
             collider.CollisionVertices.AddRange(destMesh.vertices);
             collider.CollisionIndices.AddRange(destMesh.triangles);
+            collider.CriticalRect = new Rect(Vector2.one * 0.5f, _defaultCriticalSize);
             return collider;
         }
 
-        public static void ExtractMesh(Vector2[] poly, float distance, out List<Vector3> verts, out List<int> indices, 
-        out Vector3 highPoint) {
+        public static void ExtractMesh(Vector2[] poly, float distance, out List<Vector3> verts, out List<int> indices) {
 
             // convert polygon to triangles
             Triangulator triangulator = new Triangulator(poly);
@@ -68,12 +67,12 @@ namespace PixelComrades {
                 vertices[i + poly.Length].y = poly[i].y;
                 vertices[i + poly.Length].z = distance; // back vertex    
             }
-            highPoint = Vector3.one;
-            for (int i = 0; i < vertices.Length; i++) {
-                if (vertices[i].y > highPoint.y) {
-                    highPoint = vertices[i];
-                }
-            }
+//            highPoint = Vector3.one;
+//            for (int i = 0; i < vertices.Length; i++) {
+//                if (vertices[i].y > highPoint.y) {
+//                    highPoint = vertices[i];
+//                }
+//            }
             int[] triangles = new int[tris.Count * 2 + poly.Length * 6];
             int countTris = 0;
             for (int i = 0; i < tris.Count; i += 3) {

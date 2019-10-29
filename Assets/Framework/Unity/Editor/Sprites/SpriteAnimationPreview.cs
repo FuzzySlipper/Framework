@@ -26,7 +26,7 @@ namespace PixelComrades {
             _animation = animation;
             var type = Assembly.Load("UnityEditor.dll").GetType("UnityEditor.SpriteInspector");
             for (int i = 0; i < animation.Frames.Length; i++) {
-                var sprite = animation.GetSpriteFrame(i);
+                var sprite = animation.GetSprite(i);
                 if (sprite == null) {
                     continue;
                 }
@@ -59,7 +59,7 @@ namespace PixelComrades {
                 }
                 _nextFrameTime = _currentTime + (_animation.FrameTime * _animation.GetFrame(_frame).Length);
             }
-            return _animation.GetSpriteFrame(_frame);
+            return _animation.GetSprite(_frame);
         }
 
         public Texture GetCurrentPreviewTexture(Rect previewRect) {

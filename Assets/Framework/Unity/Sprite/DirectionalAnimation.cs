@@ -1,33 +1,48 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Sirenix.OdinInspector;
+using System.Linq;
 
 namespace PixelComrades {
     public class DirectionalAnimation : SpriteAnimation {
 
         public List<DirectionalFrames> DirectionalFrames = new List<DirectionalFrames>();
+        public override int LengthSprites { get { return Sprites.Length; } }
+        public override Sprite GetSprite(int frame) {
+            return Sprites[frame];
+        }
 
-        public Sprite GetSpriteFrame(DirectionsEight facing, int frame) {
-            var frames = GetFacingSprites(facing);
-            if (frames != null) {
-                return frames[Mathf.Clamp(frame, 0, frames.Length - 1)];
+        public override SavedSpriteCollider GetSpriteCollider(int frame) {
+            if (Colliders == null || Colliders.Length == 0) {
+                return null;
             }
-            return GetSpriteFrame(frame);
+            return Colliders[frame];
+        }
+        
+        public Sprite GetSprite(DirectionsEight facing, int frame) {
+            var frames = GetFacingIndices(facing);
+            if (frames != null) {
+                var idx = frames[frame];
+                return Sprites[Mathf.Clamp(idx, 0, Sprites.Length - 1)];
+            }
+            return GetSprite(frame);
         }
 
         public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {
-            var facingDir = GetFacing(facing);
-            if (facingDir.Colliders == null || facingDir.Colliders.Length == 0) {
-                return null;
+            var frames = GetFacingIndices(facing);
+            if (frames != null) {
+                var idx = frames[frame];
+                return Colliders[Mathf.Clamp(idx, 0, Colliders.Length - 1)];
             }
-            return facingDir.Colliders[Mathf.Clamp(frame, 0, facingDir.Colliders.Length - 1)];
+            return null;
         }
 
-        private Sprite[] GetFacingSprites(DirectionsEight side) {
+        private int[] GetFacingIndices(DirectionsEight side) {
             for (int i = 0; i < DirectionalFrames.Count; i++) {
                 if (DirectionalFrames[i].Side == side) {
-                    return DirectionalFrames[i].Frames;
+                    return DirectionalFrames[i].FrameIndices;
                 }
             }
             return null;
@@ -40,37 +55,6 @@ namespace PixelComrades {
                 }
             }
             return null;
-        }
-
-        public override Sprite GetSpriteFrame(int frame) {
-            if (DirectionalFrames == null || DirectionalFrames.Count == 0) {
-                return null;
-            }
-            return DirectionalFrames[0].Frames[frame];
-        }
-
-        public override SavedSpriteCollider GetSpriteCollider(int frame) {
-            return DirectionalFrames[0].Colliders[frame];
-        }
-
-        [Button]
-        public void DoubleRearFrames() {
-            for (int d = 0; d < DirectionalFrames.Count; d++) {
-                var frames = DirectionalFrames[d].Frames;
-                switch (DirectionalFrames[d].Side) {
-                    case DirectionsEight.Rear:
-                    case DirectionsEight.RearLeft:
-                    case DirectionsEight.Left:
-                    case DirectionsEight.RearRight:
-                    case DirectionsEight.Right:
-                        for (int f = 1; f < frames.Length; f++) {
-                            if (f % 2 != 0) {
-                                frames[f] = frames[f - 1];
-                            }
-                        }
-                        break;
-                }
-            }
         }
     }
 }

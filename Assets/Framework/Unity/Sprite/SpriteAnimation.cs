@@ -9,11 +9,15 @@ namespace PixelComrades {
         public Texture2D NormalMap;
         public Texture2D EmissiveMap;
         public AnimationFrame[] Frames = new AnimationFrame[0];
+        public Sprite[] Sprites;
+        public SavedSpriteCollider[] Colliders;
         public string LastModified;
         public float FrameTime { get { return 1 / FramesPerSecond; } }
         public virtual int LengthFrames { get { return Frames.Length; } }
-        public abstract Sprite GetSpriteFrame(int frame);
+        public virtual int LengthSprites { get { return Frames.Length; } }
+        public abstract Sprite GetSprite(int frame);
         public abstract SavedSpriteCollider GetSpriteCollider(int frame);
+
         public float LengthTime {
             get {
                 float time = 0;
@@ -51,9 +55,7 @@ namespace PixelComrades {
             var pixelsPerUnit = renderer.sprite.pixelsPerUnit;
             var width = (renderer.sprite.rect.width / 2) / pixelsPerUnit;
             var height = (renderer.sprite.rect.height / 2) / pixelsPerUnit;
-            //return renderer.transform.position + new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0);
             return renderer.transform.TransformPoint(new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
-            //return renderer.bounds.center + new Vector3(frame.EventPosition.x * -renderer.bounds.extents.x, frame.EventPosition.y * -renderer.bounds.extents.y);
         }
 
         public int ConvertAnimationTimeToFrame(float time) {
@@ -97,6 +99,6 @@ namespace PixelComrades {
     public class SavedSpriteCollider {
         public List<Vector3> CollisionVertices = new List<Vector3>();
         public List<int> CollisionIndices = new List<int>();
-        public Vector3 HighPoint;
+        public Rect CriticalRect;
     }
 }

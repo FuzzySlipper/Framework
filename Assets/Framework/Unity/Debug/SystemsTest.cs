@@ -66,7 +66,7 @@ namespace PixelComrades {
                 _animation = animation;
                 _unscaled = unscaled;
                 //_renderer.GetPropertyBlock(_materialBlock);
-                _renderer.sprite = _animation.GetSpriteFrame(0);
+                _renderer.sprite = _animation.GetSprite(0);
                 //if (_animation.NormalMap != null) {
                 //    _materialBlock.SetTexture("_BumpMap", _animation.NormalMap);
                 //}
@@ -92,7 +92,7 @@ namespace PixelComrades {
                 var cf = CurrentFrame;
                 if (cf != null) {
                     StartNewTime(_animation.FrameTime * cf.Length, time);
-                    _renderer.sprite = _animation.GetSpriteFrame(FrameIndex);
+                    _renderer.sprite = _animation.GetSprite(FrameIndex);
                     return;
                 }
                 if (!_animation.IsComplete(_currentFrameIndex)) {
@@ -101,7 +101,7 @@ namespace PixelComrades {
                 if (_animation.Looping) {
                     _currentFrameIndex = 0;
                     StartNewTime(_animation.FrameTime * cf.Length, time);
-                    _renderer.sprite = _animation.GetSpriteFrame(FrameIndex);
+                    _renderer.sprite = _animation.GetSprite(FrameIndex);
                     return;
                 }
                 _playing = false;

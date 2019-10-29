@@ -14,11 +14,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class DirectionalFrames {
         public DirectionsEight Side;
-        public Sprite[] Frames = new Sprite[0];
-        public SavedSpriteCollider[] Colliders;
-        
-        public Sprite this[int index] { get { return Frames[index]; } }
-        public int Length { get { return Frames.Length; } }
+        public int[] FrameIndices;
     }
 
     [System.Serializable]

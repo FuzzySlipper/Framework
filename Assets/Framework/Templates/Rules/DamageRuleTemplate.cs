@@ -13,6 +13,9 @@ namespace PixelComrades {
         
         public void RuleEventRun(ref PrepareDamageEvent context) {
             var power = RulesSystem.CalculateImpactTotal(EntityStats, Stats.Power, _damageImpact.Value.NormalizedPercent);
+            if (context.Impact.Hit == CollisionResult.CriticalHit) {
+                power *= 2;
+            }
             context.Entries.Add(new DamageEntry(power, _damageImpact.Value.DamageType, _damageImpact.Value.TargetVital,
                 RulesSystem.LastQueryString.ToString()));
         }
