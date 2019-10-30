@@ -55,7 +55,7 @@ namespace PixelComrades {
                 var types = assemblies[a].GetTypes();
                 for (int t = 0; t < types.Length; t++) {
                     var type = types[t];
-                    if (type.IsSubclassOf(typeof(SequenceObject))) {
+                    if (type.IsSubclassOf(typeof(SequenceObject)) && (!type.IsSubclassOf(typeof(SpriteCaptureSequence)))) {
                         AnimationObjectTypes.Add(type);
                     }
                 }

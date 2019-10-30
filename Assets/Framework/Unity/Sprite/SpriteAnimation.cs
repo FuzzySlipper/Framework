@@ -1,44 +1,64 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace PixelComrades {
     public abstract class SpriteAnimation : ScriptableObject {
-        public float FramesPerSecond = 12;
-        public bool Looping = false;
-        public Texture2D NormalMap;
-        public Texture2D EmissiveMap;
-        public AnimationFrame[] Frames = new AnimationFrame[0];
-        public Sprite[] Sprites;
-        public SavedSpriteCollider[] Colliders;
+        [SerializeField, FormerlySerializedAs("FramesPerSecond")]
+        private float _framesPerSecond = 12;
+        [SerializeField, FormerlySerializedAs("Looping")]
+        private bool _looping = false;
+        [SerializeField, FormerlySerializedAs("NormalMap")]
+        private Texture2D _normalMap;
+        [SerializeField, FormerlySerializedAs("EmissiveMap")]
+        private Texture2D _emissiveMap;
+        [SerializeField, FormerlySerializedAs("Frames")] 
+        private AnimationFrame[] _frames = new AnimationFrame[0];
         public string LastModified;
-        public float FrameTime { get { return 1 / FramesPerSecond; } }
-        public virtual int LengthFrames { get { return Frames.Length; } }
-        public virtual int LengthSprites { get { return Frames.Length; } }
-        public abstract Sprite GetSprite(int frame);
-        public abstract SavedSpriteCollider GetSpriteCollider(int frame);
+        public float FrameTime { get { return 1 / _framesPerSecond; } }
+        public virtual int LengthFrames { get { return _frames.Length; } }
+        public virtual AnimationFrame[] Frames { get => _frames; set => _frames = value; }
+        public float FramesPerSecond { get => _framesPerSecond; set => _framesPerSecond = value; }
+        public bool Looping { get => _looping; set => _looping = value; }
+        public Texture2D NormalMap { get => _normalMap; set => _normalMap = value; }
+        public Texture2D EmissiveMap { get => _emissiveMap; set => _emissiveMap = value; }
+        public abstract int LengthSprites { get; }
+        public abstract Sprite[] Sprites { get; set; }
+        public abstract SavedSpriteCollider[] Colliders { get; set; }
+
+        public virtual Sprite GetSprite(int frame) {
+            return Sprites[Mathf.Clamp(frame, 0, Sprites.Length - 1)];
+        }
+
+        public virtual SavedSpriteCollider GetSpriteCollider(int frame) {
+            if (Colliders == null || Colliders.Length == 0) {
+                return null;
+            }
+            return Colliders[Mathf.Clamp(frame, 0, Colliders.Length - 1)];
+        }
 
         public float LengthTime {
             get {
                 float time = 0;
-                for (int i = 0; i < Frames.Length; i++) {
-                    time += FrameTime * Frames[i].Length;
+                for (int i = 0; i < _frames.Length; i++) {
+                    time += FrameTime * _frames[i].Length;
                 }
                 return time;
             }
         }
 
         public AnimationFrame GetFrameClamped(int frame) {
-            return Frames[Mathf.Clamp(frame, 0, Frames.Length - 1)];
+            return _frames[Mathf.Clamp(frame, 0, _frames.Length - 1)];
         }
 
         public bool IsComplete(int index) {
-            return index > Frames.Length - 1;
+            return index > _frames.Length - 1;
         }
 
         public AnimationFrame GetFrame(int index) {
-            if (index < Frames.Length) {
-                return Frames[index];
+            if (index < _frames.Length) {
+                return _frames[index];
             }
             return null;
         }
@@ -46,7 +66,7 @@ namespace PixelComrades {
         public float GetFrameStart(int frameIdx) {
             float time = 0;
             for (int i = 0; i < frameIdx; i++) {
-                time += FrameTime * Frames[i].Length;
+                time += FrameTime * _frames[i].Length;
             }
             return time;
         }
@@ -61,8 +81,8 @@ namespace PixelComrades {
         public int ConvertAnimationTimeToFrame(float time) {
             float timeCheck = 0;
             int lastGood = 0;
-            for (int i = 0; i < Frames.Length; i++) {
-                var frameTime = FrameTime * Frames[i].Length;
+            for (int i = 0; i < _frames.Length; i++) {
+                var frameTime = FrameTime * _frames[i].Length;
                 timeCheck += frameTime;
                 lastGood = i;
                 if (timeCheck >= time) {

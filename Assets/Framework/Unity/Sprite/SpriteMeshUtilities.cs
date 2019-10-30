@@ -6,21 +6,7 @@ namespace PixelComrades {
     public static class SpriteMeshUtilities {
         
         private static Vector2 _defaultCriticalSize = new Vector2(0.15f, 0.15f);
-
-        public static void GenerateColliders(DirectionalAnimation dirAnim, float distance, float quality) {
-            var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
-            spriteRenderer.transform.ResetPos();
-            dirAnim.Colliders = new SavedSpriteCollider[dirAnim.Sprites.Length];
-            for (int f = 0; f < dirAnim.Sprites.Length; f++) {
-                spriteRenderer.sprite = dirAnim.Sprites[f];
-                var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
-                dirAnim.Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
-                UnityEngine.Object.DestroyImmediate(spriteCollider);
-            }
-            UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
-        }
-
-        public static void GenerateColliders(SimpleAnimation anim, float distance, float quality) {
+        public static void GenerateColliders(SpriteAnimation anim, float distance, float quality) {
             var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
             spriteRenderer.transform.ResetPos();
             anim.Colliders = new SavedSpriteCollider[anim.Sprites.Length];

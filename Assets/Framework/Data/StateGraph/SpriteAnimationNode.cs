@@ -25,7 +25,7 @@ namespace PixelComrades {
         public override string Title { get { return Animation != null ? Animation.name : "SpriteAnimation"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
-            if (Animation is DirectionalAnimation dirAnim) {
+            if (Animation is IDirectionalAnimation dirAnim) {
                 return new DirectionalRuntimeAnimationNode(dirAnim, this, graph);
             }
             return new RuntimeSpriteAnimationNode(this, graph);
@@ -33,11 +33,11 @@ namespace PixelComrades {
 
         public class DirectionalRuntimeAnimationNode : RuntimeSpriteAnimationNode {
             
-            private DirectionalAnimation _animation;
+            private IDirectionalAnimation _animation;
             private SpriteBillboardComponent _billboard;
             private DirectionsEight _lastOrientation;
             
-            public DirectionalRuntimeAnimationNode(DirectionalAnimation anim, SpriteAnimationNode node, RuntimeStateGraph graph) : base
+            public DirectionalRuntimeAnimationNode(IDirectionalAnimation anim, SpriteAnimationNode node, RuntimeStateGraph graph) : base
             (node, graph) {
                 _animation = anim;
                 _billboard = graph.Entity.Get<SpriteBillboardComponent>();
@@ -52,7 +52,6 @@ namespace PixelComrades {
                 }
                 var animFacing = _animation.GetFacing(facing);
                 if (animFacing == null) {
-                    Debug.LogErrorFormat("No facing for {0} at {1}", facing, _animation.name);
                     return;
                 }
                 var idx = animFacing.FrameIndices[Animator.FrameIndex];

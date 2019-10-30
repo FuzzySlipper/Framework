@@ -1,50 +1,41 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using Sirenix.OdinInspector;
-using System.Linq;
-using UnityEngine.Serialization;
 
 namespace PixelComrades {
+    public class SubDirectionalAnimation : SpriteAnimation, IDirectionalAnimation {
 
-    
-    public class DirectionalAnimation : SpriteAnimation, IDirectionalAnimation {
-        
-        [SerializeField, FormerlySerializedAs("Sprites")] private Sprite[] _sprites;
-        [SerializeField, FormerlySerializedAs("Colliders")]private SavedSpriteCollider[] _colliders;
+        public SpriteAnimationSet Set;
         public List<DirectionalFrames> DirectionalFrames = new List<DirectionalFrames>();
-        
-        public override int LengthSprites { get { return _sprites.Length; } }
-        public override Sprite[] Sprites { get => _sprites; set => _sprites = value; }
-        public override SavedSpriteCollider[] Colliders { get => _colliders; set => _colliders = value; }
+        public override int LengthSprites { get { return DirectionalFrames[0].FrameIndices.Length; } }
+        public override Sprite[] Sprites { get { return Set.Sprites; } set { } }
+        public override SavedSpriteCollider[] Colliders { get { return Set.Colliders; } set { } }
 
-        
         public override Sprite GetSprite(int frame) {
-            return Sprites[frame];
+            return Set.Sprites[DirectionalFrames[0].FrameIndices[frame]];
         }
 
         public override SavedSpriteCollider GetSpriteCollider(int frame) {
-            if (Colliders == null || Colliders.Length == 0) {
+            if (Set.Colliders == null || Set.Colliders.Length == 0) {
                 return null;
             }
-            return Colliders[frame];
+            return Set.Colliders[DirectionalFrames[0].FrameIndices[frame]];
         }
-        
+
         public Sprite GetSprite(DirectionsEight facing, int frame) {
             var frames = GetFacingIndices(facing);
             if (frames != null) {
                 var idx = frames[frame];
-                return Sprites[Mathf.Clamp(idx, 0, Sprites.Length - 1)];
+                return Set.Sprites[Mathf.Clamp(idx, 0, Set.Sprites.Length - 1)];
             }
-            return GetSprite(frame);
+            return Set.GetSprite(frame);
         }
 
         public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {
             var frames = GetFacingIndices(facing);
             if (frames != null) {
                 var idx = frames[frame];
-                return Colliders[Mathf.Clamp(idx, 0, Colliders.Length - 1)];
+                return Set.Colliders[Mathf.Clamp(idx, 0, Set.Colliders.Length - 1)];
             }
             return null;
         }
