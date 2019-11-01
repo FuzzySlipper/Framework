@@ -400,7 +400,8 @@ namespace PixelComrades {
                 if (HasValidEvent(_animTime)) {
                     var rectSize = 25;
                     var eventPos = GetEventPosition(_animTime);
-                    var eventRect = new Rect(croppedRect.center + new Vector2(-eventPos.x * (croppedRect.width/2)- rectSize, -eventPos.y * (croppedRect.height/2)- rectSize), Vector2.one * rectSize);
+                    var eventRect = new Rect(croppedRect.center + new Vector2(-eventPos.x * (croppedRect.width/2)- rectSize, 
+                                                 -eventPos.y * (croppedRect.height/2)- rectSize), Vector2.one * rectSize);
                     GUI.DrawTexture(eventRect, EventTexture);
                 }
             }

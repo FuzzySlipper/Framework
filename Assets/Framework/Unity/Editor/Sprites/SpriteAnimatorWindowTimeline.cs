@@ -162,11 +162,6 @@ namespace PixelComrades {
 
             if (frame.Event == AnimationFrame.EventType.None) {
                 if (EditorGUI.EndChangeCheck()) {
-                    //// Set default tag options to last tag edited (when new tag is created it'll use these options)
-                    //_defaultEventMessageOptions = frame._messageOptions;
-                    //_defaultEventSendUpwards = frame._sendUpwards;
-                    //_defaultEventUsePrefix = frame._usePrefix;
-                    // Apply events
                     ApplyChanges();
                 }
                 return;
@@ -210,59 +205,7 @@ namespace PixelComrades {
                 new Rect(xOffset, 2, width, rect.height - 3), frame.EventDataObject, typeof(Object),
                 false);
 
-            //switch (frame.Event) {
-            //    //case AnimationFrame.EventType.Int: {
-            //    //    width = 60;
-            //    //    frame.EventDataInt = EditorGUI.IntField(n);
-            //    //    //xOffset += width + 5;
-            //    //}
-            //    //    break;
-
-            //    case AnimationFrame.EventType.Float: {
-                    
-            //        //xOffset += width + 5;
-
-            //    }
-            //        break;
-
-            //    case AnimationFrame.EventType.String: {
-            //        //xOffset += width + 5;
-                    
-            //    }
-            //        break;
-
-            //    case AnimationFrame.EventType.Object: {
-            //        //xOffset += width + 5;
-                   
-            //    }
-            //        break;
-            //    default:
-            //        break;
-            //}
-            
-            //width = 105;
-            //xOffset -= width;
-
-            //// Send updwards
-            //frame._messageOptions = GUI.Toggle(new Rect(xOffset, 0, width, rect.height),
-            //    frame._messageOptions == SendMessageOptions.RequireReceiver,
-            //    "Require Receiver", Styles.TIMELINE_EVENT_TOGGLE)
-            //    ? SendMessageOptions.RequireReceiver
-            //    : SendMessageOptions.DontRequireReceiver;
-
-            //width = 90;
-            //xOffset -= width;
-
-            //// Send updwards
-            //frame._sendUpwards = GUI.Toggle(new Rect(xOffset, 0, width, rect.height), frame._sendUpwards,
-            //    "Send Upwards", Styles.TIMELINE_EVENT_TOGGLE);
-
             if (EditorGUI.EndChangeCheck()) {
-                //// Set default tag options to last tag edited (when new tag is created it'll use these options)
-                //_defaultEventMessageOptions = frame._messageOptions;
-                //_defaultEventSendUpwards = frame._sendUpwards;
-                //_defaultEventUsePrefix = frame._usePrefix;
-                // Apply events
                 ApplyChanges();
             }
         }

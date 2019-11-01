@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class SubDirectionalAnimation : SpriteAnimation, IDirectionalAnimation {
+    public class ChildDirectionalAnimation : ChildSpriteAnimation, IDirectionalAnimation {
 
-        public SpriteAnimationSet Set;
         public List<DirectionalFrames> DirectionalFrames = new List<DirectionalFrames>();
         public override int LengthSprites { get { return DirectionalFrames[0].FrameIndices.Length; } }
         public override Sprite[] Sprites { get { return Set.Sprites; } set { } }
@@ -28,7 +27,7 @@ namespace PixelComrades {
                 var idx = frames[frame];
                 return Set.Sprites[Mathf.Clamp(idx, 0, Set.Sprites.Length - 1)];
             }
-            return Set.GetSprite(frame);
+            return Set.Sprites[frame];
         }
 
         public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {

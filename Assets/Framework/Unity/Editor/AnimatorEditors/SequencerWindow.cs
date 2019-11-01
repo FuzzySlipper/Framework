@@ -8,7 +8,8 @@ using UnityEngine;
 
 namespace PixelComrades {
     public class SequencerWindow : EditorWindow {
-
+        protected static GenericSceneObject LastScene;
+        
         [MenuItem("Window/Sequencer Window %#L")]
         public static SequencerWindow ShowWindow() {
             var window = (SequencerWindow) GetWindow(typeof(SequencerWindow), false, "Sequencer Window");
@@ -16,7 +17,6 @@ namespace PixelComrades {
             _myControlId = window.GetInstanceID();
             return window;
         }
-
         
         private const float LabelWidth = 30;
         private const float LabelOffset = 5f;
@@ -46,6 +46,8 @@ namespace PixelComrades {
         protected bool CancelPlay = false;
         protected Task PlayTask;
         protected List<Type> AnimationObjectTypes = new List<Type>();
+        protected GenericSceneObject SceneTarget;
+
         private GenericSequence CurrentSequence { get => _currentSequence; set => _currentSequence = value; }
         protected virtual float TimelinePositionY { get { return 25f; }}
         private float NotchPosition { get { return TimelinePositionY + 18f; } }
@@ -55,11 +57,12 @@ namespace PixelComrades {
                 var types = assemblies[a].GetTypes();
                 for (int t = 0; t < types.Length; t++) {
                     var type = types[t];
-                    if (type.IsSubclassOf(typeof(SequenceObject)) && (!type.IsSubclassOf(typeof(SpriteCaptureSequence)))) {
+                    if (type.IsSubclassOf(typeof(SequenceObject)) && (!type.IsSubclassOf(typeof(SpriteCaptureTrack)))) {
                         AnimationObjectTypes.Add(type);
                     }
                 }
             }
+            TryFindSceneObject();
         }
         
         void OnDestroy() {
@@ -69,8 +72,26 @@ namespace PixelComrades {
             }
         }
 
-        public void Set(GenericSequence sequence) {
+        public virtual void Set(GenericSequence sequence) {
+            SetupNewSequence(sequence);
+        }
+
+        protected void SetupNewSequence(GenericSequence sequence) {
             CurrentSequence = sequence;
+            if (_objectWindow != null) {
+                _objectWindow.Close();
+            }
+            foreach (var track in CurrentSequence.Objects) {
+                var newList = CurrentSequence.Objects.ToList();
+                newList.Remove(track);
+                foreach (var otherAction in newList) {
+                    if (otherAction.EditingTrack == track.EditingTrack &&
+                        (track.StartTime >= otherAction.StartTime && track.StartTime <= otherAction.EndTime ||
+                         track.EndTime >= otherAction.StartTime && track.EndTime <= otherAction.EndTime)) {
+                        otherAction.EditingTrack++;
+                    }
+                }
+            }
         }
         
         protected virtual void OnGUI() {
@@ -161,6 +182,10 @@ namespace PixelComrades {
         }
 
         protected virtual void DrawToolbar() {
+            var go = (GenericSceneObject) EditorGUILayout.ObjectField("Scene Object", SceneTarget, typeof(GenericSceneObject), true);
+            if (go != SceneTarget) {
+                SetSceneObject(go);
+            }
             if (!Application.isPlaying) {
                 if (PlayTask == null) {
                     if (GUILayout.Button("PLAY")) {
@@ -221,6 +246,10 @@ namespace PixelComrades {
         }
 
         protected virtual void Play() {
+            if (SceneTarget == null) {
+                Debug.LogError("No Scene Object");
+                return;
+            }
             TimeManager.ForceCheckEditor();
             PlayTask = TimeManager.StartUnscaled(PlayAnimation());
         }
@@ -231,6 +260,7 @@ namespace PixelComrades {
                 return;
             }
             var newObj = CreateInstance(targetType);
+            newObj.name = targetType.ToString();
             AssetDatabase.AddObjectToAsset(newObj, _currentSequence);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
             var animObj = newObj as SequenceObject;
@@ -424,9 +454,11 @@ namespace PixelComrades {
 
         private IEnumerator PlayAnimation() {
             CancelPlay = false;
-            var entity = Entity.New("Tester");
+            var entity = SceneTarget.BuildEntity();
             var player = new RuntimeSequence(entity,  _currentSequence);
-            entity.Add(new PoseAnimatorComponent(PoseAnimator.Main.Avatar, PoseAnimator.Main.DefaultPose, PoseAnimator.Main.transform));
+            if (!entity.HasComponent<PoseAnimatorComponent>() && PoseAnimator.Main != null) {
+                entity.Add(new PoseAnimatorComponent(PoseAnimator.Main.Avatar, PoseAnimator.Main.DefaultPose, PoseAnimator.Main.transform));
+            }
             player.Play();
             PlayLimiter.Reset();
             var lastPauseTime = 1f;
@@ -454,27 +486,25 @@ namespace PixelComrades {
             PlayTask = null;
         }
 
-        private void OnSelectionChange() {
+        protected void OnSelectionChange() {
             var newAnim = Selection.objects.Length == 1 ? Selection.activeObject as GenericSequence : null;
             if (newAnim == null) {
                 return;
             }
-            CurrentSequence = newAnim;
-            if (_objectWindow != null) {
-                _objectWindow.Close();
+            Set(newAnim);
+            Repaint();
+        }
+
+        protected void TryFindSceneObject() {
+            if (LastScene != null) {
+                SetSceneObject(LastScene);
             }
-            foreach (var track in CurrentSequence.Objects) {
-                var newList = CurrentSequence.Objects.ToList();
-                newList.Remove(track);
-                foreach (var otherAction in newList) {
-                    if (otherAction.EditingTrack == track.EditingTrack &&
-                        (track.StartTime >= otherAction.StartTime && track.StartTime <= otherAction.EndTime ||
-                         track.EndTime >= otherAction.StartTime && track.EndTime <= otherAction.EndTime)) {
-                        otherAction.EditingTrack++;
-                    }
+            else {
+                var target = GenericSceneObject.Find();
+                if (target != null) {
+                    SetSceneObject(target);
                 }
             }
-            Repaint();
         }
 
         private void PerformDrag(float offset, float visibleDuration, int trackOffset) {
@@ -503,6 +533,11 @@ namespace PixelComrades {
             if (_draggedObject != null) {
                 DragAction(_draggedObject, visibleDuration, offset, trackOffset);
             }
+        }
+
+        public virtual void SetSceneObject(GenericSceneObject go) {
+            SceneTarget = go;
+            LastScene = go;
         }
 
         private void RemoveContextItem(object obj) {

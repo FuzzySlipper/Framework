@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [ExecuteInEditMode]
     public class MeleeWeaponTrail : MonoBehaviour, IPoolEvents {
 
         [SerializeField] private bool _useInterpolation = true;

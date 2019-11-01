@@ -12,11 +12,24 @@ namespace PixelComrades {
         [SerializeField] private TransformState _basePositioning = new TransformState();
         [SerializeField] private HandPose _handPose = null;
         [SerializeField] private MusclePose _idlePose = null;
+        [SerializeField] private bool _auto = true;
 
         public Transform Tr { get { return _base; } }
         public Transform Spawn { get { return _spawn; } }
         public MusclePose IdlePose { get { return _idlePose; } }
-        
+
+        private void OnEnable() {
+            if (_auto) {
+                SetFx(true);
+            }
+        }
+
+        private void OnDisable() {
+            if (_auto) {
+                SetFx(false);
+            }
+        }
+
         public void SetFx(bool status) {
             if (_weaponTrail != null) {
                 //_weaponTrail.gameObject.SetActive(status);

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
 
@@ -66,6 +67,20 @@ namespace PixelComrades {
         public static int[] RightHandMuscles = new[] {
             75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94
         };
+
+        private static int[] _allHands;
+        public static int[] AllHands {
+            get {
+                if (_allHands == null) {
+                    var handsTemp = new List<int>();
+                    handsTemp.AddRange(LeftHandMuscles);
+                    handsTemp.AddRange(RightHandMuscles);
+                    _allHands = handsTemp.ToArray();
+                }
+                return _allHands;
+            }
+        }
+
         public static int[] RightArmMuscles = new[] {
             46, 48, 49, 50, 51, 52, 53, 54
         };

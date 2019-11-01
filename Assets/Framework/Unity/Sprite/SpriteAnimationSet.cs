@@ -3,12 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class SpriteAnimationSet : SpriteAnimation {
+    public class SpriteAnimationSet : ScriptableObject {
         
         [SerializeField] private Sprite[] _sprites;
         [SerializeField] private SavedSpriteCollider[] _colliders;
-        public override int LengthSprites { get { return _sprites.Length; } }
-        public override Sprite[] Sprites { get => _sprites; set => _sprites = value; }
-        public override SavedSpriteCollider[] Colliders { get => _colliders; set => _colliders = value; }
+        [SerializeField] private List<ChildSpriteAnimation> _children = new List<ChildSpriteAnimation>(); 
+        public Sprite[] Sprites { get => _sprites; set => _sprites = value; }
+        public SavedSpriteCollider[] Colliders { get => _colliders; set => _colliders = value; }
+
+        public void AddChild(ChildSpriteAnimation child) {
+            child.Set = this;
+            _children.Add(child);
+        }
     }
 }

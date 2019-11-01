@@ -54,6 +54,9 @@ namespace PixelComrades {
         void OnEnable() {
             Camera.onPreCull -= DrawWithCamera;
             Camera.onPreCull += DrawWithCamera;
+            if (_spriteCollider != null) {
+                _spriteCollider.InitMeshCollider();
+            }
         }
 
         void OnDisable() {
@@ -113,6 +116,12 @@ namespace PixelComrades {
                     _testRenderer.material.DisableKeyword(_shaderEmissiveKeyword);
                 }
                 _testRenderer.SetPropertyBlock(blockMaterial);
+                _testRenderer.transform.rotation = data.Flip ? Quaternion.identity : Quaternion.Inverse(transform.rotation);
+                var frame = data.Animation.GetFrame(data.Frame);
+                if (frame.HasEvent) {
+                    Debug.DrawRay(data.Animation.GetEventPosition(data.Sprite, _testRenderer.transform, frame), _testRenderer.transform
+                    .forward * 5, Color.red, 5f);
+                }
                 var pixelsPerUnit = data.Sprite.pixelsPerUnit;
                 var size = new Vector2(data.Sprite.rect.width / pixelsPerUnit,
                     data.Sprite.rect.height / pixelsPerUnit);

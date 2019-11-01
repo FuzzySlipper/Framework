@@ -78,6 +78,14 @@ namespace PixelComrades {
             return renderer.transform.TransformPoint(new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
         }
 
+        public Vector3 GetEventPosition(Sprite sprite, Transform tr, AnimationFrame frame) {
+            var pixelsPerUnit = sprite.pixelsPerUnit;
+            var width = (sprite.rect.width / 2) / pixelsPerUnit;
+            var height = (sprite.rect.height / 2) / pixelsPerUnit;
+            return tr.TransformPoint(
+                new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
+        }
+
         public int ConvertAnimationTimeToFrame(float time) {
             float timeCheck = 0;
             int lastGood = 0;

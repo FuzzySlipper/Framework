@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public sealed class SubSimpleAnimation : SpriteAnimation {
+    public sealed class ChildSimpleAnimation : ChildSpriteAnimation {
 
-        public SpriteAnimationSet Set;
         public int[] Indices = new int[0];
         public override int LengthSprites { get { return Indices.Length; } }
         public override Sprite[] Sprites { get { return Set.Sprites; } set {} }

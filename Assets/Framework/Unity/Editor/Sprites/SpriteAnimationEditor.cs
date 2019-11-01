@@ -34,22 +34,12 @@ namespace PixelComrades {
             if (GUILayout.Button("Generate Colliders")) {
                 if (targets.Length > 1) {
                     for (int i = 0; i < targets.Length; i++) {
-                        if (targets[i] is DirectionalAnimation dirAnim) {
-                            SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
-                        }
-                        else if (targets[i] is SimpleAnimation simpleAnim) {
-                            SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
-                        }
+                        SpriteMeshUtilities.GenerateColliders(targets[i] as SpriteAnimation, _distance, _quality);
                         EditorUtility.SetDirty(targets[i]);
                     }
                 }
                 else {
-                    if (script is DirectionalAnimation dirAnim) {
-                        SpriteMeshUtilities.GenerateColliders(dirAnim, _distance, _quality);
-                    }
-                    else if (script is SimpleAnimation simpleAnim) {
-                        SpriteMeshUtilities.GenerateColliders(simpleAnim, _distance, _quality);
-                    }
+                    SpriteMeshUtilities.GenerateColliders(script, _distance, _quality);
                     EditorUtility.SetDirty(script);
                 }
             }

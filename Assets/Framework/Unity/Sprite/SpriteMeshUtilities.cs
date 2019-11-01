@@ -19,6 +19,19 @@ namespace PixelComrades {
             UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
         }
 
+        public static void GenerateColliders(SpriteAnimationSet set, float distance, float quality) {
+            var spriteRenderer = new GameObject("SpriteTester").AddComponent<SpriteRenderer>();
+            spriteRenderer.transform.ResetPos();
+            set.Colliders = new SavedSpriteCollider[set.Sprites.Length];
+            for (int f = 0; f < set.Sprites.Length; f++) {
+                spriteRenderer.sprite = set.Sprites[f];
+                var spriteCollider = spriteRenderer.gameObject.AddComponent<PolygonCollider2D>();
+                set.Colliders[f] = GenerateSavedCollider(spriteCollider.points, distance, quality);
+                UnityEngine.Object.DestroyImmediate(spriteCollider);
+            }
+            UnityEngine.Object.DestroyImmediate(spriteRenderer.gameObject);
+        }
+
         private static SavedSpriteCollider GenerateSavedCollider(Vector2[] poly, float distance, float quality) {
             var collider = new SavedSpriteCollider();
             ExtractMesh(poly, distance, out var verts, out var indices);

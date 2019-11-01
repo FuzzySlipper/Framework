@@ -2317,7 +2317,7 @@ namespace PixelComrades {
         public static bool CompareCaseInsensitive(this string data, string other) {
             return string.Equals(data, other, StringComparison.OrdinalIgnoreCase);
         }
-
+        
         public static List<string> SplitMultiEntry(this string targetLine) {
             return StringUtilities.SplitString(targetLine, StringConst.MultiEntryBreak);
         }
