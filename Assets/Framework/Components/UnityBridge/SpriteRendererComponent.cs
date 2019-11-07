@@ -24,7 +24,6 @@ namespace PixelComrades {
         private static readonly int EmissionMap = Shader.PropertyToID("_EmissionMap");
         private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         
-        //private CachedUnityComponent<SpriteRenderer> _renderer;
         private CachedTransform _baseTr;
         private CachedTransform _spriteTr;
         private CachedUnityComponent<MeshFilter> _filter;
@@ -41,7 +40,6 @@ namespace PixelComrades {
         public Texture2D Normal { get; private set; }
         public Texture2D Emissive { get; private set; }
         public bool FlipX { get; private set; }
-        //private SpriteRenderer Value { get => _renderer; }
         public Transform BaseTr { get => _baseTr; }
         public Transform SpriteTr { get => _spriteTr; }
         
@@ -55,7 +53,6 @@ namespace PixelComrades {
             if (MeshRenderer != null) {
                 MeshRenderer.SetMode(status);
             }
-            //Value.SetMode(status);
         }
 
         public void SetFloat(int id, float value) {
@@ -93,31 +90,16 @@ namespace PixelComrades {
             FlipX = flipped;
         }
 
-//        public void SetTextures(Texture2D normalMap, Texture2D emissive) {
-//            MaterialBlocks[0].SetTexture(BumpMap, normalMap);
-//            MaterialBlocks[0].SetTexture(EmissionMap, emissive);
-//            if (emissive != null) {
-//                Value.material.EnableKeyword("_EMISSION");
-//            }
-//            else {
-//                Value.material.DisableKeyword("_EMISSION");
-//            }
-//            Value.SetPropertyBlock(MaterialBlocks[0]);
-//        }
-
         public Vector3 GetEventPosition(AnimationFrame frame) {
             var sprite = Sprite;
             var pixelsPerUnit = sprite.pixelsPerUnit;
             var width = (sprite.rect.width / 2) / pixelsPerUnit;
             var height = (sprite.rect.height / 2) / pixelsPerUnit;
-            //return renderer.transform.position + new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0);
             return SpriteTr.TransformPoint(
                 new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
-            //return renderer.bounds.center + new Vector3(frame.EventPosition.x * -renderer.bounds.extents.x, frame.EventPosition.y * -renderer.bounds.extents.y);
         }
 
         public SpriteRendererComponent(Transform spriteTr, Transform baseTr) {
-            //_renderer = new CachedUnityComponent<SpriteRenderer>(renderer);
             _spriteTr = new CachedTransform(spriteTr);
             _baseTr = new CachedTransform(baseTr);
             IsDirty = false;
@@ -125,7 +107,6 @@ namespace PixelComrades {
         }
 
         public SpriteRendererComponent(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {
-            //_renderer = new CachedUnityComponent<SpriteRenderer>(renderer);
             _meshRenderer = new CachedUnityComponent<MeshRenderer>(renderer);
             filter.sharedMesh = ProceduralMeshUtility.GenerateQuad(Vector2.one, new Vector2(0.5f, 0));
             _filter = new CachedUnityComponent<MeshFilter>(filter);

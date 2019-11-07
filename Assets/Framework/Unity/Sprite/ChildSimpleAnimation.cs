@@ -10,15 +10,15 @@ namespace PixelComrades {
         public override Sprite[] Sprites { get { return Set.Sprites; } set {} }
         public override SavedSpriteCollider[] Colliders { get { return Set.Colliders; } set { } }
 
-        public override Sprite GetSprite(int frame) {
-            return Set.Sprites[Indices[frame]];
+        public override Sprite GetSprite(int spriteIdx) {
+            return Set.Sprites[Indices[spriteIdx]];
         }
 
-        public override SavedSpriteCollider GetSpriteCollider(int frame) {
+        public override SavedSpriteCollider GetSpriteCollider(int spriteIdx) {
             if (Set.Colliders == null || Set.Colliders.Length == 0) {
                 return null;
             }
-            return Set.Colliders[Indices[frame]];
+            return Set.Colliders[Indices[spriteIdx]];
         }
     }
 }

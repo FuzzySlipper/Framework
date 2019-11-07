@@ -131,7 +131,6 @@ namespace PixelComrades {
             holder.Frames = new AnimationFrame[allSprites.Length];
             for (var i = 0; i < allSprites.Length; i++) {
                 holder.Frames[i] = new AnimationFrame {
-                    SpriteIndex = i,
                     Length = 1,
                 };
             }

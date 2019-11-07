@@ -10,7 +10,7 @@ namespace PixelComrades {
         private static readonly float TIMELINE_SCRUBBER_HEIGHT = 16;
         private static readonly float TIMELINE_EVENT_HEIGHT = 12;
         private static readonly float TIMELINE_BOTTOMBAR_HEIGHT = 18;
-        private static readonly float TIMELINE_OFFSET_MIN = -10;
+        private static readonly float _timelineOffsetMin = -10;
 
         private static readonly float SCRUBBER_INTERVAL_TO_SHOW_LABEL = 60.0f;
         private static readonly float SCRUBBER_INTERVAL_WIDTH_MIN = 10.0f;
@@ -22,13 +22,9 @@ namespace PixelComrades {
         private static readonly Color COLOR_EVENT_BAR_BG = new Color(0.2f, 0.2f, 0.2f);
 
         private static readonly Color COLOR_EVENT_LABEL_BG = COLOR_EVENT_BAR_BG*0.8f + Color.grey*0.2f;
-            // Fake alpha'd look while stillmasking things behind it
-
         private static readonly Color COLOR_EVENT_LABEL_BG_SELECTED = COLOR_EVENT_BAR_BG*0.8f + COLOR_UNITY_BLUE*0.2f;
-
         private static readonly float FRAME_RESIZE_RECT_WIDTH = 8;
 
-        //static readonly float EVENT_WIDTH = 2;
         private static readonly float EVENT_CLICK_OFFSET = -2;
         private static readonly float EVENT_CLICK_WIDTH = 10;
 
@@ -928,10 +924,10 @@ namespace PixelComrades {
             _timelineAnimWidth = _timelineScale*GetAnimLength();
             if (_timelineAnimWidth > rect.width/2.0f) {
                 _timelineOffset = Mathf.Clamp(_timelineOffset, rect.width - _timelineAnimWidth - rect.width/2.0f,
-                    -TIMELINE_OFFSET_MIN);
+                    -_timelineOffsetMin);
             }
             else {
-                _timelineOffset = -TIMELINE_OFFSET_MIN;
+                _timelineOffset = -_timelineOffsetMin;
             }
 
             //

@@ -13,13 +13,12 @@ namespace PixelComrades {
 
         private static readonly float TIMELINE_HEIGHT = 200;
         private static readonly float INFO_PANEL_WIDTH = 260;
-        private static readonly float CHECKERBOARD_SCALE = 32.0f;
-        private static Texture2D s_textureCheckerboard;
+        private static float _checkerboardScale = 32.0f;
+        private static Texture2D _textureCheckerboard;
         private float _animTime;
 
         // When true, the anim plays automatically when animation is selected. Set to false when users manually stops an animation
         [SerializeField] private bool _autoPlay = false;
-
         [SerializeField] private SpriteAnimation _clip;
 
         // List of copied frames or events
@@ -47,12 +46,10 @@ namespace PixelComrades {
         private float _timelineAnimWidth = 1;
 
         // Timeline view's offset from left (in pixels)
-        private float _timelineOffset = -TIMELINE_OFFSET_MIN;
+        private float _timelineOffset = -_timelineOffsetMin;
         // Unit per second on timeline
         private float _timelineScale = 1000;
         [SerializeField] private bool _uiImage;
-
-        // Used to clear selection when hit play (avoids selection references being broken)
         private bool _wasPlaying;
 
         private Texture2D _eventTexture = null;
@@ -176,7 +173,6 @@ namespace PixelComrades {
             for (int i = 0; i < _frames.Count; i++) {
                 _clip.Frames[i] = new AnimationFrame() {
                     Length = _frames[i].LengthMulti,
-                    SpriteIndex = i,
                     Event = _frames[i].Event,
                     EventName = _frames[i].EventName,
                     EventPosition = _frames[i].EventPosition,
@@ -292,22 +288,22 @@ namespace PixelComrades {
 
         // Returns a usable texture that looks like a high-contrast checker board.
         private static Texture2D GetCheckerboardTexture() {
-            if (s_textureCheckerboard == null) {
-                s_textureCheckerboard = new Texture2D(2, 2);
-                s_textureCheckerboard.name = "[Generated] Checkerboard Texture";
-                s_textureCheckerboard.hideFlags = HideFlags.DontSave;
-                s_textureCheckerboard.filterMode = FilterMode.Point;
-                s_textureCheckerboard.wrapMode = TextureWrapMode.Repeat;
+            if (_textureCheckerboard == null) {
+                _textureCheckerboard = new Texture2D(2, 2);
+                _textureCheckerboard.name = "[Generated] Checkerboard Texture";
+                _textureCheckerboard.hideFlags = HideFlags.DontSave;
+                _textureCheckerboard.filterMode = FilterMode.Point;
+                _textureCheckerboard.wrapMode = TextureWrapMode.Repeat;
 
                 var c0 = new Color(0.4f, 0.4f, 0.4f, 1.0f);
                 var c1 = new Color(0.278f, 0.278f, 0.278f, 1.0f);
-                s_textureCheckerboard.SetPixel(0, 0, c0);
-                s_textureCheckerboard.SetPixel(1, 1, c0);
-                s_textureCheckerboard.SetPixel(0, 1, c1);
-                s_textureCheckerboard.SetPixel(1, 0, c1);
-                s_textureCheckerboard.Apply();
+                _textureCheckerboard.SetPixel(0, 0, c0);
+                _textureCheckerboard.SetPixel(1, 1, c0);
+                _textureCheckerboard.SetPixel(0, 1, c1);
+                _textureCheckerboard.SetPixel(1, 0, c1);
+                _textureCheckerboard.Apply();
             }
-            return s_textureCheckerboard;
+            return _textureCheckerboard;
         }
 
         private int GetCurrentFrame() {
@@ -422,17 +418,10 @@ namespace PixelComrades {
         }
 
         private void LayoutPreview(Rect rect) {
-            //
-            // Draw checkerboard
-            //
-            var checkboardCoords = new Rect(Vector2.zero, rect.size/(CHECKERBOARD_SCALE*_previewScale));
+            var checkboardCoords = new Rect(Vector2.zero, rect.size/(_checkerboardScale*_previewScale));
             checkboardCoords.center = new Vector2(-_previewOffset.x, _previewOffset.y)/
-                                      (CHECKERBOARD_SCALE*_previewScale);
+                                      (_checkerboardScale*_previewScale);
             GUI.DrawTextureWithTexCoords(rect, GetCheckerboardTexture(), checkboardCoords, false);
-
-            //
-            // Draw sprite
-            //
             Sprite sprite = null;
             if (_frames.Count > 0) {
                 sprite = GetSpriteAtTime(_animTime);
@@ -452,10 +441,6 @@ namespace PixelComrades {
 
                 LayoutFrameSprite(rect, sprite, _previewScale, _previewOffset, false, true);
             }
-
-            //
-            // Handle layout events
-            //
             var e = Event.current;
             if (rect.Contains(e.mousePosition)) {
                 if (e.type == EventType.ScrollWheel) {
@@ -620,12 +605,12 @@ namespace PixelComrades {
                 //_selectedEvents.Clear();
                 _selectedFrames.Clear();
                 _previewOffset = Vector2.zero;
-                _timelineOffset = -TIMELINE_OFFSET_MIN;
+                _timelineOffset = -_timelineOffsetMin;
             }
             Repaint();
         }
 
-        private void OnEnable() {
+        void OnEnable() {
             _editorTimePrev = EditorApplication.timeSinceStartup;
 
             InitialiseFramesReorderableList();
@@ -633,11 +618,11 @@ namespace PixelComrades {
             OnSelectionChange();
         }
 
-        private void OnFocus() {
+        void OnFocus() {
             OnSelectionChange();
         }
 
-        private void OnGUI() {
+        void OnGUI() {
             GUI.SetNextControlName("none");
             // If no sprite selected, show editor	
             if (_clip == null || _frames == null) {
@@ -647,7 +632,7 @@ namespace PixelComrades {
             }
 
             
-            GUILayout.BeginHorizontal(Styles.PREVIEW_BUTTON); // EditorStyles.toolbar );
+            GUILayout.BeginHorizontal(Styles.PREVIEW_BUTTON);
             {
                 LayoutToolbarPlay();
                 LayoutToolbarPrevFrame();
@@ -659,10 +644,6 @@ namespace PixelComrades {
             }
             GUILayout.EndHorizontal();
 
-            //
-            // Preview
-            //
-
             var lastRect = GUILayoutUtility.GetLastRect();
 
             var previewRect = new Rect(lastRect.xMin, lastRect.yMax, position.width - INFO_PANEL_WIDTH,
@@ -670,28 +651,14 @@ namespace PixelComrades {
             if (_previewResetScale) {
                 ResetPreviewScale(previewRect);
                 _previewResetScale = false;
-
-                // Also reset timeline length
                 _timelineScale = position.width/(MathEx.Max(0.5f, _clip.LengthTime)*1.25f);
             }
             LayoutPreview(previewRect);
-
-            //
-            // Info Panel
-            //
             var infoPanelRect = new Rect(lastRect.xMin + position.width - INFO_PANEL_WIDTH, lastRect.yMax,
                 INFO_PANEL_WIDTH, position.height - lastRect.yMax - TIMELINE_HEIGHT);
             LayoutInfoPanel(infoPanelRect);
-
-            //
-            // Timeline
-            //
             var timelineRect = new Rect(0, previewRect.yMax, position.width, TIMELINE_HEIGHT);
             LayoutTimeline(timelineRect);
-
-            //
-            // Handle keypress events that are also used in text fields, this requires check that a text box doesn't have focus
-            //
             var e = Event.current;
             if (focusedWindow == this) {
                 var allowKeypress = string.IsNullOrEmpty(GUI.GetNameOfFocusedControl()) ||
@@ -721,9 +688,6 @@ namespace PixelComrades {
                 }
             }
 
-            //
-            // Handle event commands- Delete, selectall, duplicate, copy, paste...
-            //
             if (e.type == EventType.ValidateCommand) {
                 switch (e.commandName) {
                     case "Delete":
@@ -783,8 +747,7 @@ namespace PixelComrades {
             }
         }
 
-        /// Unity event called when the selectd object changes
-        private void OnSelectionChange() {
+        void OnSelectionChange() {
             var obj = Selection.activeObject;
             if (obj != _clip && obj is SpriteAnimation) {
                 _clip = Selection.activeObject as SpriteAnimation;
@@ -962,7 +925,7 @@ namespace PixelComrades {
             _editorTimePrev = EditorApplication.timeSinceStartup;
         }
 
-        [MenuItem("Tools/Sprite Animator Window")] public static void ShowWindow() {
+        [MenuItem("Window/Sprite Animator Window")] public static void ShowWindow() {
             GetWindow(typeof(SpriteAnimatorWindow), false, "Sprite Animator");
         }
     }

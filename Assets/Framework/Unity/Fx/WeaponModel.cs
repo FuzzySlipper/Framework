@@ -37,6 +37,13 @@ namespace PixelComrades {
             }
         }
 
+        public void UpdateFx(float time) {
+            if (_weaponTrail != null) {
+                //_weaponTrail.gameObject.SetActive(status);
+                _weaponTrail.RunUpdate();
+            }
+        }
+
         [Button]
         public void SetPosition() {
             _basePositioning.Set(_base);

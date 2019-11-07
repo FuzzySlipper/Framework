@@ -118,14 +118,15 @@ namespace PixelComrades {
                 _testRenderer.SetPropertyBlock(blockMaterial);
                 _testRenderer.transform.rotation = data.Flip ? Quaternion.identity : Quaternion.Inverse(transform.rotation);
                 var frame = data.Animation.GetFrame(data.Frame);
-                if (frame.HasEvent) {
-                    Debug.DrawRay(data.Animation.GetEventPosition(data.Sprite, _testRenderer.transform, frame), _testRenderer.transform
-                    .forward * 5, Color.red, 5f);
-                }
                 var pixelsPerUnit = data.Sprite.pixelsPerUnit;
                 var size = new Vector2(data.Sprite.rect.width / pixelsPerUnit,
                     data.Sprite.rect.height / pixelsPerUnit);
-                
+                if (frame.HasEvent) {
+                    var center = _spriteCollider.transform.TransformPoint(
+                        Mathf.Lerp(
+                            -(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
+                    Debug.DrawRay(center, _testRenderer.transform.forward * 5, Color.red, 5f);
+                }
                 if (_testFilter.sharedMesh == null) {
                     _testFilter.sharedMesh = ProceduralMeshUtility.GenerateQuad(size, new Vector2(0.5f, 0));
                 }

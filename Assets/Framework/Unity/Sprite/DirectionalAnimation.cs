@@ -20,30 +20,30 @@ namespace PixelComrades {
         public override SavedSpriteCollider[] Colliders { get => _colliders; set => _colliders = value; }
 
         
-        public override Sprite GetSprite(int frame) {
-            return Sprites[frame];
+        public override Sprite GetSprite(int spriteIdx) {
+            return Sprites[spriteIdx];
         }
 
-        public override SavedSpriteCollider GetSpriteCollider(int frame) {
+        public override SavedSpriteCollider GetSpriteCollider(int spriteIdx) {
             if (Colliders == null || Colliders.Length == 0) {
                 return null;
             }
-            return Colliders[frame];
+            return Colliders[spriteIdx];
         }
         
-        public Sprite GetSprite(DirectionsEight facing, int frame) {
+        public Sprite GetSprite(DirectionsEight facing, int spriteIdx) {
             var frames = GetFacingIndices(facing);
             if (frames != null) {
-                var idx = frames[frame];
+                var idx = frames[spriteIdx];
                 return Sprites[Mathf.Clamp(idx, 0, Sprites.Length - 1)];
             }
-            return GetSprite(frame);
+            return GetSprite(spriteIdx);
         }
 
-        public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int frame) {
+        public SavedSpriteCollider GetSpriteCollider(DirectionsEight facing, int spriteIdx) {
             var frames = GetFacingIndices(facing);
             if (frames != null) {
-                var idx = frames[frame];
+                var idx = frames[spriteIdx];
                 return Colliders[Mathf.Clamp(idx, 0, Colliders.Length - 1)];
             }
             return null;

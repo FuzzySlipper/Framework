@@ -26,10 +26,7 @@ namespace PixelComrades {
         public override void OnInspectorGUI() {
             var script = (SpriteAnimation)target;
             if (GUILayout.Button("Edit Animations")) {
-                if (targets.Length > 1) {
-                    return;
-                }
-                SpriteAnimatorWindow.ShowWindow();
+                SpriteAnimationWindow.ShowWindow();
             }
             if (GUILayout.Button("Generate Colliders")) {
                 if (targets.Length > 1) {

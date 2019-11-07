@@ -22,6 +22,7 @@ namespace PixelComrades {
         private const float LabelOffset = 5f;
         private const float NotchWidth = 5f;
         private const float HandleWidth = 10f;
+        private const int MaxTrackHeight = 200;
         private static int _myControlId;
         //private readonly Dictionary<int, TempObjectValues> _playTimeChanges = new Dictionary<int, TempObjectValues>();
         private readonly List<SequenceObject> _selectedObjects = new List<SequenceObject>();
@@ -81,17 +82,17 @@ namespace PixelComrades {
             if (_objectWindow != null) {
                 _objectWindow.Close();
             }
-            foreach (var track in CurrentSequence.Objects) {
-                var newList = CurrentSequence.Objects.ToList();
-                newList.Remove(track);
-                foreach (var otherAction in newList) {
-                    if (otherAction.EditingTrack == track.EditingTrack &&
-                        (track.StartTime >= otherAction.StartTime && track.StartTime <= otherAction.EndTime ||
-                         track.EndTime >= otherAction.StartTime && track.EndTime <= otherAction.EndTime)) {
-                        otherAction.EditingTrack++;
-                    }
-                }
-            }
+//            foreach (var track in CurrentSequence.Objects) {
+//                var newList = CurrentSequence.Objects.ToList();
+//                newList.Remove(track);
+//                foreach (var otherAction in newList) {
+//                    if (otherAction.EditingTrack == track.EditingTrack &&
+//                        (track.StartTime >= otherAction.StartTime && track.StartTime <= otherAction.EndTime ||
+//                         track.EndTime >= otherAction.StartTime && track.EndTime <= otherAction.EndTime)) {
+//                        otherAction.EditingTrack++;
+//                    }
+//                }
+//            }
         }
         
         protected virtual void OnGUI() {
@@ -209,7 +210,7 @@ namespace PixelComrades {
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             CurrentSequence.MaxTracks = EditorGUILayout.IntField("Max tracks:", CurrentSequence.MaxTracks);
-            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 50, 150);
+            _boxHeight = EditorGUILayout.IntSlider("Track height:", _boxHeight, 50, MaxTrackHeight);
             if (_draggedObject == null) {
                 var newVisibleDuration = CurrentSequence.MaxDuration / _visibleScale;
                 if (Math.Abs(_visibleDuration - newVisibleDuration) > 0) {
@@ -254,7 +255,7 @@ namespace PixelComrades {
             PlayTask = TimeManager.StartUnscaled(PlayAnimation());
         }
 
-        private void CreateContextItem(object obj) {
+        protected virtual void CreateContextItem(object obj) {
             var targetType = obj as Type;
             if (targetType == null) {
                 return;
@@ -323,7 +324,7 @@ namespace PixelComrades {
                 }
             }
             newDuration = Mathf.Abs(newDuration);
-            if (dragged.StartTime != newStartTime || dragged.Duration != newDuration || dragged.EditingTrack != newEditingTrack) {
+            if (Math.Abs(dragged.StartTime - newStartTime) > 0.0001f || Math.Abs(dragged.Duration - newDuration) > 0.0001f || dragged.EditingTrack != newEditingTrack) {
                 if (Intersects(dragged, newEditingTrack, newStartTime, newDuration) || newStartTime < 0) {
                     return;
                 }
@@ -509,24 +510,6 @@ namespace PixelComrades {
 
         private void PerformDrag(float offset, float visibleDuration, int trackOffset) {
             if (_draggedObject != null && GUIUtility.hotControl == _myControlId && Event.current.rawType == EventType.MouseUp) {
-//                if (Application.isPlaying) {
-//                    var newVals = new TempObjectValues {
-//                        StartTime = _draggedObject.StartTime,
-//                        Duration = _draggedObject.Duration,
-//                        EditingTrack = _draggedObject.EditingTrack
-//                    };
-//                    var id = _draggedObject.GetInstanceID();
-//                    if (_playTimeChanges.ContainsKey(id)) {
-//                        _playTimeChanges[id] = newVals;
-//                    }
-//                    else {
-//                        _playTimeChanges.Add(id, newVals);
-//                    }
-//                    Repaint();
-//                }
-//                else {
-//                    
-//                }
                 EditorUtility.SetDirty(_currentSequence);
                 _draggedObject = null;
             }
@@ -540,7 +523,7 @@ namespace PixelComrades {
             LastScene = go;
         }
 
-        private void RemoveContextItem(object obj) {
+        protected virtual void RemoveContextItem(object obj) {
             var track = obj as SequenceObject;
             if (track == null) {
                 return;

@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [ExecuteInEditMode]
     public class MeleeWeaponTrail : MonoBehaviour, IPoolEvents {
 
         [SerializeField] private bool _useInterpolation = true;
@@ -116,7 +115,7 @@ namespace PixelComrades {
         }
 
         void Update() {
-            RunUpdate(TimeManager.DeltaTime);
+            RunUpdate();
         }
 
         private void SetLastPosition() {
@@ -140,7 +139,19 @@ namespace PixelComrades {
             return new Point(p, _holder.Tr.InverseTransformPoint(_base.position), _holder.Tr.InverseTransformPoint(_tip.position));
         }
 
-        public void RunUpdate(float dt) {
+        public void SetTime(float time) {
+            if (_holder == null || _holder.Tr == null) {
+                Setup();
+            }
+            if (_holder.Tr.parent != transform.root) {
+                _holder.Tr.SetParentResetPos(transform.root);
+            }
+            if (!_holder.Renderer.enabled) {
+                _holder.Renderer.enabled = true;
+            }
+        }
+
+        public void RunUpdate() {
             if (!_active) {
                 return;
             }
@@ -164,8 +175,6 @@ namespace PixelComrades {
                     make = true;
                 }
                 else {
-                    //Vector3 l1 = _points[_points.Count - 2].basePosition - _points[_points.Count - 3].basePosition;
-                    //Vector3 l2 = _points[_points.Count - 1].basePosition - _points[_points.Count - 2].basePosition;
                     Vector3 l1 = _points[_points.Count - 2].TipPosition - _points[_points.Count - 3].TipPosition;
                     Vector3 l2 = _points[_points.Count - 1].TipPosition - _points[_points.Count - 2].TipPosition;
                     if (Vector3.Angle(l1, l2) > _maxAngle || theDistanceSqr > _maxVertexDistanceSqr)
@@ -355,7 +364,7 @@ namespace PixelComrades {
                 Gizmos.DrawSphere(_tip.position, 0.025f);
             }
             if (_preview && gameObject.activeInHierarchy) {
-                RunUpdate(TimeManager.DeltaUnscaled);
+                RunUpdate();
             }
         }
 

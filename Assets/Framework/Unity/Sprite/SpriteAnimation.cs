@@ -27,15 +27,15 @@ namespace PixelComrades {
         public abstract Sprite[] Sprites { get; set; }
         public abstract SavedSpriteCollider[] Colliders { get; set; }
 
-        public virtual Sprite GetSprite(int frame) {
-            return Sprites[Mathf.Clamp(frame, 0, Sprites.Length - 1)];
+        public virtual Sprite GetSprite(int spriteIdx) {
+            return Sprites[Mathf.Clamp(spriteIdx, 0, Sprites.Length - 1)];
         }
 
-        public virtual SavedSpriteCollider GetSpriteCollider(int frame) {
+        public virtual SavedSpriteCollider GetSpriteCollider(int spriteIdx) {
             if (Colliders == null || Colliders.Length == 0) {
                 return null;
             }
-            return Colliders[Mathf.Clamp(frame, 0, Colliders.Length - 1)];
+            return Colliders[Mathf.Clamp(spriteIdx, 0, Colliders.Length - 1)];
         }
 
         public float LengthTime {
@@ -63,7 +63,7 @@ namespace PixelComrades {
             return null;
         }
 
-        public float GetFrameStart(int frameIdx) {
+        public float GetFrameStartTime(int frameIdx) {
             float time = 0;
             for (int i = 0; i < frameIdx; i++) {
                 time += FrameTime * _frames[i].Length;
@@ -86,6 +86,10 @@ namespace PixelComrades {
                 new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
         }
 
+        public AnimationFrame GetFrameAtTime(float time) {
+            return Frames[Mathf.Clamp(ConvertAnimationTimeToFrame(time), 0, Frames.Length - 1)];
+        }
+
         public int ConvertAnimationTimeToFrame(float time) {
             float timeCheck = 0;
             int lastGood = 0;
@@ -105,8 +109,7 @@ namespace PixelComrades {
     [System.Serializable]
     public class AnimationFrame {
         public float Length = 1;
-        public int SpriteIndex;
-        
+
         public EventType Event = EventType.None;
         public string EventName;
         public Vector2 EventPosition;

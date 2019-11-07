@@ -15,6 +15,14 @@ namespace PixelComrades {
     public class DirectionalFrames {
         public DirectionsEight Side;
         public int[] FrameIndices;
+
+        public DirectionalFrames(DirectionsEight side, int length) {
+            Side = side;
+            FrameIndices = new int[length];
+            for (int i = 0; i < FrameIndices.Length; i++) {
+                FrameIndices[i] = -1;
+            }
+        }
     }
 
     [System.Serializable]
