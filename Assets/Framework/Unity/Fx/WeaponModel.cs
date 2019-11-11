@@ -13,6 +13,7 @@ namespace PixelComrades {
         [SerializeField] private HandPose _handPose = null;
         [SerializeField] private MusclePose _idlePose = null;
         [SerializeField] private bool _auto = true;
+        [SerializeField] private MeleeWeaponTrailAlt _meleeTrail = null;
 
         public Transform Tr { get { return _base; } }
         public Transform Spawn { get { return _spawn; } }
@@ -35,12 +36,23 @@ namespace PixelComrades {
                 //_weaponTrail.gameObject.SetActive(status);
                 _weaponTrail.SetActive(status);
             }
+            if (_meleeTrail != null) {
+                if (status) {
+                    _meleeTrail.StartTrail();
+                }
+                else {
+                    _meleeTrail.ClearTrail();
+                }
+            }
         }
 
         public void UpdateFx(float time) {
             if (_weaponTrail != null) {
                 //_weaponTrail.gameObject.SetActive(status);
                 _weaponTrail.RunUpdate();
+            }
+            if (_meleeTrail != null) {
+                _meleeTrail.UpdateTrail(time, TimeManager.DeltaUnscaled);
             }
         }
 

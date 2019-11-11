@@ -20,6 +20,7 @@ namespace PixelComrades {
         [SerializeField] private bool _preview = false;
         [SerializeField] private bool _removeWorldPosition = true;
         [SerializeField] private Material _material = null;
+        [SerializeField] private bool _useBezier = false;
 
         private List<Point> _points = new List<Point>();
         private List<Point> _smoothedPoints = new List<Point>();
@@ -155,9 +156,6 @@ namespace PixelComrades {
             if (!_active) {
                 return;
             }
-            //if (_autoDestruct && !CheckEmit(dt)) {
-            //       return;
-            //}
             if (_holder == null || _holder.Tr == null) {
                 Setup();
             }
@@ -202,16 +200,16 @@ namespace PixelComrades {
                             tipPoints[2] = _points[_points.Count - 2].TipPosition;
                             tipPoints[3] = _points[_points.Count - 1].TipPosition;
 
-                            //IEnumerable<Vector3> smoothTip = Interpolate.NewBezier(Interpolate.Ease(Interpolate.EaseType.Linear), tipPoints, subdivisions);
-                            IEnumerable<Vector3> smoothTip = Interpolate.NewCatmullRom(tipPoints, _subdivisions, false);
+                            IEnumerable<Vector3> smoothTip = _useBezier ? Interpolate.NewBezier(Interpolate.Ease(Interpolate.EaseType.Linear), 
+                            tipPoints, _subdivisions) : Interpolate.NewCatmullRom(tipPoints, _subdivisions, false);
                             Vector3[] basePoints = new Vector3[4];
                             basePoints[0] = _points[_points.Count - 4].BasePosition;
                             basePoints[1] = _points[_points.Count - 3].BasePosition;
                             basePoints[2] = _points[_points.Count - 2].BasePosition;
                             basePoints[3] = _points[_points.Count - 1].BasePosition;
 
-                            //IEnumerable<Vector3> smoothBase = Interpolate.NewBezier(Interpolate.Ease(Interpolate.EaseType.Linear), basePoints, subdivisions);
-                            IEnumerable<Vector3> smoothBase = Interpolate.NewCatmullRom(basePoints, _subdivisions, false);
+                            IEnumerable<Vector3> smoothBase = _useBezier ? Interpolate.NewBezier(Interpolate.Ease(Interpolate.EaseType.Linear), basePoints, _subdivisions):
+                            Interpolate.NewCatmullRom(basePoints, _subdivisions, false);
                             _smoothTipList.Clear();
                             _smoothTipList.AddRange(smoothTip);
                             _smoothBaseList.Clear();
@@ -219,7 +217,6 @@ namespace PixelComrades {
                             float firstTime = _points[_points.Count - 4].TimeCreated;
                             float secondTime = _points[_points.Count - 1].TimeCreated;
 
-                            //Debug.Log(" smoothTipList.Count: " + smoothTipList.Count);
                             for (int n = 0; n < _smoothTipList.Count; ++n) {
                                 int idx = _smoothedPoints.Count - (_smoothTipList.Count - n);
                                 // there are moments when the _smoothedPoints are lesser

@@ -15,6 +15,7 @@ namespace PixelComrades {
         [SerializeField] private Transform _leftShoulderTarget = null;
 
         [SerializeField] private string _currentLabel = "";
+        [SerializeField, ValueDropdown("SignalsList")] private string _loadExisting = "";
         [SerializeField, Range(-2, 2)] private float _rightHandOpen = 1;
         [SerializeField, Range(-2, 2)] private float _leftHandOpen = 1;
 
@@ -26,7 +27,6 @@ namespace PixelComrades {
         
         private float _lastRightHand = -2;
         private float _lastLeftHand = -2;
-        
         
         public PoseAnimator PoseAnimator { get => _poseAnimator; }
         public Transform RightHandTarget { get => _rightHandTarget; set => _rightHandTarget = value; }
@@ -49,9 +49,6 @@ namespace PixelComrades {
             if (_ik != null) {
                 _ik.UpdateSolverExternal();
             }
-//            if (_poseAnimator != null) {
-//                _poseAnimator.RefreshPose();
-//            }
         }
 
         public void UpdateIk() {
@@ -116,6 +113,25 @@ namespace PixelComrades {
             if (pose != null) {
                 Restore(pose);
             }
+        }
+
+        [Button]
+        public void RestoreExisting() {
+            if (_db == null) {
+                return;
+            }
+            var pose = _db.GetPose(_loadExisting);
+            if (pose != null) {
+                Restore(pose);
+                _currentLabel = _loadExisting;
+            }
+        }
+
+        private ValueDropdownList<string> SignalsList() {
+            if (_db == null) {
+                return null;
+            }
+            return _db.SignalsList();
         }
 
         public void Restore(SavedIkPose ikPose) {

@@ -1,9 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     public sealed class IkPoserClip : SequenceObject {
+
+        private const string PosesAddress = "Assets/GameData/Player/IkPoses/PlayerPoses.asset";
 
         public AnimationCurve Curve = new AnimationCurve();
         public string StartPose;
@@ -18,6 +21,13 @@ namespace PixelComrades {
         public override IRuntimeSequenceObject GetRuntime(IRuntimeSequence owner) {
             return new RuntimeObject(this, owner);
         }
+//
+//        private ValueDropdownList<string> SignalsList() {
+//            if (Source == null) {
+//                return null;
+//            }
+//            return Source.SignalsList();
+//        }
 
         public override void DrawTimelineGui(Rect rect) {
             if (Curve == null) {
@@ -34,11 +44,28 @@ namespace PixelComrades {
 
         public override void DrawEditorGui() {
 #if UNITY_EDITOR
+            if (Source == null) {
+                ItemPool.LoadAsset<IkPoses>(PosesAddress, p => { Source = p; });
+            }
             UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
             UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Source)), true);
             UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Curve)), true);
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(StartPose)), true);
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(TargetPose)), true);
+            if (Source == null) {
+                so.ApplyModifiedProperties();
+                return;
+            }
+            var list = Source.StringSignalsList().ToArray();
+            var startIndex = list.FindIndex(StartPose);
+            var targetIndex = list.FindIndex(TargetPose);
+            var startIndexNew = UnityEditor.EditorGUILayout.Popup("Start Pose", startIndex, list);
+            var targetIndexNew = UnityEditor.EditorGUILayout.Popup("Target Pose", targetIndex, list);
+            if (startIndexNew != startIndex || targetIndex != targetIndexNew) {
+                StartPose = list[startIndexNew];
+                TargetPose = list[targetIndexNew];
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+            //UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(StartPose)), true);
+            //UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(TargetPose)), true);
             so.ApplyModifiedProperties();
 #endif
         }

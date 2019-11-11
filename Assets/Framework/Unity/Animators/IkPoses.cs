@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     [CreateAssetMenu]
@@ -15,6 +16,24 @@ namespace PixelComrades {
                 }
             }
             return null;
+        }
+
+        public ValueDropdownList<string> SignalsList() {
+            var signals = new ValueDropdownList<string>();
+            signals.Add("");
+            for (int i = 0; i < _poses.Count; i++) {
+                signals.Add(_poses[i].Label);
+            }
+            return signals;
+        }
+
+        public List<string> StringSignalsList() {
+            var signals = new List<string>();
+            signals.Add("");
+            for (int i = 0; i < _poses.Count; i++) {
+                signals.Add(_poses[i].Label);
+            }
+            return signals;
         }
 
         public void AddPose(SavedIkPose ikPose) {

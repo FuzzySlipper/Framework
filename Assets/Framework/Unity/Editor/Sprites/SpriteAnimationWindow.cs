@@ -1,9 +1,11 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Rewired;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
+using Object = UnityEngine.Object;
 
 namespace PixelComrades {
     public class SpriteAnimationWindow : EditorWindow {
@@ -16,6 +18,7 @@ namespace PixelComrades {
 
         private static float _checkerboardScale = 32.0f;
         private static float _timelineOffsetMin = -10;
+        private static float _maxScale = 25f;
         private static Texture2D _textureCheckerboard;
         private static readonly float TimelineScrubberHeight = 16;
         private static readonly float TimelineBottomBarHeight = 18;
@@ -24,13 +27,13 @@ namespace PixelComrades {
         private static readonly float ScrubberIntervalWidthMax = 80.0f;
         private static readonly float ScrubberIntervalToShowLabel = 60.0f;
         private float _timelineEventBarHeight = TimelineEventHeight;
-        private static readonly float FrameResizeRectWidth = 8;
         private static readonly Color ColorUnityBlue = new Color(0.3f, 0.5f, 0.85f, 1);
         private static readonly Color ColorEventBarBg = new Color(0.2f, 0.2f, 0.2f);
         private static readonly Color ColorEventLabelBg = ColorEventBarBg * 0.8f + Color.grey * 0.2f;
         private static readonly Color ColorEventLabelBgSelected = ColorEventBarBg * 0.8f + ColorUnityBlue * 0.2f;
         private static readonly float TimelineHeight = 200;
         private static readonly float InfoPanelWidth = 260;
+        private static readonly Color EventBorder = new Color(1f, 0.36f, 0.03f);
         private int _resizeFrameId;
         
         [SerializeField] private bool _autoPlay = false;
@@ -48,7 +51,6 @@ namespace PixelComrades {
         private float _timelineScale = 1000;
         private Texture2D _eventTexture = null;
         private int _currentFrame;
-        private eDragState _dragState = eDragState.None;
         private double _editorTimePrev;
         private float _timelineOffset = -_timelineOffsetMin;
 
@@ -61,7 +63,7 @@ namespace PixelComrades {
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
                     bool isBorder = x < border || y < border || x > size - border || y > size - border;
-                    _eventTexture.SetPixel(x, y, isBorder ? Color.white : Color.clear);
+                    _eventTexture.SetPixel(x, y, isBorder ? EventBorder : Color.clear);
                 }
             }
             _eventTexture.Apply();
@@ -76,7 +78,7 @@ namespace PixelComrades {
         }
 
         private void Update() {
-            if (_clip != null && _playing && _dragState != eDragState.Scrub) {
+            if (_clip != null && _playing) {
                 var delta = (float) (EditorApplication.timeSinceStartup - _editorTimePrev);
 
                 _animTime += delta * _previewSpeedScale;
@@ -93,9 +95,6 @@ namespace PixelComrades {
                 }
                 Repaint();
             }
-            else if (_dragState != eDragState.None) {
-                Repaint();
-            }
             _currentFrame = _clip.ConvertAnimationTimeToFrame(_animTime);
             _editorTimePrev = EditorApplication.timeSinceStartup;
         }
@@ -110,7 +109,7 @@ namespace PixelComrades {
             }
 
             
-            GUILayout.BeginHorizontal(Styles.PREVIEW_BUTTON);
+            GUILayout.BeginHorizontal(Styles.PreviewButton);
             {
                 LayoutToolbarPlay();
                 LayoutToolbarPrevFrame();
@@ -166,10 +165,10 @@ namespace PixelComrades {
         }
         
         private void LayoutPreview(Rect rect) {
-            var checkboardCoords = new Rect(Vector2.zero, rect.size/(_checkerboardScale*_previewScale));
-            checkboardCoords.center = new Vector2(-_previewOffset.x, _previewOffset.y)/
+            var checkerboard = new Rect(Vector2.zero, rect.size/(_checkerboardScale*_previewScale));
+            checkerboard.center = new Vector2(-_previewOffset.x, _previewOffset.y)/
                                       (_checkerboardScale*_previewScale);
-            GUI.DrawTextureWithTexCoords(rect, GetCheckerboardTexture(), checkboardCoords, false);
+            GUI.DrawTextureWithTexCoords(rect, GetCheckerboardTexture(), checkerboard, false);
             Sprite sprite = _clip.GetSprite(_currentFrame);
             if (sprite != null) {
                 if (sprite.packed && Application.isPlaying) {
@@ -192,7 +191,7 @@ namespace PixelComrades {
                         scale /= 10.0f;
                     }
                     _previewScale -= e.delta.y*scale*0.05f;
-                    _previewScale = Mathf.Clamp(_previewScale, 0.1f, 100.0f);
+                    _previewScale = Mathf.Clamp(_previewScale, 0.1f, _maxScale);
                     Repaint();
                     e.Use();
                 }
@@ -205,14 +204,21 @@ namespace PixelComrades {
                         }
                     }
                 }
-                else if (e.type == EventType.MouseDown && e.button == 0) {
-                    var frame = _clip.Frames[_currentFrame];
-                    if (frame.Event == AnimationFrame.EventType.None) {
-                        frame.Event = AnimationFrame.EventType.Default;
+                else if (e.type == EventType.MouseDown) {
+                    if (e.button == 0) {
+                        var frame = _clip.Frames[_currentFrame];
+                        if (frame.Event == AnimationFrame.EventType.None) {
+                            frame.Event = AnimationFrame.EventType.Default;
+                        }
+                        var mousePos = Event.current.mousePosition;
+                        frame.EventPosition.x = Mathf.InverseLerp(rect.xMin, rect.xMax, mousePos.x);
+                        frame.EventPosition.y = Mathf.InverseLerp(rect.yMax, rect.yMin, mousePos.y);
+                        Repaint();
                     }
-                    var mousePos = Event.current.mousePosition;
-                    frame.EventPosition.x = Mathf.InverseLerp(rect.xMin, rect.xMax, mousePos.x);
-                    frame.EventPosition.y = Mathf.InverseLerp(rect.yMax, rect.yMin, mousePos.y);
+                    else if (e.button == 1) {
+                        _clip.Frames[_currentFrame].Event = AnimationFrame.EventType.None;
+                        Repaint();
+                    }
                 }
             }
         }
@@ -260,7 +266,7 @@ namespace PixelComrades {
         private void ResetPreviewScale(Rect rect) {
             Sprite sprite = _clip.GetSprite(0);
             _previewScale = 1;
-            if (sprite != null && rect.width > 0 && rect.height > 0 && sprite.rect.width > 0 && sprite.rect.height > 0) {
+            if (sprite != null && rect.width > 1 && rect.height > 1 && sprite.rect.width > 1 && sprite.rect.height > 1) {
                 var widthScaled = rect.width / sprite.rect.width;
                 var heightScaled = rect.height / sprite.rect.height;
 
@@ -271,7 +277,7 @@ namespace PixelComrades {
                     _previewScale = rect.height / sprite.rect.height;
                 }
 
-                _previewScale = Mathf.Clamp(_previewScale, 0.1f, 100.0f) * 0.95f;
+                _previewScale = Mathf.Clamp(_previewScale, 0.1f, _maxScale) * 0.95f;
             }
         }
         
@@ -351,7 +357,7 @@ namespace PixelComrades {
                 height = elementHeight
             });
 
-            LayoutPlayhead(new Rect(rect) {
+            LayoutPlayHead(new Rect(rect) {
                 height = rect.height - TimelineBottomBarHeight
             });
 
@@ -394,12 +400,6 @@ namespace PixelComrades {
                     }
                 }
             }
-
-            if (e.rawType == EventType.MouseUp && e.button == 0 &&
-                (_dragState == eDragState.SelectFrame)) {
-                _dragState = eDragState.None;
-                Repaint();
-            }
         }
 
         private float AnimTimeToGuiPos(Rect rect, float time) {
@@ -430,14 +430,14 @@ namespace PixelComrades {
             LayoutFrameSprite(rect, sprite, scale, Vector2.zero, true, false);
         }
         private void LayoutToolbarLoop() {
-            _previewLoop = GUILayout.Toggle(_previewLoop, _previewLoop ? Contents.LOOP_ON : Contents.LOOP_OFF,
-                Styles.PREVIEW_BUTTON_LOOP, GUILayout.Width(25));
+            _previewLoop = GUILayout.Toggle(_previewLoop, _previewLoop ? Contents.LoopOn : Contents.LoopOff,
+                Styles.PreviewButtonLoop, GUILayout.Width(25));
         }
 
         private void LayoutToolbarAnimName() {
             GUILayout.Space(10);
             if (GUILayout.Button(
-                _clip.name, new GUIStyle(Styles.PREVIEW_BUTTON) {
+                _clip.name, new GUIStyle(Styles.PreviewButton) {
                     stretchWidth = true,
                     alignment = TextAnchor.MiddleLeft
                 })) {
@@ -447,7 +447,7 @@ namespace PixelComrades {
         }
 
         private void LayoutToolbarNextFrame() {
-            if (GUILayout.Button(Contents.NEXT, Styles.PREVIEW_BUTTON, GUILayout.Width(25))) {
+            if (GUILayout.Button(Contents.Next, Styles.PreviewButton, GUILayout.Width(25))) {
                 _playing = false;
                 ChangeFrame(1);
             }
@@ -460,16 +460,12 @@ namespace PixelComrades {
 
         private void LayoutToolbarPlay() {
             EditorGUI.BeginChangeCheck();
-            _playing = GUILayout.Toggle(_playing, _playing ? Contents.PAUSE : Contents.PLAY, Styles.PREVIEW_BUTTON,
+            _playing = GUILayout.Toggle(_playing, _playing ? Contents.Pause : Contents.Play, Styles.PreviewButton,
                 GUILayout.Width(40));
             if (EditorGUI.EndChangeCheck()) {
-                // Set the auto play variable. Anims will auto play when selected unless user has manually stopped an anim.
                 _autoPlay = _playing;
 
                 if (_playing) {
-                    // Clicked play
-
-                    // If anim is at end, restart
                     if (_animTime >= _clip.LengthTime) {
                         _animTime = 0;
                     }
@@ -478,31 +474,30 @@ namespace PixelComrades {
         }
 
         private void LayoutToolbarPrevFrame() {
-            if (GUILayout.Button(Contents.PREV, Styles.PREVIEW_BUTTON, GUILayout.Width(25))) {
+            if (GUILayout.Button(Contents.Prev, Styles.PreviewButton, GUILayout.Width(25))) {
                 _playing = false;
                 ChangeFrame(-1);
             }
         }
 
         private void LayoutToolbarScaleSlider() {
-            // When press the zoom button, if scale isn't 1, set it to 1, otherwise, scale to it (so it toggles baseically)
-            if (GUILayout.Button(Contents.ZOOM, Styles.PREVIEW_LABEL_BOLD, GUILayout.Width(30))) {
-                if (_previewScale == 1)
+            if (GUILayout.Button(Contents.Zoom, Styles.PreviewLabelBold, GUILayout.Width(30))) {
+                if (Math.Abs(_previewScale - 1) < 0.0001f)
                     _previewResetScale = true;
                 else
                     _previewScale = 1;
             }
-            _previewScale = GUILayout.HorizontalSlider(_previewScale, 0.1f, 5, Styles.PREVIEW_SLIDER,
-                Styles.PREVIEW_SLIDER_THUMB, GUILayout.Width(50));
-            GUILayout.Label(_previewScale.ToString("0.0"), Styles.PREVIEW_LABEL_SPEED, GUILayout.Width(40));
+            _previewScale = GUILayout.HorizontalSlider(_previewScale, 0.1f, 5, Styles.PreviewSlider,
+                Styles.PreviewSliderThumb, GUILayout.Width(50));
+            GUILayout.Label(_previewScale.ToString("0.0"), Styles.PreviewLabelSpeed, GUILayout.Width(40));
         }
 
         private void LayoutToolbarSpeedSlider() {
-            if (GUILayout.Button(Contents.SPEEDSCALE, Styles.PREVIEW_LABEL_BOLD, GUILayout.Width(30)))
+            if (GUILayout.Button(Contents.Speedscale, Styles.PreviewLabelBold, GUILayout.Width(30)))
                 _previewSpeedScale = 1;
-            _previewSpeedScale = GUILayout.HorizontalSlider(_previewSpeedScale, 0, 4, Styles.PREVIEW_SLIDER,
-                Styles.PREVIEW_SLIDER_THUMB, GUILayout.Width(50));
-            GUILayout.Label(_previewSpeedScale.ToString("0.00"), Styles.PREVIEW_LABEL_SPEED, GUILayout.Width(40));
+            _previewSpeedScale = GUILayout.HorizontalSlider(_previewSpeedScale, 0, 4, Styles.PreviewSlider,
+                Styles.PreviewSliderThumb, GUILayout.Width(50));
+            GUILayout.Label(_previewSpeedScale.ToString("0.00"), Styles.PreviewLabelSpeed, GUILayout.Width(40));
         }
 
         private static void DrawLine(Vector2 from, Vector2 to, Color color, float width = 0) {
@@ -543,7 +538,7 @@ namespace PixelComrades {
                 width = MathEx.Max(rect.width, 655)
             };
 
-            GUI.BeginGroup(rect, Styles.TIMELINE_BOTTOMBAR_BG);
+            GUI.BeginGroup(rect, Styles.TimelineBottombarBg);
 
             LayoutBottomBarFrameData(rect);
             GUI.EndGroup();
@@ -566,10 +561,12 @@ namespace PixelComrades {
             EditorGUI.LabelField(new Rect(xOffset, 2, width, rect.height - 3), "Length");
 
             xOffset += width + 5;
-            width = 30;
+            //width = 30;
+            width = 120;
 
             GUI.SetNextControlName("Frame Length");
-            frame.Length = EditorGUI.FloatField(new Rect(xOffset, 2, width, rect.height - 3), frame.Length);
+            frame.Length = EditorGUI.Slider(new Rect(xOffset, 2, width, rect.height - 3), frame.Length, 0.1f, 2f);
+            //frame.Length = EditorGUI.FloatField(new Rect(xOffset, 2, width, rect.height - 3), frame.Length);
             xOffset += width;
 
             width = 55;
@@ -639,7 +636,7 @@ namespace PixelComrades {
         }
         
 
-        private void LayoutPlayhead(Rect rect) {
+        private void LayoutPlayHead(Rect rect) {
             var offset = rect.xMin + _timelineOffset + _animTime * _timelineScale;
             DrawLine(new Vector2(offset, rect.yMin), new Vector2(offset, rect.yMax), Color.red);
         }
@@ -657,7 +654,7 @@ namespace PixelComrades {
                 var frame = _clip.Frames[i];
                 var start = AnimTimeToGuiPos(rect, SnapTimeToFrameRate(_clip.GetFrameStartTime(i)));
                 var text = frame.EventName;
-                var textWidth = Styles.TIMELINE_EVENT_TEXT.CalcSize(new GUIContent(text)).x;
+                var textWidth = Styles.TimelineEventText.CalcSize(new GUIContent(text)).x;
                 var end = start + textWidth + 4;
                 DrawRect(new Rect(start, 0, 1, rect.height), Color.grey);
                 if (start > rect.xMax || end < rect.xMin)
@@ -679,14 +676,14 @@ namespace PixelComrades {
         private void LayoutEventVisuals(AnimationFrame frame, bool selected, Rect eventRect, string labelText,
             Rect labelRect) {
             var eventColor = selected ? ColorUnityBlue : Color.grey;
-            var eventBGColor = selected ? ColorEventLabelBgSelected : ColorEventLabelBg;
+            var eventBgColor = selected ? ColorEventLabelBgSelected : ColorEventLabelBg;
 
             //DrawRect( new Rect(eventRect) { width = EVENT_WIDTH }, eventColor  );
-            DrawRect(labelRect, eventBGColor);
+            DrawRect(labelRect, eventBgColor);
             GUI.Label(
                 new Rect(labelRect) {
                     yMin = labelRect.yMin - 4
-                }, labelText, new GUIStyle(Styles.TIMELINE_EVENT_TEXT) {
+                }, labelText, new GUIStyle(Styles.TimelineEventText) {
                     normal = {
                         textColor = eventColor
                     }
@@ -694,8 +691,8 @@ namespace PixelComrades {
             if (selected)
                 GUI.color = ColorUnityBlue;
             GUI.Box(
-                new Rect(eventRect.xMin - 2, eventRect.yMin, 6, 20), Contents.EVENT_MARKER,
-                new GUIStyle(Styles.TIMELINE_EVENT_TICK) {
+                new Rect(eventRect.xMin - 2, eventRect.yMin, 6, 20), Contents.EventMarker,
+                new GUIStyle(Styles.TimelineEventTick) {
                     normal = {
                         textColor = eventColor
                     }
@@ -704,14 +701,14 @@ namespace PixelComrades {
         }
 
         private void LayoutEventsBarBack(Rect rect) {
-            GUI.BeginGroup(rect, Styles.TIMELINE_KEYFRAME_BG);
+            GUI.BeginGroup(rect, Styles.TimelineKeyframeBg);
             GUI.EndGroup();
         }
         
         private void LayoutFrames(Rect rect) {
             var e = Event.current;
 
-            GUI.BeginGroup(rect, Styles.TIMELINE_ANIM_BG);
+            GUI.BeginGroup(rect, Styles.TimelineAnimBg);
 
             //DrawRect( new Rect(0,0,rect.width,rect.height), new Color(0.3f,0.3f,0.3f,1));
 
@@ -738,29 +735,7 @@ namespace PixelComrades {
 
             GUI.EndGroup();
 
-            if (_dragState == eDragState.None) {
-                //
-                // Check for unhandled mouse left click. It should deselect any selected frames
-                //
-                if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition)) {
-                    e.Use();
-                }
-                // Check for unhanlded drag, it should start a select
-                if (e.type == EventType.MouseDrag && e.button == 0 && rect.Contains(e.mousePosition)) {
-                    _dragState = eDragState.SelectFrame;
-                    e.Use();
-                }
-            }
-            else if (_dragState == eDragState.ResizeFrame) {
-                // While resizing frame, show the resize cursor
-                EditorGUIUtility.AddCursorRect(rect, MouseCursor.ResizeHorizontal);
-            }
-            else if (_dragState == eDragState.MoveFrame) {
-                // While moving frame, show the move cursor
-                EditorGUIUtility.AddCursorRect(rect, MouseCursor.MoveArrow);
-            }
         }
-
         
         private void LayoutFrame(Rect rect, int frameId, float startTime, float endTime, Sprite sprite) {
             var startOffset = _timelineOffset + startTime*_timelineScale;
@@ -779,62 +754,11 @@ namespace PixelComrades {
             DrawLine(new Vector2(endOffset, 0), new Vector2(endOffset, rect.height), new Color(0.4f, 0.4f, 0.4f));
             LayoutTimelineSprite(frameRect, sprite);
 
-            //
-            // Frame clicking events
-            //
-
             var e = Event.current;
-
-            if (_dragState == eDragState.None) {
-                //
-                // Resize rect
-                //
-                var resizeRect = new Rect(endOffset - FrameResizeRectWidth*0.5f, 0, FrameResizeRectWidth,
-                    rect.height);
-                EditorGUIUtility.AddCursorRect(resizeRect, MouseCursor.ResizeHorizontal);
-
-                //
-                // Check for Start Resizing frame
-                //
-                if (e.type == EventType.MouseDown && e.button == 0 && resizeRect.Contains(e.mousePosition)) {
-                    // Start resizing the frame
-                    _dragState = eDragState.ResizeFrame;
-                    _resizeFrameId = frameId;
-                    GUI.FocusControl("none");
-                    e.Use();
-                }
-                if (e.type == EventType.MouseDown && e.button == 0 && frameRect.Contains(e.mousePosition)) {
-                    // Started clicking unselected - start selecting
-                    _dragState = eDragState.SelectFrame;
-                    SelectFrame(frameId);
-                    GUI.FocusControl("none");
-                    e.Use();
-                }
-            }
-            else if (_dragState == eDragState.ResizeFrame) {
-                // Check for resize frame by dragging mouse
-                if (e.type == EventType.MouseDrag && e.button == 0 && _resizeFrameId == frameId) {
-                    var newFrameLength =
-                        GuiPosToAnimTime(new Rect(0, 0, position.width, position.height), e.mousePosition.x) -
-                        startTime;
-                    newFrameLength = MathEx.Max(newFrameLength, 1.0f / _clip.FramesPerSecond);
-                    //SetFrameLength(frameId, newFrameLength);
-                    e.Use();
-                    Repaint();
-                }
-
-                // Check for finish resizing frame
-                if (e.type == EventType.MouseUp && e.button == 0 && _resizeFrameId == frameId) {
-                    _dragState = eDragState.None;
-                    ApplyChanges();
-                    e.Use();
-                }
-            }
-            else if (_dragState == eDragState.SelectFrame) {
-                if (e.type == EventType.MouseUp && e.button == 0) {
-                    _dragState = eDragState.None;
-                    e.Use();
-                }
+            if (e.type == EventType.MouseDown && e.button == 0 && frameRect.Contains(e.mousePosition)) {
+                SelectFrame(frameId);
+                GUI.FocusControl("none");
+                e.Use();
             }
         }
         
@@ -963,27 +887,16 @@ namespace PixelComrades {
             if (rect.Contains(e.mousePosition)) {
                 if (e.type == EventType.MouseDown) {
                     if (e.button == 0) {
-                        _dragState = eDragState.Scrub;
                         _animTime = GuiPosToAnimTime(rect, e.mousePosition.x);
                         GUI.FocusControl("none");
                         e.Use();
                     }
                 }
             }
-            if (_dragState == eDragState.Scrub && e.button == 0) {
-                if (e.type == EventType.MouseDrag) {
-                    _animTime = GuiPosToAnimTime(rect, e.mousePosition.x);
-                    e.Use();
-                }
-                else if (e.type == EventType.MouseUp) {
-                    _dragState = eDragState.None;
-                    e.Use();
-                }
-            }
         }
 
         private void SelectFrame(int frame) {
-            _animTime = _clip.GetFrameStartTime(frame) + 0.01f;
+            _animTime = _clip.GetFrameStartTime(frame) + 0.0001f;
         }
 
         public static string ToTimelineLabelString(float seconds, float sampleRate) {
@@ -998,19 +911,6 @@ namespace PixelComrades {
             Undo.RecordObject(_clip, "Animation Change");
             _clip.LastModified = System.DateTime.Now.ToString("G");
             EditorUtility.SetDirty(_clip);
-        }
-
-        private static void DrawRect(Rect rect, Color backgroundColor, Color borderColor, float borderWidth = 1) {
-            // draw background
-            EditorGUI.DrawRect(rect, backgroundColor);
-
-            // Draw border
-            rect.width = rect.width - borderWidth;
-            rect.height = rect.height - borderWidth;
-            DrawLine(new Vector2(rect.xMin, rect.yMin), new Vector2(rect.xMin, rect.yMax), borderColor, borderWidth);
-            DrawLine(new Vector2(rect.xMin, rect.yMax), new Vector2(rect.xMax, rect.yMax), borderColor, borderWidth);
-            DrawLine(new Vector2(rect.xMax, rect.yMax), new Vector2(rect.xMax, rect.yMin), borderColor, borderWidth);
-            DrawLine(new Vector2(rect.xMax, rect.yMin), new Vector2(rect.xMin, rect.yMin), borderColor, borderWidth);
         }
 
         private float GetFrameTime() {
@@ -1077,68 +977,53 @@ namespace PixelComrades {
             return _textureCheckerboard;
         }
 
-        private enum eDragState {
-            None,
-            Scrub,
-            ResizeFrame,
-            MoveFrame,
-            SelectFrame,
-            //MoveEvent,
-            //SelectEvent
-        }
-
         private class Styles {
-            public static readonly GUIStyle PREVIEW_BUTTON = new GUIStyle("preButton");
+            public static readonly GUIStyle PreviewButton = new GUIStyle("preButton");
 
-            public static readonly GUIStyle PREVIEW_BUTTON_LOOP = new GUIStyle(PREVIEW_BUTTON) {
+            public static readonly GUIStyle PreviewButtonLoop = new GUIStyle(PreviewButton) {
                 padding = new RectOffset(0, 0, 2, 0)
             };
 
-            public static readonly GUIStyle PREVIEW_SLIDER = new GUIStyle("preSlider");
-            public static readonly GUIStyle PREVIEW_SLIDER_THUMB = new GUIStyle("preSliderThumb");
-            public static readonly GUIStyle PREVIEW_LABEL_BOLD = new GUIStyle("preLabel");
+            public static readonly GUIStyle PreviewSlider = new GUIStyle("preSlider");
+            public static readonly GUIStyle PreviewSliderThumb = new GUIStyle("preSliderThumb");
+            public static readonly GUIStyle PreviewLabelBold = new GUIStyle("preLabel");
 
-            public static readonly GUIStyle PREVIEW_LABEL_SPEED = new GUIStyle("preLabel") {
+            public static readonly GUIStyle PreviewLabelSpeed = new GUIStyle("preLabel") {
                 fontStyle = FontStyle.Normal,
                 normal = {
                     textColor = Color.gray
                 }
             };
 
-            public static readonly GUIStyle TIMELINE_KEYFRAME_BG = new GUIStyle("AnimationKeyframeBackground");
-#if UNITY_5_3 || UNITY_5_4
-			public static readonly GUIStyle TIMELINE_ANIM_BG = new GUIStyle("AnimationCurveEditorBackground");
-#else
-            public static readonly GUIStyle TIMELINE_ANIM_BG = new GUIStyle("CurveEditorBackground");
-#endif
-            public static readonly GUIStyle TIMELINE_BOTTOMBAR_BG = new GUIStyle("ProjectBrowserBottomBarBg");
+            public static readonly GUIStyle TimelineKeyframeBg = new GUIStyle("AnimationKeyframeBackground");
+            public static readonly GUIStyle TimelineAnimBg = new GUIStyle("CurveEditorBackground");
+            public static readonly GUIStyle TimelineBottombarBg = new GUIStyle("ProjectBrowserBottomBarBg");
+            public static readonly GUIStyle TimelineEventText = EditorStyles.miniLabel;
+            public static readonly GUIStyle TimelineEventTick = new GUIStyle();
 
-            public static readonly GUIStyle TIMELINE_EVENT_TEXT = EditorStyles.miniLabel;
-            public static readonly GUIStyle TIMELINE_EVENT_TICK = new GUIStyle();
-
-            public static readonly GUIStyle TIMELINE_EVENT_TOGGLE = new GUIStyle(EditorStyles.toggle) {
+            public static readonly GUIStyle TimelineEventToggle = new GUIStyle(EditorStyles.toggle) {
                 font = EditorStyles.miniLabel.font,
                 fontSize = EditorStyles.miniLabel.fontSize,
                 padding = new RectOffset(15, 0, 3, 0)
             };
 
-            public static readonly GUIStyle INFOPANEL_LABEL_RIGHTALIGN = new GUIStyle(EditorStyles.label) {
+            public static readonly GUIStyle InfopanelLabelRightalign = new GUIStyle(EditorStyles.label) {
                 alignment = TextAnchor.MiddleRight
             };
 
         }
         private class Contents {
-            public static readonly GUIContent PLAY = EditorGUIUtility.IconContent("PlayButton");
-            public static readonly GUIContent PAUSE = EditorGUIUtility.IconContent("PauseButton");
-            public static readonly GUIContent PREV = EditorGUIUtility.IconContent("Animation.PrevKey");
-            public static readonly GUIContent NEXT = EditorGUIUtility.IconContent("Animation.NextKey");
-            public static readonly GUIContent SPEEDSCALE = EditorGUIUtility.IconContent("SpeedScale");
-            public static readonly GUIContent ZOOM = EditorGUIUtility.IconContent("d_ViewToolZoom");
-            public static readonly GUIContent LOOP_OFF = EditorGUIUtility.IconContent("d_RotateTool");
-            public static readonly GUIContent LOOP_ON = EditorGUIUtility.IconContent("d_RotateTool On");
-            public static readonly GUIContent PLAY_HEAD = EditorGUIUtility.IconContent("me_playhead");
-            public static readonly GUIContent EVENT_MARKER = EditorGUIUtility.IconContent("d_Animation.EventMarker");
-            public static readonly GUIContent ANIM_MARKER = EditorGUIUtility.IconContent("blendKey");
+            public static readonly GUIContent Play = EditorGUIUtility.IconContent("PlayButton");
+            public static readonly GUIContent Pause = EditorGUIUtility.IconContent("PauseButton");
+            public static readonly GUIContent Prev = EditorGUIUtility.IconContent("Animation.PrevKey");
+            public static readonly GUIContent Next = EditorGUIUtility.IconContent("Animation.NextKey");
+            public static readonly GUIContent Speedscale = EditorGUIUtility.IconContent("SpeedScale");
+            public static readonly GUIContent Zoom = EditorGUIUtility.IconContent("d_ViewToolZoom");
+            public static readonly GUIContent LoopOff = EditorGUIUtility.IconContent("d_RotateTool");
+            public static readonly GUIContent LoopOn = EditorGUIUtility.IconContent("d_RotateTool On");
+            public static readonly GUIContent PlayHead = EditorGUIUtility.IconContent("me_playhead");
+            public static readonly GUIContent EventMarker = EditorGUIUtility.IconContent("d_Animation.EventMarker");
+            public static readonly GUIContent AnimMarker = EditorGUIUtility.IconContent("blendKey");
         }
     }
 }

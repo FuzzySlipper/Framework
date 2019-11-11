@@ -24,7 +24,7 @@ namespace PixelComrades {
             return new RuntimeSequenceNode(this, graph);
         }
 
-        public class RuntimeSequenceNode : RuntimeStateNode {
+        private class RuntimeSequenceNode : RuntimeStateNode {
             private RuntimeSequence _sequence;
             public override string DebugInfo {
                 get {
