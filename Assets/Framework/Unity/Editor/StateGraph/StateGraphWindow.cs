@@ -20,15 +20,14 @@ namespace PixelComrades {
         private Rect _scrollRect;
         private Vector2 _scrollPosition1;
         
-        private GUIStyle _inPointStyle;
-        private GUIStyle _outPointStyle;
-        private GUIStyle _nodeTextStyle;
+        
+        
         private GUIStyle _nodeButtonStyle;
         private GUIStyle[] _nodeStyles;
         private GUIStyle[] _nodeSelectedStyles;
         
-        private ConnectionPoint _selectedInPoint;
-        private ConnectionPoint _selectedOutPoint;
+        private ConnectionInPoint _selectedInPoint;
+        private ConnectionOutPoint _selectedOutPoint;
         private List<Type> _nodeTypes = new List<Type>();
         private GenericMenu _addTrackMenu;
         private StateGraphNode _selected;
@@ -40,8 +39,6 @@ namespace PixelComrades {
             window.titleContent = new GUIContent("StateGraphWindow");
             return window;
         }
-
-        
 
         public StateGraphWindow() {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -73,16 +70,7 @@ namespace PixelComrades {
                 _nodeSelectedStyles[i].normal.background = EditorGUIUtility.Load(string.Format("{0}{1} on.png", path, index)) as Texture2D;
                 _nodeSelectedStyles[i].border = new RectOffset(12, 12, 12, 12);
             }
-            _inPointStyle = new GUIStyle();
-            _inPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left.png") as Texture2D;
-            _inPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left on.png") as Texture2D;
-            _inPointStyle.border = new RectOffset(4, 4, 12, 12);
-            _outPointStyle = new GUIStyle();
-            _outPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right.png") as Texture2D;
-            _outPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right on.png") as Texture2D;
-            _outPointStyle.border = new RectOffset(4, 4, 12, 12);
-            _nodeTextStyle = new GUIStyle("WhiteLabel");
-            _nodeTextStyle.alignment = TextAnchor.MiddleCenter;
+            
             _nodeButtonStyle = new GUIStyle("ToolbarButton");
         }
 
@@ -91,7 +79,7 @@ namespace PixelComrades {
         }
 
         private void OnGUI() {
-            if (_inPointStyle == null || _nodeStyles == null || _nodeTextStyle == null) {
+            if (_nodeStyles == null) {
                 SetupStyles();
             }
             if (_nodeTypes.Count == 0) {
@@ -161,7 +149,7 @@ namespace PixelComrades {
                     if (connectOut.Target == null) {
                         continue;
                     }
-                    var connectIn = connectOut.Target.GetConnectionPointById(connectOut.TargetId);
+                    var connectIn = connectOut.Target.GetConnectionInPointById(connectOut.TargetId);
                     Handles.DrawBezier(
                         connectIn.Rect.center,
                         connectOut.Rect.center,
@@ -174,7 +162,7 @@ namespace PixelComrades {
                     if (Handles.Button(
                         (connectIn.Rect.center + connectOut.Rect.center) * 0.5f, Quaternion.identity,
                         4, 8, Handles.RectangleHandleCap)) {
-                        OnClickRemoveConnection(connectIn, connectOut);
+                        OnClickRemoveConnection(connectOut);
                     }
                 }
             }
@@ -225,7 +213,7 @@ namespace PixelComrades {
                 GUILayout.BeginArea(node.Rect, style);
                 EditorGUI.BeginChangeCheck();
                 GUILayout.Space(10);
-                GUILayout.Label(node.Title, _nodeTextStyle, GUILayout.MaxWidth(maxWidth));
+                GUILayout.Label(node.Title, StateGraphExtensions.NodeTextStyle, GUILayout.MaxWidth(maxWidth));
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
                 var tagIndex = System.Array.IndexOf(tagValues, node.Tag);
@@ -233,25 +221,25 @@ namespace PixelComrades {
                 if (newTag != tagIndex) {
                     node.Tag = tagValues[newTag];
                 }
-                GUILayout.Label("ID: " + node.Id, _nodeTextStyle, GUILayout.MaxWidth(maxWidth/2));
+                GUILayout.Label("ID: " + node.Id, StateGraphExtensions.NodeTextStyle, GUILayout.MaxWidth(maxWidth/2));
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
-                if (node.DrawGui(_nodeTextStyle, _nodeButtonStyle)) {
+                if (node.DrawGui(StateGraphExtensions.NodeTextStyle, _nodeButtonStyle)) {
                     Repaint();
                 }
                 for (int c = 0; c < node.Conditions.Count; c++) {
-                    node.Conditions[c].DrawGui(node, _nodeTextStyle, _nodeButtonStyle);
+                    node.Conditions[c].DrawGui(node, StateGraphExtensions.NodeTextStyle, _nodeButtonStyle);
                     GUILayout.Space(10);
                 }
                 if (node.Conditions.Count > 0 && node.OutPoints.Count > 1) {
                     GUILayout.BeginHorizontal();
                     GUILayout.Space(20);
-                    GUILayout.Label("Else exit ", _nodeTextStyle);
+                    GUILayout.Label("Else exit ", StateGraphExtensions.NodeTextStyle);
                     var indices = new string[node.OutPoints.Count];
                     for (int idx = 0; idx < indices.Length; idx++) {
                         indices[idx] = idx.ToString();
                     }
-                    node.DefaultExit = UnityEditor.EditorGUILayout.Popup(node.DefaultExit, indices, _nodeTextStyle);
+                    node.DefaultExit = UnityEditor.EditorGUILayout.Popup(node.DefaultExit, indices, StateGraphExtensions.NodeTextStyle);
                     GUILayout.Space(20);
                     GUILayout.EndHorizontal();
                 }
@@ -291,7 +279,7 @@ namespace PixelComrades {
                         node.InPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.InPoints[c], c, inSpacing);
+                    StateGraphExtensions.DrawConnectionPoint(node.InPoints[c], c, inSpacing, OnClickInPoint, RemoveConnectionPoint);
                 }
                 var outSpacing = Mathf.Clamp(0.8f / node.OutPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.OutPoints.Count; c++) {
@@ -299,89 +287,53 @@ namespace PixelComrades {
                         node.OutPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.OutPoints[c], c, outSpacing);
+                    StateGraphExtensions.DrawConnectionPoint(node.OutPoints[c], c, outSpacing, OnClickOutPoint, RemoveConnectionPoint);
                 }
                 if (node.InPoints.Count < node.InputMax) {
                     var addRect = new Rect(
-                        node.Rect.x + ConnectionPoint.Width * 0.5f,
-                        node.Rect.y + node.Rect.height - (ConnectionPoint.Height*1.25f),
-                        ConnectionPoint.Width, ConnectionPoint.Height);
-                    if (GUI.Button(addRect, "+", _nodeTextStyle)) {
-                        node.InPoints.Add(new ConnectionPoint(node, ConnectionPointType.In, node.FindMinConnectionId()));
+                        node.Rect.x + ConnectionOutPoint.Width * 0.5f,
+                        node.Rect.y + node.Rect.height - (ConnectionOutPoint.Height*1.25f),
+                        ConnectionOutPoint.Width, ConnectionOutPoint.Height);
+                    if (GUI.Button(addRect, "+", StateGraphExtensions.NodeTextStyle)) {
+                        node.InPoints.Add(new ConnectionInPoint(node, node.FindMinConnectionId()));
                         EditorUtility.SetDirty(node);
                     }
                 }
                 if (node.OutPoints.Count < node.OutputMax) {
                     var addRect = new Rect(
-                        node.Rect.x + node.Rect.width - (ConnectionPoint.Width*1.25f),
-                        node.Rect.y + node.Rect.height - (ConnectionPoint.Height*1.25f),
-                        ConnectionPoint.Width, ConnectionPoint.Height);
-                    if (GUI.Button(addRect, "+", _nodeTextStyle)) {
-                        node.OutPoints.Add(new ConnectionPoint(node, ConnectionPointType.Out, node.FindMinConnectionId()));
+                        node.Rect.x + node.Rect.width - (ConnectionOutPoint.Width*1.25f),
+                        node.Rect.y + node.Rect.height - (ConnectionOutPoint.Height*1.25f),
+                        ConnectionOutPoint.Width, ConnectionOutPoint.Height);
+                    if (GUI.Button(addRect, "+", StateGraphExtensions.NodeTextStyle)) {
+                        node.OutPoints.Add(new ConnectionOutPoint(node, node.FindMinConnectionId()));
                         EditorUtility.SetDirty(node);
                     }
                 }
             }
         }
 
-        private void DrawConnectionPoint(ConnectionPoint point, int index, float spacing) {
-            var height = (point.Owner.Rect.height * ((index+1) * spacing)); 
-            point.Rect.y = point.Owner.Rect.y + height - point.Rect.height * 0.5f;
-            switch (point.ConnectType) {
-                case ConnectionPointType.In:
-                    point.Rect.x = point.Owner.Rect.x - point.Rect.width + 8f;
-                    break;
-
-                case ConnectionPointType.Out:
-                    point.Rect.x = point.Owner.Rect.x + point.Owner.Rect.width - 8f;
-                    break;
-            }
-            if (GUI.Button(point.Rect, "",point.ConnectType == ConnectionPointType.In ? _inPointStyle : _outPointStyle)) {
-                if (point.ConnectType == ConnectionPointType.In) {
-                    OnClickInPoint(point);
-                }
-                else {
-                    OnClickOutPoint(point);
-                }
-            }
-            var labelRect = new Rect(point.Rect);
-            GUI.Label(labelRect, " " + index.ToString(), _nodeTextStyle);
-            var buttonRect = new Rect(point.Rect);
-            switch (point.ConnectType) {
-                case ConnectionPointType.In:
-                    if (point.Owner.InPoints.Count <= point.Owner.InputMin) {
-                        return;
-                    }
-                    buttonRect.x += point.Rect.width + 1;
-                    break;
-
-                case ConnectionPointType.Out:
-                    if (point.Owner.OutPoints.Count <= point.Owner.OutputMin) {
-                        return;
-                    }
-                    buttonRect.x -= point.Rect.width + 1;
-                    break;
-            }
-            if (GUI.Button(buttonRect, "-", _nodeTextStyle)) {
-                RemoveConnectionPoint(point);
-            }
+        private void RemoveConnectionPoint(ConnectionOutPoint point) {
+            //_graph.ClearConnectsWith(point);
+//            for (int i = _graph.Connections.Count - 1; i >= 0; i--) {
+//                if (_graph.Connections[i].GetIn() == point || _graph.Connections[i].GetOut() == point) {
+//                    _graph.Connections.RemoveAt(i);
+//                }
+//            }
+            point.Owner.OutPoints.Remove(point);
+            EditorUtility.SetDirty(point.Owner);
         }
 
-        private void RemoveConnectionPoint(ConnectionPoint point) {
+        private void RemoveConnectionPoint(ConnectionInPoint point) {
             _graph.ClearConnectsWith(point);
 //            for (int i = _graph.Connections.Count - 1; i >= 0; i--) {
 //                if (_graph.Connections[i].GetIn() == point || _graph.Connections[i].GetOut() == point) {
 //                    _graph.Connections.RemoveAt(i);
 //                }
 //            }
-            if (point.ConnectType == ConnectionPointType.In) {
-                point.Owner.InPoints.Remove(point);
-            }
-            else {
-                point.Owner.OutPoints.Remove(point);
-            }
+            point.Owner.InPoints.Remove(point);
             EditorUtility.SetDirty(point.Owner);
         }
+        
         
         private void ProcessNodeEvents(Event e) {
             if (_graph == null) {
@@ -411,6 +363,8 @@ namespace PixelComrades {
                                     GenericMenu genericMenu = new GenericMenu();
                                     genericMenu.AddItem(new GUIContent("Remove node"), false, () => OnClickRemoveNode(node));
                                     genericMenu.AddItem(new GUIContent("Toggle Default"), false, () => OnClickSetDefault(node));
+                                    genericMenu.AddItem(new GUIContent("Duplicate"), false, () => OnDuplicate(node));
+                                    genericMenu.AddItem(new GUIContent("CheckSize"), false, () => node.CheckSize());
                                     genericMenu.AddItem(new GUIContent(node.AllowEarlyExit? "Disable Early Exit" : "Enable Early Exit"), false, () => 
                                     OnSetEarlyExit(node));
                                     genericMenu.ShowAsContext();
@@ -474,7 +428,7 @@ namespace PixelComrades {
                 return;
             }
             if (_scrollRect.Contains(Event.current.mousePosition)) {
-                _scrollPosition += -delta;
+                _scrollPosition += -Vector2.ClampMagnitude(delta, 50);
                 Event.current.Use();
             }
 //            _drag = Vector2.ClampMagnitude(delta, MaxDrag);
@@ -497,14 +451,11 @@ namespace PixelComrades {
         }
 
         private void CreateConnection() {
-            _graph.ClearConnectsWith(_selectedInPoint, _selectedOutPoint);
-            _selectedInPoint.Target = _selectedOutPoint.Owner;
-            _selectedInPoint.TargetId = _selectedOutPoint.Id;
             _selectedOutPoint.Target = _selectedInPoint.Owner;
             _selectedOutPoint.TargetId = _selectedInPoint.Id;
         }
 
-        private void OnClickInPoint(ConnectionPoint inPoint) {
+        private void OnClickInPoint(ConnectionInPoint inPoint) {
             _selectedInPoint = inPoint;
             if (_selectedOutPoint != null) {
                 if (_selectedOutPoint.Owner != _selectedInPoint.Owner) {
@@ -517,7 +468,7 @@ namespace PixelComrades {
             }
         }
 
-        private void OnClickOutPoint(ConnectionPoint outPoint) {
+        private void OnClickOutPoint(ConnectionOutPoint outPoint) {
             _selectedOutPoint = outPoint;
             if (_selectedInPoint != null) {
                 if (_selectedOutPoint.Owner != _selectedInPoint.Owner) {
@@ -530,8 +481,9 @@ namespace PixelComrades {
             }
         }
 
-        private void OnClickRemoveConnection(ConnectionPoint inPnt, ConnectionPoint outPnt) {
-            _graph.ClearConnectsWith(inPnt, outPnt);
+        private void OnClickRemoveConnection(ConnectionOutPoint outPnt) {
+            outPnt.Target = null;
+            outPnt.TargetId = -1;
         }
 
         private void OnClickRemoveNode(StateGraphNode node) {
@@ -562,6 +514,14 @@ namespace PixelComrades {
             Repaint();
         }
 
+        private void OnDuplicate(StateGraphNode node) {
+            var newObj = Instantiate(node);
+            AssetDatabase.AddObjectToAsset(newObj, _graph);
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
+            SetupNewNode(newObj);
+            newObj.CheckSize();
+        }
+
         private void CreateContextItem(object obj) {
             var targetType = obj as Type;
             if (targetType == null) {
@@ -570,10 +530,13 @@ namespace PixelComrades {
             var newObj = CreateInstance(targetType);
             AssetDatabase.AddObjectToAsset(newObj, _graph);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
-            var node = (StateGraphNode) newObj;
-            _graph.Nodes.Add(node);
+            SetupNewNode((StateGraphNode) newObj);
+        }
 
+        private void SetupNewNode(StateGraphNode node) {
+            _graph.Nodes.Add(node);
             node.Set(_mouseScrollPosition, GetUniqueId(), _graph);
+            EditorUtility.SetDirty(_graph);
             Repaint();
         }
 
@@ -595,6 +558,83 @@ namespace PixelComrades {
                     _graph.Nodes[i].name = properName;
                     EditorUtility.SetDirty(_graph.Nodes[i]);
                 }
+            }
+        }
+    }
+
+    public static class StateGraphExtensions {
+        private static GUIStyle _inPointStyle;
+        private static GUIStyle _outPointStyle;
+        private static GUIStyle _nodeTextStyle;
+        
+        public static GUIStyle NodeTextStyle {
+            get {
+                if (!_setup) {
+                    Init();
+                }
+                return _nodeTextStyle;
+            }
+        }
+        
+        private static bool _setup = false;
+
+        private static void Init() {
+            _setup = true;
+            _inPointStyle = new GUIStyle();
+            _inPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left.png") as Texture2D;
+            _inPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left on.png") as Texture2D;
+            _inPointStyle.border = new RectOffset(4, 4, 12, 12);
+            _outPointStyle = new GUIStyle();
+            _outPointStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right.png") as Texture2D;
+            _outPointStyle.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right on.png") as Texture2D;
+            _outPointStyle.border = new RectOffset(4, 4, 12, 12);
+            _nodeTextStyle = new GUIStyle("WhiteLabel");
+            _nodeTextStyle.alignment = TextAnchor.MiddleCenter;
+        }
+        
+        public static void DrawConnectionPoint(ConnectionOutPoint point, int index, float spacing, Action<ConnectionOutPoint> onClickOut,
+         Action<ConnectionOutPoint> onRemove) {
+            if (!_setup) {
+                Init();
+            }
+            var height = (point.Owner.Rect.height * ((index + 1) * spacing));
+            point.Rect.y = point.Owner.Rect.y + height - point.Rect.height * 0.5f;
+            point.Rect.x = point.Owner.Rect.x + point.Owner.Rect.width - 8f;
+            if (GUI.Button(point.Rect, "", _outPointStyle)) {
+                onClickOut?.Invoke(point);
+            }
+            var labelRect = new Rect(point.Rect);
+            GUI.Label(labelRect, " " + index.ToString(), _nodeTextStyle);
+            var buttonRect = new Rect(point.Rect);
+            if (point.Owner.OutPoints.Count <= point.Owner.OutputMin) {
+                return;
+            }
+            buttonRect.x -= point.Rect.width + 1;
+            if (GUI.Button(buttonRect, "-", _nodeTextStyle)) {
+                onRemove?.Invoke(point);
+            }
+        }
+
+        public static void DrawConnectionPoint(ConnectionInPoint point, int index, float spacing, Action<ConnectionInPoint> onClickPoint,
+            Action<ConnectionInPoint> onRemove) {
+            if (!_setup) {
+                Init();
+            }
+            var height = (point.Owner.Rect.height * ((index + 1) * spacing));
+            point.Rect.y = point.Owner.Rect.y + height - point.Rect.height * 0.5f;
+            point.Rect.x = point.Owner.Rect.x - point.Rect.width + 8f;
+            if (GUI.Button(point.Rect, "", _inPointStyle)) {
+                onClickPoint?.Invoke(point);
+            }
+            var labelRect = new Rect(point.Rect);
+            GUI.Label(labelRect, " " + index.ToString(), _nodeTextStyle);
+            var buttonRect = new Rect(point.Rect);
+            if (point.Owner.InPoints.Count <= point.Owner.InputMin) {
+                return;
+            }
+            buttonRect.x += point.Rect.width + 1;
+            if (GUI.Button(buttonRect, "-", _nodeTextStyle)) {
+                onRemove?.Invoke(point);
             }
         }
     }

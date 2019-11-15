@@ -24,6 +24,7 @@ namespace PixelComrades {
         private static List<System.Type> _systemTypes = new List<Type>();
         private static List<IMainSystemUpdate> _updates = new List<IMainSystemUpdate>();
         private static List<IMainFixedUpdate> _fixedUpdates = new List<IMainFixedUpdate>();
+        private static List<IMainLateUpdate> _lateUpdates = new List<IMainLateUpdate>();
         private static List<IPeriodicUpdate> _periodicUpdates = new List<IPeriodicUpdate>();
         private static Dictionary<Type, List<IReceive>> _globalDelegateReceivers = new Dictionary<Type, List<IReceive>>();
         private static Dictionary<Type, List<IReceive>> _globalArrayReceivers = new Dictionary<Type, List<IReceive>>();
@@ -34,6 +35,7 @@ namespace PixelComrades {
         private static List<Type> TypeList { get { return _typeEvents[_typeListIdx]; } }
         private static Dictionary<Type, TypedMessageQueue> _msgLists = new Dictionary<Type, TypedMessageQueue>();
         private static SortByPriorityClass _typeSorter = new SortByPriorityClass();
+        private static SortByPriorityObject _updateSorter = new SortByPriorityObject();
         private static SortByPriorityReceiver _receiverSorter = new SortByPriorityReceiver();
 
         public static void Setup() {
@@ -223,6 +225,7 @@ namespace PixelComrades {
                 else {
                     _updates.Remove(update);
                 }
+                _updates.Sort(_updateSorter);
             }
             if (system is IMainFixedUpdate fixedUpdate) {
                 if (add) {
@@ -231,6 +234,7 @@ namespace PixelComrades {
                 else {
                     _fixedUpdates.Remove(fixedUpdate);
                 }
+                _fixedUpdates.Sort(_updateSorter);
             }
             if (system is IPeriodicUpdate periodicUpdate) {
                 if (add) {
@@ -239,6 +243,16 @@ namespace PixelComrades {
                 else {
                     _periodicUpdates.Remove(periodicUpdate);
                 }
+                _periodicUpdates.Sort(_updateSorter);
+            }
+            if (system is IMainLateUpdate lateUpdate) {
+                if (add) {
+                    _lateUpdates.Add(lateUpdate);
+                }
+                else {
+                    _lateUpdates.Remove(lateUpdate);
+                }
+                _lateUpdates.Sort(_updateSorter);
             }
         }
 

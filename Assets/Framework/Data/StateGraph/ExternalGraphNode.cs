@@ -22,17 +22,17 @@ namespace PixelComrades {
         public override string Title { get { return ExternalGraph != null ? ExternalGraph.name : "Graph"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
-            return new RuntimeExternalGraphNode(this, graph);
+            return new RuntimeNode(this, graph);
         }
 
-        public class RuntimeExternalGraphNode : RuntimeStateNode {
+        public class RuntimeNode : RuntimeStateNode {
             
-            private RuntimeStateGraph _runtimeGraph;
+            public RuntimeStateGraph ExternalGraph;
             private bool _completed;
             
-            public RuntimeExternalGraphNode(ExternalGraphNode node, RuntimeStateGraph graph) : base(node,graph) {
-                _runtimeGraph = node.ExternalGraph.GetRuntimeGraph(graph, graph.Entity);
-                _runtimeGraph.OnComplete += ExternalGraphCompleted;
+            public RuntimeNode(ExternalGraphNode node, RuntimeStateGraph graph) : base(node,graph) {
+                ExternalGraph = node.ExternalGraph.GetRuntimeGraph(graph, graph.Entity);
+                ExternalGraph.OnComplete += ExternalGraphCompleted;
             }
 
             private void ExternalGraphCompleted() {
@@ -42,12 +42,12 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 _completed = false;
-                _runtimeGraph.Start();
+                ExternalGraph.Start();
             }
 
             public override void OnExit() {
                 base.OnExit();
-                _runtimeGraph.Stop();
+                ExternalGraph.Stop();
             }
 
             public override bool TryComplete(float dt) {
@@ -57,8 +57,14 @@ namespace PixelComrades {
                 if (_completed) {
                     return true;
                 }
-                _runtimeGraph.Update(dt);
-                return !_runtimeGraph.IsActive;
+                ExternalGraph.Update(dt);
+                return !ExternalGraph.IsActive;
+            }
+
+            public override void Dispose() {
+                base.Dispose();
+                ExternalGraph.Dispose();
+                ExternalGraph = null;
             }
         }
     }

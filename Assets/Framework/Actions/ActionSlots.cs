@@ -107,14 +107,14 @@ namespace PixelComrades {
         private bool _isSecondary;
         private bool _isHidden;
         private CachedComponent<ActionSlots> _owner;
-        private CachedComponent<ActionConfig> _action = new CachedComponent<ActionConfig>();
+        private ActionTemplate _action;
         
         public Entity Owner { get { return _owner.Value.GetEntity(); } }
         public string[] CompatibleSlots { get; }
         public Type[] RequiredTypes { get; }
         public List<StatModHolder> CurrentStats { get; }
         public IEntityContainer Container { get { return _owner.Value; } }
-        public ActionConfig Action { get { return _action.Value; } }
+        public ActionTemplate Action { get { return _action; } }
         public string LastEquipStatus { get; set; }
         public string TargetSlot { get { return "Usable"; } }
         public Transform EquipTr { get { return null; } }
@@ -126,12 +126,14 @@ namespace PixelComrades {
             }
             set {
                 if (value == null) {
-                    if (Action?.EquippedSlot >= 0) {
-                        Owner.Get<ReadyActions>().RemoveAction(Action.EquippedSlot);
+                    if (Action?.Config.EquippedSlot >= 0) {
+                        Owner.Get<ReadyActions>().RemoveAction(Action.Config.EquippedSlot);
                     }
                 }
                 _cachedItem.Set(value);
-                _action.Set(value);
+                if (value != null) {
+                    _action = value.GetTemplate<ActionTemplate>();
+                }
             }
         }
 

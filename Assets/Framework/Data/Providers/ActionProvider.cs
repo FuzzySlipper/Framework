@@ -18,9 +18,12 @@ namespace PixelComrades {
             var type = data.Get<DataReference>(DatabaseFields.ItemType);
             var skill = data.TryGetValue<string>(DatabaseFields.Skill, "");
             action.Primary = type?.TargetID == "WeaponUsable";
-            var weaponModel = data.TryGetValue("WeaponModel", "");
-            if (!string.IsNullOrEmpty(weaponModel)) {
-                entity.Add(new WeaponModelComponent(weaponModel));
+            action.WeaponModel = data.TryGetValue("WeaponModel", "");
+            if (!string.IsNullOrEmpty(action.WeaponModel)) {
+                entity.Add(new WeaponModelComponent(action.WeaponModel));
+            }
+            else {
+                action.WeaponModel = data.TryGetValue("SpriteWeaponModel", "");
             }
             var stats = entity.Get<StatsContainer>();
             var power = new RangeStat(entity, Stats.Power, Stats.Power, data.TryGetValue(DatabaseFields.PowerMin, 0f), data.TryGetValue

@@ -12,8 +12,8 @@ namespace PixelComrades {
         public static Vector2 DefaultNodeSize = new Vector2(225, 125);
         
         public Rect Rect;
-        public List<ConnectionPoint> InPoints = new List<ConnectionPoint>();
-        public List<ConnectionPoint> OutPoints = new List<ConnectionPoint>();
+        public List<ConnectionInPoint> InPoints = new List<ConnectionInPoint>();
+        public List<ConnectionOutPoint> OutPoints = new List<ConnectionOutPoint>();
         public List<ConditionExit> Conditions = new List<ConditionExit>();
         public int DefaultExit = 0;
         public int Id;
@@ -31,13 +31,17 @@ namespace PixelComrades {
             Id = id;
             Graph = graph;
             int connectionId = MinConnectionId;
-            for (int i = 0; i < InputMin; i++) {
-                InPoints.Add(new ConnectionPoint(this, ConnectionPointType.In, connectionId));
-                connectionId++;
+            if (InPoints.Count < InputMin) {
+                for (int i = 0; i < InputMin; i++) {
+                    InPoints.Add(new ConnectionInPoint(this, connectionId));
+                    connectionId++;
+                }
             }
-            for (int i = 0; i < OutputMin; i++) {
-                OutPoints.Add(new ConnectionPoint(this, ConnectionPointType.Out, connectionId));
-                connectionId++;
+            if (OutPoints.Count < OutputMin) {
+                for (int i = 0; i < OutputMin; i++) {
+                    OutPoints.Add(new ConnectionOutPoint(this, connectionId));
+                    connectionId++;
+                }
             }
         }
         
@@ -45,12 +49,16 @@ namespace PixelComrades {
             Rect.position += delta;
         }
 
-        public ConnectionPoint GetConnectionPointById(int id) {
+        public ConnectionInPoint GetConnectionInPointById(int id) {
             for (int i = 0; i < InPoints.Count; i++) {
                 if (InPoints[i].Id == id) {
                     return InPoints[i];
                 }
             }
+            return null;
+        }
+
+        public ConnectionOutPoint GetConnectionOutPointById(int id) {
             for (int i = 0; i < OutPoints.Count; i++) {
                 if (OutPoints[i].Id == id) {
                     return OutPoints[i];
@@ -121,25 +129,33 @@ namespace PixelComrades {
 //        }
 //    }
 
-    public enum ConnectionPointType {
-        In,
-        Out
-    }
-
     [System.Serializable]
-    public class ConnectionPoint {
+    public class ConnectionOutPoint {
         public const float Width = 15;
         public const float Height = 20;
         public Rect Rect;
-        public ConnectionPointType ConnectType;
         public StateGraphNode Owner;
         public StateGraphNode Target;
         public int Id;
         public int TargetId;
 
-        public ConnectionPoint(StateGraphNode node, ConnectionPointType connectType, int id) {
+        public ConnectionOutPoint(StateGraphNode node, int id) {
             Owner = node;
-            ConnectType = connectType;
+            Rect = new Rect(0, 0, Width, Height);
+            Id = id;
+        }
+    }
+
+    [System.Serializable]
+    public class ConnectionInPoint {
+        public const float Width = 15;
+        public const float Height = 20;
+        public Rect Rect;
+        public StateGraphNode Owner;
+        public int Id;
+
+        public ConnectionInPoint(StateGraphNode node, int id) {
+            Owner = node;
             Rect = new Rect(0, 0, Width, Height);
             Id = id;
         }

@@ -255,21 +255,6 @@ namespace PixelComrades {
             PlayTask = TimeManager.StartUnscaled(PlayAnimation());
         }
 
-        protected virtual void CreateContextItem(object obj) {
-            var targetType = obj as Type;
-            if (targetType == null) {
-                return;
-            }
-            var newObj = CreateInstance(targetType);
-            newObj.name = targetType.ToString();
-            AssetDatabase.AddObjectToAsset(newObj, _currentSequence);
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
-            var animObj = newObj as SequenceObject;
-            CurrentSequence.Add(animObj);
-            FindOpenStartTime(animObj);
-            Repaint();
-        }
-
         private void FindOpenStartTime(SequenceObject animObject) {
             float start = animObject.StartTime;
             while (true) {
@@ -408,6 +393,7 @@ namespace PixelComrades {
                     else if (Event.current.button == 1 || Event.current.type == EventType.ContextClick) {
                         var contextMenu = new GenericMenu();
                         contextMenu.AddItem(new GUIContent("Remove"), false, RemoveContextItem, obj);
+                        contextMenu.AddItem(new GUIContent("Duplicate"), false, DuplicateContextItem, obj);
                         contextMenu.ShowAsContext();
                         Event.current.Use();
                     }
@@ -531,6 +517,36 @@ namespace PixelComrades {
             CurrentSequence.Remove(track);
             DestroyImmediate(track, true);
             EditorUtility.SetDirty(_currentSequence);
+            Repaint();
+        }
+
+        protected virtual void DuplicateContextItem(object obj) {
+            var track = obj as SequenceObject;
+            if (track == null) {
+                return;
+            }
+            var newObj = Instantiate(track);
+            newObj.name = track.GetType().Name;
+            AssetDatabase.AddObjectToAsset(newObj, _currentSequence);
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
+            SetupNewObject(newObj);
+        }
+
+        protected virtual void CreateContextItem(object obj) {
+            var targetType = obj as Type;
+            if (targetType == null) {
+                return;
+            }
+            var newObj = CreateInstance(targetType);
+            newObj.name = targetType.Name;
+            AssetDatabase.AddObjectToAsset(newObj, _currentSequence);
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(newObj));
+            SetupNewObject(newObj as SequenceObject);
+        }
+
+        protected virtual void SetupNewObject(SequenceObject animObj) {
+            CurrentSequence.Add(animObj);
+            FindOpenStartTime(animObj);
             Repaint();
         }
 

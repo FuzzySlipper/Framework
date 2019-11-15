@@ -23,6 +23,9 @@ namespace PixelComrades {
 
         private ActionTemplate[] _actions;
 
+        public ActionTemplate QueuedChange;
+        public int QueuedSlot;
+
         public ActionTemplate this[int index] { get { return _actions[index]; } }
         public ReadyActions(int actionsCnt) {
             _actions = new ActionTemplate[actionsCnt];
@@ -40,7 +43,7 @@ namespace PixelComrades {
             return _actions[index];
         }
 
-        public void EquipToEmpty(ActionConfig actionConfig) {
+        public void EquipToEmpty(ActionTemplate actionConfig) {
             for (int i = 0; i < _actions.Length; i++) {
                 if (_actions[i] == null) {
                     EquipAction(actionConfig, i);
@@ -49,22 +52,18 @@ namespace PixelComrades {
             }
         }
 
-        public void EquipAction(ActionConfig actionConfig, int slot) {
+        public void EquipAction(ActionTemplate template, int slot) {
             if (_actions.Length <= slot) {
-                System.Array.Resize(ref _actions, slot +1);
+                System.Array.Resize(ref _actions, slot + 1);
             }
             if (_actions[slot] != null) {
                 RemoveAction(slot);
             }
-            if (actionConfig == null) {
-                return;
-            }
-            var template = actionConfig.GetEntity().GetTemplate<ActionTemplate>();
             if (template == null) {
                 return;
             }
             _actions[slot] = template;
-            actionConfig.EquippedSlot = slot;
+            template.Config.EquippedSlot = slot;
             this.GetEntity().Post(new ReadyActionsChanged(slot, template, this));
         }
 

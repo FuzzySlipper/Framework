@@ -15,7 +15,6 @@ namespace PixelComrades {
 
         public void ClearConnectsWith(StateGraphNode node) {
             for (int i = 0; i < Nodes.Count; i++) {
-                ClearList(Nodes[i].InPoints, node);
                 ClearList(Nodes[i].OutPoints, node);
             }
 //            for (int i = Connections.Count - 1; i >= 0; i--) {
@@ -25,7 +24,7 @@ namespace PixelComrades {
 //            }
         }
 
-        private void ClearList(List<ConnectionPoint> points, StateGraphNode node) {
+        private void ClearList(List<ConnectionOutPoint> points, StateGraphNode node) {
             for (int c = 0; c < points.Count; c++) {
                 if (points[c].Target == node) {
                     points[c].Target = null;
@@ -34,26 +33,13 @@ namespace PixelComrades {
             }
         }
 
-        public void ClearConnectsWith(ConnectionPoint newInPnt, ConnectionPoint newOutPnt) {
-//            for (int i = Connections.Count - 1; i >= 0; i--) {
-//                var inPnt = Connections[i].GetIn();
-//                var outPnt = Connections[i].GetOut();
-//                if (inPnt == newInPnt || inPnt == newOutPnt || outPnt == newInPnt || outPnt == newOutPnt) {
-//                    Connections.RemoveAt(i);
-//                }
-//            }
-            ClearConnectsWith(newInPnt);
-            ClearConnectsWith(newOutPnt);
-        }
-
-        public void ClearConnectsWith(ConnectionPoint point) {
+        public void ClearConnectsWith(ConnectionInPoint point) {
             for (int i = 0; i < Nodes.Count; i++) {
-                ClearList(Nodes[i].InPoints, point);
                 ClearList(Nodes[i].OutPoints, point);
             }
         }
 
-        private void ClearList(List<ConnectionPoint> points, ConnectionPoint pnt) {
+        private void ClearList(List<ConnectionOutPoint> points, ConnectionInPoint pnt) {
             for (int c = 0; c < points.Count; c++) {
                 if (points[c].TargetId == pnt.Id && points[c].Target == pnt.Owner) {
                     points[c].Target = null;

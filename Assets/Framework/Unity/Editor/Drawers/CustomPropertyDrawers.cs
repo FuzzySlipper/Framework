@@ -5,9 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEngine.AddressableAssets;
 
 namespace PixelComrades {
-
+//    [CustomPropertyDrawer(typeof(SpriteAnimationReference))]
+//    public class SpriteAnimationReferenceDrawer : PropertyDrawer {
+//        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+//            var reference = property.FindPropertyRelative(nameof(SpriteAnimationReference.Reference));
+//            EditorGUI.PropertyField(position, reference, label, true);
+//            EditorGUI.EndProperty();
+//        }
+//    }
+    
     //[CustomPropertyDrawer(typeof(PossibleAbility))]
     //public class PossibleAbilityDrawer : PropertyDrawer {
     //    private const float MinPercent = 0;

@@ -72,18 +72,13 @@ namespace PixelComrades {
         }
 
         public Vector3 GetEventPosition(SpriteRenderer renderer, AnimationFrame frame) {
-            var pixelsPerUnit = renderer.sprite.pixelsPerUnit;
-            var width = (renderer.sprite.rect.width / 2) / pixelsPerUnit;
-            var height = (renderer.sprite.rect.height / 2) / pixelsPerUnit;
-            return renderer.transform.TransformPoint(new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
+            return GetEventPosition(renderer.sprite, renderer.transform, frame);
         }
 
         public Vector3 GetEventPosition(Sprite sprite, Transform tr, AnimationFrame frame) {
-            var pixelsPerUnit = sprite.pixelsPerUnit;
-            var width = (sprite.rect.width / 2) / pixelsPerUnit;
-            var height = (sprite.rect.height / 2) / pixelsPerUnit;
-            return tr.TransformPoint(
-                new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
+            var size = new Vector2(sprite.rect.width / sprite.pixelsPerUnit,
+                sprite.rect.height / sprite.pixelsPerUnit);
+            return tr.TransformPoint(Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
         }
 
         public AnimationFrame GetFrameAtTime(float time) {

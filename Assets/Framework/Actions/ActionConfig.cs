@@ -14,6 +14,7 @@ namespace PixelComrades {
         public float Range;
         public string EquipVariable;
         public string AnimationTrigger;
+        public string WeaponModel;
         public bool Primary;
         public int EquippedSlot = -1;
         public ActionConfig() {}

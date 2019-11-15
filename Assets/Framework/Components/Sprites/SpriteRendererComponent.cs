@@ -21,9 +21,6 @@ namespace PixelComrades {
     
     [System.Serializable]
     public sealed class SpriteRendererComponent : IComponent, IRenderingComponent, IDisposable {
-        private static readonly int EmissionMap = Shader.PropertyToID("_EmissionMap");
-        private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
-        
         private CachedTransform _baseTr;
         private CachedTransform _spriteTr;
         private CachedUnityComponent<MeshFilter> _filter;
@@ -91,19 +88,10 @@ namespace PixelComrades {
         }
 
         public Vector3 GetEventPosition(AnimationFrame frame) {
-            var sprite = Sprite;
-            var pixelsPerUnit = sprite.pixelsPerUnit;
-            var width = (sprite.rect.width / 2) / pixelsPerUnit;
-            var height = (sprite.rect.height / 2) / pixelsPerUnit;
+            var size = new Vector2(Sprite.rect.width / Sprite.pixelsPerUnit,
+                Sprite.rect.height / Sprite.pixelsPerUnit);
             return SpriteTr.TransformPoint(
-                new Vector3(frame.EventPosition.x * width, height + (frame.EventPosition.y * height), 0));
-        }
-
-        public SpriteRendererComponent(Transform spriteTr, Transform baseTr) {
-            _spriteTr = new CachedTransform(spriteTr);
-            _baseTr = new CachedTransform(baseTr);
-            IsDirty = false;
-            _meshRenderer = null;
+                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
         }
 
         public SpriteRendererComponent(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {
@@ -118,10 +106,6 @@ namespace PixelComrades {
             _baseTr = new CachedTransform(baseTr);
             IsDirty = false;
         }
-        
-        public void UpdateMesh() {
-            _filter.Value.sharedMesh.SetVertices(MeshVertices);
-        }
 
         public SpriteRendererComponent(SerializationInfo info, StreamingContext context) {
             _spriteTr = info.GetValue(nameof(_spriteTr), _spriteTr);
@@ -131,6 +115,10 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_spriteTr), _spriteTr);
             info.AddValue(nameof(_baseTr), _baseTr);
+        }
+
+        public void UpdateMesh() {
+            _filter.Value.sharedMesh.SetVertices(MeshVertices);
         }
 
         public void Dispose() {

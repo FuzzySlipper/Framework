@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,9 +6,9 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class AnimationGraphComponent : IComponent {
+    public sealed class AnimationGraphComponent : IComponent, IDisposable {
         
-        public RuntimeStateGraph Value { get; }
+        public RuntimeStateGraph Value { get; private set; }
 
         public AnimationGraphComponent(RuntimeStateGraph value) {
             Value = value;
@@ -26,6 +27,11 @@ namespace PixelComrades {
                 return null;
             }
             return reference.Value;
+        }
+
+        public void Dispose() {
+            Value.Dispose();
+            Value = null;
         }
     }
 }

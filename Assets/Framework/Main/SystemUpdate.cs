@@ -24,6 +24,10 @@ namespace PixelComrades {
         void OnFixedSystemUpdate(float dt);
     }
 
+    public interface IMainLateUpdate {
+        void OnSystemLateUpdate(float dt, float unscaledDt);
+    }
+
     public interface ISystemFixedUpdate {
         void OnFixedSystemUpdate(float dt);
     }

@@ -52,8 +52,14 @@ namespace PixelComrades {
                 }
             }
             if (aet.SpriteAnimator?.CurrentFrame != null) {
-                aet.AnimEvent.Position = aet.SpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame);
-                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpriteRenderer.BaseTr.rotation;
+                if (aet.SpriteRenderer != null) {
+                    aet.AnimEvent.Position = aet.SpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame);
+                    aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpriteRenderer.BaseTr.rotation;
+                }
+                else {
+                    aet.AnimEvent.Position = aet.SimpleSpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame, action?.Config.EquippedSlot ?? 0);
+                    aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SimpleSpriteRenderer.Rotation;
+                }
                 return;
             }
             if (aet.SpawnPivot != null) {
@@ -80,6 +86,7 @@ namespace PixelComrades {
         private CachedComponent<AnimationEventComponent> _animEvent = new CachedComponent<AnimationEventComponent>();
         private CachedComponent<SpriteAnimatorComponent> _spriteAnimator = new CachedComponent<SpriteAnimatorComponent>();
         private CachedComponent<SpriteRendererComponent> _spriteRenderer = new CachedComponent<SpriteRendererComponent>();
+        private CachedComponent<SpriteSimpleRendererComponent> _simpleSpriteRenderer = new CachedComponent<SpriteSimpleRendererComponent>();
         private CachedComponent<CommandTarget> _target = new CachedComponent<CommandTarget>();
         public TransformComponent Tr { get => _tr.Value; }
         public SpawnPivotComponent SpawnPivot { get => _spawnPivot.Value; }
@@ -88,9 +95,10 @@ namespace PixelComrades {
         public AnimationEventComponent AnimEvent { get => _animEvent; }
         public SpriteAnimatorComponent SpriteAnimator { get => _spriteAnimator; }
         public SpriteRendererComponent SpriteRenderer { get => _spriteRenderer; }
+        public SpriteSimpleRendererComponent SimpleSpriteRenderer { get => _simpleSpriteRenderer; }
         public CommandTarget Target => _target.Value;
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer, _target
+            _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer, _target, _simpleSpriteRenderer
         };
         public override System.Type[] GetTypes() {
             return new System.Type[] {

@@ -10,10 +10,10 @@ namespace PixelComrades {
         private const float Border = 300;
         private const float MaxRectSize = 2500;
 
-        private AnimationGraphComponent _graph = null;
         private Vector2 _scrollPosition;
         private Rect _scrollRect;
         private Vector2 _scrollPosition1;
+        private AnimationGraphComponent _graph;
         
         private GUIStyle _inPointStyle;
         private GUIStyle _outPointStyle;
@@ -101,39 +101,48 @@ namespace PixelComrades {
                 GUI.EndScrollView();
                 return;
             }
-            DrawConnections();
-            DrawNodes();
+            if (_graph.Value.Current is ExternalGraphNode.RuntimeNode externalGraphNode) {
+                DrawGraph(externalGraphNode.ExternalGraph);
+            }
+            else {
+                DrawGraph(_graph.Value);
+            }
+        }
+
+        private void DrawGraph(RuntimeStateGraph graph) {
+            DrawConnections(graph);
+            DrawNodes(graph);
             GUI.EndScrollView();
-            
+
             ProcessEvents(Event.current);
             var sideRect = new Rect(position.width - Border, 0, Border - 10, position.height);
             _scrollPosition1 = GUI.BeginScrollView(sideRect, _scrollPosition1, new Rect(0, 0, Border, MaxRectSize));
-            EditorGUILayout.LabelField("IsActive " + _graph.Value.IsActive);
+            EditorGUILayout.LabelField("IsActive " + graph.IsActive);
             EditorGUILayout.LabelField(" ");
             EditorGUILayout.LabelField("-Variables-");
-            foreach (var valueVariable in _graph.Value.Variables) {
+            foreach (var valueVariable in graph.Variables) {
                 EditorGUILayout.LabelField(valueVariable.Key + ": ");
                 EditorGUILayout.LabelField(valueVariable.Value.ToString());
             }
             EditorGUILayout.LabelField(" ");
             EditorGUILayout.LabelField("-Triggers-");
-            foreach (string trigger in _graph.Value.TriggerLog.InOrder()) {
-                EditorGUILayout.LabelField( _graph.Value.TriggerLog.GetTime(trigger).ToString("F3") + ": ");
+            foreach (string trigger in graph.TriggerLog.InOrder()) {
+                EditorGUILayout.LabelField(graph.TriggerLog.GetTime(trigger).ToString("F3") + ": ");
                 EditorGUILayout.LabelField(trigger);
             }
             GUI.EndScrollView();
             Repaint();
         }
 
-        private void DrawConnections() {
-            for (int i = 0; i < _graph.Value.OriginalGraph.Count; i++) {
-                var node = _graph.Value.OriginalGraph[i];
+        private void DrawConnections(RuntimeStateGraph graph) {
+            for (int i = 0; i < graph.OriginalGraph.Count; i++) {
+                var node = graph.OriginalGraph[i];
                 for (int c = 0; c < node.OutPoints.Count; c++) {
                     var connectOut = node.OutPoints[c];
                     if (connectOut.Target == null) {
                         continue;
                     }
-                    var connectIn = connectOut.Target.GetConnectionPointById(connectOut.TargetId);
+                    var connectIn = connectOut.Target.GetConnectionInPointById(connectOut.TargetId);
                     Handles.DrawBezier(
                         connectIn.Rect.center,
                         connectOut.Rect.center,
@@ -168,13 +177,13 @@ namespace PixelComrades {
             Handles.EndGUI();
         }
 
-        private void DrawNodes() {
-            if (_graph == null) {
+        private void DrawNodes(RuntimeStateGraph graph) {
+            if (graph == null) {
                 return;
             }
-            var currentNode = _graph.Value.Current?.Node;
-            for (int i = 0; i < _graph.Value.OriginalGraph.Count; i++) {
-                var node = _graph.Value.OriginalGraph.Nodes[i];
+            var currentNode = graph.Current?.Node;
+            for (int i = 0; i < graph.OriginalGraph.Count; i++) {
+                var node = graph.OriginalGraph.Nodes[i];
                 var maxWidth = node.Rect.x * 0.8f;
                 var style = node == currentNode ? _nodeSelectedStyle : _nodeStyle;
                 GUILayout.BeginArea(node.Rect, style);
@@ -189,7 +198,7 @@ namespace PixelComrades {
                 EditorGUILayout.LabelField(node.ExitEvent);
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();
-                GUILayout.Label(_graph.Value.GetRuntimeNode(node.Id).DebugInfo);
+                GUILayout.Label(graph.GetRuntimeNode(node.Id).DebugInfo);
                 GUILayout.EndArea();
                 var inSpacing = Mathf.Clamp(0.8f / node.InPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.InPoints.Count; c++) {
@@ -197,7 +206,7 @@ namespace PixelComrades {
                         node.InPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.InPoints[c], c, inSpacing);
+                    StateGraphExtensions.DrawConnectionPoint(node.InPoints[c], c, inSpacing, null, null);
                 }
                 var outSpacing = Mathf.Clamp(0.8f / node.OutPoints.Count, 0.02f, 1);
                 for (int c = 0; c < node.OutPoints.Count; c++) {
@@ -205,40 +214,8 @@ namespace PixelComrades {
                         node.OutPoints.RemoveAt(c);
                         break;
                     }
-                    DrawConnectionPoint(node.OutPoints[c], c, outSpacing);
+                    StateGraphExtensions.DrawConnectionPoint(node.OutPoints[c], c, outSpacing, null, null);
                 }
-            }
-        }
-
-        private void DrawConnectionPoint(ConnectionPoint point, int index, float spacing) {
-            var height = (point.Owner.Rect.height * ((index + 1) * spacing));
-            point.Rect.y = point.Owner.Rect.y + height - point.Rect.height * 0.5f;
-            switch (point.ConnectType) {
-                case ConnectionPointType.In:
-                    point.Rect.x = point.Owner.Rect.x - point.Rect.width + 8f;
-                    break;
-
-                case ConnectionPointType.Out:
-                    point.Rect.x = point.Owner.Rect.x + point.Owner.Rect.width - 8f;
-                    break;
-            }
-            var labelRect = new Rect(point.Rect);
-            GUI.Label(labelRect, " " + index.ToString(), _nodeTextStyle);
-            var buttonRect = new Rect(point.Rect);
-            switch (point.ConnectType) {
-                case ConnectionPointType.In:
-                    if (point.Owner.InPoints.Count <= point.Owner.InputMin) {
-                        return;
-                    }
-                    buttonRect.x += point.Rect.width + 1;
-                    break;
-
-                case ConnectionPointType.Out:
-                    if (point.Owner.OutPoints.Count <= point.Owner.OutputMin) {
-                        return;
-                    }
-                    buttonRect.x -= point.Rect.width + 1;
-                    break;
             }
         }
 

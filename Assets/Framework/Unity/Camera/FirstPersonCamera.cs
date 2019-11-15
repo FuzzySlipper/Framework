@@ -6,47 +6,6 @@ using Sirenix.OdinInspector;
 namespace PixelComrades {
     public class FirstPersonCamera : MonoSingleton<FirstPersonCamera> {
 
-        [System.Serializable]
-        public class SpringEventConfig {
-            [ValueDropdown("SignalsList")] public string AnimationEvent;
-            public Vector3 Force;
-            public int Frames;
-            public SpringType Type;
-
-            public SpringEventConfig() { }
-
-            public SpringEventConfig(string animationEvent, Vector3 force, int frames, SpringType type) {
-                AnimationEvent = animationEvent;
-                Force = force;
-                Frames = frames;
-                Type = type;
-            }
-
-            public enum SpringType {
-                Position,
-                Rotation,
-                Fov
-            }
-
-            private ValueDropdownList<string> SignalsList() {
-                return AnimationEvents.GetDropdownList();
-            }
-
-            public void Trigger() {
-                switch (Type) {
-                    case SpringType.Fov:
-                        ZoomForce(Force.AbsMax(), Frames);
-                        break;
-                    case SpringType.Rotation:
-                        AddRotationForce(Force, Frames);
-                        break;
-                    case SpringType.Position:
-                        AddForce(Force, Frames);
-                        break;
-                }
-            }
-        }
-
         private static Vector3 _topDirection = new Vector3(-1,0,0);
         private static Vector3 _bottomDirection = new Vector3(1, 0, 0);
         private static Vector3 _rightDirection = new Vector3(0, 1, 0);
@@ -316,22 +275,7 @@ namespace PixelComrades {
                 _rotationY += (targetDir.y * _zTargetSpeed);
             }
             _rotationY = Mathf.Clamp(_rotationY, -_maxLookAngleY, _maxLookAngleY);
-            //if (float.IsNaN(_rotationX)) {
-            //    _rotationX = 0;
-            //}
-            //if (float.IsNaN(_rotationY)) {
-            //    _rotationY = 0;
-            //}
-            //float xTilt = (_useHeadBob ? CameraHeadBob.XTilt * _tiltForce : 0f);
-            //float yTilt = (_useHeadBob ? CameraHeadBob.YTilt * _tiltForce : 0f);
-            //Quaternion camTargetRotation = Quaternion.Euler(-1f * _rotationY + (_useHeadBob ? CameraHeadBob.XTilt * _tiltForce : 0f), 0f, 0f);
-            //Quaternion bodyTargetRotation = _nativeRotation * Quaternion.Euler(0f, _rotationX + (_useHeadBob ? CameraHeadBob.YTilt * _tiltForce : 0f), 0f);
-            //Quaternion camTargetRotation = Quaternion.Euler(-1f * _rotationY + xTilt, 0f, 0f);
-            //Quaternion bodyTargetRotation = Quaternion.Euler(0f, _rotationX + yTilt, 0f);
             var targetRotation = Quaternion.Euler(-1f * _rotationY , _rotationX, 0);
-            //float smoothRotation = _lookSmooth * (TimeManager.DeltaUnscaled * 50f);
-            //_camTr.localRotation = Quaternion.Slerp(_camTr.localRotation, targetRotation, smoothRotation);
-            //_bodyTr.localRotation = Quaternion.Slerp(_bodyTr.localRotation,bodyTargetRotation, smoothRotation);
             _camTr.localRotation = targetRotation;
             _camTr.rotation = TransformQuaternion(_camTr.rotation, Quaternion.Euler(_rotationSpring.Value));
         }

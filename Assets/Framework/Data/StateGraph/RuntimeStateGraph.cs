@@ -22,7 +22,7 @@ namespace PixelComrades {
         public bool IsActive { get { return Current != null; } }
         public string CurrentTag { get { return Current != null ? Current.Node.Tag : ""; } }
         public StateGraph OriginalGraph { get; private set; }
-        public RuntimeStateGraph ParentGraph { get; }
+        public RuntimeStateGraph ParentGraph { get; private set; }
         public Entity Entity { get; private set; }
 #if UNITY_EDITOR
         public CircularBuffer<string> TriggerLog = new CircularBuffer<string>(20, true);
@@ -44,6 +44,18 @@ namespace PixelComrades {
             ParentGraph = parent;
             Entity = entity;
             SetupGraph();
+        }
+
+        public void Dispose() {
+            foreach (var stateNode in _lookup) {
+                stateNode.Value.Dispose();
+            }
+            _lookup.Clear();
+            Entity = null;
+            ParentGraph = null;
+            OriginalGraph = null;
+            Current = null;
+            StartNode = null;
         }
         
         private void SetupGraph() {

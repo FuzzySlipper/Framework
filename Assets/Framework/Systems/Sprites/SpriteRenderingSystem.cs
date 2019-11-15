@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Rewired;
 using UnityEngine.Rendering;
 
 namespace PixelComrades {
@@ -12,11 +13,16 @@ namespace PixelComrades {
         public static int ShaderPropertyTexture = Shader.PropertyToID("_MainTex");
         public static int ShaderPropertyNormal = Shader.PropertyToID("_BumpMap");
         public static int ShaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
+        public static int ShaderPropertyEmissivePower = Shader.PropertyToID("_EmissionPower");
         public static string MaterialAddress = "SpriteNpcInstanced.mat";
         public static int RenderLayer = LayerMasks.NumberEnemy;
         
-        private TemplateList<SpriteRendererTemplate> _list;
-        private ManagedArray<SpriteRendererTemplate>.RefDelegate _del;
+        private TemplateList<SpriteRendererTemplate> _rendererList;
+        private ManagedArray<SpriteRendererTemplate>.RefDelegate _rendererDel;
+        private TemplateList<SpriteRendererInstancedTemplate> _rendererInstancedList;
+        private ManagedArray<SpriteRendererInstancedTemplate>.RefDelegate _rendererInstancedDel;
+        private ComponentArray<SpriteSimpleRendererComponent> _simpleRenderers;
+        private ComponentArray<SpriteSimpleRendererComponent>.RefDelegate _simpleRendererDel;
         private Queue<RenderBlock> _renderPool = new Queue<RenderBlock>();
         private Material _material;
         private Dictionary<Texture2D, RenderBlock> _blocks = new Dictionary<Texture2D, RenderBlock>();
@@ -24,15 +30,27 @@ namespace PixelComrades {
 
         public SpriteRenderingSystem() {
             TemplateFilter<SpriteRendererTemplate>.Setup();
-            _list = EntityController.GetTemplateList<SpriteRendererTemplate>();
-            _del = RunUpdate;
+            _rendererList = EntityController.GetTemplateList<SpriteRendererTemplate>();
+            _rendererDel = RunUpdate;
+
+            TemplateFilter<SpriteRendererInstancedTemplate>.Setup();
+            _rendererInstancedList = EntityController.GetTemplateList<SpriteRendererInstancedTemplate>();
+            _rendererInstancedDel = RunUpdate;
+
+            _simpleRenderers = EntityController.GetComponentArray<SpriteSimpleRendererComponent>();
+            _simpleRendererDel = RunUpdate;
+            
             ItemPool.LoadAsset<Material>(MaterialAddress, (m)=> _material = m);
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _textureList.Clear();
             _blocks.Clear();
-            _list.Run(_del);
+            
+            _rendererList.Run(_rendererDel);
+            _rendererInstancedList.Run(_rendererInstancedDel);
+            _simpleRenderers.Run(_simpleRendererDel);
+            
             for (int i = 0; i < _textureList.Count; i++) {
                 var block = _blocks[_textureList[i]];
                 block.MaterialPropertyBlock.SetVectorArray(ShaderPropertyUv, block.UvList);
@@ -48,55 +66,97 @@ namespace PixelComrades {
         }
 
         private void RunUpdate(ref SpriteRendererTemplate template) {
-            bool backwards = template.Billboard.Backwards;
-            if (template.Renderer.MeshRenderer != null) {
-                backwards = template.Billboard.Backwards && !template.Renderer.FlipX;
-            }
-            template.Billboard.Billboard.Apply(template.Renderer.SpriteTr, backwards, ref template.Billboard.LastAngleHeight);
-            var orientation = SpriteFacingControl.GetCameraSide(
-                template.Billboard.Facing, template.Renderer.SpriteTr,
-                template.Renderer.BaseTr, 5, out var inMargin);
-            if (!inMargin || !(orientation.IsAdjacent(template.Billboard.Orientation))){
-                template.Billboard.Orientation = orientation;
-            }
-            if (template.Renderer.IsDirty) {
-                template.Renderer.UpdatedSprite();
-                var sprite = template.Renderer.Sprite;
-                template.Renderer.Uv = GetUv(sprite);
-                var size = new Vector2(sprite.rect.width / sprite.pixelsPerUnit,
-                    sprite.rect.height / sprite.pixelsPerUnit);
-                if (template.Renderer.SavedCollider != null) {
-                    template.Collider.Value.UpdateCollider(template.Renderer.SavedCollider);
-                    if (template.CriticalHitCollider != null) {
-                        template.CriticalHitCollider.Assign(template.Renderer.SavedCollider.CriticalRect, size);
-                    }
-                }
-                else {
-                    template.Collider.Value.UpdateSprite(sprite, template.Renderer.FlipX);
-                }
+            if (template.Billboard != null) {
+                bool backwards = template.Billboard.Backwards;
                 if (template.Renderer.MeshRenderer != null) {
-                    UpdateMeshRenderer(template, size);
-                    return;
+                    backwards = template.Billboard.Backwards && !template.Renderer.FlipX;
                 }
+                UpdateBillboard(template.Billboard, template.Renderer.BaseTr, template.Renderer.SpriteTr, backwards);
             }
-            if (template.Renderer.MeshRenderer != null) {
+            if (!template.Renderer.IsDirty) {
                 return;
             }
-            var texture = template.Renderer.Sprite.texture;
-            if (!_blocks.TryGetValue(texture, out var block)) {
-                _textureList.Add(texture);
-                block = CreateBlock(template.Renderer);
-                _blocks.Add(texture, block);
+            template.Renderer.UpdatedSprite();
+            var sprite = template.Renderer.Sprite;
+            template.Renderer.Uv = GetUv(sprite);
+            var size = new Vector2(sprite.rect.width / sprite.pixelsPerUnit,
+                sprite.rect.height / sprite.pixelsPerUnit);
+            if (template.Renderer.SavedCollider != null) {
+                template.Collider.Value.UpdateCollider(template.Renderer.SavedCollider);
+                if (template.CriticalHitCollider != null) {
+                    template.CriticalHitCollider.Assign(template.Renderer.SavedCollider.CriticalRect, size);
+                }
             }
-            var tr = template.Renderer.SpriteTr;
-            var scale = tr.localScale;
-            if (template.Renderer.FlipX) {
-                scale.x = -scale.x;
+            else {
+                template.Collider.Value.UpdateSprite(sprite, template.Renderer.FlipX);
             }
-            var matrix = Matrix4x4.TRS(tr.position, tr.rotation, scale);
-            block.MatrixList.Add(matrix);
-            block.UvList.Add(template.Renderer.Uv);
-            block.Colors.Add(template.SpriteColor?.CurrentColor ?? Color.white);
+            UpdateMeshRenderer(template, size);
+        }
+
+        private void UpdateBillboard(SpriteBillboardComponent billboard, Transform baseTr, Transform spriteTr, bool backwards) {
+            billboard.Billboard.Apply(spriteTr, backwards, ref billboard.LastAngleHeight);
+            var orientation = SpriteFacingControl.GetCameraSide(billboard.Facing, spriteTr,baseTr, 5, out var inMargin);
+            if (!inMargin || !(orientation.IsAdjacent(billboard.Orientation))) {
+                billboard.Orientation = orientation;
+            }
+        }
+
+        private void RunUpdate(ref SpriteRendererInstancedTemplate template) {
+            for (int i = 0; i < template.Renderer.Sprites.Length; i++) {
+                var data = template.Renderer.Sprites[i];
+//                if (template.Billboard != null) {
+//                    bool backwards = !data.Flip;
+//                    UpdateBillboard(template.Billboard, template.Renderer.BaseTr, template.Renderer.SpriteTr, backwards);
+//                }
+                if (data.IsDirty) {
+                    data.SetUv(GetUv(data.Sprite));
+                    
+                }
+                var texture = data.Sprite.texture;
+                if (!_blocks.TryGetValue(texture, out var block)) {
+                    _textureList.Add(texture);
+                    block = CreateBlock(data.Sprite, data.Normal, data.Emissive);
+                    _blocks.Add(texture, block);
+                }
+                var rotation = template.Renderer.Rotation;
+                var scale = template.Renderer.Scale;
+                if (data.Flip) {
+                    scale.x = -scale.x;
+                    rotation = Quaternion.Inverse(rotation);
+                }
+                var matrix = Matrix4x4.TRS(template.Renderer.Position, rotation, scale);
+                block.MatrixList.Add(matrix);
+                block.UvList.Add(data.Uv);
+                block.Colors.Add(template.SpriteColor?.CurrentColor ?? Color.white);
+            }
+        }
+
+        private void RunUpdate(ref SpriteSimpleRendererComponent renderer) {
+            for (int i = 0; i < renderer.Sprites.Length; i++) {
+                var data = renderer.Sprites[i];
+                if (data.Sprite == null) {
+                    continue;
+                }
+                if (data.IsDirty) {
+                    data.SetUv(GetUv(data.Sprite));
+                    data.MatBlock.SetColor(ShaderPropertyColor, Color.white);
+                    data.MatBlock.SetTexture(ShaderPropertyTexture, data.Sprite.texture);
+                    data.MatBlock.SetTexture(ShaderPropertyNormal, data.Normal);
+                    if (data.Emissive != null) {
+                        data.MatBlock.SetTexture(ShaderPropertyEmissive, data.Emissive);
+                    }
+                    data.MatBlock.SetFloat(ShaderPropertyEmissivePower, data.Emissive != null ? 1 : 0);
+                }
+                var rotation = renderer.Rotation;
+                var scale = renderer.Scale;
+                if (data.Flip) {
+                    scale.x = -scale.x;
+                    rotation = Quaternion.Inverse(rotation);
+                }
+                var matrix = Matrix4x4.TRS(renderer.Position, rotation, scale);
+                data.MatBlock.SetVector(ShaderPropertyUv, data.Uv);
+                Graphics.DrawMesh(renderer.Quad, matrix, renderer.Mat, 0, null, 0, data.MatBlock, ShadowCastingMode.On);
+            }
         }
 
         private void UpdateMeshRenderer(SpriteRendererTemplate template, Vector2 size) {
@@ -116,15 +176,19 @@ namespace PixelComrades {
         }
 
         private RenderBlock CreateBlock(SpriteRendererComponent data) {
+            return CreateBlock(data.Sprite, data.Normal, data.Emissive);
+        }
+
+        private RenderBlock CreateBlock(Sprite sprite, Texture2D normal, Texture2D emissive) {
             var block = GetRenderBlock();
             block.Clear();
-            block.Material.SetTexture(ShaderPropertyTexture, data.Sprite.texture);
-            block.Material.SetTexture(ShaderPropertyNormal, data.Normal);
-            block.Material.SetTexture(ShaderPropertyEmissive, data.Emissive);
-            var pixelsPerUnit = data.Sprite.pixelsPerUnit;
+            block.Material.SetTexture(ShaderPropertyTexture, sprite.texture);
+            block.Material.SetTexture(ShaderPropertyNormal, normal);
+            block.Material.SetTexture(ShaderPropertyEmissive, emissive);
+            var pixelsPerUnit = sprite.pixelsPerUnit;
             var size = new Vector2(
-                data.Sprite.rect.width / pixelsPerUnit,
-                data.Sprite.rect.height / pixelsPerUnit);
+                sprite.rect.width / pixelsPerUnit,
+                sprite.rect.height / pixelsPerUnit);
             block.Quad = ProceduralMeshUtility.GenerateQuad(size, new Vector2(0.5f, 0));
             return block;
         }
@@ -188,6 +252,26 @@ namespace PixelComrades {
                 typeof(SpriteRendererComponent),
                 typeof(SpriteColliderComponent),
                 typeof(SpriteBillboardComponent),
+            };
+        }
+    }
+
+    public class SpriteRendererInstancedTemplate : BaseTemplate {
+
+        private CachedComponent<SpriteInstancedRendererComponent> _renderer = new CachedComponent<SpriteInstancedRendererComponent>();
+        private CachedComponent<SpriteBillboardComponent> _billboard = new CachedComponent<SpriteBillboardComponent>();
+        private CachedComponent<SpriteColorComponent> _spriteColor = new CachedComponent<SpriteColorComponent>();
+
+        public SpriteInstancedRendererComponent Renderer { get => _renderer.Value; }
+        public SpriteBillboardComponent Billboard => _billboard.Value;
+        public SpriteColorComponent SpriteColor => _spriteColor.Value;
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _renderer, _billboard, _spriteColor
+        };
+
+        public override System.Type[] GetTypes() {
+            return new System.Type[] {
+                typeof(SpriteInstancedRendererComponent),
             };
         }
     }

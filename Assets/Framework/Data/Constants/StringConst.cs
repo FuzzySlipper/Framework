@@ -161,6 +161,7 @@ namespace PixelComrades {
         public const string Action = "Action";
         public const string Death = "Death";
         public const string Move = "Move";
+        public const string ChangingEquipment = "ChangingEquipment";
 
         public override string Parse(string value, string defaultValue) {
             return value;
@@ -182,6 +183,7 @@ namespace PixelComrades {
         public const string UsingAbility = "UsingAbility";
         public const string IsMoving = "IsMoving";
         public const string Equipment = "Equipment";
+        public const string WeaponModel = "WeaponModel";
 
         public override string Parse(string value, string defaultValue) {
             return value;
@@ -196,6 +198,7 @@ namespace PixelComrades {
         public const string Attack = "Attack";
         public const string UseAbility = "UseAbility";
         public const string ChangeEquipment = "ChangeEquipment";
+        public const string ResetToIdle = "ResetToIdle";
         public const string CastSpell = "CastSpell";
         public const string Punch = "Punch";
 

@@ -5,20 +5,17 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class WeaponBobComponent : IComponent {
-        
-        public Transform ArmsPivot = null;
-        public Vector3 ResetPoint;
-        public float BobTime = 0;
-        
+    public sealed class FpPivotComponent : IComponent {
 
-        public WeaponBobComponent(Transform pivot ) {
-            ArmsPivot = pivot;
-            ResetPoint = ArmsPivot.localPosition;
+        private CachedTransform _tr;
+        
+        public Transform Tr { get { return _tr; } }
 
+        public FpPivotComponent(Transform tr) {
+            _tr = new CachedTransform(tr);
         }
-        
-        public WeaponBobComponent(SerializationInfo info, StreamingContext context) {
+
+        public FpPivotComponent(SerializationInfo info, StreamingContext context) {
             //BuildingIndex = info.GetValue(nameof(BuildingIndex), BuildingIndex);
         }
                 

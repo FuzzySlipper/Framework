@@ -5,36 +5,17 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class FirstPersonAnimationSystem : SystemBase, IMainSystemUpdate, IReceive<ReadyActionsChanged>, IReceive<AnimationEventTriggered> {
-        
-        private GameOptions.CachedBool _useWeaponBob = new GameOptions.CachedBool("UseWeaponBob");
+    public sealed class FirstPersonAnimationSystem : SystemBase, IReceive<ReadyActionsChanged>, IReceive<AnimationEventTriggered> {
         
         private TemplateList<FirstPersonAnimationTemplate> _animTemplates;
-        private ManagedArray<FirstPersonAnimationTemplate>.RefDelegate _animDel;
         
         public FirstPersonAnimationSystem(){
             TemplateFilter<FirstPersonAnimationTemplate>.Setup();
             _animTemplates = EntityController.GetTemplateList<FirstPersonAnimationTemplate>();
-            _animDel = HandleAnimNodes;
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
                 typeof(WeaponModelComponent),
-                typeof(PlayerComponent)
+                typeof(PoseAnimatorComponent)
             }));
-        }
-
-        public void OnSystemUpdate(float dt, float unscaledDt) {
-            _animTemplates.Run(_animDel);
-        }
-        
-        private void HandleAnimNodes(ref FirstPersonAnimationTemplate template) {
-            var dt = TimeManager.DeltaTime;
-            if (template.WeaponBob != null && _useWeaponBob && template.AnimGraph.Value.CurrentTag != GraphNodeTags.Action) {
-                template.WeaponBob.BobTime += dt;
-                var velocity = Player.FirstPersonController.VelocityPercent;
-                var y = template.WeaponBob.VerticalSwayAmount * Mathf.Sin((template.WeaponBob.SwaySpeed * 2) * template.WeaponBob.BobTime) * velocity;
-                var x = template.WeaponBob.HorizontalSwayAmount * Mathf.Sin(template.WeaponBob.SwaySpeed * template.WeaponBob.BobTime) * velocity;
-                template.WeaponBob.ArmsPivot.localPosition = template.WeaponBob.ResetPoint + new Vector3(x, y, 0);
-            }
         }
 
         public void Handle(ReadyActionsChanged arg) {
@@ -125,6 +106,7 @@ namespace PixelComrades {
 
         public override System.Type[] GetTypes() {
             return new System.Type[] {
+                typeof(PoseAnimatorComponent),
                 typeof(TransformComponent),
             };
         }

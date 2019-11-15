@@ -20,8 +20,49 @@ namespace PixelComrades {
     }
 
     [Serializable]
-    public class SpriteAnimationAssetReference : AssetReferenceT<SpriteAnimation> {
-        public SpriteAnimationAssetReference(string guid) : base(guid) {
+    public class SpriteAnimationReference : AssetReference {
+        [SerializeField] public bool IsDirectional;
+        
+        public override bool ValidateAsset(UnityEngine.Object obj) {
+            if (obj is SpriteAnimation) {
+                return true;
+            }
+            if (obj is SpriteAnimationSet) {
+                return true;
+            }
+            return false;
         }
+#if UNITY_EDITOR
+        public override bool SetEditorAsset(UnityEngine.Object value) {
+            if (value != null) {
+                if (!(value is SpriteAnimation) && !(value is SpriteAnimationSet)) {
+                    return false;
+                }
+            }
+            if (!base.SetEditorAsset(value)) {
+                return false;
+            }
+            if (value != null && value is DirectionalAnimation) {
+                IsDirectional = true;
+            }
+            else {
+                IsDirectional = false;
+            }
+            return true;
+        }
+
+        public override bool SetEditorSubObject(UnityEngine.Object value) {
+            if (!base.SetEditorSubObject(value)) {
+                return false;
+            }
+            if (value != null && value is DirectionalAnimation) {
+                IsDirectional = true;
+            }
+            else {
+                IsDirectional = false;
+            }
+            return true;
+        }
+#endif
     }
 }

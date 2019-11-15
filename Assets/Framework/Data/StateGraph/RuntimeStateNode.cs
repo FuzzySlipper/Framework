@@ -6,8 +6,8 @@ namespace PixelComrades {
     public abstract class RuntimeStateNode {
         public List<RuntimeConditionChecker> Conditions = new List<RuntimeConditionChecker>();
         public RuntimeStateNode LastEnter { get; protected set; }
-        public RuntimeStateGraph Graph { get; }
-        public StateGraphNode Node { get; }
+        public RuntimeStateGraph Graph { get; private set; }
+        public StateGraphNode Node { get; private set; }
         public int Id { get { return Node.Id; } }
         public float TimeEntered { get; protected set; }
         public virtual string DebugInfo { get => ""; }
@@ -74,6 +74,11 @@ namespace PixelComrades {
                 return true;
             }
             return false;
+        }
+
+        public virtual void Dispose() {
+            Graph = null;
+            Node = null;
         }
     }
 

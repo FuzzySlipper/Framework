@@ -43,6 +43,45 @@ namespace PixelComrades {
         }
     }
 
+    public class SortByPriorityObject : IComparer<System.Object> {
+
+        Dictionary<System.Type, int> _priority = new Dictionary<Type, int>();
+
+        public int Compare(System.Object first, System.Object second) {
+            if (first == null && second == null) {
+                return 0;
+            }
+            if (first == null) {
+                return 1;
+            }
+            if (second == null) {
+                return -1;
+            }
+            var firstType = first.GetType();
+            var secondType = second.GetType();
+            if (!_priority.TryGetValue(firstType, out var firstPriority)) {
+                var firstAttr = firstType.GetCustomAttribute<PriorityAttribute>(true);
+                if (firstAttr != null) {
+                    _priority.Add(firstType, firstAttr.Value);
+                }
+                else {
+                    _priority.Add(firstType, (int) Priority.Normal);
+                }
+            }
+            if (!_priority.TryGetValue(secondType, out var secondPriority)) {
+                var secondAttr = secondType.GetCustomAttribute<PriorityAttribute>(true);
+                if (secondAttr != null) {
+                    _priority.Add(secondType, secondAttr.Value);
+                }
+                else {
+                    _priority.Add(secondType, (int) Priority.Normal);
+                }
+            }
+            return firstPriority.CompareTo(secondPriority);
+
+        }
+    }
+
     public class SortByPriorityClass<T> : IComparer<ManagedArray<T>.Delegate> {
         
         Dictionary<System.Type, int> _priority = new Dictionary<Type, int>();
