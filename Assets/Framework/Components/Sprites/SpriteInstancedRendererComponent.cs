@@ -51,7 +51,13 @@ namespace PixelComrades {
         }
 
         public Vector3 GetEventPosition(AnimationFrame frame, int index) {
+            if (index >= Sprites.Length || index < 0) {
+                return _spriteTr.Tr.position;
+            }
             var sprite = Sprites[index].Sprite;
+            if (sprite == null) {
+                return _spriteTr.Tr.position;
+            }
             var size = new Vector2(
                 sprite.rect.width / sprite.pixelsPerUnit,
                 sprite.rect.height / sprite.pixelsPerUnit);

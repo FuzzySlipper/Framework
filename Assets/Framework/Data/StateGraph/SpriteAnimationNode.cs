@@ -127,7 +127,7 @@ namespace PixelComrades {
                     Renderer.Flip(_billboard.Orientation.IsFlipped());
                 }
                 var animFacing = _animation.GetFacing(facing);
-                if (animFacing == null) {
+                if (animFacing == null || Animator.FrameIndex >= animFacing.FrameIndices.Length) {
                     return;
                 }
                 var idx = animFacing.FrameIndices[Animator.FrameIndex];

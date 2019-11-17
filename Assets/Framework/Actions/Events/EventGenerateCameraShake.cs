@@ -11,7 +11,7 @@ namespace PixelComrades {
         }
 
         public void Trigger(ActionEvent ae, string eventName) {
-            FirstPersonCamera.AddForce(Shake, false);
+            World.Get<EntityEventSystem>().Post(new CameraPositionForceEvent(Shake));
         }
     }
 }

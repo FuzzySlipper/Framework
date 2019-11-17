@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 
 namespace PixelComrades {
     [AutoRegister, Priority(Priority.Lowest)]
-    public sealed class SpriteRenderingSystem : SystemBase, IMainSystemUpdate {
+    public sealed class SpriteRenderingSystem : SystemBase, IMainSystemUpdate, IMainLateUpdate {
         
         public static int ShaderPropertyUv = Shader.PropertyToID("_MainTex_UV");
         public static int ShaderPropertyColor = Shader.PropertyToID("_Color");
@@ -49,7 +49,6 @@ namespace PixelComrades {
             
             _rendererList.Run(_rendererDel);
             _rendererInstancedList.Run(_rendererInstancedDel);
-            _simpleRenderers.Run(_simpleRendererDel);
             
             for (int i = 0; i < _textureList.Count; i++) {
                 var block = _blocks[_textureList[i]];
@@ -63,6 +62,10 @@ namespace PixelComrades {
                     block.MaterialPropertyBlock, ShadowCastingMode.TwoSided, true, RenderLayer);
                 _renderPool.Enqueue(block);
             }
+        }
+
+        public void OnSystemLateUpdate(float dt, float unscaledDt) {
+            _simpleRenderers.Run(_simpleRendererDel);
         }
 
         private void RunUpdate(ref SpriteRendererTemplate template) {

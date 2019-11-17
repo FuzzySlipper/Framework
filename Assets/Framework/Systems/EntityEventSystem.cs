@@ -77,6 +77,10 @@ namespace PixelComrades {
             hub.Post(msg);
         }
 
+        public void Post<T>(T msg) where T : struct, IEntityMessage {
+            World.Enqueue(msg);
+        }
+
         public void PostNoGlobal<T>(int entity, T msg) where T : struct, IEntityMessage {
             if (!_entityEvents.TryGetValue(entity, out var hub)) {
                 return;

@@ -358,6 +358,12 @@ namespace PixelComrades {
             list.Clear();
         }
 
+        public static void LateUpdate(float dt, float unscaledDt) {
+            for (int i = 0; i < _lateUpdates.Count; i++) {
+                _lateUpdates[i].OnSystemLateUpdate(dt, unscaledDt);
+            }
+        }
+
         public static void FixedUpdate(float dt) {
             for (int i = 0; i < _fixedUpdates.Count; i++) {
                 _fixedUpdates[i].OnFixedSystemUpdate(dt);

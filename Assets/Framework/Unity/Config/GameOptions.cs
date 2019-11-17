@@ -27,6 +27,61 @@ namespace PixelComrades {
             Cached.Reset();
         }
 
+        [Command("SetIntOption")]
+        public static void SetIntOption(string key, int value) {
+            if (_dictInt.ContainsKey(key)) {
+                _dictInt[key] = value;
+            }
+            else {
+                _dictInt.Add(key, value);
+            }
+            Cached.Reset();
+        }
+
+        [Command("SetFloatOption")]
+        public static void SetFloatOption(string key, float value) {
+            if (_dictFloat.ContainsKey(key)) {
+                _dictFloat[key] = value;
+            }
+            else {
+                _dictFloat.Add(key, value);
+            }
+            Cached.Reset();
+        }
+
+        [Command("SetBoolOption")]
+        public static void SetBoolOption(string key, bool value) {
+            if (_dictBool.ContainsKey(key)) {
+                _dictBool[key] = value;
+            }
+            else {
+                _dictBool.Add(key, value);
+            }
+            Cached.Reset();
+        }
+
+        [Command("SetStringOption")]
+        public static void SetStringOption(string key, string value) {
+            if (_dictString.ContainsKey(key)) {
+                _dictString[key] = value;
+            }
+            else {
+                _dictString.Add(key, value);
+            }
+            Cached.Reset();
+        }
+
+        [Command("SetColorOption")]
+        public static void SetColorOption(string key, Color value) {
+            if (_dictColor.ContainsKey(key)) {
+                _dictColor[key] = value;
+            }
+            else {
+                _dictColor.Add(key, value);
+            }
+            Cached.Reset();
+        }
+
         private static void LoadDictionary<T>(DataList data, Dictionary<string, T> dict) {
             dict.Clear();
             for (int i = 0; i < data.Count; i++) {

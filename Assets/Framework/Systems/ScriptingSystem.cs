@@ -68,7 +68,12 @@ namespace PixelComrades {
             if (!stateEvent.Origin.Tags.Contain(EntityTags.Player)) {
                 return;
             }
-            FirstPersonCamera.AddForce(Force, IsRotation, Frames);
+            if (IsRotation) {
+                World.Get<EntityEventSystem>().Post(new CameraRotationForceEvent(Force, Frames));
+            }
+            else {
+                World.Get<EntityEventSystem>().Post(new CameraPositionForceEvent(Force, Frames));
+            }
         }
 
         public CameraShakeEvent(SerializationInfo info, StreamingContext context) {
@@ -98,7 +103,12 @@ namespace PixelComrades {
             if (!stateEvent.Origin.Tags.Contain(EntityTags.Player)) {
                 return;
             }
-            FirstPersonCamera.AddForce(stateEvent.Rotation.eulerAngles, IsRotation, Frames);
+            if (IsRotation) {
+                World.Get<EntityEventSystem>().Post(new CameraRotationForceEvent(stateEvent.Rotation.eulerAngles, Frames));
+            }
+            else {
+                World.Get<EntityEventSystem>().Post(new CameraPositionForceEvent(stateEvent.Rotation.eulerAngles, Frames));
+            }
         }
 
         public CameraStateShakeEvent(SerializationInfo info, StreamingContext context) {
@@ -126,7 +136,7 @@ namespace PixelComrades {
             if (!stateEvent.Origin.Tags.Contain(EntityTags.Player)) {
                 return;
             }
-            FirstPersonCamera.ZoomForce(Force, Frames);
+            World.Get<EntityEventSystem>().Post(new CameraZoomForceEvent(Force, Frames));
         }
 
         public CameraFovShakeEvent(SerializationInfo info, StreamingContext context) {

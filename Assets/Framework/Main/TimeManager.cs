@@ -181,6 +181,10 @@ namespace PixelComrades {
             World.FixedUpdate(FixedDelta);
         }
 
+        void LateUpdate() {
+            World.LateUpdate(_deltaTime, _deltaUnscaled);
+        }
+
         private void RunUpdate() {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {

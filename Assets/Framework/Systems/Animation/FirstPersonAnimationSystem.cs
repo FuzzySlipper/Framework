@@ -79,8 +79,8 @@ namespace PixelComrades {
                     }
                     break;
                 default:
-                    if (arg.Entity.Tags.Contain(EntityTags.Player)) {
-                        FirstPersonCamera.PlaySpringAnimation(arg.Event);
+                    if (arg.Entity.IsPlayer()) {
+                        World.Get<CameraSystem>().PlaySpringAnimation(arg.Event);
                     }
                     break;
             } 

@@ -384,6 +384,13 @@ namespace PixelComrades {
             return entity.Tags.Contain(EntityTags.IsDead);
         }
 
+        public static bool IsPlayer(this Entity entity) {
+            if (entity == null) {
+                return false;
+            }
+            return entity.Tags.Contain(EntityTags.Player);
+        }
+
         public static T FindStat<T>(this Entity entity, string statFullID) where T : BaseStat {
             WhileLoopLimiter.ResetInstance();
             var currentEntity = entity;

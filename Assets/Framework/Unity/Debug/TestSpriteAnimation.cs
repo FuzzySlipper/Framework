@@ -23,7 +23,7 @@ namespace PixelComrades {
         [SerializeField] private SpriteCollider _spriteCollider = null;
         [SerializeField] private int _updateFrame = 0;
         [SerializeField] private bool _drawNow = true;
-        [SerializeField] private Material _mat;
+        [SerializeField] private Material _mat = null;
         
         private List<Vector3> _vertices = new List<Vector3>();
         private UnscaledTimer _drawTimer = new UnscaledTimer();
