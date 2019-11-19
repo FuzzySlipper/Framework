@@ -16,12 +16,12 @@ namespace PixelComrades {
 
         public IconComponent(string iconLocation) {
             IconLocation = iconLocation;
-            Sprite = ItemPool.LoadAssetOld<Sprite>(IconLocation);
+            Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
         }
 
         public IconComponent(string dir, string icon) {
-            IconLocation = ItemPool.GetCombinedLocator(dir, icon);
-            Sprite = ItemPool.LoadAssetOld<Sprite>(IconLocation);
+            IconLocation = ItemPool.GetCombinedLocator(dir, icon, ".png");
+            Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
         }
 
         public IconComponent(){}

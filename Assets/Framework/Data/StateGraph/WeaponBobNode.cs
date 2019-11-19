@@ -4,10 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public sealed class WeaponBobNode : StateGraphNode {
-        [Range(0, 0.1f)] [SerializeField] public float VerticalSwayAmount = 0.025f;
-        [Range(0, 0.1f)] [SerializeField] public float HorizontalSwayAmount = 0.075f;
-        [Range(0, 15f)] [SerializeField] public float SwaySpeed = 3f;
-
+        public float VerticalSwayAmount = 0.025f;
+        public float HorizontalSwayAmount = 0.075f;
+        public float SwaySpeed = 3f;
+        protected override Vector2 GetNodeSize { get { return new Vector2(DefaultNodeSize.x, DefaultNodeSize.y * 1.25f); } }
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
 
@@ -15,16 +15,16 @@ namespace PixelComrades {
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             UnityEditor.EditorGUILayout.LabelField("Vertical");
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(VerticalSwayAmount)), GUIContent.none, true);
+            UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(VerticalSwayAmount)), 0, 0.1f, GUIContent.none);
             UnityEditor.EditorGUILayout.LabelField("Horizontal");
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(HorizontalSwayAmount)), GUIContent.none, true);
+            UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(HorizontalSwayAmount)), 0, 0.1f, GUIContent.none);
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
             
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             UnityEditor.EditorGUILayout.LabelField("Sway");
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(SwaySpeed)), GUIContent.none, true);
+            UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(SwaySpeed)), 0, 15f, GUIContent.none);
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
             so.ApplyModifiedProperties();
@@ -54,23 +54,6 @@ namespace PixelComrades {
                 if (_component == null) {
                     _component = Graph.Entity.Get<WeaponBobComponent>();
                 }
-                var readyActions = Graph.Entity.Get<ReadyActions>();
-                if (readyActions == null) {
-                    return;
-                }
-                var actionConfig = readyActions.QueuedChange;
-                var targetIndex = readyActions.QueuedSlot;
-                if (actionConfig == null || readyActions.GetAction(targetIndex) == actionConfig) {
-                    readyActions.RemoveAction(targetIndex);
-                }
-                else {
-                    readyActions.EquipAction(actionConfig, targetIndex);
-                }
-                if (targetIndex == 0 && actionConfig != null) {
-                    Graph.SetVariable(GraphVariables.Equipment, actionConfig.Config.EquipVariable);
-                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig.Config.WeaponModel);
-                }
-                readyActions.QueuedChange = null;
             }
 
             public override void OnExit() {

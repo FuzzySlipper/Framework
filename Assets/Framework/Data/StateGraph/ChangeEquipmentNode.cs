@@ -4,7 +4,19 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public sealed class ChangeEquipmentNode : StateGraphNode {
+        public float Delay = 0f;
+        
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
+#if UNITY_EDITOR
+
+            UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
+            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Delay)), GUIContent.none, true);
+            so.ApplyModifiedProperties();
+            GUILayout.Space(20);
+            GUILayout.EndHorizontal();
+#endif
             return false;
         }
 
@@ -15,8 +27,12 @@ namespace PixelComrades {
         }
 
         private class RuntimeNode : RuntimeStateNode {
-            
-            public RuntimeNode(ChangeEquipmentNode node, RuntimeStateGraph graph) : base(node, graph) {}
+
+            private ChangeEquipmentNode _changeNode;
+
+            public RuntimeNode(ChangeEquipmentNode node, RuntimeStateGraph graph) : base(node, graph) {
+                _changeNode = node;
+            }
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
@@ -44,7 +60,12 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
-                base.TryComplete(dt);
+                if (base.TryComplete(dt)) {
+                    return true;
+                }
+                if (TimeManager.Time < TimeEntered + _changeNode.Delay) {
+                    return false;
+                }
                 return true;
             }
         }

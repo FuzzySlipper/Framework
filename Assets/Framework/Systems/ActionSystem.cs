@@ -55,7 +55,7 @@ namespace PixelComrades {
                 aeTemplate.Entity.Post(ae);
                 action.Entity.PostNoGlobal(ae);
             }
-            if (ae.State == ActionState.Activate) {
+            if (ae.State == ActionState.Start) {
                 for (int i = 0; i < action.Config.Costs.Count; i++) {
                     action.Config.Costs[i].ProcessCost(ae.Origin, action.Entity);
                 }

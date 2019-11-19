@@ -12,22 +12,22 @@ namespace PixelComrades {
         }
 
         public static void Damage(float amount, Vector3 start) {
-            var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextDamage", start, Quaternion.identity, true, false);
+            var spawn = ItemPool.Spawn<FloatingText>(UnityDirs.UI, "FloatingTextDamage", start, Quaternion.identity, true, false);
             spawn.StartText(amount.ToString("F0"), 4f, start + DefaultEnd);
         }
 
         public static void Message(string message, Vector3 start, Color color) {
-            var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextStandard", start, Quaternion.identity, true, false);
+            var spawn = ItemPool.Spawn<FloatingText>(UnityDirs.UI, "FloatingTextStandard", start, Quaternion.identity, true, false);
             spawn.StartText(message, 1.5f, start + DefaultEnd, color);
         }
 
         public static void Message(string message, Vector3 start) {
-            var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextStandard", start, Quaternion.identity, true, false);
+            var spawn = ItemPool.Spawn<FloatingText>(UnityDirs.UI, "FloatingTextStandard", start, Quaternion.identity, true, false);
             spawn.StartText(message, 1.5f, start + DefaultEnd);
         }
 
         public static void Spawn(string text, float duration, Vector3 start, Vector3 end) {
-            var spawn = ItemPool.Spawn<FloatingText>("UI/FloatingTextStandard", start, Quaternion.identity, true, false);
+            var spawn = ItemPool.Spawn<FloatingText>(UnityDirs.UI, "FloatingTextStandard", start, Quaternion.identity, true, false);
             spawn.StartText(text, duration, end);
         }
 

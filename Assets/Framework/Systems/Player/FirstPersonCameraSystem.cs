@@ -51,35 +51,6 @@ namespace PixelComrades {
             _singleton.Cam.fieldOfView = _singleton.OriginalFov + _singleton.FovSpring.Value.z;
         }
 
-        private IEnumerator UpdateSprings(float minTime) {
-            var endTime = TimeManager.TimeUnscaled + minTime;
-            bool allResting = true;
-            while (allResting) {
-                UpdateSprings();
-                if (!_singleton.FovSpring.Resting) {
-                    _singleton.Cam.fieldOfView = _singleton.OriginalFov + _singleton.FovSpring.Value.z;
-                }
-                if (!_singleton.MoveSpring.Resting) {
-                    _singleton.CamTr.position = TransformPoint(_singleton.FollowTr.position, _singleton.CamTr.rotation, _singleton.MoveSpring.Value);
-                }
-                if (!_singleton.RotationSpring.Resting) {
-                    _singleton.CamTr.rotation = TransformQuaternion(_singleton.FollowTr.rotation, Quaternion.Euler(_singleton.RotationSpring.Value));
-                }
-                if (TimeManager.Time > endTime) {
-                    allResting = _singleton.MoveSpring.Resting && _singleton.RotationSpring.Resting && _singleton.FovSpring.Resting;
-                }
-                yield return null;
-            }
-        }
-
-        public static Vector3 TransformPoint(Vector3 worldPosition, Quaternion rotation, Vector3 localPosition) {
-            return worldPosition + (rotation * localPosition);
-        }
-
-        public static Quaternion TransformQuaternion(Quaternion worldRotation, Quaternion rotation) {
-            return worldRotation * rotation;
-        }
-
         private void UpdateSprings() {
             _singleton.FovSpring.UpdateSpring();
             _singleton.MoveSpring.UpdateSpring();
@@ -98,6 +69,14 @@ namespace PixelComrades {
 
         public void Set(PlayerCameraComponent component) {
             _singleton = component;
+        }
+
+        public static Vector3 TransformPoint(Vector3 worldPosition, Quaternion rotation, Vector3 localPosition) {
+            return worldPosition + (rotation * localPosition);
+        }
+
+        public static Quaternion TransformQuaternion(Quaternion worldRotation, Quaternion rotation) {
+            return worldRotation * rotation;
         }
     }
 }

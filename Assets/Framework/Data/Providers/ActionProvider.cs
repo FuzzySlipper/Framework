@@ -113,16 +113,17 @@ namespace PixelComrades {
                 switch (reload) {
                     case "Repair":
                         ammoComponent = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, power, _brokenWeaponPercent));
+                        var handlers = entity.GetOrAdd<RuleEventListenerComponent>();
+                        handlers.Handlers.Add(World.Get<AmmoSystem>());
                         break;
                     default:
                     case "Reload":
                         ammoComponent = entity.Add(new AmmoComponent(ammo, skill, reloadSpeed, null));
+                        action.Costs.Add(new CostAmmo(ammoComponent));
                         break;
-
                 }
                 ammoComponent.Amount.SetLimits(0, data.TryGetValue("AmmoAmount", 5));
                 ammoComponent.Amount.SetMax();
-                action.Costs.Add(new CostAmmo(ammoComponent));
             }
             switch (abilityType) {
                 default:

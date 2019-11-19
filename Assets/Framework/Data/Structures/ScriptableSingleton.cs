@@ -7,7 +7,7 @@ using UnityEditor;
 namespace PixelComrades {
     public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
 
-        private const string FullDirectory = UnityDirs.EditorFolder + UnityDirs.System;
+        private const string FullDirectory = UnityDirs.EditorFolder;
 
         private static T _main;
         private static object _lock = new object();
@@ -18,7 +18,7 @@ namespace PixelComrades {
                 }
                 lock (_lock) {
                     if (_main == null) {
-                        _main = Resources.Load<T>(string.Format("{0}{1}", UnityDirs.System, typeof(T).Name));
+                        _main = Resources.Load<T>(typeof(T).Name);
                         if (_main == null) {
                             _main = CreateInstance<T>();
 #if UNITY_EDITOR

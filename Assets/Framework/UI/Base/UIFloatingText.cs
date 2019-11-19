@@ -54,16 +54,16 @@ namespace PixelComrades {
             UIFloatingText spawn;
             switch (orientation) {
                 case Orietation.Right:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextRight", start);
+                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextRight", start);
                     break;
                 case Orietation.Left:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextLeft", start);
+                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextLeft", start);
                     break;
                 case Orietation.Icon:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextIcon", start);
+                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextIcon", start);
                     break;
                 default:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextStandard", start);
+                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", start);
                     break;
             }
             //spawn.RectTransform.sizeDelta = start.sizeDelta;
@@ -78,7 +78,7 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, UIRoot.Misc.Get().transform);
-            UIFloatingText spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextStandard", UIRoot.Misc.Get().transform);
+            UIFloatingText spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", UIRoot.Misc.Get().transform);
             spawn.transform.position = RectTransformUtility.WorldToScreenPoint(Player.Cam, start);
             var end = RectTransformUtility.WorldToScreenPoint(Player.Cam, start + new Vector3(0, 1, 0));
             spawn.RectTransform.SetAsLastSibling();
@@ -90,7 +90,7 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, start);
-            var spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextStandard", start);
+            var spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", start);
             spawn.RectTransform.SetParent(UIRoot.Player.Get().transform);
             spawn.RectTransform.SetAsLastSibling();
             TimeManager.StartUnscaled(spawn.SetTargetText(text, duration, end, startColor));

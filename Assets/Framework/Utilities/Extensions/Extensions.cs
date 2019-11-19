@@ -2806,14 +2806,14 @@ namespace PixelComrades {
 
     public static class AssetTypeExtensions {
         private static Dictionary<Type, string> _typeToExtensions = new Dictionary<Type, string>() {
-            {typeof(GameObject), "prefab"}, {typeof(ScriptableObject), "asset" },
+            {typeof(GameObject), ".prefab"}, {typeof(ScriptableObject), ".asset" },
         };
 
         public static string GetExtensionFromType<T>() {
             if (_typeToExtensions.TryGetValue(typeof(T), out var extension)) {
                 return extension;
             }
-            return "asset";
+            return ".asset";
         }
     }
 

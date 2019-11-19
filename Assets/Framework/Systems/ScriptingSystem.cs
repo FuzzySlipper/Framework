@@ -31,7 +31,6 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class WaitEvent : IActionEventHandler, ISerializable {
-        public bool CanAdvance { get { return _timer.IsActive; } }
         
         private Timer _timer;
 
@@ -65,7 +64,7 @@ namespace PixelComrades {
         }
 
         public void Trigger(ActionEvent stateEvent, string eventName) {
-            if (!stateEvent.Origin.Tags.Contain(EntityTags.Player)) {
+            if (!stateEvent.Origin.IsPlayer()) {
                 return;
             }
             if (IsRotation) {
@@ -100,7 +99,7 @@ namespace PixelComrades {
         }
 
         public void Trigger(ActionEvent stateEvent, string eventName) {
-            if (!stateEvent.Origin.Tags.Contain(EntityTags.Player)) {
+            if (!stateEvent.Origin.IsPlayer()) {
                 return;
             }
             if (IsRotation) {

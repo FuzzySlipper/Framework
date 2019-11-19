@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
 namespace PixelComrades {
@@ -115,7 +117,7 @@ namespace PixelComrades {
 
         private static FastString _stringBuilder = new FastString();
 
-        public static T LoadAsset<T>(string dir, string file) where T : UnityEngine.Object {
+        public static T LoadAsset<T>(string dir, string file, System.Action<T> del = null) where T : UnityEngine.Object {
             if (string.IsNullOrEmpty(file)) {
                 if (!string.IsNullOrEmpty(dir)) {
                     Debug.LogFormat("Attempted to load empty file at {0}", dir);
@@ -130,37 +132,52 @@ namespace PixelComrades {
                 _stringBuilder.Append(UnityDirs.EditorFolder);
                 _stringBuilder.Append(dir);
                 _stringBuilder.Append(file);
-                _stringBuilder.Append(".");
                 _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());
                 return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(_stringBuilder.ToString());
             }
 #endif
             _stringBuilder.Append(dir);
             _stringBuilder.Append(file);
-            return Resources.Load<T>(_stringBuilder.ToString());
+            _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());
+            return LoadAsset<T>(_stringBuilder.ToString(), del);
         }
 
-        public static string GetCombinedLocator(string dir, string file) {
+        public static string GetCombinedLocator(string dir, string file, string extension) {
             _stringBuilder.Clear();
             _stringBuilder.Append(dir);
             _stringBuilder.Append(file);
+            _stringBuilder.Append(extension);
             return _stringBuilder.ToString();
         }
 
         private static Dictionary<int, string> _loadedAssets = new Dictionary<int, string>();
         
-        public static void LoadAsset<T>(string fullFilePath, Action<T> del) where T : UnityEngine.Object {
+        public static T LoadAsset<T>(string fullFilePath, Action<T> del = null) where T : UnityEngine.Object {
             //return Resources.Load<T>(fullFilePath);
-            var op = Addressables.LoadAssetsAsync<T>(fullFilePath, del);
-            if (op.IsDone && op.Result.Count > 0) {
-                _loadedAssets.AddOrUpdate(op.Result[0].GetInstanceID(), fullFilePath);
+            AsyncOperationHandle<T> op = Addressables.LoadAssetAsync<T>(fullFilePath);
+            if (op.IsDone) {
+                if (op.OperationException != null) {
+                    return null;
+                }
+                _loadedAssets.AddOrUpdate(op.Result.GetInstanceID(), fullFilePath);
+                del?.Invoke(op.Result);
+                return op.Result;
             }
+            TimeManager.StartUnscaled(TaskWait<T>(op, fullFilePath, del));
+            return null;
         }
 
-        public static T LoadAssetOld<T>(string fullFilePath) where T : UnityEngine.Object {
-            return Resources.Load<T>(fullFilePath);
+        private static IEnumerator TaskWait<T>(AsyncOperationHandle<T> op, string fullFilePath, Action<T> del) where T : UnityEngine.Object {
+            while (!op.IsDone) {
+                yield return null;
+            }
+            if (op.OperationException != null) {
+                yield break;
+            }
+            _loadedAssets.AddOrUpdate(op.Result.GetInstanceID(), fullFilePath);
+            del?.Invoke(op.Result);
         }
-        
+
         public static string GetAssetLocation<T>(T target) where T : UnityEngine.Object {
             return _loadedAssets.TryGetValue(target.GetInstanceID(), out var ar) ? ar : "";
         }
@@ -252,6 +269,16 @@ namespace PixelComrades {
             return GetWorldEntityComponent<T>(newObject);
         }
 
+        public static T SpawnUIPrefab<T>(string dir, string file, Transform parent) where T : MonoBehaviour {
+            _stringBuilder.Clear();
+            _stringBuilder.Append(dir);
+            _stringBuilder.Append(file);
+            var newObject = Main.SpawnByString(_stringBuilder.ToString(), false, parent.transform.position, parent.transform.rotation, parent, 
+            false);
+            newObject.transform.localScale = Vector3.one;
+            return GetWorldEntityComponent<T>(newObject);
+        }
+
         public static void Despawn(GameObject targetGameObject) {
             Main.ReturnToPool(targetGameObject);
         }
@@ -319,8 +346,7 @@ namespace PixelComrades {
                 return null;
             }
             if (!Application.isPlaying) {
-                GameObject temp = (GameObject) Resources.Load(itemName);
-                var go = GameObject.Instantiate(temp, pos, rot);
+                var go = Addressables.InstantiateAsync(itemName + ".prefab").Result;
                 return go.GetOrAddComponent<PrefabEntity>();
             }
             if (!_stringToId.TryGetValue(itemName, out var itemId)) {
@@ -430,7 +456,7 @@ namespace PixelComrades {
                 Debug.LogError(itemName + " is blank");
                 return -1;
             }
-            GameObject temp = (GameObject) Resources.Load(itemName);
+            GameObject temp = SyncAddressables.LoadAsset<GameObject>(itemName + ".prefab");
             if (temp == null) {
                 Debug.LogError("No resource located for " + itemName);
                 return -1;

@@ -148,6 +148,15 @@ namespace PixelComrades {
                 return false;
             }
             if (!trigger.Trigger()) {
+#if UNITY_EDITOR
+                if (trigger.Triggered) {
+                    TriggerLog.Add(key + " Already triggered");
+                }
+                else {
+                    TriggerLog.Add(key + "next valid time " + (trigger.TimeTriggered + trigger.MinTriggerTime).ToString("F2")
+                                   + " Current " + TimeManager.Time.ToString("F2"));
+                }
+#endif
                 return false;
             }
             for (int i = 0; i < _globals.Count; i++) {

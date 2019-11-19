@@ -44,7 +44,7 @@ public class FindMissingScriptsRecursively : EditorWindow {
         }
     }
 
-    [MenuItem("Window/FindMissingScriptsRecursively")]
+    [MenuItem("Tools/FindMissingScriptsRecursively")]
     public static void ShowWindow() {
         GetWindow(typeof(FindMissingScriptsRecursively));
     }

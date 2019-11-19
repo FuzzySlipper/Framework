@@ -58,7 +58,7 @@ namespace PixelComrades {
                 _current++;
                 UIChargeCircle.ManualSetPercent((float) _current / _totalAmmo);
                 _reloadTimer = _reloadPerAmmo;
-                if (!_ammo.TryLoadOneAmmo(Graph.Entity)) {
+                if (!World.Get<AmmoSystem>().TryLoadOneAmmo(Graph.Entity, _ammo)) {
                     return true;
                 }
                 return false;

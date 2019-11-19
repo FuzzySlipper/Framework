@@ -83,7 +83,13 @@ namespace PixelComrades {
                 SetupStyles();
             }
             if (_nodeTypes.Count == 0) {
-                GUILayout.Label("No Sequence Types");
+                GUILayout.Label("No Graph Types");
+            }
+            if (Selection.objects.Length == 1) {
+                var newGraph = Selection.objects.Length == 1 ? Selection.activeObject as StateGraph : null;
+                if (newGraph != null && newGraph != _graph) {
+                    Set(newGraph);
+                }
             }
             _scrollRect = new Rect(0, 0, position.width-Border, position.height);
             _scrollPosition = GUI.BeginScrollView(_scrollRect, _scrollPosition, new Rect(0, 0, MaxRectSize, MaxRectSize));
@@ -193,7 +199,8 @@ namespace PixelComrades {
             if (_graph == null) {
                 return;
             }
-            var animationLabels = AnimationEvents.GetValues();
+            var aeLabels = AnimationEvents.GetNames().ToArray();
+            var aeValues = AnimationEvents.GetValues();
             var tagLabels = GraphNodeTags.GetNames().ToArray();
             var tagValues = GraphNodeTags.GetValues();
             for (int i = 0; i < _graph.Nodes.Count; i++) {
@@ -245,17 +252,17 @@ namespace PixelComrades {
                 }
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(20);
-                var enterIndex = System.Array.IndexOf(animationLabels, node.EnterEvent);
-                var exitIndex = System.Array.IndexOf(animationLabels, node.ExitEvent);
+                var enterIndex = System.Array.IndexOf(aeValues, node.EnterEvent);
+                var exitIndex = System.Array.IndexOf(aeValues, node.ExitEvent);
                 GUILayout.Label("Enter");
-                var newEnter = UnityEditor.EditorGUILayout.Popup(enterIndex, animationLabels);
+                var newEnter = UnityEditor.EditorGUILayout.Popup(enterIndex, aeLabels);
                 if (newEnter != enterIndex) {
-                    node.EnterEvent = animationLabels[newEnter];
+                    node.EnterEvent = aeValues[newEnter];
                 }
                 GUILayout.Label("Exit");
-                var newExit = UnityEditor.EditorGUILayout.Popup(exitIndex, animationLabels);
+                var newExit = UnityEditor.EditorGUILayout.Popup(exitIndex, aeLabels);
                 if (newExit != exitIndex) {
-                    node.ExitEvent = animationLabels[newExit];
+                    node.ExitEvent = aeValues[newExit];
                 }
                 GUILayout.Space(20);
                 GUILayout.EndHorizontal();

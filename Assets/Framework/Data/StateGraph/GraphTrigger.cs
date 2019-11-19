@@ -7,9 +7,10 @@ namespace PixelComrades {
     public sealed class GraphTrigger {
         public string Key;
         [SerializeField] private float _minTriggerTime = 0.1f;
-        public bool Triggered { get; private set; }
-        
         private float _timeTriggered;
+        public bool Triggered { get; private set; }
+        public float MinTriggerTime { get => _minTriggerTime; }
+        public float TimeTriggered { get => _timeTriggered; }
         
         public void Reset() {
             Triggered = false;

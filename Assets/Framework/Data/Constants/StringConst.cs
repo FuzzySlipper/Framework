@@ -43,29 +43,25 @@ namespace PixelComrades {
 
     public static partial class UnityDirs {
         public const string EditorFolder = "Assets/GameData/Resources/";
-        public const string System = "Systems/";
-        public const string ActionFx = "ActionFx/";
-        public const string Particles = "Particles/";
-        public const string Usable = "Usable/";
-        public const string Icons = "Icons/";
-        public const string ItemIcons = "Icons/Items/";
-        public const string AbilityIcons = "Icons/Abilities/";
-        public const string ActionSpawn = "ActionSpawn/";
-        public const string Items = "Items/";
-        public const string Weapons = "Weapons/";
-        public const string UI = "UI/";
-        public const string Materials = "Materials/";
-        public const string Models = "Models/";
+        public const string ActionFx = "Assets/GameData/ActionFx/";
+        public const string Particles = "Assets/GameData/Particles/";
+        public const string ItemIcons = "Assets/GameData/Icons/Items/";
+        public const string AbilityIcons = "Assets/GameData/Icons/Abilities/";
+        public const string ActionSpawn = "Assets/GameData/ActionSpawn/";
+        public const string Items = "Assets/GameData/Items/";
+        public const string Weapons = "Assets/GameData/Weapons/";
+        public const string UI = "Assets/GameData/UI/";
+        public const string Materials = "Assets/GameData/Materials/";
+        public const string Models = "Assets/GameData/Models/";
         public const string Dialogue = "Dialogue/";
-        public const string Characters = "Characters/";
-        public const string CharacterAnimations = "CharacterAnimations/";
-        public const string Audio = "Audio/";
-        public const string PlayerAnimations = "PlayerAnimations/";
-        public const string Levels = "Levels/";
+        public const string Characters = "Assets/GameData/Characters/";
+        public const string CharacterAnimations = "Assets/GameData/CharacterAnimations/";
+        public const string Audio = "Assets/GameData/Audio/";
+        public const string Levels = "Assets/GameData/Levels/";
         public const string Towns = "Towns/";
         public const string LevelObjects = "Levels/Objects/";
         public const string LevelTileSets = "Levels/TileSets/";
-        public const string LevelMatConfigs = "Levels/MatConfigs/";
+        public const string LevelMatConfigs = "Assets/GameData/MatConfigs/";
     }
 
     public static partial class Stats {

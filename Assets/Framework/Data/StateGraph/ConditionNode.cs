@@ -23,7 +23,7 @@ namespace PixelComrades {
             public RuntimeConditionNode(ConditionNode node, RuntimeStateGraph graph) : base(node, graph) {}
             
             public override bool TryComplete(float dt) {
-                return HasTrueCondition();
+                return true;
             }
         }
     }
