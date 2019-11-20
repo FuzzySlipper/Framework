@@ -73,6 +73,12 @@ namespace PixelComrades {
             OnSelectionChange();
         }
 
+        void OnDisable() {
+            if (_clip != null) {
+                EditorUtility.SetDirty(_clip);
+            }
+        }
+
         void OnFocus() {
             OnSelectionChange();
         }
@@ -141,6 +147,9 @@ namespace PixelComrades {
         void OnSelectionChange() {
             var obj = Selection.activeObject;
             if (obj != _clip && obj is SpriteAnimation) {
+                if (_clip != null) {
+                    EditorUtility.SetDirty(_clip);
+                }
                 _clip = Selection.activeObject as SpriteAnimation;
                 OnClipChange();
             }
@@ -161,6 +170,7 @@ namespace PixelComrades {
                 _previewOffset = Vector2.zero;
                 _timelineOffset = -_timelineOffsetMin;
             }
+            EditorUtility.SetDirty(_clip);
             Repaint();
         }
         

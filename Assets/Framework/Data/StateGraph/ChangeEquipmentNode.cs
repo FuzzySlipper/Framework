@@ -48,9 +48,9 @@ namespace PixelComrades {
                 else {
                     readyActions.EquipAction(actionConfig, targetIndex);
                 }
-                if (targetIndex == 0 && actionConfig != null) {
-                    Graph.SetVariable(GraphVariables.Equipment, actionConfig.Config.EquipVariable);
-                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig.Config.WeaponModel);
+                if (targetIndex == 0) {
+                    Graph.SetVariable(GraphVariables.Equipment, actionConfig?.Config.EquipVariable ?? "");
+                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig?.Config.WeaponModel ?? "");
                 }
                 readyActions.QueuedChange = null;
             }

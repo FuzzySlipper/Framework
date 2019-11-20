@@ -43,6 +43,10 @@ namespace PixelComrades {
             var target = msg.Target;
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var dmgMsg, out var dmgHoverMsg);
+            if (msg.Impact.Hit == CollisionResult.CriticalHit) {
+                dmgMsg.Append("<b>");
+                dmgHoverMsg.Append("<b>");
+            }
             if (target.StatDefend != null) {
                 for (int i = 0; i < target.StatDefend.Count; i++) {
                     for (int d = msg.Entries.Count - 1; d >= 0; d--) {

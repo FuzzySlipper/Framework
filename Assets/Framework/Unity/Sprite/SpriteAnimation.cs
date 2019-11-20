@@ -27,6 +27,18 @@ namespace PixelComrades {
         public abstract Sprite[] Sprites { get; set; }
         public abstract SavedSpriteCollider[] Colliders { get; set; }
 
+        public int NumberOfEvents {
+            get {
+                int cnt = 0;
+                for (int i = 0; i < Frames.Length; i++) {
+                    if (Frames[i].Event != AnimationFrame.EventType.None) {
+                        cnt++;
+                    }
+                }
+                return cnt;
+            }
+        }
+
         public virtual Sprite GetSprite(int spriteIdx) {
             return Sprites[Mathf.Clamp(spriteIdx, 0, Sprites.Length - 1)];
         }

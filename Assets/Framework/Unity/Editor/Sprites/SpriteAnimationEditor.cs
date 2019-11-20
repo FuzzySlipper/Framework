@@ -59,6 +59,7 @@ namespace PixelComrades {
             EditorGUILayout.LabelField(string.Format("Length: {0}", script.LengthTime.ToString("F1")));
             EditorGUILayout.LabelField(string.Format("FrameTime: {0}", script.FrameTime.ToString("F1")));
             EditorGUILayout.LabelField(string.Format("Animation Length: {0}", script.LengthFrames));
+            EditorGUILayout.LabelField(string.Format("Number Events: {0}", script.NumberOfEvents));
             _distance = EditorGUILayout.FloatField("Collider Size", _distance);
             _quality = EditorGUILayout.FloatField("Collider Quality", _quality);
             _copyAnimation = (SpriteAnimation) EditorGUILayout.ObjectField("Clone Source", _copyAnimation, typeof(SpriteAnimation), false);

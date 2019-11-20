@@ -12,18 +12,24 @@ namespace PixelComrades {
 #if UNITY_EDITOR
 
             UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+            
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            UnityEditor.EditorGUILayout.LabelField("Vertical");
+            UnityEditor.EditorGUILayout.LabelField("Vertical", textStyle);
             UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(VerticalSwayAmount)), 0, 0.1f, GUIContent.none);
-            UnityEditor.EditorGUILayout.LabelField("Horizontal");
+            GUILayout.Space(20);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
+            UnityEditor.EditorGUILayout.LabelField("Horizontal", textStyle);
             UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(HorizontalSwayAmount)), 0, 0.1f, GUIContent.none);
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
             
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            UnityEditor.EditorGUILayout.LabelField("Sway");
+            UnityEditor.EditorGUILayout.LabelField("Sway", textStyle);
             UnityEditor.EditorGUILayout.Slider(so.FindProperty(nameof(SwaySpeed)), 0, 15f, GUIContent.none);
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
