@@ -7,10 +7,10 @@ namespace PixelComrades {
 
         public void Spawn(string title, Transform parent, bool isV3) {
             if (isV3) {
-                _text = ItemPool.SpawnUIPrefab<UIDataText>(string.Format("{0}DataTextV3", StringConst.PathUI), parent);
+                _text = ItemPool.SpawnUIPrefab<UIDataText>(string.Format("{0}DataTextV3", UnityDirs.UI), parent);
             }
             else {
-                _text = ItemPool.SpawnUIPrefab<UIDataText>(string.Format("{0}DataText", StringConst.PathUI), parent);
+                _text = ItemPool.SpawnUIPrefab<UIDataText>(string.Format("{0}DataText", UnityDirs.UI), parent);
             }
             _text.SetTitle(title);
         }

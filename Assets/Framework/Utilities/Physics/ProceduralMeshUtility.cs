@@ -254,14 +254,18 @@ namespace PixelComrades {
                 2, 3, 0
             };
             
-            return new Mesh {
+            var mesh = new Mesh {
                 vertices = vertices,
                 uv = uv,
                 triangles = triangles,
                 normals = normals,
                 tangents = tangents
             };
-            
+            mesh.RecalculateBounds();
+            var boundsSize = mesh.bounds.size;
+            boundsSize.z = Mathf.Max(boundsSize.z, 1);
+            mesh.bounds = new Bounds(mesh.bounds.center, boundsSize * 3);
+            return mesh;
         }
 
         public static Mesh GenerateDoubleSidedQuad(Vector2 size, Vector2 pivot) {

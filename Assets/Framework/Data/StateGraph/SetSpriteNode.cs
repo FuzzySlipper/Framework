@@ -49,6 +49,7 @@ namespace PixelComrades {
             private SetSpriteNode _spriteNode;
             private SpriteRendererComponent _spriteRenderer;
             private SpriteSimpleRendererComponent _simpleRenderer;
+            private SpriteAnimation _spriteAnimation;
             private bool _setup = false;
             
             public RuntimeNode(SetSpriteNode node, RuntimeStateGraph graph) : base(node, graph) {
@@ -63,28 +64,36 @@ namespace PixelComrades {
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                var op = _spriteNode.Sprite.LoadAssetAsync<SpriteAnimation>();
-                op.Completed += FinishSetup;
+                if (!_setup) {
+                    var op = _spriteNode.Sprite.LoadAssetAsync<SpriteAnimation>();
+                    op.Completed += FinishSetup;
+                }
+                else {
+                    SetSprite();
+                }
             }
 
             private void FinishSetup(AsyncOperationHandle<SpriteAnimation> animation) {
                 _setup = true;
-                var spriteAnimation = animation.Result;
-                if (spriteAnimation == null) {
+                _spriteAnimation = animation.Result;
+                if (_spriteAnimation == null) {
                     return;
                 }
+                SetSprite();
+            }
+
+            private void SetSprite() {
                 var frame = _spriteNode.Frame;
                 if (_spriteNode.InstancedIndex >= 0) {
                     var data = _simpleRenderer.Sprites[_spriteNode.InstancedIndex];
-                    data.Sprite = spriteAnimation.GetSprite(frame);
-                    data.Emissive = spriteAnimation.EmissiveMap;
-                    data.Normal = spriteAnimation.NormalMap;
+                    data.Sprite = _spriteAnimation.GetSprite(frame);
+                    data.Emissive = _spriteAnimation.EmissiveMap;
+                    data.Normal = _spriteAnimation.NormalMap;
                     data.Flip = false;
                 }
                 else {
-                    _spriteRenderer.SetSprite(
-                        spriteAnimation.GetSprite(frame), spriteAnimation.NormalMap, spriteAnimation.EmissiveMap,
-                        spriteAnimation.GetSpriteCollider(frame));
+                    _spriteRenderer.SetSprite(_spriteAnimation.GetSprite(frame), _spriteAnimation.NormalMap, _spriteAnimation.EmissiveMap,
+                        _spriteAnimation.GetSpriteCollider(frame));
                 }
             }
 

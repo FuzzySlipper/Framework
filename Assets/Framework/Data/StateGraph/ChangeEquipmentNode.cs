@@ -44,13 +44,14 @@ namespace PixelComrades {
                 var targetIndex = readyActions.QueuedSlot;
                 if (actionConfig == null || readyActions.GetAction(targetIndex) == actionConfig) {
                     readyActions.RemoveAction(targetIndex);
+                    actionConfig = null;
                 }
                 else {
                     readyActions.EquipAction(actionConfig, targetIndex);
                 }
                 if (targetIndex == 0) {
-                    Graph.SetVariable(GraphVariables.Equipment, actionConfig?.Config.EquipVariable ?? "");
-                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig?.Config.WeaponModel ?? "");
+                    Graph.SetVariable(GraphVariables.Equipment, actionConfig != null ? actionConfig.Config.EquipVariable : "");
+                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig != null ? actionConfig.Config.WeaponModel : "");
                 }
                 readyActions.QueuedChange = null;
             }

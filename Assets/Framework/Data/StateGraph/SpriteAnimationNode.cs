@@ -74,9 +74,9 @@ namespace PixelComrades {
 
             protected override void UpdateSprite() {
                 var data = _simpleRenderer.Sprites[AnimNode.InstancedIndex];
-                data.Sprite = Animator.CurrentAnimation.GetSprite(Animator.FrameIndex);
-                data.Emissive = Animator.CurrentAnimation.EmissiveMap;
-                data.Normal = Animator.CurrentAnimation.NormalMap;
+                data.Sprite = Animation.GetSprite(Animator.FrameIndex);
+                data.Emissive = Animation.EmissiveMap;
+                data.Normal = Animation.NormalMap;
                 data.Flip = AnimNode.ForceReverse;
             }
         }
@@ -95,13 +95,13 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
             }
-
-            protected override void FinishSetup(AsyncOperationHandle<SpriteAnimation> animation) {
-                base.FinishSetup(animation);
-                _animation = Animator.CurrentAnimation as IDirectionalAnimation;
+            
+            protected override void SetAnimation(SpriteAnimation animation) {
+                _animation = animation as IDirectionalAnimation;
                 if (_animation == null) {
-                    Debug.Log(Animator.CurrentAnimation != null ? Animator.CurrentAnimation.name : "Null animation");
+                    Debug.Log(Animation != null ? Animation.name : "Null animation");
                 }
+                base.SetAnimation(animation);
             }
 
             public override void OnExit() {
@@ -115,7 +115,7 @@ namespace PixelComrades {
 
             protected override void UpdateSprite() {
                 if (_animation == null) {
-                    _animation = Animator.CurrentAnimation as IDirectionalAnimation;
+                    _animation = Animation as IDirectionalAnimation;
                     if (_animation == null) {
                         return;
                     }
@@ -153,15 +153,16 @@ namespace PixelComrades {
             protected SpriteAnimationNode AnimNode;
             protected SpriteRendererComponent Renderer;
             protected SpriteAnimatorComponent Animator;
+            protected SpriteAnimation Animation;
 
             private bool _setup = false;
             
             public override string DebugInfo { 
                 get {
-                    if (Animator.CurrentAnimation == null) {
+                    if (Animation == null) {
                         return "No Animation Setup: " + _setup;
                     }
-                    return string.Format("{2} Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer, Animator.CurrentAnimation.name)
+                    return string.Format("{2} Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer, Animation.name)
             ; } }
 
             public RuntimeSpriteAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base(node, graph) {
@@ -173,24 +174,36 @@ namespace PixelComrades {
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                //Renderer.SetTextures(_node.Animation.NormalMap, _node.Animation.EmissiveMap);
-                var op = AnimNode.Animation.LoadAssetAsync<SpriteAnimation>();
-                op.Completed += FinishSetup;
-                
+                if (!_setup) {
+                    var op = AnimNode.Animation.LoadAssetAsync<SpriteAnimation>();
+                    op.Completed += FinishSetup;
+                }
+                else {
+                    SetupAnimation();
+                }
             }
 
-            protected virtual void FinishSetup(AsyncOperationHandle<SpriteAnimation> animation) {
+            private void FinishSetup(AsyncOperationHandle<SpriteAnimation> op) {
                 _setup = true;
-                var spriteAnimation = animation.Result;
-                if (spriteAnimation == null) {
-                    Debug.LogError(animation.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + AnimNode
-                    .Animation.SubObjectName);
+                if (op.Result == null) {
+                    Debug.LogError(
+                        op.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + AnimNode
+                            .Animation.SubObjectName);
                     return;
                 }
-                Animator.CurrentAnimation = spriteAnimation;
+                SetAnimation(op.Result);
+            }
+
+            protected virtual void SetAnimation(SpriteAnimation animation) {
+                Animation = animation;
+                SetupAnimation();
+            }
+
+            private void SetupAnimation() {
+                Animator.CurrentAnimation = Animation;
                 Animator.FrameIndex = 0;
                 Renderer?.Flip(AnimNode.ForceReverse);
-                UpdateFrame(Animator.CurrentAnimation.GetFrame(0));
+                UpdateFrame(Animation.GetFrame(0));
                 UpdateSprite();
             }
 
@@ -199,12 +212,12 @@ namespace PixelComrades {
             }
 
             protected virtual void UpdateSprite() {
-                Renderer.SetSprite(Animator.CurrentAnimation.GetSprite(Animator.FrameIndex), Animator.CurrentAnimation.NormalMap, Animator.CurrentAnimation.EmissiveMap,
-                    Animator.CurrentAnimation.GetSpriteCollider(Animator.FrameIndex));
+                Renderer.SetSprite(Animation.GetSprite(Animator.FrameIndex), Animation.NormalMap, Animation.EmissiveMap,
+                    Animation.GetSpriteCollider(Animator.FrameIndex));
             }
 
             protected void UpdateFrame(AnimationFrame frame) {
-                Animator.FrameTimer = Animator.CurrentAnimation.FrameTime * frame.Length;
+                Animator.FrameTimer = Animation.FrameTime * frame.Length;
                 Animator.CurrentFrame = frame;
                 if (frame.HasEvent) {
                     Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, frame.Event == AnimationFrame.EventType.Default?
@@ -224,15 +237,15 @@ namespace PixelComrades {
                     return false;
                 }
                 Animator.FrameIndex++;
-                var frame = Animator.CurrentAnimation.GetFrame(Animator.FrameIndex);
+                var frame = Animation.GetFrame(Animator.FrameIndex);
                 if (frame != null) {
                     UpdateFrame(frame);
                     UpdateSprite();
                     return false;
                 }
-                if (Animator.CurrentAnimation.Looping && AnimNode.AllowLooping) {
+                if (Animation.Looping && AnimNode.AllowLooping) {
                     Animator.FrameIndex = 0;
-                    UpdateFrame(Animator.CurrentAnimation.GetFrame(Animator.FrameIndex));
+                    UpdateFrame(Animation.GetFrame(Animator.FrameIndex));
                     UpdateSprite();
                     return false;
                 }
@@ -242,7 +255,7 @@ namespace PixelComrades {
             public override void Dispose() {
                 base.Dispose();
                 _setup = false;
-                Animator.CurrentAnimation = null;
+                Animation = null;
                 AnimNode.Animation.ReleaseAsset();
             }
         }

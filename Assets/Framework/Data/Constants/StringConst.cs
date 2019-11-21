@@ -24,11 +24,9 @@ namespace PixelComrades {
         public const char MultiEntryBreak = '|';
         public const char ChildMultiEntryBreak = '/';
 
-        public const string PathUI = "UI/";
+        public const string ParticleUI = UnityDirs.Particles + "ParticleUI";
 
-        public const string ParticleUI = "Particles/ParticleUI";
-
-        public const string ItemDragDrop = "UI/ItemDragDrop";
+        public const string ItemDragDrop = UnityDirs.UI + "ItemDragDrop";
 
         public const string ButtonNormalAnimName = "Normal";
         public const string ButtonSelectedAnimName = "Highlighted";

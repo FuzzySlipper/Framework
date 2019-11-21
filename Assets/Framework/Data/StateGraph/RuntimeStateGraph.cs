@@ -162,6 +162,12 @@ namespace PixelComrades {
             for (int i = 0; i < _globals.Count; i++) {
                 _globals[i].CheckConditions();
             }
+            if (Current != null && Current.CanExit()) {
+                var node = Current.GetExitNode();
+                if (node != null) {
+                    SetCurrentNode(node);
+                }
+            }
             trigger.Reset();
 #if UNITY_EDITOR
             TriggerLog.Add(key);

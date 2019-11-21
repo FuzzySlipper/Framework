@@ -154,7 +154,7 @@ namespace PixelComrades {
                 var scale = renderer.Scale;
                 if (data.Flip) {
                     scale.x = -scale.x;
-                    rotation = Quaternion.Inverse(rotation);
+                    //rotation = Quaternion.Inverse(rotation);
                 }
                 var matrix = Matrix4x4.TRS(renderer.Position, rotation, scale);
                 data.MatBlock.SetVector(ShaderPropertyUv, data.Uv);

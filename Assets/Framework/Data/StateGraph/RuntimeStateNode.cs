@@ -50,6 +50,13 @@ namespace PixelComrades {
             }
             return false;
         }
+
+        public virtual bool CanExit() {
+            if (Node.AllowEarlyExit && HasTrueCondition()) {
+                return true;
+            }
+            return false;
+        }
         
         public RuntimeStateNode GetConditionExitNode() {
             for (int i = 0; i < Conditions.Count; i++) {
@@ -70,10 +77,7 @@ namespace PixelComrades {
         }
 
         public virtual bool TryComplete(float dt) {
-            if (Node.AllowEarlyExit && HasTrueCondition()) {
-                return true;
-            }
-            return false;
+            return CanExit();
         }
 
         public virtual void Dispose() {

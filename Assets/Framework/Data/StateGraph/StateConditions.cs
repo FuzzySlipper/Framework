@@ -63,6 +63,8 @@ namespace PixelComrades {
                     return new FloatVariableChecker(this);
                 case ConditionType.EntityTag:
                     return new TagVariableChecker(this);
+                case ConditionType.IsAttacking:
+                    return new IsAttackingChecker(this);
             }
             return null;
         }
@@ -81,6 +83,9 @@ namespace PixelComrades {
                 case ConditionType.Trigger:
                 case ConditionType.EntityTag:
                     break;
+                case ConditionType.IsAttacking:
+                    GUILayout.Label("IsAttacking", textStyle);
+                    break;
                 default:
                     var graphLabels = GraphVariables.GetValues();
                     var index = System.Array.IndexOf(graphLabels, VariableName);
@@ -92,6 +97,12 @@ namespace PixelComrades {
                     break;
             }
             switch (Type) {
+                case ConditionType.IsAttacking:
+                    bool.TryParse(Value, out bool oldBool);
+                    if (GUILayout.Button(oldBool.ToString(), buttonStyle)) {
+                        Value = (!oldBool).ToString();
+                    }
+                    break;
                 case ConditionType.Trigger:
                     var labels = graph.GlobalTriggers.Select(t => t.Key).ToArray();
                     var index = System.Array.IndexOf(labels, Value);
@@ -277,6 +288,45 @@ namespace PixelComrades {
             return false;
         }
     }
+
+    public class IsAttackingChecker : RuntimeConditionChecker {
+        public bool Value;
+
+        public IsAttackingChecker(ConditionChecker condition) : base(condition) {
+            bool.TryParse(condition.Value, out Value);
+        }
+
+        public override bool IsTrue(RuntimeStateNode node) {
+            bool isAttacking = false;
+            if (node.Graph.GetVariable<bool>(GraphVariables.Attacking)) {
+                isAttacking = true;
+                var action = node.Graph.Entity.Get<CurrentAction>().Value;
+                if (action == null) {
+                    isAttacking = false;
+                }
+                else {
+                    var actionEntity = action.Entity;
+                    for (int i = 0; i < action.Config.Costs.Count; i++) {
+                        if (!action.Config.Costs[i].CanAct(node.Graph.Entity, actionEntity)) {
+                            isAttacking = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            switch (Original.Comparison) {
+                case ComparisonType.Equals:
+                case ComparisonType.GreaterThan:
+                case ComparisonType.EqualsOrGreaterThan:
+                case ComparisonType.EqualsOrLessThan:
+                    return isAttacking == Value;
+                case ComparisonType.LessThan:
+                case ComparisonType.NotEqualTo:
+                    return isAttacking != Value;
+            }
+            return isAttacking;
+        }
+    }
     
 
     public enum ConditionType {
@@ -286,6 +336,7 @@ namespace PixelComrades {
         IntVariable,
         FloatVariable,
         EntityTag,
+        IsAttacking
     }
 
     public enum ComparisonType {

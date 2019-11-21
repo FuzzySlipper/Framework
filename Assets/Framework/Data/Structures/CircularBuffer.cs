@@ -12,6 +12,7 @@ namespace PixelComrades {
         private int _nextIndex = 0;
         private bool _filledBuffer = false;
         private bool _trackTime;
+        private WhileLoopLimiter _moveNextLimiter = new WhileLoopLimiter(2500);
 
         public CircularBuffer(int size, bool trackTime) {
             if (size < 1) {
@@ -55,7 +56,8 @@ namespace PixelComrades {
             }
             var startIndex = _nextIndex - 1;
             int index = startIndex;
-            while (true) {
+            _moveNextLimiter.Reset();
+            while (_moveNextLimiter.Advance()) {
                 if (index >= _buffer.Length || index < 0) {
                     continue;
                 }
