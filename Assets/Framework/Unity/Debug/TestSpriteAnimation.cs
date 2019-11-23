@@ -18,6 +18,7 @@ namespace PixelComrades {
         private static string _shaderEmissiveKeyword = "_EMISSION";
         
         [SerializeField] private SpriteAnimation _animation = null;
+        [SerializeField] private Sprite _sprite = null;
         [SerializeField] private MeshFilter _meshFilter = null;
         [SerializeField] private MeshRenderer _meshRenderer = null;
         [SerializeField] private SpriteCollider _spriteCollider = null;
@@ -54,11 +55,18 @@ namespace PixelComrades {
         }
 
         private void DrawWithCamera(Camera cam) {
-            if (!cam || _animation == null) {
+            if (!cam) {
+                return;
+            }
+            if (_animation == null || _sprite == null) {
                 return;
             }
             if (_mesh == null) {
                 _mesh = ProceduralMeshUtility.GenerateQuad(new Vector2(20.48f, 10.24f), new Vector2(0.5f, 0));
+            }
+            if (_sprite != null) {
+                DrawSprite();
+                return;
             }
             if (!_drawTimer.IsActive) {
                 _frame++;
@@ -76,9 +84,20 @@ namespace PixelComrades {
                 matBlock.SetTexture(_shaderPropertyEmissive, _animation.EmissiveMap);
             }
             matBlock.SetColor(_shaderPropertyColor, Color.white);
-            var matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
             matBlock.SetVector(_shaderPropertyUv, SpriteRenderingSystem.GetUv(sprite));
-            Graphics.DrawMesh(_mesh, matrix, _mat, 0, null, 0, matBlock, ShadowCastingMode.On);
+            Graphics.DrawMesh(_mesh, GetMatrix(), _mat, 0, null, 0, matBlock, ShadowCastingMode.On);
+        }
+
+        private Matrix4x4 GetMatrix() {
+            return Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
+        }
+
+        private void DrawSprite() {
+            var matBlock = new MaterialPropertyBlock();
+            matBlock.SetTexture(_shaderPropertyTexture, _sprite.texture);
+            matBlock.SetColor(_shaderPropertyColor, Color.white);
+            matBlock.SetVector(_shaderPropertyUv, SpriteRenderingSystem.GetUv(_sprite));
+            Graphics.DrawMesh(_mesh, GetMatrix(), _mat, 0, null, 0, matBlock, ShadowCastingMode.On);
         }
         
 #if UNITY_EDITOR

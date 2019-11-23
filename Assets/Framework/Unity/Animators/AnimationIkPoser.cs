@@ -2,7 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+#if ROOTMOTION
 using RootMotion.FinalIK;
+#endif
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
@@ -21,7 +23,9 @@ namespace PixelComrades {
 
         [SerializeField] private IkPoses _db = null;
         [SerializeField] private PoseAnimator _poseAnimator = null;
+#if ROOTMOTION
         [SerializeField] private FullBodyBipedIK _ik = null;
+#endif
 
         [SerializeField] private bool _autoUpdate = true;
         
@@ -46,15 +50,19 @@ namespace PixelComrades {
                 SetHand(false);
                 _poseAnimator.RefreshPose();
             }
+#if ROOTMOTION
             if (_ik != null) {
                 _ik.UpdateSolverExternal();
             }
+#endif
         }
 
         public void UpdateIk() {
+#if ROOTMOTION
             if (_ik != null) {
                 _ik.UpdateSolverExternal();
             }
+#endif
         }
 
         public void SetHand(bool isRight) {

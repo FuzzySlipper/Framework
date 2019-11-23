@@ -36,7 +36,8 @@ namespace PixelComrades {
         [SerializeField] private TextMeshPro _text = null;
         [SerializeField] private TweenV3 _moveTween = new TweenV3();
         [SerializeField] private TweenFloat _colorTween = new TweenFloat();
-
+        
+        private ScaledTimer _timeoutTimer = new ScaledTimer(10);
         public void StartText(string text, float duration, Vector3 end) {
             StartText(text, duration, end, _endColor);
         }
@@ -50,12 +51,16 @@ namespace PixelComrades {
             _text.color = _defaultColor;
             _moveTween.Restart(transform.position, end, duration);
             _colorTween.Restart(0, 1, duration);
+            _timeoutTimer.RestartTimer();
             while (_moveTween.Active) {
                 _text.color = Color.Lerp(_defaultColor, _endColor, _colorTween.Get());
                 transform.position = _moveTween.Get();
                 transform.LookAt(transform.position + Player.Cam.transform.rotation * Vector3.forward,
                     Player.Cam.transform.rotation * Vector3.up);
                 //_text.fontSize = Vector3.Distance(transform.position, Player.Cam.transform.position) * 0.35f;
+                if (!_timeoutTimer.IsActive) {
+                    break;
+                }
                 yield return null;
             }
             ItemPool.Despawn(gameObject);

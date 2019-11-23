@@ -43,7 +43,7 @@ namespace PixelComrades {
             writer.Write(DebugLog.Current);
             writer.Close();
         }
-        
+
         [Command("godMode")]
         public static void GodMode() {
             bool added = false;
