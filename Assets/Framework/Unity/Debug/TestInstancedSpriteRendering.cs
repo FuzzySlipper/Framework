@@ -98,6 +98,7 @@ namespace PixelComrades {
                 var scale = spriteData.Flip ? new Vector3(-1, 1, 1) : Vector3.one;
                 //var rotation = spriteData.Flip ? transform.rotation : Quaternion.Inverse(transform.rotation);
                 spriteData.Matrix = Matrix4x4.TRS(transform.position + (_distance * i * Vector3.right), rotation,scale * spriteData.Scale);
+                
             }
             if (_testRenderer != null && _testFilter != null) {
                 var blockMaterial = new MaterialPropertyBlock();
@@ -174,7 +175,7 @@ namespace PixelComrades {
             }
             var block = new RenderBlock();
             block.Material = new Material(_material);
-            block.materialPropertyBlock = new MaterialPropertyBlock();
+            block.MaterialPropertyBlock = new MaterialPropertyBlock();
             return block;
         }
 
@@ -187,7 +188,7 @@ namespace PixelComrades {
             
             public Material Material;
             public Mesh Quad;
-            public MaterialPropertyBlock materialPropertyBlock;
+            public MaterialPropertyBlock MaterialPropertyBlock;
 
             public void Clear() {
                 MatrixList.Clear();
@@ -195,7 +196,7 @@ namespace PixelComrades {
                 Colors.Clear();
                 DissolvePositions.Clear();
                 DissolveRadii.Clear();
-                materialPropertyBlock.Clear();
+                MaterialPropertyBlock.Clear();
             }
         }
         
@@ -247,17 +248,17 @@ namespace PixelComrades {
             for (int i = 0; i < _textureList.Count; i++) {
                 var block = _blocks[_textureList[i]];
                 
-                block.materialPropertyBlock.SetVectorArray(_shaderPropertyUv, block.UvList);
-                block.materialPropertyBlock.SetVectorArray(_shaderPropertyColor, block.Colors);
-                block.materialPropertyBlock.SetFloatArray(_dissolveMaskRadius, block.DissolveRadii);
-                block.materialPropertyBlock.SetVectorArray(_dissolveMaskPosition, block.DissolvePositions);
+                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyUv, block.UvList);
+                block.MaterialPropertyBlock.SetVectorArray(_shaderPropertyColor, block.Colors);
+                block.MaterialPropertyBlock.SetFloatArray(_dissolveMaskRadius, block.DissolveRadii);
+                block.MaterialPropertyBlock.SetVectorArray(_dissolveMaskPosition, block.DissolvePositions);
                 
                 Graphics.DrawMeshInstanced(
                     block.Quad,
                     0,
                     block.Material,
                     block.MatrixList,
-                    block.materialPropertyBlock, ShadowCastingMode.TwoSided, true, gameObject.layer, cam
+                    block.MaterialPropertyBlock, ShadowCastingMode.TwoSided, true, gameObject.layer, cam
                 );
                 _renderPool.Enqueue(block);
             }
