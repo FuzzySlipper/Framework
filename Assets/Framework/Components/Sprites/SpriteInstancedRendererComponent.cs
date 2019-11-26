@@ -62,7 +62,7 @@ namespace PixelComrades {
                 sprite.rect.width / sprite.pixelsPerUnit,
                 sprite.rect.height / sprite.pixelsPerUnit);
             return _spriteTr.Tr.TransformPoint(
-                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
+                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0.2f);
         }
 
         public SpriteSimpleRendererComponent(Transform spriteTr) {
