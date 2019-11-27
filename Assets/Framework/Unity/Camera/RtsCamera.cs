@@ -15,6 +15,7 @@ namespace PixelComrades {
         [SerializeField] private float _tiltDampening = 0.75f; // How "smooth" should the camera tilts be?  Note: Smaller numbers are smoother
         [SerializeField] private float _zoomDampening = 0.75f; // How "smooth" should the camera zooms be?  Note: Smaller numbers are smoother
         [Header("Visibility")]
+        [SerializeField] private bool _useVisibilityCheck = false;
         [SerializeField] private bool _showDebugCameraTarget = false; // If set, "small green sphere" will be shown indicating camera target position (even when Following)
         [SerializeField] private float _cameraRadius = 1f;
         [SerializeField] private bool _targetVisbilityViaPhysics = false; // If set, camera will raycast from target out in order to avoid objects being between target and camera
@@ -64,6 +65,7 @@ namespace PixelComrades {
         public Transform CameraTarget { get { return _target.transform; } }
         public bool IsFollowing { get { return FollowTarget != null; } }
         public Transform FollowTarget { get { return _followTarget; } }
+        public float LookAtHeightOffset { get => _lookAtHeightOffset; set => _lookAtHeightOffset = value; }
 
         void Awake() {
             _camera = GetComponentInChildren<Camera>();
@@ -262,10 +264,11 @@ namespace PixelComrades {
             if (_camera.orthographic) {
                 _camera.orthographicSize = _currDistance * _orthoMulti;
             }
-            // check that camera is not below terrain
-            float y = GetHeightAt(position.x, position.z) + 1;
-            if (y > position.y) {
-                position.y = y;
+            if (_useVisibilityCheck) {
+                float y = GetHeightAt(position.x, position.z) + 1;
+                if (y > position.y) {
+                    position.y = y;
+                }                
             }
             // update position and rotation of camera
             transform.rotation = rotation;

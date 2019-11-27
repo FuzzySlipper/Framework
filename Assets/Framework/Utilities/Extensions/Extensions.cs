@@ -2063,6 +2063,10 @@ namespace PixelComrades {
             "North", "East", "South", "West", "Up", "Down"
         };
 
+        public static List<string> Door2DLabelList = new List<string>() {
+            "Forward", "Right", "Back", "Left"
+        };
+
         public static string ToCardinalString(this Directions dir) {
             return _toCardinal[(int) dir];
         }
@@ -2214,6 +2218,21 @@ namespace PixelComrades {
             for (int write = 0; write < hitLimit; write++) {
                 for (int sort = 0; sort < hitLimit - 1; sort++) {
                     if (rayHits[sort].distance > rayHits[sort + 1].distance) {
+                        var lesser = rayHits[sort + 1];
+                        rayHits[sort + 1] = rayHits[sort];
+                        rayHits[sort] = lesser;
+                    }
+                }
+            }
+        }
+
+        public static void SortByHitPointAsc(this RaycastHit[] rayHits, int hitLimit, Vector3 origin) {
+            //System.Array.Sort(rayHits, _ascending);
+            for (int write = 0; write < hitLimit; write++) {
+                for (int sort = 0; sort < hitLimit - 1; sort++) {
+                    var dist1 = Vector3.Distance(rayHits[sort].point, origin);
+                    var dist2 = Vector3.Distance(rayHits[sort+1].point, origin);
+                    if (dist1 > dist2) {
                         var lesser = rayHits[sort + 1];
                         rayHits[sort + 1] = rayHits[sort];
                         rayHits[sort] = lesser;
