@@ -269,7 +269,7 @@ namespace PixelComrades {
         }
     }
 
-    public partial class PlayerAnimationIds : GenericEnum<PlayerAnimationIds, string> {
+    public partial class PlayerAnimationIds : StringEnum<PlayerAnimationIds> {
         public const string Idle = "Idle";
         public const string IdleMelee1H = "IdleMelee1H";
         public const string IdleMelee2H = "IdleMelee2H";
@@ -298,11 +298,6 @@ namespace PixelComrades {
         public const string LoopCastStart = "LoopCastStart";
         public const string LoopCast = "LoopCast";
         public const string LoopCastEnd = "LoopCastEnd";
-
-
-        public override string Parse(string value, string defaultValue) {
-            return value;
-        }
     }
 
     //public static class AttackStats {
