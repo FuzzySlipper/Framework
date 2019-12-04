@@ -228,6 +228,10 @@ namespace PixelComrades {
             return _values.ToArray();
         }
 
+        public static List<U> GetValuesList() {
+            return _values;
+        }
+
         public static int IndexOf(string name) {
             return _names.IndexOf(name);
         }

@@ -28,7 +28,6 @@ namespace PixelComrades {
 
         void Awake() {
             MessageKit<Transform>.addObserver(Messages.CameraFocusChanged, SetTarget);
-            
         }
 
         public void SetTarget(Transform target) {
@@ -59,7 +58,7 @@ namespace PixelComrades {
             UpdatePosition(h, v, mw, Input.GetMouseButton(_mouseRotateButton));
         }
 
-        public void UpdatePosition(float h, float v, float mw, bool doRotate) {
+        public void UpdatePosition(float horizontal, float forward, float mw, bool doRotate) {
             if (mw > 0) {
                 _startingDistance -= TimeManager.DeltaUnscaled * _zoomSpeed;
                 if (_startingDistance < _minDistance) {
@@ -73,21 +72,21 @@ namespace PixelComrades {
                 }
             }
             if (doRotate) {
-                if (h > 0 && h > Math.Abs(v)) {
+                if (horizontal > 0 && horizontal > Math.Abs(forward)) {
                     _tr.RotateAround(_target.transform.position, new Vector3(0, 1, 0), _camRotationSpeed * TimeManager.DeltaTime);
                     _camY = _tr.eulerAngles.y;
                 }
-                else if (h < 0 && h < -Math.Abs(v)) {
+                else if (horizontal < 0 && horizontal < -Math.Abs(forward)) {
                     _tr.RotateAround(_target.transform.position, new Vector3(0, 1, 0), -_camRotationSpeed * TimeManager.DeltaTime);
                     _camY = _tr.eulerAngles.y;
                 }
-                else if (v > 0 && v > Math.Abs(h)) {
+                else if (forward > 0 && forward > Math.Abs(horizontal)) {
                     _camXAngle += _camRotationSpeed * TimeManager.DeltaTime;
                     if (_camXAngle > _maxCameraAngle) {
                         _camXAngle = _maxCameraAngle;
                     }
                 }
-                else if (v < 0 && v < -Math.Abs(h)) {
+                else if (forward < 0 && forward < -Math.Abs(horizontal)) {
                     _camXAngle += -_camRotationSpeed * TimeManager.DeltaTime;
                     if (_camXAngle < _minCameraAngle) {
                         _camXAngle = _minCameraAngle;

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace PixelComrades {
-    public class RtsCamera : MonoBehaviour, IPoolEvents {
+    public class RtsCamera : MonoBehaviour, IPoolEvents, ISimpleCam {
 
         [SerializeField] private float _lookAtHeightOffset = 1;// Y coordinate of camera target.   Only used if TerrainHeightViaPhysics and GetTerrainHeight are not set.
         [SerializeField] private FloatRange _tiltRange = new FloatRange(-360, 360);
@@ -66,7 +66,8 @@ namespace PixelComrades {
         public bool IsFollowing { get { return FollowTarget != null; } }
         public Transform FollowTarget { get { return _followTarget; } }
         public float LookAtHeightOffset { get => _lookAtHeightOffset; set => _lookAtHeightOffset = value; }
-
+        public float PanUpDownAxis { get => _lookAtHeightOffset; set => _lookAtHeightOffset += value; }
+        
         void Awake() {
             _camera = GetComponentInChildren<Camera>();
         }
@@ -104,6 +105,14 @@ namespace PixelComrades {
                     _lastDebugCamera = _showDebugCameraTarget;
                 }
             }
+        }
+
+        public void ResetPosition() {
+            ResetToInitialValues(true, true);
+        }
+
+        public void MoverUpdate() {
+            UpdateInput();
         }
 
         protected void LateUpdate() {
