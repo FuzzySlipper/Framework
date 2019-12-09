@@ -7,6 +7,11 @@ using UnityEngine.AddressableAssets;
 
 namespace PixelComrades {
     public static class AddressableAssetUtilities {}
+
+    [Serializable]
+    public class PrefabAssetReference : AssetReferenceT<GameObject> {
+        public PrefabAssetReference(string guid) : base(guid) {}
+    }
     
     [Serializable]
     public class SpriteAssetReference : AssetReferenceT<Sprite> {

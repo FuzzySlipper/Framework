@@ -57,8 +57,8 @@ namespace PixelComrades {
         public const string Audio = "Assets/GameData/Audio/";
         public const string Levels = "Assets/GameData/Levels/";
         public const string Towns = "Towns/";
-        public const string LevelObjects = "Levels/Objects/";
-        public const string LevelTileSets = "Levels/TileSets/";
+        public const string LevelObjects = "Assets/GameData/Levels/Objects/";
+        public const string LevelTileSets = "Assets/GameData/Levels/TileSets/";
         public const string LevelMatConfigs = "Assets/GameData/MatConfigs/";
     }
 

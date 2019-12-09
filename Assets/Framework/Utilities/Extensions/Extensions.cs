@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 using Random = System.Random;
 #if UNITY_EDITOR
@@ -104,18 +105,30 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class RandomObjectHolder {
-        public UnityEngine.Object[] Objects = new UnityEngine.Object[0];
+        public PrefabAssetReference[] Objects = new PrefabAssetReference[0];
         public AnimationCurve Curve = new AnimationCurve();
 
-        public UnityEngine.Object Get() {
+        public void Load() {
+            for (int i = 0; i < Objects.Length; i++) {
+                Objects[i].LoadAssetAsync();
+            }
+        }
+
+        public void Unload() {
+            for (int i = 0; i < Objects.Length; i++) {
+                Objects[i].ReleaseAsset();
+            }
+        }
+
+        public GameObject Get() {
             if (Objects.Length == 0) {
                 return null;
             }
             if (Objects.Length == 1) {
-                return Objects[0];
+                return Objects[0].Asset as GameObject;
             }
             //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
+            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)))).Asset as GameObject;
         }
 
         public int GetIndex() {
@@ -2003,11 +2016,11 @@ namespace PixelComrades {
         }
 
         public static int RotateRight(this Directions d, int rotation) {
-            return MathEx.WrapAround(((int) d - rotation), Length2D);
+            return MathEx.WrapAround(((int) d + rotation), Length2D);
         }
 
         public static int RotateLeft(this Directions d, int rotation) {
-            return MathEx.WrapAround(((int) d + rotation), Length2D);
+            return MathEx.WrapAround(((int) d - rotation), Length2D);
         }
 
         public static int Length = 6;
@@ -2543,6 +2556,12 @@ namespace PixelComrades {
             return val > max ? min : val;
         }
 
+        /// <summary>
+        /// Max is exclusive, will warp to max-1 below 0
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static int WrapAround(int input, int max) {
             return (input % max + max) % max;
         }
