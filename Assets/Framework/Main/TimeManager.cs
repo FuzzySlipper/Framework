@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -31,6 +32,7 @@ namespace PixelComrades {
         private static float _time = 0;
         private static float _timeUnscaled = 0;
         private static float _timeScale = 1;
+        private static ProfilerMarker _profileUpdate = new ProfilerMarker("TimeManagerUpdate");
 
         public static float DeltaTime { get { return _deltaTime; } }
         public static float FixedDelta { get { return _fixedDelta; } }
@@ -155,6 +157,9 @@ namespace PixelComrades {
         }
 
         void Update() {
+#if UNITY_EDITOR
+            _profileUpdate.Begin();
+#endif
             //_time += UnityEngine.Time.deltaTime * TimeScale;
             if (!_pathTimer.IsActive) {
                 _pathTimer.Activate();
@@ -173,6 +178,9 @@ namespace PixelComrades {
             //    CullingManager.Main.Update();
             //}
             Entity.ProcessPendingDeletes();
+#if UNITY_EDITOR
+            _profileUpdate.End();
+#endif
         }
 
         void FixedUpdate() {

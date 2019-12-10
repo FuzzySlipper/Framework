@@ -8,6 +8,13 @@ using UnityEditor;
 using UnityEngine.AddressableAssets;
 
 namespace PixelComrades {
+//    [CustomPropertyDrawer(typeof(RandomObjectHolder))]
+//    public class RandomObjectHolderDrawer : PropertyDrawer {
+//        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+//            TargetAnimator animator = PropertyDrawerUtility.GetActualObjectForSerializedProperty<TargetAnimator>(fieldInfo, property);
+//        }
+//    }
+
     [CustomPropertyDrawer(typeof(FloatRange))]
     public class FloatRangeDrawer : PropertyDrawer {
         private const float MinPercent = 0;

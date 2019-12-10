@@ -105,34 +105,47 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class RandomObjectHolder {
-        public PrefabAssetReference[] Objects = new PrefabAssetReference[0];
+        public List<PrefabAssetReference> Objects = new List<PrefabAssetReference>();
         public AnimationCurve Curve = new AnimationCurve();
 
         public void Load() {
-            for (int i = 0; i < Objects.Length; i++) {
+#if UNITY_EDITOR
+            return;
+#endif
+            for (int i = 0; i < Objects.Count; i++) {
                 Objects[i].LoadAssetAsync();
             }
         }
 
         public void Unload() {
-            for (int i = 0; i < Objects.Length; i++) {
+#if UNITY_EDITOR
+            return;
+#endif
+            for (int i = 0; i < Objects.Count; i++) {
                 Objects[i].ReleaseAsset();
             }
         }
 
+        public GameObject Get(int index) {
+#if UNITY_EDITOR
+            return Objects[index].editorAsset;
+#endif
+            return Objects[index].Asset as GameObject;
+        }
+
         public GameObject Get() {
-            if (Objects.Length == 0) {
+            if (Objects.Count == 0) {
                 return null;
             }
-            if (Objects.Length == 1) {
-                return Objects[0].Asset as GameObject;
+            if (Objects.Count == 1) {
+                return Get(0);
             }
             //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Objects.SafeAccess((int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)))).Asset as GameObject;
+            return Get((int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
         }
 
         public int GetIndex() {
-            return (int) (Objects.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
+            return (int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
         }
     }
 

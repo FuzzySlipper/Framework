@@ -214,6 +214,10 @@ namespace PixelComrades {
             return _names;
         }
 
+        public static List<string> GetIds() {
+            return _ids;
+        }
+
         public static string[] GetNames(U value) {
             List<string> nameList = new List<string>();
             for (int i = 0; i < _values.Count; i++) {
