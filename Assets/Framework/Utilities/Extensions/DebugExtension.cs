@@ -1294,7 +1294,7 @@ public static class DebugExtension
 	/// <param name='color'>
 	/// 	- The color of the arrow.
 	/// </param>
-	public static void DrawArrow(Vector3 position, Vector3 direction, Color color)
+	public static void GizmoDrawArrow(Vector3 position, Vector3 direction, Color color)
 	{	
 		Color oldColor = Gizmos.color;
 		Gizmos.color = color;
@@ -1336,9 +1336,9 @@ public static class DebugExtension
 	/// <param name='direction'>
 	/// 	- The direction the arrow will point in.
 	/// </param>
-	public static void DrawArrow(Vector3 position, Vector3 direction)
+	public static void GizmoDrawArrow(Vector3 position, Vector3 direction)
 	{
-		DrawArrow(position, direction, Color.white);
+		GizmoDrawArrow(position, direction, Color.white);
 	}
 	
 	/// <summary>

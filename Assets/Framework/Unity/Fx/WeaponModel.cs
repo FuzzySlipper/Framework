@@ -70,7 +70,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected() {
             if (_spawn != null) {
-                DebugExtension.DrawArrow(_spawn.position, _spawn.forward * 0.2f, Color.red);
+                DebugExtension.GizmoDrawArrow(_spawn.position, _spawn.forward * 0.2f, Color.red);
             }
         }
 #endif
