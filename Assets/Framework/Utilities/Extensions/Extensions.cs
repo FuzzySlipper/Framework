@@ -1578,22 +1578,21 @@ namespace PixelComrades {
 
     public static class DirectionsExtensions {
         public static Directions OppositeDir(this Directions dir) {
-            if (dir == Directions.Forward) {
-                return Directions.Back;
+            switch (dir) {
+                case Directions.Forward:
+                    return Directions.Back;
+                case Directions.Right:
+                    return Directions.Left;
+                case Directions.Left:
+                    return Directions.Right;
+                case Directions.Back:
+                default:
+                    return Directions.Forward;
+                case Directions.Up:
+                    return Directions.Down;
+                case Directions.Down:
+                    return Directions.Up;
             }
-            if (dir == Directions.Right) {
-                return Directions.Left;
-            }
-            if (dir == Directions.Back) {
-                return Directions.Forward;
-            }
-            if (dir == Directions.Up) {
-                return Directions.Down;
-            }
-            if (dir == Directions.Down) {
-                return Directions.Up;
-            }
-            return Directions.Right;
         }
 
         public static DirectionsEight ToDirectionEight(this Directions dir) {

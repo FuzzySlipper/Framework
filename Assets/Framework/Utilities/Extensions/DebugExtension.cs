@@ -1034,7 +1034,7 @@ public static class DebugExtension
 	/// <param name='radius'>
 	/// 	- The radius of the circle.
 	/// </param>
-	public static void DrawCircle(Vector3 position, Vector3 up, Color color, float radius = 1.0f)
+	public static void GizmoDrawCircle(Vector3 position, Vector3 up, Color color, float radius = 1.0f)
 	{
 		up = ((up == Vector3.zero) ? Vector3.up : up).normalized * radius;
 		Vector3 _forward = Vector3.Slerp(up, -up, 0.5f);
@@ -1086,9 +1086,9 @@ public static class DebugExtension
 	/// <param name='radius'>
 	/// 	- The radius of the circle.
 	/// </param>
-	public static void DrawCircle(Vector3 position, Color color, float radius = 1.0f)
+	public static void GizmoDrawCircle(Vector3 position, Color color, float radius = 1.0f)
 	{
-		DrawCircle(position, Vector3.up, color, radius);
+		GizmoDrawCircle(position, Vector3.up, color, radius);
 	}
 	
 	/// <summary>
@@ -1103,9 +1103,9 @@ public static class DebugExtension
 	/// <param name='radius'>
 	/// 	- The radius of the circle.
 	/// </param>
-	public static void DrawCircle(Vector3 position, Vector3 up, float radius = 1.0f)
+	public static void GizmoDrawCircle(Vector3 position, Vector3 up, float radius = 1.0f)
 	{
-		DrawCircle(position, position, Color.white, radius);
+		GizmoDrawCircle(position, position, Color.white, radius);
 	}
 	
 	/// <summary>
@@ -1117,9 +1117,9 @@ public static class DebugExtension
 	/// <param name='radius'>
 	/// 	- The radius of the circle.
 	/// </param>
-	public static void DrawCircle(Vector3 position, float radius = 1.0f)
+	public static void GizmoDrawCircle(Vector3 position, float radius = 1.0f)
 	{
-		DrawCircle(position, Vector3.up, Color.white, radius);
+		GizmoDrawCircle(position, Vector3.up, Color.white, radius);
 	}
 	
 	//Wiresphere already exists
@@ -1145,9 +1145,9 @@ public static class DebugExtension
 		Vector3 right = Vector3.Cross(up, forward).normalized*radius;
 		
 		//Radial circles
-		DebugExtension.DrawCircle(start, up, color, radius);	
-		DebugExtension.DrawCircle(end, -up, color, radius);
-		DebugExtension.DrawCircle((start+end)*0.5f, up, color, radius);
+		DebugExtension.GizmoDrawCircle(start, up, color, radius);	
+		DebugExtension.GizmoDrawCircle(end, -up, color, radius);
+		DebugExtension.GizmoDrawCircle((start+end)*0.5f, up, color, radius);
 		
 		Color oldColor = Gizmos.color;
 		Gizmos.color = color;
@@ -1228,8 +1228,8 @@ public static class DebugExtension
 		Gizmos.DrawRay(position, Vector3.Slerp(_forward, _right, angle/90.0f).normalized*dist);
 		Gizmos.DrawRay(position, Vector3.Slerp(_forward, -_right, angle/90.0f).normalized*dist);
 		
-		DebugExtension.DrawCircle(position+_forward, direction, color, (_forward-(slerpedVector.normalized*dist)).magnitude);
-		DebugExtension.DrawCircle(position+(_forward*0.5f), direction, color, ((_forward*0.5f)-(slerpedVector.normalized*(dist*0.5f))).magnitude);
+		DebugExtension.GizmoDrawCircle(position+_forward, direction, color, (_forward-(slerpedVector.normalized*dist)).magnitude);
+		DebugExtension.GizmoDrawCircle(position+(_forward*0.5f), direction, color, ((_forward*0.5f)-(slerpedVector.normalized*(dist*0.5f))).magnitude);
 		
 		Gizmos.color = oldColor;
 	}
@@ -1373,8 +1373,8 @@ public static class DebugExtension
 		end = middle+((end-middle).normalized*sideLength);
 		
 		//Radial circles
-		DebugExtension.DrawCircle(start, up, color, radius);	
-		DebugExtension.DrawCircle(end, -up, color, radius);
+		DebugExtension.GizmoDrawCircle(start, up, color, radius);	
+		DebugExtension.GizmoDrawCircle(end, -up, color, radius);
 		
 		//Side lines
 		Gizmos.DrawLine(start+right, end+right);
