@@ -35,7 +35,7 @@ namespace PixelComrades {
             var hitPnt = collisionPnt.point;
             var hitNormal = collisionPnt.normal;
 #if DEBUG
-            DebugExtension.DebugPoint(hitPnt, Color.magenta, 1.5f, 4f);
+            DebugExtension.DrawPoint(hitPnt, Color.magenta, 1.5f, 4f);
 #endif
             hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, hitPnt, hitNormal));
             entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, hitNormal));

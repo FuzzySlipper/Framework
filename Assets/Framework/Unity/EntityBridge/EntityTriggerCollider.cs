@@ -34,7 +34,7 @@ namespace PixelComrades {
             var hitPnt = other.ClosestPointOnBounds(position);
             var hitNormal = (hitPnt - position).normalized;
 #if DEBUG
-            DebugExtension.DebugPoint(hitPnt, Color.yellow, 1.5f, 4f);
+            DebugExtension.DrawPoint(hitPnt, Color.yellow, 1.5f, 4f);
 #endif
             hitEntity.Post(new CollisionEvent(entity, sourceNode, targetNode, hitPnt, hitNormal));
             entity.Post(new PerformedCollisionEvent(sourceNode, targetNode, hitPnt, hitNormal));

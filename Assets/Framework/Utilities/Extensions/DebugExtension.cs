@@ -40,7 +40,7 @@ public static class DebugExtension
 	/// <param name='depthTest'>
 	/// 	- Whether or not this point should be faded when behind other objects.
 	/// </param>
-	public static void DebugPoint(Vector3 position, Color color, float scale = 1.0f, float duration = 0, bool depthTest = true)
+	public static void DrawPoint(Vector3 position, Color color, float scale = 1.0f, float duration = 0, bool depthTest = true)
 	{
 		color = (color == default(Color)) ? Color.white : color;
 		
@@ -64,9 +64,9 @@ public static class DebugExtension
 	/// <param name='depthTest'>
 	/// 	- Whether or not this point should be faded when behind other objects.
 	/// </param>
-	public static void DebugPoint(Vector3 position, float scale = 1.0f, float duration = 0, bool depthTest = true)
+	public static void DrawPoint(Vector3 position, float scale = 1.0f, float duration = 0, bool depthTest = true)
 	{
-		DebugPoint(position, Color.white, scale, duration, depthTest);
+		DrawPoint(position, Color.white, scale, duration, depthTest);
 	}
 	
 	/// <summary>
@@ -800,7 +800,7 @@ public static class DebugExtension
 	/// <param name='scale'>
 	/// 	- The size of the drawn point.
 	/// </param>
-	public static void DrawPoint(Vector3 position, Color color, float scale = 1.0f)
+	public static void GizmoPoint(Vector3 position, Color color, float scale = 1.0f)
 	{
 		Color oldColor = Gizmos.color;
 		
@@ -821,9 +821,9 @@ public static class DebugExtension
 	/// <param name='scale'>
 	/// 	- The size of the drawn point.
 	/// </param>
-	public static void DrawPoint(Vector3 position, float scale = 1.0f)
+	public static void GizmoPoint(Vector3 position, float scale = 1.0f)
 	{
-		DrawPoint(position, Color.white, scale);
+		GizmoPoint(position, Color.white, scale);
 	}
 	
 	/// <summary>

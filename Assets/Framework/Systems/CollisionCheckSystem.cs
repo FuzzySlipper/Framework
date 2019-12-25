@@ -90,7 +90,7 @@ namespace PixelComrades {
                     else if (hitEntity != null) {
                         pointColor = Color.red;
                     }
-                    DebugExtension.DebugPoint(_rayHits[i].point + (Vector3.up * (i * 0.1f)), pointColor, 0.25f, 2.5f);
+                    DebugExtension.DrawPoint(_rayHits[i].point + (Vector3.up * (i * 0.1f)), pointColor, 0.25f, 2.5f);
 #endif
                 if (isEnvironment) {
 #if DEBUG
@@ -109,7 +109,7 @@ namespace PixelComrades {
                         var localDir = hit.transform.InverseTransformDirection(ray.direction);
                         var rayCast = new Ray(detailTr.TransformPoint(localPoint), detailTr.TransformDirection(localDir));
                         if (!targetNode.DetailCollider.Collider.Raycast(rayCast, out var childHit, 500)) {
-                            DebugExtension.DebugPoint(childHit.point, Color.yellow, 0.25f, 2.5f);
+                            DebugExtension.DrawPoint(childHit.point, Color.yellow, 0.25f, 2.5f);
                             continue;
                         }
                     }

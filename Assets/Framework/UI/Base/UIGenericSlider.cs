@@ -49,6 +49,12 @@ namespace PixelComrades {
             }
         }
 
+        public void ForceUpdateCurrent() {
+            var value = _slider.value;
+            _text.text = _slider.wholeNumbers ? value.ToString("F0") : value.ToString("F1");
+            _lastVal = value;
+        }
+
         public void OnPoolSpawned() {
         }
 
