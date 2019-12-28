@@ -110,7 +110,9 @@ namespace PixelComrades {
 
         public void Load() {
 #if UNITY_EDITOR
-            return;
+            if (!Application.isPlaying) {
+                return;
+            }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
                 Objects[i].LoadAssetAsync();
@@ -119,7 +121,9 @@ namespace PixelComrades {
 
         public void Unload() {
 #if UNITY_EDITOR
-            return;
+            if (!Application.isPlaying) {
+                return;
+            }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
                 Objects[i].ReleaseAsset();
@@ -128,8 +132,20 @@ namespace PixelComrades {
 
         public GameObject Get(int index) {
 #if UNITY_EDITOR
-            return Objects[index].editorAsset;
+            if (!Application.isPlaying) {
+                return Objects[index].editorAsset;
+            }
 #endif
+            if (Objects[index].Asset == null) {
+                var op = Objects[index].LoadAssetAsync();
+                if (!op.IsDone) {
+                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
+                    op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
+                }
+                else {
+                    return op.Result;
+                }
+            }
             return Objects[index].Asset as GameObject;
         }
 

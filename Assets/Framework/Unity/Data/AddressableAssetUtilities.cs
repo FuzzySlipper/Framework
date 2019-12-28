@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
-
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace PixelComrades {
     public static class AddressableAssetUtilities {}
@@ -87,6 +87,14 @@ namespace PixelComrades {
             }
             return false;
         }
+
+        public override void ReleaseAsset() {
+            if (Asset == null) {
+                return;
+            }
+            base.ReleaseAsset();
+        }
+        
 #if UNITY_EDITOR
         public override bool SetEditorAsset(UnityEngine.Object value) {
             if (value != null) {
