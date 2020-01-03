@@ -51,7 +51,7 @@ namespace PixelComrades {
             parseIndex++;
             for (int i = 0; i < Count; i++) {
                 if (strVal == GetNameAt(i) || strVal == GetIdAt(i)) {
-                    return ValueAt(i);
+                    return GetValueAt(i);
                 }
             }
             return _static.Parse(strVal, defValue);
@@ -293,7 +293,7 @@ namespace PixelComrades {
             return _names[_index];
         }
 
-        public static U ValueAt(int index) {
+        public static U GetValueAt(int index) {
             if (index >= 0 && index < Count) {
                 return _values[index];
             }
