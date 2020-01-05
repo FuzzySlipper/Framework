@@ -6,7 +6,7 @@ using UnityEditor;
 namespace PixelComrades {
     public static class CheckGameDataDependencies {
 
-        [MenuItem("Tools/Check GameData Dependencies #&g")]
+        [MenuItem("Tools/Check GameData Dependencies")]
         [MenuItem("Assets/Check GameData Dependencies", false, 50)]
         public static void CheckDependencies() {
             Object[] roots = new Object[Selection.objects.Length];
@@ -32,5 +32,11 @@ namespace PixelComrades {
                 Selection.objects = newSelection.ToArray();
             }
         }
+
+        [MenuItem("Tools/GameData Init")]
+        public static void GameDataInit() {
+            GameData.Init();
+        }
+
     }
 }
