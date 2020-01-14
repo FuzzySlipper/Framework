@@ -530,6 +530,8 @@ namespace PixelComrades {
             return index >= 0 && index < list.Count;
         }
 
+        public const float MaxDiceRoll = 100f;
+
         public static bool DiceRollSucess(this System.Random random, float chance) {
             if (chance < 1 && chance > 0) {
                 chance *= 100;

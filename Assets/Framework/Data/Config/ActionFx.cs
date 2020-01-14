@@ -68,7 +68,6 @@ namespace PixelComrades {
                         AudioPool.PlayClip(_actionData[i].Sound, position, 0.5f);
                     }
                     if (_actionData[i].Particle.Animation == null) {
-                        
                         continue;
                     }
                     switch (_actionData[i].Event) {
