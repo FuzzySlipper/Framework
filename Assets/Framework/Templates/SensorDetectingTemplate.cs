@@ -8,6 +8,7 @@ namespace PixelComrades {
         private CachedComponent<GridPosition> _position = new CachedComponent<GridPosition>();
         private CachedComponent<SensorComponent> _sensor = new CachedComponent<SensorComponent>();
         private CachedComponent<TransformComponent> _tr = new CachedComponent<TransformComponent>();
+        
         public GridPosition Position { get => _position; }
         public SensorComponent Sensor { get => _sensor; }
         public TransformComponent Tr { get => _tr?.Value; }

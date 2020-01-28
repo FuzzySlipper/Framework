@@ -6,6 +6,7 @@ namespace PixelComrades {
     public interface ISimpleCam {
         void ResetPosition();
         void MoverUpdate();
+        void SetCameraMode(string mode);
         float PanUpDownAxis { get; set; }
     }
     public sealed class FreeCamera : MonoBehaviour, ISimpleCam {
@@ -36,7 +37,9 @@ namespace PixelComrades {
         private Vector3 _initPosition;
         private Vector3 _initRotation;
         private float _res = 1f;
-        
+        public void SetCameraMode(string mode) {
+        }
+
         public float PanUpDownAxis { get; set; }
         
         void Awake() {

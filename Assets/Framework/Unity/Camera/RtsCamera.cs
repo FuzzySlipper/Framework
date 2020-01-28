@@ -61,6 +61,7 @@ namespace PixelComrades {
         private GameObject _target;
         private MeshRenderer _targetRenderer;
         private Camera _camera;
+        private float _defaultRotateTilt;
 
         public Transform CameraTarget { get { return _target.transform; } }
         public bool IsFollowing { get { return FollowTarget != null; } }
@@ -73,6 +74,7 @@ namespace PixelComrades {
         }
 
         void Start() {
+            _defaultRotateTilt = Mathf.Max(_rotateSpeed, _tiltSpeed);
             _currTilt = transform.rotation.eulerAngles.x;
             _currRotation = transform.rotation.eulerAngles.y;
             _distance = _distanceRange.Clamp(_distance);
@@ -109,6 +111,19 @@ namespace PixelComrades {
 
         public void ResetPosition() {
             ResetToInitialValues(true, true);
+        }
+
+        public void SetCameraMode(string mode) {
+            switch (mode) {
+                case "Overhead":
+                    _camera.orthographic = true;
+                    _rotateSpeed = _tiltSpeed = 0;
+                    break;
+                default:
+                    _camera.orthographic = false;
+                    _rotateSpeed = _tiltSpeed = _defaultRotateTilt;
+                    break;
+            }
         }
 
         public void MoverUpdate() {

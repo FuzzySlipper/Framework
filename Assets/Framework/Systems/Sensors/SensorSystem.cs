@@ -162,6 +162,9 @@ namespace PixelComrades {
         //    simple.UpdateWatchTargets();
         //}
 
+        private Collider[] _shoutColliders = new Collider[40];
+        private const float ShoutRadius = 30f;
+        
         public void Handle(ReceivedDamageEvent arg) {
             var sensorTargets = arg.Target.Entity.Find<SensorTargetsComponent>();
 //#if DEBUG
@@ -170,6 +173,27 @@ namespace PixelComrades {
 //                arg.Origin?.Entity.ParentId + " is pooled " + arg.Origin?.Entity.Pooled);
 //#endif
             sensorTargets.AddWatch(arg.Origin, true);
+            if (sensorTargets.Shouted) {
+                return;
+            }
+            var sourceFaction = arg.Target.Faction.Faction;
+            var factionSystem = World.Get<FactionSystem>();
+            sensorTargets.Shouted = true;
+            var sourcePos = arg.Target.Tr.position;
+            var limit = Physics.OverlapSphereNonAlloc(sourcePos, ShoutRadius, _shoutColliders, LayerMasks.DefaultCollision);
+            for (int i = 0; i < limit; i++) {
+                var sensorTemplate = UnityToEntityBridge.GetEntity(_shoutColliders[i]).GetTemplate<UnitySensorTemplate>();
+                if (sensorTemplate == null) {
+                    continue;
+                }
+                if (!factionSystem.AreFriends(sourceFaction, sensorTemplate.Faction.Faction)) {
+                    continue;
+                }
+                if (Physics.Linecast(sourcePos, sensorTemplate.Tr.position, LayerMasks.Walls)) {
+                    continue;
+                }
+                sensorTemplate.Targets.AddWatch(arg.Origin, false);
+            }
         }
     }
 }

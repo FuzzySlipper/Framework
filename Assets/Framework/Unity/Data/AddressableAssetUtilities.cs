@@ -12,7 +12,7 @@ namespace PixelComrades {
     public class PrefabAssetReference : AssetReferenceT<GameObject> {
         public PrefabAssetReference(string guid) : base(guid) {}
     }
-    
+
     [Serializable]
     public class SpriteAssetReference : AssetReferenceT<Sprite> {
         public SpriteAssetReference(string guid) : base(guid) {}

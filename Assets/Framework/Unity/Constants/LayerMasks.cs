@@ -19,6 +19,7 @@ public static class LayerMasks  {
     public static int NumberCeiling = 21;
     public static int NumberWall = 22;
     public static int NumberFloor = 23;
+    public static int NumberWeapon = 24;
 
     private static LayerMask _default = 1 << 0;
     private static LayerMask _collision = 1 << NumberCollision;

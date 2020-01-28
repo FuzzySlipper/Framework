@@ -33,6 +33,11 @@ namespace PixelComrades {
             if (arg.Amount <= 0) {
                 return;
             }
+            if (arg.Target.AnimGraph.TryGetVariable<float>(GraphVariables.PainChance, out var painChance)) {
+                if (!Game.DiceRollSuccess(painChance)) {
+                    return;
+                }
+            }
             arg.Target.AnimGraph.TriggerGlobal(GraphTriggers.GetHit);
         }
     }

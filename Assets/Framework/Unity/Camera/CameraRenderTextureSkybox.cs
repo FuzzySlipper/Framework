@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public class CameraSkybox : MonoBehaviour {
+    public class CameraRenderTextureSkybox : MonoBehaviour {
 
         [SerializeField] private RenderTexture _rt = null;
         [SerializeField] private LayerMask _bgLayerMask = new LayerMask();

@@ -75,6 +75,15 @@ namespace PixelComrades {
             return default(T);
         }
 
+        public bool TryGetVariable<T>(string key, out T targetVariable) {
+            if (Variables.TryGetValue(key, out var variable) && variable is T targetType) {
+                targetVariable = targetType;
+                return true;
+            }
+            targetVariable = default(T);
+            return false;
+        }
+
         public void SetVariable<T>(string key, T value) {
             if (Variables.ContainsKey(key)) {
                 Variables[key] = value;

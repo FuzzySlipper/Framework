@@ -76,17 +76,6 @@ namespace PixelComrades {
             return true;
         }
 
-        [MenuItem("Assets/Create/Simple Animation From Sprite", false, -100)]
-        public static void CreateSimpleAnimation() {
-            
-            for (int i = 0; i < Selection.objects.Length; i++) {
-                var texture = Selection.objects[i] as Texture2D;
-                if (texture != null) {
-                    CreateSimpleAnimation(texture);
-                }
-            }
-        }
-
         [MenuItem("GameObject/Delete Children", true, -15)]
         public static bool DeleteChildren_Validator() {
             if (Selection.activeGameObject == null || Selection.gameObjects == null || Selection.gameObjects.Length == 0) {
@@ -113,6 +102,16 @@ namespace PixelComrades {
             }
         }
 
+        [MenuItem("Assets/Create/Simple Animation From Sprite", false, -100)]
+        public static void CreateSimpleAnimation() {
+
+            for (int i = 0; i < Selection.objects.Length; i++) {
+                var texture = Selection.objects[i] as Texture2D;
+                if (texture != null) {
+                    CreateSimpleAnimation(texture);
+                }
+            }
+        }
         private static void CreateSimpleAnimation(Texture2D texture) {
             if (texture == null) {
                 return;
@@ -146,5 +145,91 @@ namespace PixelComrades {
             AssetDatabase.SaveAssets();
             return scriptableObject;
         }
+        //
+        // [MenuItem("Assets/Create/Convert Directional Sprite To Animation", false, -100)]
+        // public static void ConvertDirectionalSpriteToAnimation() {
+        //     for (int i = 0; i < Selection.objects.Length; i++) {
+        //         var sprite = Selection.objects[i] as DirectionalSprite;
+        //         if (sprite != null) {
+        //             CreateDirectionalAnimation(sprite);
+        //         }
+        //     }
+        // }
+        //
+        // [MenuItem("Assets/Create/Convert Directional Sprite To Animation", true, -100)]
+        // public static bool ConvertDirectionalSpriteToAnimation_Validator() {
+        //     if (Selection.objects == null || Selection.objects.Length == 0) {
+        //         return false;
+        //     }
+        //     var sprite = Selection.objects[0] as DirectionalSprite;
+        //     if (sprite == null) {
+        //         return false;
+        //     }
+        //     return true;
+        // }
+        //
+        // private static void CreateDirectionalAnimation(DirectionalSprite sprite) {
+        //     if (sprite == null) {
+        //         return;
+        //     }
+        //     var texturePath = AssetDatabase.GetAssetPath(sprite.Frames[0].Frame.texture);
+        //     Sprite[] allSprites = AssetDatabase.LoadAllAssetsAtPath(texturePath).OfType<Sprite>().ToArray();
+        //     if (allSprites.Length == 0) {
+        //         return;
+        //     }
+        //     Sprite[] animSprites = new Sprite[allSprites.Length];
+        //     for (int i = 0; i < allSprites.Length; i++) {
+        //         animSprites[i] = allSprites[i];
+        //     }
+        //     var path = (texturePath.Remove(texturePath.Length - 3));
+        //     var holder = CreateAnimationHolder(path);
+        //     holder.Frames = new AnimationFrame[allSprites.Length];
+        //     for (var i = 0; i < allSprites.Length; i++) {
+        //         holder.Frames[i] = new AnimationFrame {
+        //             Length = 1,
+        //         };
+        //     }
+        //     AssetDatabase.SaveAssets();
+        //     AssetDatabase.Refresh();
+        //     holder.Sprites = allSprites;
+        //     EditorUtility.SetDirty(holder);
+        // }
+        //
+        // private DirectionalAnimation CreateDirectionalAnimation(string spritePath, CaptureJob job, SpriteCaptureSequence sequence) {
+        //     var allSprites = AssetDatabase.LoadAllAssetsAtPath(spritePath).OfType<Sprite>().ToArray();
+        //     if (allSprites.Length == 0) {
+        //         Debug.LogError("no anim sprite");
+        //         return null;
+        //     }
+        //     var anim = CreateAnimationHolder(job.SheetName + "_" + sequence.name, job, sequence);
+        //     anim.Sprites = allSprites;
+        //     for (int r = 0; r < job.Records.Length; r++) {
+        //         var record = job.Records[r];
+        //         var facing = anim.GetFacing((DirectionsEight) record.Side);
+        //         facing.FrameIndices[record.Source.AnimationIndex] = r;
+        //     }
+        //     SpriteMeshUtilities.GenerateColliders(anim, _distance, _quality);
+        //     EditorUtility.SetDirty(anim);
+        //     AssetDatabase.SaveAssets();
+        //     AssetDatabase.Refresh();
+        //     return anim;
+        // }
+        //
+        // private static DirectionalAnimation CreateAnimationHolder(string pathName, DirectionalSprite sprite) {
+        //     var dirAnim = ScriptableObject.CreateInstance<DirectionalAnimation>();
+        //     AssetDatabase.CreateAsset(dirAnim, pathName);
+        //     AssetDatabase.SaveAssets();
+        //     dirAnim.NormalMap = sprite.NormalMap;
+        //     dirAnim.EmissiveMap = sprite.EmissiveMap;
+        //     dirAnim.Frames = sequence.BuildFrameArray();
+        //     for (int i = 0; i < SpriteFacingControl.SideLength; i++) {
+        //         var side = (DirectionsEight) i;
+        //         if (!sequence.ValidSide(side)) {
+        //             continue;
+        //         }
+        //         dirAnim.DirectionalFrames.Add(new DirectionalFrames(side, dirAnim.Frames.Length));
+        //     }
+        //     return dirAnim;
+        // }
     }
 }

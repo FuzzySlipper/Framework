@@ -11,6 +11,7 @@ namespace PixelComrades {
         public int MaxUpdatesNoContact = 150;
         public List<WatchTarget> WatchTargets = new List<WatchTarget>();
         public int Faction;
+        public bool Shouted = false;
 
         public SensorTargetsComponent(int faction) {
             Faction = faction;

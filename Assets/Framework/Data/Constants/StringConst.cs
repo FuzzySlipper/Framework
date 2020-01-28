@@ -178,7 +178,8 @@ namespace PixelComrades {
         public const string IsMoving = "IsMoving";
         public const string Equipment = "Equipment";
         public const string WeaponModel = "WeaponModel";
-
+        public const string PainChance = "PainChance";
+        
         public override string Parse(string value, string defaultValue) {
             return value;
         }

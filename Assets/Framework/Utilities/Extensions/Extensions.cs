@@ -102,7 +102,69 @@ namespace PixelComrades {
             return (int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
         }
     }
+    
+    [System.Serializable]
+    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetReferenceT<TV> {
+        public List<T> Objects = new List<T>();
+        public AnimationCurve Curve = new AnimationCurve();
 
+        public void Load() {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                return;
+            }
+#endif
+            for (int i = 0; i < Objects.Count; i++) {
+                Objects[i].LoadAssetAsync();
+            }
+        }
+
+        public void Unload() {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                return;
+            }
+#endif
+            for (int i = 0; i < Objects.Count; i++) {
+                Objects[i].ReleaseAsset();
+            }
+        }
+
+        public TV Get(int index) {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                return Objects[index].editorAsset;
+            }
+#endif
+            if (Objects[index].Asset == null) {
+                var op = Objects[index].LoadAssetAsync();
+                if (!op.IsDone) {
+                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
+                    op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
+                }
+                else {
+                    return op.Result;
+                }
+            }
+            return Objects[index].Asset as TV;
+        }
+
+        public TV Get() {
+            if (Objects.Count == 0) {
+                return null;
+            }
+            if (Objects.Count == 1) {
+                return Get(0);
+            }
+            //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
+            return Get((int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
+        }
+
+        public int GetIndex() {
+            return (int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
+        }
+    }
+    
     [System.Serializable]
     public class RandomObjectHolder {
         public List<PrefabAssetReference> Objects = new List<PrefabAssetReference>();

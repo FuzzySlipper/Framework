@@ -15,7 +15,7 @@ namespace PixelComrades {
         public static int ShaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
         public static int ShaderPropertyEmissivePower = Shader.PropertyToID("_EmissionPower");
         public static string MaterialAddress = "SpriteNpcInstanced.mat";
-        public static int RenderLayer = LayerMasks.NumberEnemy;
+        public static int RenderLayer = LayerMasks.NumberWeapon;
         
         private TemplateList<SpriteRendererTemplate> _rendererList;
         private ManagedArray<SpriteRendererTemplate>.RefDelegate _rendererDel;
