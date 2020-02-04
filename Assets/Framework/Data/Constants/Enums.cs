@@ -101,4 +101,11 @@ namespace PixelComrades {
         Top = 8,
         Bottom = 9,
     }
+
+    public enum CornerDirections {
+        NorthWest = 0,
+        NorthEast = 1,
+        SouthEast = 2,
+        SouthWest = 3
+    }
 }

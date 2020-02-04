@@ -348,7 +348,7 @@ namespace PixelComrades {
                     var cell = enumerator.Current.Value;
                     bool isBorder = false;
                     for (int i = 0; i < DirectionsExtensions.DiagonalLength; i++) {
-                        var pos = enumerator.Current.Key + ((DirectionsEight) i).ToP3();
+                        var pos = enumerator.Current.Key + ((DirectionsEight) i).ToPoint3();
                         if (!_cells.TryGetValue(pos, out var neighbor)) {
                             isBorder = true;
                             break;

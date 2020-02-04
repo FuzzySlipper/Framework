@@ -1797,6 +1797,20 @@ namespace PixelComrades {
             }
         }
 
+        public static Directions[] GetWallDirections(this CornerDirections cornerDirection) {
+            switch (cornerDirection) {
+                default:
+                case CornerDirections.NorthWest:
+                    return new[] {Directions.Left, Directions.Forward};
+                case CornerDirections.NorthEast:
+                    return new[] {Directions.Forward, Directions.Right};
+                case CornerDirections.SouthEast:
+                    return new[] {Directions.Right, Directions.Back};
+                case CornerDirections.SouthWest:
+                    return new[] {Directions.Back, Directions.Left};
+            }
+        }
+
         private static DirectionsEight[][] _adjacent = new DirectionsEight[8][] {
             new [] {DirectionsEight.FrontLeft, DirectionsEight.FrontRight},
             new [] {DirectionsEight.Front, DirectionsEight.Right},
@@ -2219,7 +2233,7 @@ namespace PixelComrades {
             new Point3(0, 1, 0), new Point3(0, -1, 0)
         };
 
-        public static Point3 ToP3(this DirectionsEight dir) {
+        public static Point3 ToPoint3(this DirectionsEight dir) {
             return _diagonalPosition[(int) dir];
         }
 

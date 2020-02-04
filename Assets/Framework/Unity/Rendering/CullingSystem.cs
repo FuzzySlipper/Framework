@@ -72,7 +72,7 @@ namespace PixelComrades {
             CurrentList.Clear();
             CurrentList.Add(_playerPosition);
             for (int i = 0; i < DirectionsExtensions.DiagonalLength; i++) {
-                var pos = _playerPosition + ((DirectionsEight) i).ToP3();
+                var pos = _playerPosition + ((DirectionsEight) i).ToPoint3();
                 CurrentList.Add(pos);
             }
             SetList(true);

@@ -182,7 +182,7 @@ namespace PixelComrades {
                 return PathfindingResult.Redirected;
             }
             for (int i = 0; i < DirectionsExtensions.DiagonalLength; i++) {
-                var pos = endPos + ((DirectionsEight) i).ToP3();
+                var pos = endPos + ((DirectionsEight) i).ToPoint3();
                 if (!_keyedDict.TryGetValue(pos, out var node)) {
                     continue;
                 }

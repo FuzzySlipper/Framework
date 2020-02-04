@@ -221,7 +221,7 @@ namespace PixelComrades {
             public List<Vector4> Colors = new List<Vector4>();
             public Material Material;
             public Mesh Quad;
-            public  MaterialPropertyBlock MaterialPropertyBlock;
+            public MaterialPropertyBlock MaterialPropertyBlock;
 
 
             public void Clear() {
