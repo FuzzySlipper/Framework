@@ -1,2 +1,2 @@
 # Framework
-This is an attempt to make a standalone repo of the more generic parts of our rpg framework
+This is a standalone repo of the more generic parts of our rpg framework. It is a custom Entity Component System (unrelated to Unity's new ECS) with controlled access to Unity features. Whenever possible it avoids Unity closed components (colliders, transforms, mesh renderers, etc) to use custom ECS components so they can better integrate with the rest of the framework and be directly controlled.
