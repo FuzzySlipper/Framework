@@ -1656,6 +1656,47 @@ namespace PixelComrades {
 
     }
 
+    public static class CornerDirectionsExtensions {
+
+        public static void GetAdjacentCorners(this Directions direction, out CornerDirections dir01, out CornerDirections dir02) {
+            switch (direction) {
+                default:
+                case Directions.Forward:
+                    dir01 = CornerDirections.NorthWest;
+                    dir02 = CornerDirections.NorthEast;
+                    break;
+                case Directions.Right:
+                    dir01 = CornerDirections.NorthEast;
+                    dir02 = CornerDirections.SouthEast;
+                    break;
+                case Directions.Back:
+                    dir01 = CornerDirections.SouthEast;
+                    dir02 = CornerDirections.SouthWest;
+                    break;
+                case Directions.Left:
+                    dir01 = CornerDirections.SouthWest;
+                    dir02 = CornerDirections.NorthWest;
+                    break;
+            }
+        }
+
+        public static Vector3 GetCornerPositionV3(this CornerDirections diagonalDirection) {
+            switch (diagonalDirection) {
+                case CornerDirections.NorthWest:
+                    return Vector3.forward + Vector3.left;
+                case CornerDirections.NorthEast:
+                    return Vector3.forward + Vector3.right;
+                case CornerDirections.SouthEast:
+                    return Vector3.back + Vector3.right;
+                case CornerDirections.SouthWest:
+                    return Vector3.back + Vector3.left;
+                default:
+                    return Vector3.zero;
+            }
+        }
+
+    }
+
     public static class DirectionsExtensions {
         public static Directions OppositeDir(this Directions dir) {
             switch (dir) {
@@ -1808,6 +1849,20 @@ namespace PixelComrades {
                     return new[] {Directions.Right, Directions.Back};
                 case CornerDirections.SouthWest:
                     return new[] {Directions.Back, Directions.Left};
+            }
+        }
+
+        public static CornerDirections OppositeDir(this CornerDirections cornerDirection) {
+            switch (cornerDirection) {
+                default:
+                case CornerDirections.NorthWest:
+                    return CornerDirections.SouthEast;
+                case CornerDirections.NorthEast:
+                    return CornerDirections.SouthWest;
+                case CornerDirections.SouthEast:
+                    return CornerDirections.NorthWest;
+                case CornerDirections.SouthWest:
+                    return CornerDirections.NorthEast;
             }
         }
 
