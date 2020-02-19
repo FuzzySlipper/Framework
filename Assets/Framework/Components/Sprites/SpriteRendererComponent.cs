@@ -76,6 +76,7 @@ namespace PixelComrades {
             Normal = normal;
             Emissive = emissive;
             SavedCollider = spriteCollider;
+            SetRendering(RenderingMode.Normal);
         }
 
         public void UpdatedSprite() {

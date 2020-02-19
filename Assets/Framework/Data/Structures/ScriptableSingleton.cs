@@ -7,7 +7,8 @@ using UnityEditor;
 namespace PixelComrades {
     public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
 
-        private const string FullDirectory = UnityDirs.EditorFolder;
+        public const string EditorFolder = "Assets/GameData/Resources/";
+        private const string FullDirectory = EditorFolder;
 
         private static T _main;
         private static object _lock = new object();

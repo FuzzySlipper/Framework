@@ -37,10 +37,10 @@ namespace PixelComrades {
         public const string AudioDefaultItemReturn = "Sounds/DefaultItemReturn";
 
         public const string TimeUnits = "seconds";
+        public const string FileExtension = ".json";
     }
 
     public static partial class UnityDirs {
-        public const string EditorFolder = "Assets/GameData/Resources/";
         public const string ActionFx = "Assets/GameData/ActionFx/";
         public const string Particles = "Assets/GameData/Particles/";
         public const string ItemIcons = "Assets/GameData/Icons/Items/";

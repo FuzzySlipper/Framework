@@ -129,7 +129,6 @@ namespace PixelComrades {
             //var path = string.Format("{0}{1}.{2}", UnityDirs.EditorFolder, location, AssetTypeExtensions.GetExtensionFromType<T>());
             //return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
             if (!Application.isPlaying) {
-                _stringBuilder.Append(UnityDirs.EditorFolder);
                 _stringBuilder.Append(dir);
                 _stringBuilder.Append(file);
                 _stringBuilder.Append(AssetTypeExtensions.GetExtensionFromType<T>());

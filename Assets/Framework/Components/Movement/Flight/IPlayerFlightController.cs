@@ -4,12 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface IPlayerFlightController {
-        void SetStatus(bool status);
         void NewGame();
+        void SetStatus(bool status);
         Transform Tr { get;}
-        Rigidbody Rb { get;}
         Entity Entity { get;}
-        void SetDefaultMode();
         void SetMode(FlightControl.Mode mode);
         float Thrust { get;}
     }
