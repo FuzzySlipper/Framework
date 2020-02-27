@@ -3,7 +3,7 @@ using System.Collections;
 
 public class WhileLoopLimiter {
 
-    public static WhileLoopLimiter Instance = new WhileLoopLimiter(5500);
+    public static WhileLoopLimiter Instance = new WhileLoopLimiter(8500);
 
     public static void ResetInstance() {
         Instance.Reset();

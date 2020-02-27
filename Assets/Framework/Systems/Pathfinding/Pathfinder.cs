@@ -19,7 +19,7 @@ namespace PixelComrades {
             public float StartCost = float.MaxValue; //G
             public float EndCost = float.MaxValue; // H
 
-            public float TotalCost { get { return StartCost + EndCost; } } //F
+            public virtual float TotalCost { get { return StartCost + EndCost; } } //F
 
             //public virtual float GetTravelCost(int travelAxis, float amt, PathNode parent) {
             //    return amt;
@@ -81,7 +81,7 @@ namespace PixelComrades {
         protected abstract T CreateNode(TV key);
         protected abstract bool CheckWalkable(TV pos, TV neighborPos);
         protected abstract IList<TV> GetSurrounding(PathNode<TV> centerNode);
-
+        protected virtual bool IgnoreEndWalkable { get { return true; } }
         public abstract List<TV> GetPathTrace(T endNode, List<TV> existing);
 
         public virtual T FindPath() {
@@ -108,22 +108,28 @@ namespace PixelComrades {
                     if (ClosedSet.Contains(neighborPos)) {
                         continue;
                     }
+                    if (!CheckWalkable(centerNode.Value, neighborPos)) {
+                        continue;
+                    }
                     var neighbor = Get(neighborPos);
                     if (neighbor == null) {
-                        if (CheckWalkable(centerNode.Value, neighborPos)) {
+                        //if (CheckWalkable(centerNode.Value, neighborPos)) {
                             neighbor = CreateNode(neighborPos);
-                        }
-                        else {
-                            ClosedSet.Add(neighborPos);
-                        }
+                        //}
+                        // else {
+                        //     ClosedSet.Add(neighborPos);
+                        // }
                     }
                     if (neighborPos.Equals(End)) {
                         if (neighbor != null) {
                             neighbor.Parent = centerNode;
                             return neighbor;
                         }
-                        return centerNode;
+                        if (IgnoreEndWalkable) {
+                            return centerNode;
+                        }
                     }
+                    
                     if (neighbor == null) {
                         continue;
                     }

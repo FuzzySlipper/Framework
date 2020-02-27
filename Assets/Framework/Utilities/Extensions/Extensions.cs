@@ -503,8 +503,16 @@ namespace PixelComrades {
             return random.NextFloat(0, 1);
         }
 
+        public static float value(this Random random) {
+            return random.NextFloat(0, 1);
+        }
+
         public static float NextFloat(this Random random, double minValue, double maxValue) {
             return (float) (random.NextDouble() * (maxValue - minValue) + minValue);
+        }
+
+        public static float Range(this Random random, float min, float max) {
+            return random.NextFloat(min, max);
         }
 
         public static int Range(this Random random, int min, int max) {
