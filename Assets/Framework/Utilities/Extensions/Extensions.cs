@@ -139,8 +139,8 @@ namespace PixelComrades {
             if (Objects[index].Asset == null) {
                 var op = Objects[index].LoadAssetAsync();
                 if (!op.IsDone) {
-                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
-                    op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
+                    //Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
+                    //op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
                 }
                 else {
                     return op.Result;
@@ -164,6 +164,9 @@ namespace PixelComrades {
             return (int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
         }
     }
+
+    [System.Serializable]
+    public class SpriteAssetHolder : GenericAssetHolder<SpriteAssetReference, Sprite> { }
     
     [System.Serializable]
     public class RandomObjectHolder {
