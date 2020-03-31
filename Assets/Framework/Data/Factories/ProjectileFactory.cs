@@ -4,24 +4,102 @@ using System.Collections.Generic;
 using UnityEditorInternal;
 
 namespace PixelComrades {
-    public class ProjectileSystem : SystemBase, IEntityFactory {
+    public class ProjectileFactory : ScriptableSingleton<ProjectileFactory>, IEntityFactory {
+        private class ProjectileLoader : LoadOperationEvent {
+            private Entity _entity;
+            private Vector3 _target;
+            private Vector3 _spawnPos;
+            private Quaternion _spawnRot;
+            private ActionFx _actionFx;
+            private ProjectileConfig _config;
+
+            public void Set(ProjectileConfig config, Entity entity, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx actionFx) {
+                _config = config;
+                _entity = entity;
+                _target = target;
+                _spawnPos = spawnPos;
+                _spawnRot = spawnRot;
+                _actionFx = actionFx;
+            }
+
+            public override void OnComplete() {
+                NewPrefab.transform.SetPositionAndRotation(_spawnPos, _spawnRot);
+                var spawn = NewPrefab.GetComponent<IProjectile>();
+                _entity.Add(new TransformComponent(NewPrefab.Transform));
+                var template = _entity.GetTemplate<ProjectileTemplate>();
+                template.MoveTarget.SetMoveTarget(_target);
+                if (_config.ActionFx != null) {
+                    template.ActionFx.ChangeFx(_config.ActionFx);
+                }
+                if (_actionFx != null) {
+                    if (template.ActionFx != null) {
+                        template.ActionFx.ChangeFx(_actionFx);
+                    }
+                    else {
+                        _entity.Add(new ActionFxComponent(_actionFx));
+                    }
+                }
+                switch (_config.Type) {
+                    default:
+                    case ProjectileType.Simple:
+                        break;
+                    case ProjectileType.SpriteAnimation:
+                        spawn.SetColor(_config.MainColor, Color.white * _config.GlowPower);
+                        if (_config.Animation != null) {
+                            var spriteRenderer = NewPrefab.Renderers[0] as SpriteRenderer;
+                            _entity.Add(new SpriteAnimationComponent(spriteRenderer, (SpriteAnimation) _config.Animation.Asset, false, _config
+                            .Billboard));
+                        }
+                        break;
+                    case ProjectileType.VolumeLaser:
+                        spawn.SetColor(_config.MainColor, _config.OffsetColor);
+                        break;
+                }
+                switch (_config.Movement) {
+                    case ProjectileMovement.Arc:
+                    case ProjectileMovement.Forward:
+                        template.CollisionCheckForward.LastPos = null;
+                        NewPrefab.Transform.LookAt(_target, NewPrefab.Transform.up);
+                        break;
+                    case ProjectileMovement.Force:
+                        //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
+                        break;
+                }
+                spawn.SetSize(_config.Size, _config.Length);
+                if (spawn.Rigidbody != null) {
+                    template.Rb.SetRb(spawn.Rigidbody);
+                }
+                _entity.Tags.Add(EntityTags.Moving);
+                template.Rendering.Set(spawn);
+                UnityToEntityBridge.RegisterToEntity(NewPrefab.Transform.gameObject, _entity);
+                _entity.Post(new ProjectileSpawned(_config, _entity));
+                Clear();
+            }
+
+            private void Clear() {
+                SourcePrefab = null;
+                NewPrefab = null;
+                _entity = null;
+                _actionFx = null;
+                _loadPool.Store(this);
+            }
+        }
         
         private static GameOptions.CachedFloat _defaultTimeout = new GameOptions.CachedFloat("ProjectileTimeout");
         private static GameOptions.CachedFloat _defaultSpeed = new GameOptions.CachedFloat("ProjectileSpeed");
         private static GameOptions.CachedFloat _defaultRotation = new GameOptions.CachedFloat("ProjectileRotation");
-        private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePool");
         private static Dictionary<string, ProjectileConfig> _configs = new Dictionary<string, ProjectileConfig>();
+        private static GenericPool<ProjectileLoader> _loadPool = new GenericPool<ProjectileLoader>(2);
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
-
-        public ProjectileSystem() {
-            TemplateFilter<ProjectileTemplate>.Setup();
-        }
+        
+        [SerializeField] private ProjectileConfig[] _allItems = new ProjectileConfig[0];
 
         private static void Init() {
             GameData.AddInit(Init);
-            foreach (var loadedDataEntry in GameData.GetSheet("ActionSpawn")) {
-                var data = loadedDataEntry.Value;
-                _configs.AddOrUpdate(data.ID, new ProjectileConfig(data));
+            _configs.Clear();
+            for (int i = 0; i < Main._allItems.Length; i++) {
+                var data = Main._allItems[i];
+                _configs.Add(data.ID, data);
             }
         }
 
@@ -46,8 +124,10 @@ namespace PixelComrades {
             //entity.Destroy();
             return false;
         }
+        
 
-        public Entity SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot) {
+        public static void SpawnProjectile(Entity owner, string id, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx 
+        actionFx = null) {
             if (_configs.Count == 0) {
                 Init();
             }
@@ -55,55 +135,16 @@ namespace PixelComrades {
 #if DEBUG
                 DebugLog.Add("Couldn't find project config " + id, false);
 #endif
-                return null;
+                return;
             }
-            var entity = GetProjectile(config);
-            var template = entity.GetTemplate<ProjectileTemplate>();
-            template.MoveTarget.SetMoveTarget(target);
-            if (config.ActionFx != null) {
-                template.ActionFx.ChangeFx(config.ActionFx);
-            }
-            var prefab = ItemPool.Spawn(UnityDirs.ActionSpawn, config.Type, spawnPos, spawnRot);
-            if (prefab == null) {
-                return entity;
-            }
-            var spawn = prefab.GetComponent<IProjectile>();
-            entity.Add(new TransformComponent(prefab.Transform));
-            switch (config.Type) {
-                default:
-                case "Simple":
-                    break;
-                case "SpriteAnimation":
-                    spawn.SetColor(config.MainColor, Color.white * config.GlowPower);
-                    if (config.Animation != null) {
-                        var spriteRenderer = prefab.Renderers[0] as SpriteRenderer;
-                        entity.Add(new SpriteAnimationComponent(spriteRenderer, config.Animation, false, config.Billboard));
-                    }
-                    break;
-                case "VolumeLaser":
-                    spawn.SetColor(config.MainColor, config.OffsetColor);
-                    break;
-            }
-            spawn.SetSize(config.Size, config.Length);
-            switch (config.Movement) {
-                case "Forward":
-                case "Arc":
-                    template.CollisionCheckForward.LastPos = null;
-                    prefab.Transform.LookAt(target, prefab.Transform.up);
-                    break;
-                case "Force":
-                    //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
-                    break;
-            }
-            if (spawn.Rigidbody != null) {
-                template.Rb.SetRb(spawn.Rigidbody);
-            }
-            entity.Tags.Add(EntityTags.Moving);
-            template.Rendering.Set(spawn);
-            UnityToEntityBridge.RegisterToEntity(prefab.Transform.gameObject, entity);
+            var entity = Main.GetProjectile(config);
             entity.ParentId = owner.Id;
-            entity.Post(new ProjectileSpawned(config, entity));
-            return entity;
+            var projectileEvent = _loadPool.New();
+            if (config.Type == ProjectileType.SpriteAnimation && !config.Animation.RuntimeKeyIsValid()) {
+                config.Animation.LoadAssetAsync();
+            }
+            projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
+            ItemPool.Spawn(projectileEvent);
         }
 
         private Entity GetProjectile(ProjectileConfig data) {
@@ -125,20 +166,20 @@ namespace PixelComrades {
             entity.Add(new TypeId(data.ID));
             switch (data.Type) {
                 default:
-                case "Simple":
+                case ProjectileType.Simple:
                     break;
-                case "SpriteAnimation":
+                case ProjectileType.SpriteAnimation:
                     entity.Add(new CollisionCheckForward(data.CollisionDistance));
                     break;
-                case "VolumeLaser":
+                case ProjectileType.VolumeLaser:
                     entity.Add(new CollisionCheckForward(data.CollisionDistance));
                     break;
             }
             switch (data.Movement) {
-                case "Forward":
+                case ProjectileMovement.Forward:
                     entity.Add(new ForwardMover());
                     break;
-                case "Arc":
+                case ProjectileMovement. Arc:
                     entity.Add(new ArcMover());
                     break;
             }
@@ -149,13 +190,10 @@ namespace PixelComrades {
                 entity.Add(new ActionFxComponent(data.ActionFx));
                 if (data.ActionFx.TryGetColor(out var actionColor)) {
                     entity.Add(new HitParticlesComponent(actionColor));
-                }
+                }  
             }
             if (data.TrailAmount > 0) {
                 entity.Add(new ParticleTrailComponent(data.TrailAmount, data.TrailFrequency, data.TrailColor, ParticleGravityStatus.Default));
-            }
-            if (data.Components != null) {
-                World.Get<DataFactory>().AddComponentList(entity, data.Data, data.Components);
             }
             return entity;
         }
@@ -210,80 +248,19 @@ namespace PixelComrades {
                 };
             }
         }
+    }
 
-        public class ProjectileConfig {
-            public DataEntry Data;
-            public string ID;
-            public string Type;
-            public string Movement;
-            public float Speed;
-            public float Rotation;
-            public float CollisionDistance;
-            public float Size;
-            public float Length;
-            public float Timeout;
-            public string Prefab;
-            public ActionFx ActionFx;
-            public SpriteAnimation Animation;
-            public ImpactRadiusTypes Radius;
-            public BillboardMode Billboard;
-            public Color MainColor;
-            public Color OffsetColor;
-            public float GlowPower;
-            public int PoolSize;
-            public DataList Components;
-            public int TrailAmount;
-            public float TrailFrequency;
-            public Color TrailColor;
-
-            public ProjectileConfig(DataEntry data) {
-                Data = data;
-                ID = data.ID;
-                Type = data.TryGetValue("Type", data.ID);
-                Movement = data.TryGetValue("Movement", "Simple");
-                Speed = data.TryGetValue("Speed", 0f);
-                Rotation = data.TryGetValue("Rotation", 0f);
-                CollisionDistance = data.TryGetValue("CollisionDistance", 0.25f);
-                Size = data.TryGetValue("Size", 0f);
-                Length = data.TryGetValue("Length", 0f);
-                Timeout = data.TryGetValue(DatabaseFields.Timeout, _defaultTimeout.Value);
-                GlowPower = data.TryGetValue("GlowPower", 0f);
-                TrailAmount = data.TryGetValue("TrailAmount", 0);
-                TrailFrequency = data.TryGetValue("TrailFrequency", 0f);
-                TrailColor = data.TryGetValue("TrailColor", Color.black);
-                Radius = ParseUtilities.TryParseEnum(data.GetValue<string>("Radius"), ImpactRadiusTypes.Single);
-                Billboard = ParseUtilities.TryParseEnum(data.GetValue<string>("Billboard"), BillboardMode.FaceCamYDiff);
-                MainColor = data.TryGetValue("MainColor", Color.white);
-                OffsetColor = data.TryGetValue("OffsetColor", Color.white);
-                PoolSize = data.TryGetValue("PoolSize", _defaultPool);
-                var afx = data.GetValue<string>(DatabaseFields.ActionFx);
-                if (!string.IsNullOrEmpty(afx)) {
-                    ActionFx = ItemPool.LoadAsset<ActionFx>(UnityDirs.ActionFx, afx);
-                }
-                var model = data.GetValue<string>(DatabaseFields.Model);
-                switch (Type) {
-                    default:
-                    case "Simple":
-                        break;
-                    case "SpherePhysics":
-                        if (!string.IsNullOrEmpty(model)) {
-                            Animation = ItemPool.LoadAsset<SpriteAnimation>(UnityDirs.ActionSpawn, model);
-                        }
-                        break;
-                    case "VolumeLaser":
-                        Prefab = model;
-                        break;
-                }
-                Components = data.Get(DatabaseFields.Components) as DataList;
-            }
-        }
+    public enum ProjectileType {
+        Simple,
+        SpriteAnimation,
+        VolumeLaser
     }
 
     public struct ProjectileSpawned : IEntityMessage {
-        public ProjectileSystem.ProjectileConfig Config;
+        public ProjectileConfig Config;
         public Entity Entity;
 
-        public ProjectileSpawned(ProjectileSystem.ProjectileConfig config, Entity entity) {
+        public ProjectileSpawned(ProjectileConfig config, Entity entity) {
             Config = config;
             Entity = entity;
         }

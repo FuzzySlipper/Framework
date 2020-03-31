@@ -18,7 +18,7 @@ namespace PixelComrades {
         }
 
         public string ToDescription() {
-            return string.Format("{0:F0} {1}", Amount, GameData.DamageTypes.GetNameAt(DamageType));
+            return string.Format("{0:F0} {1}", Defenses.GetNameAt(DamageType));
         }
     }
     

@@ -14,7 +14,7 @@ namespace PixelComrades {
             var stats = context.Target.Stats;
             var vital = stats.GetVital(context.TargetVital);
             if (vital == null) {
-                vital = stats.GetVital(GameData.Vitals.GetID(context.TargetVital));
+                vital = stats.GetVital(context.TargetVital);
             }
             if (vital != null) {
                 vital.Current += context.Amount;

@@ -49,12 +49,12 @@ namespace PixelComrades {
         }
 
         public override bool CanAct(Entity owner, Entity action) {
-            var stat = owner.FindStat<VitalStat>(GameData.Vitals.GetID(TargetVital));
+            var stat = owner.FindStat<VitalStat>(TargetVital);
             if (stat != null && stat.Current >= VitalAmount) {
                 return true;
             }
             //entity.Get<StatusUpdateComponent>(e => e.Status = string.Format("Not enough {0}", Vitals.GetDescriptionAt(TargetVital)));
-            owner.PostAll(new StatusUpdate(owner, "Not enough " + GameData.Vitals.GetNameAt(TargetVital)));
+            owner.PostAll(new StatusUpdate(owner, "Not enough " + Vitals.GetNameAt(TargetVital)));
             return false;
         }
     }

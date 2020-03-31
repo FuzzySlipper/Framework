@@ -105,7 +105,7 @@ namespace PixelComrades {
                 var stats = target.Stats;
                 var vital = stats.GetVital(dmg.TargetVital);
                 if (vital == null) {
-                    vital = stats.GetVital(GameData.Vitals.GetID(dmg.TargetVital));
+                    vital = stats.GetVital(dmg.TargetVital);
                 }
                 if (vital != null) {
                     dmgHoverMsg.Append(vital.ToLabelString());

@@ -14,8 +14,15 @@ namespace PixelComrades {
     }
 
     [Serializable]
-    public class SpriteAssetReference : AssetReferenceT<Sprite> {
-        public SpriteAssetReference(string guid) : base(guid) {}
+    public class PrefabEntityReference : AssetReferenceT<PrefabEntity> {
+        public PrefabEntityReference(string guid) : base(guid) {
+        }
+    }
+
+    [Serializable]
+    public class AudioClipAssetReference : AssetReferenceT<AudioClip> {
+        public AudioClipAssetReference(string guid) : base(guid) {
+        }
     }
 
     [Serializable]
@@ -25,8 +32,16 @@ namespace PixelComrades {
     }
 
     [Serializable]
-    public class SpriteReference : AssetReference {
+    public class ActionFxAssetReference : AssetReferenceT<ActionFx> {
+        public ActionFxAssetReference(string guid) : base(guid) {
+        }
+    }
+    [Serializable]
+    public class SpriteReference : AssetReferenceT<Sprite> {
         [SerializeField] public bool IsSprite;
+
+        public SpriteReference(string guid) : base(guid) {
+        }
 
         public override bool ValidateAsset(UnityEngine.Object obj) {
             if (obj is SpriteAnimation) {
@@ -75,9 +90,12 @@ namespace PixelComrades {
     }
 
     [Serializable]
-    public class SpriteAnimationReference : AssetReference {
+    public class SpriteAnimationReference : AssetReferenceT<SpriteAnimation> {
         [SerializeField] public bool IsDirectional;
-        
+
+        public SpriteAnimationReference(string guid) : base(guid) {
+        }
+
         public override bool ValidateAsset(UnityEngine.Object obj) {
             if (obj is SpriteAnimation) {
                 return true;

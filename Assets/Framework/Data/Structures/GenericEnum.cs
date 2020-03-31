@@ -50,7 +50,7 @@ namespace PixelComrades {
             var strVal = lines[parseIndex];
             parseIndex++;
             for (int i = 0; i < Count; i++) {
-                if (strVal == GetNameAt(i) || strVal == GetIdAt(i)) {
+                if (strVal == GetNameAt(i) || strVal == GetID(i)) {
                     return GetValueAt(i);
                 }
             }
@@ -96,6 +96,8 @@ namespace PixelComrades {
         public static bool AllowInstanceExceptions { get { return _allowInstanceExceptions; } set { _allowInstanceExceptions = value; } }
         public static Type UnderlyingType { get { return typeof(U); } }
         public static int Count { get { return _names.Count; } }
+        public static int Length { get { return _names.Count; } }
+
         public int Index {
             get { return _index; }
             set {
@@ -236,8 +238,8 @@ namespace PixelComrades {
             return _values;
         }
 
-        public static int IndexOf(string name) {
-            return _names.IndexOf(name);
+        public static int IndexOf(string id) {
+            return _ids.IndexOf(id);
         }
 
         public static bool IsDefinedIndex(int index) {
@@ -261,6 +263,10 @@ namespace PixelComrades {
             return false;
         }
 
+        public static string GetNameAt(string id) {
+            return GetNameAt(IndexOf(id));
+        }
+
         public static string GetNameAt(int index) {
             if (index >= 0 && index < Count) {
                 return _names[index];
@@ -268,7 +274,7 @@ namespace PixelComrades {
             throw new IndexOutOfRangeException(string.Format("Index must be between 0 and {0}", Count - 1));
         }
 
-        public static string GetIdAt(int index) {
+        public static string GetID(int index) {
             if (index >= 0 && index < Count) {
                 return _ids[index];
             }

@@ -5,15 +5,14 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class AnimationEventComponent : IComponent {
+    public sealed class PlayerLevelComponent : IComponent {
+
+        public int SkillPoints;
+        public int AttributePoints;
+        public ExperienceStat Xp = new ExperienceStat();
+        public PlayerLevelComponent(){}
         
-        public AnimationEvent CurrentAnimationEvent;
-        public Vector3 Position;
-        public Quaternion Rotation;
-        
-        public AnimationEventComponent(){}
-        
-        public AnimationEventComponent(SerializationInfo info, StreamingContext context) {
+        public PlayerLevelComponent(SerializationInfo info, StreamingContext context) {
             //BuildingIndex = info.GetValue(nameof(BuildingIndex), BuildingIndex);
         }
                 

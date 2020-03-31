@@ -18,9 +18,16 @@ namespace PixelComrades {
             V3 = v3;
         }
     }
+
+    public interface ISpriteRendererComponent {
+        void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx,
+            bool flip);
+
+        void Flip(bool isFlipped);
+    }
     
     [System.Serializable]
-    public sealed class SpriteRendererComponent : IComponent, IRenderingComponent, IDisposable {
+    public sealed class SpriteRendererComponent : IComponent, IRenderingComponent, ISpriteRendererComponent, IDisposable {
         private CachedTransform _baseTr;
         private CachedTransform _spriteTr;
         private CachedUnityComponent<MeshFilter> _filter;
@@ -79,6 +86,11 @@ namespace PixelComrades {
             SetRendering(RenderingMode.Normal);
         }
 
+        public void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx, 
+        bool flip) {
+            SetSprite(sprite,normal, emissive, spriteCollider);
+        }
+
         public void UpdatedSprite() {
             IsDirty = false;
             //Value.sprite = _sprite;
@@ -89,10 +101,15 @@ namespace PixelComrades {
         }
 
         public Vector3 GetEventPosition(AnimationFrame frame) {
-            var size = new Vector2(Sprite.rect.width / Sprite.pixelsPerUnit,
+            return GetEventPosition(frame.EventPosition);
+        }
+
+        public Vector3 GetEventPosition(Vector2 frame) {
+            var size = new Vector2(
+                Sprite.rect.width / Sprite.pixelsPerUnit,
                 Sprite.rect.height / Sprite.pixelsPerUnit);
             return SpriteTr.TransformPoint(
-                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
+                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.x), size.y * frame.y, 0);
         }
 
         public SpriteRendererComponent(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {

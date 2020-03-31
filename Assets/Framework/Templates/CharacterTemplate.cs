@@ -23,7 +23,11 @@ namespace PixelComrades {
         private CachedComponent<CurrentAction> _currentAction = new CachedComponent<CurrentAction>();
         private CachedComponent<AnimationEventComponent> _animationEvent = new CachedComponent<AnimationEventComponent>();
         private CachedComponent<RuleEventListenerComponent> _ruleEvent = new CachedComponent<RuleEventListenerComponent>();
-        
+        private CachedComponent<EntityLevelComponent> _level = new CachedComponent<EntityLevelComponent>();
+        private CachedComponent<GenericDataComponent> _genericData = new CachedComponent<GenericDataComponent>();
+
+        public GenericDataComponent GenericData { get => _genericData; }
+
         public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public StatsContainer Stats => _stats.Value;
@@ -43,15 +47,17 @@ namespace PixelComrades {
         public CurrentAction CurrentActionComponent => _currentAction.Value;
         public AnimationEventComponent AnimationEvent => _animationEvent.Value;
         public RuleEventListenerComponent RuleEvents => _ruleEvent.Value;
+        public EntityLevelComponent Level => _level.Value;
+
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
-            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent
+            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, _level
         };
 
         public VitalStat GetVital(int vital) {
-            return _stats.Value.GetVital(GameData.Vitals.GetID(vital));
+            return _stats.Value.GetVital(Vitals.GetID(vital));
         }
 
         public override System.Type[] GetTypes() {

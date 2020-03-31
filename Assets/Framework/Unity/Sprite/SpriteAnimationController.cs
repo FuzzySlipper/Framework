@@ -41,7 +41,7 @@ namespace PixelComrades {
                 _currentFrameIndex++;
                 if (CurrentFrame != null) {
                     if (CurrentFrame.HasEvent) {
-                        if (CurrentFrame.Event == AnimationFrame.EventType.Default) {
+                        if (CurrentFrame.Event == AnimationEvent.Type.Default) {
                             DefaultEventTriggered = true;
                         }
                         LastEventFrame = CurrentFrame;
@@ -70,7 +70,7 @@ namespace PixelComrades {
             _currentFrameIndex++;
             if (CurrentFrame != null) {
                 if (CurrentFrame.HasEvent) {
-                    if (CurrentFrame.Event == AnimationFrame.EventType.Default) {
+                    if (CurrentFrame.Event == AnimationEvent.Type.Default) {
                         DefaultEventTriggered = true;
                     }
                     LastEventFrame = CurrentFrame;

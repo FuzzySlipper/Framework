@@ -31,7 +31,7 @@ namespace PixelComrades {
             get {
                 int cnt = 0;
                 for (int i = 0; i < Frames.Length; i++) {
-                    if (Frames[i].Event != AnimationFrame.EventType.None) {
+                    if (Frames[i].Event != AnimationEvent.Type.None) {
                         cnt++;
                     }
                 }
@@ -112,25 +112,51 @@ namespace PixelComrades {
         }
     }
 
+    public struct AnimationEvent {
+        public readonly Type EventType;
+        public readonly Vector3 EventPosition;
+        public readonly string EventDataString;
+        public readonly UnityEngine.Object EventDataObject;
+
+        public enum Type {
+            None = 0,
+            Default = 1,
+            Message,
+            Camera,
+            Fx,
+            StateEnter,
+            StateExit,
+        }
+
+        public AnimationEvent(Type type, string eventName) : this() {
+            EventType = type;
+            EventDataString = eventName;
+            EventPosition = Vector3.zero;
+            EventDataString = null;
+            EventDataObject = null;
+        }
+
+        public AnimationEvent(AnimationFrame frame, Vector3 pos) {
+            EventType = frame.Event;
+            EventPosition = pos;
+            EventDataString = frame.EventDataString;
+            EventDataObject = frame.EventDataObject;
+        }
+    }
+
 
     [System.Serializable]
     public class AnimationFrame {
         public float Length = 1;
 
-        public EventType Event = EventType.None;
-        public string EventName;
+        public AnimationEvent.Type Event = AnimationEvent.Type.None;
         public Vector2 EventPosition;
-        public float EventDataFloat;
         public string EventDataString;
         public UnityEngine.Object EventDataObject;
 
-        public bool HasEvent { get { return Event != EventType.None; } }
+        public bool HasEvent { get { return Event != AnimationEvent.Type.None; } }
 
-        public enum EventType {
-            None = 0,
-            Default = 1,
-            Message,
-        }
+        
     }
 
     [System.Serializable]

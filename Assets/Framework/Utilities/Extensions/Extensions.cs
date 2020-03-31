@@ -166,9 +166,6 @@ namespace PixelComrades {
     }
 
     [System.Serializable]
-    public class SpriteAssetHolder : GenericAssetHolder<SpriteAssetReference, Sprite> { }
-    
-    [System.Serializable]
     public class RandomObjectHolder {
         public List<PrefabAssetReference> Objects = new List<PrefabAssetReference>();
         public AnimationCurve Curve = new AnimationCurve();

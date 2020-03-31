@@ -63,25 +63,9 @@ namespace PixelComrades {
         }
 
         public void Handle(AnimationEventTriggered arg) {
-            switch (arg.Event) {
-                case AnimationEvents.Default:
-                    break;
-                case AnimationEvents.FxOn:
-                    var weaponModelOn = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
-                    if (weaponModelOn?.Loaded != null) {
-                        weaponModelOn.Loaded.SetFx(true);
-                    }
-                    break;
-                case AnimationEvents.FxOff:
-                    var weaponModelOff = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
-                    if (weaponModelOff?.Loaded != null) {
-                        weaponModelOff.Loaded.SetFx(false);
-                    }
-                    break;
-                default:
-                    if (arg.Entity.IsPlayer()) {
-                        World.Get<CameraSystem>().PlaySpringAnimation(arg.Event);
-                    }
+            switch (arg.Event.EventType) {
+                case AnimationEvent.Type.Camera:
+                    World.Get<CameraSystem>().PlaySpringAnimation(arg.Event.EventDataString);
                     break;
             } 
         }

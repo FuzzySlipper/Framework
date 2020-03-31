@@ -29,7 +29,6 @@ namespace PixelComrades {
 
         public AmmoComponent(SerializationInfo info, StreamingContext context) {
             Amount = info.GetValue(nameof(Amount), Amount);
-            Config = AmmoFactory.GetTemplate(info.GetValue(nameof(Config), Config.ID));
             RepairSpeedPercent = info.GetValue(nameof(RepairSpeedPercent), RepairSpeedPercent);
             DamageModStat = info.GetValue(nameof(DamageModStat), DamageModStat);
             DamagePercent = info.GetValue(nameof(DamagePercent), DamagePercent);

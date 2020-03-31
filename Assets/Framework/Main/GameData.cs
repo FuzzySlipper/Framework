@@ -15,13 +15,6 @@ namespace PixelComrades {
         private static Dictionary<string, DataEntry> _entriesByFullID = new Dictionary<string, DataEntry>();
 
         public static Enums Enums { get { return _enums; } }
-        public static FakeEnum Vitals { get { return _enums[StatTypes.Vitals]; } }
-        public static FakeEnum Attributes { get { return _enums[StatTypes.Attributes]; } }
-        public static FakeEnum DamageTypes { get { return _enums[StatTypes.DamageTypes]; } }
-        public static FakeEnum EquipmentSlotTypes { get { return _enums[EnumTypes.EquipmentSlotType]; } }
-        public static FakeEnum Skills { get { return _enums[StatTypes.Skills]; } }
-        public static FakeEnum ActionDistance { get { return _enums[EnumTypes.ActionDistance]; } }
-        public static FakeEnum CollisionType { get { return _enums[EnumTypes.CollisionType]; } }
         
         private static System.Action _onInit;
 

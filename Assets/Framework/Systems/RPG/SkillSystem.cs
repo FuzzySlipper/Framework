@@ -18,7 +18,7 @@ namespace PixelComrades {
                 return;
             }
             FastString.Instance.Clear();
-            FastString.Instance.AppendBoldLabelNewLine("Requires " + GameData.Skills.GetNameAt(skillReq.Skill), skillReq.Required.ToDescription());
+            FastString.Instance.AppendBoldLabelNewLine("Requires " + Skills.GetNameAt(skillReq.Skill), skillReq.Required.ToDescription());
             arg.Data.Text += FastString.Instance.ToString();
         }
     }

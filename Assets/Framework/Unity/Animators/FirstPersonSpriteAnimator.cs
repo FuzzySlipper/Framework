@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public class FirstPersonSpriteAnimator : MonoBehaviour, IAnimator, ISystemUpdate, IOnCreate {
+    public class FirstPersonSpriteAnimator : MonoBehaviour, ISystemUpdate, IOnCreate {
 
         [SerializeField] private SpriteRenderer _renderer = null;
         [SerializeField] private Transform _pivot = null;
@@ -39,7 +39,6 @@ namespace PixelComrades {
         private AnimationFrame CurrentFrame { get { return _currentAnim != null ? _currentAnim.GetFrame(_currentFrameIndex) : null; } }
         public float CurrentAnimationRemaining { get { return _currentAnim != null ? (_currentAnim.LengthFrames - _currentFrameIndex) * _currentAnim.FrameTime : 0; } }
         public Vector3 GetEventPosition { get { return _currentAnim != null ? _currentAnim.GetEventPosition(_renderer, _eventFrame) : Vector3.zero; } }
-        public string CurrentAnimationEvent { get; private set; }
         public Quaternion GetEventRotation {
             get {
                 var target = GetMouseRaycastPosition();
@@ -189,12 +188,8 @@ namespace PixelComrades {
             _currentFrameIndex++;
             if (CurrentFrame != null) {
                 if (CurrentFrame.HasEvent) {
-                    if (CurrentFrame.Event == AnimationFrame.EventType.Default) {
+                    if (CurrentFrame.Event == AnimationEvent.Type.Default) {
                         DefaultEventTriggered = true;
-                        CurrentAnimationEvent = AnimationEvents.Default;
-                    }
-                    else {
-                        CurrentAnimationEvent = CurrentFrame.EventName;
                     }
                     _eventFrame = CurrentFrame;
                 }

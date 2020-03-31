@@ -24,8 +24,7 @@ namespace PixelComrades {
 
         public void Fire(Vector3 targetPos) {
             var position = ShootPivot.Tr.position;
-            World.Get<ProjectileSystem>().SpawnProjectile(this.GetEntity(), ProjectileId, targetPos, position, Quaternion
-            .LookRotation(targetPos - position));
+            ProjectileFactory.SpawnProjectile(this.GetEntity(), ProjectileId, targetPos, position, Quaternion.LookRotation(targetPos - position));
             ShootTimer.StartNewTime(ShootCooldown.Get());
         }
         

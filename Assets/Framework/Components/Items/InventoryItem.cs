@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [System.Serializable]
 	public sealed class InventoryItem : IComponent, IDisposable {
-        public InventoryItem(int maxStack, int price, int rarity) {
+        public InventoryItem(int maxStack, int price, ItemRarity rarity) {
             MaxStack = maxStack;
             Price = price;
             Rarity = rarity;
@@ -33,7 +33,7 @@ namespace PixelComrades {
         
         public int MaxStack { get; }
         public int Price { get; }
-        public int Rarity { get; }
+        public ItemRarity Rarity { get; }
 
         public int Index = -1;
         public int Count = 1;

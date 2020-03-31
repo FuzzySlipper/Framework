@@ -19,6 +19,15 @@ namespace PixelComrades {
             for (int i = 0; i <= amtHidden; i++) {
                 _list.Add(new ActionSlot(this, true, true));
             }
+            // for (int i = 0; i <= amountPrimary; i++) {
+            //     _list.Add(new ActionSlot(this, PivotTypes.Primary));
+            // }
+            // for (int i = 0; i <= amountSecondary; i++) {
+            //     _list.Add(new ActionSlot(this, PivotTypes.Secondary));
+            // }
+            // for (int i = 0; i <= amtHidden; i++) {
+            //     _list.Add(new ActionSlot(this, PivotTypes.Hidden));
+            // }
         }
 
         public ActionSlots(SerializationInfo info, StreamingContext context) {

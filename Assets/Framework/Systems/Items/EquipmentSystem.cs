@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
     [AutoRegister]
@@ -187,7 +188,7 @@ namespace PixelComrades {
             for (int i = 0; i < equipment.StatsToEquip.Count; i++) {
                 FastString.Instance.AppendNewLine(stats.Get(equipment.StatsToEquip[i]).ToLabelString());
             }
-            FastString.Instance.AppendBoldLabelNewLine("Equipment Slot", GameData.EquipmentSlotTypes.GetNameAt(equipment.EquipmentSlotType));
+            FastString.Instance.AppendBoldLabelNewLine("Equipment Slot", EquipmentSlotTypes.GetNameAt(equipment.EquipmentSlotType));
             arg.Data.Text += FastString.Instance.ToString();
         }
 

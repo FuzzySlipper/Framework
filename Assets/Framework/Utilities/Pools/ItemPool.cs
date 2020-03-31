@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.SceneManagement;
 
 namespace PixelComrades {
@@ -15,7 +16,7 @@ namespace PixelComrades {
         private Dictionary<int, PrefabEntity> _referenceItems = new Dictionary<int, PrefabEntity>();
         private Dictionary<string, int> _stringToId = new Dictionary<string, int>();
         private Dictionary<int, Queue<PrefabEntity>> _pooledDict = new Dictionary<int, Queue<PrefabEntity>>();
-
+        private Dictionary<PrefabAssetReference, int> _prefabKeys = new Dictionary<PrefabAssetReference, int>();
         private static List<PrefabEntity> _sceneObjects = new List<PrefabEntity>();
         public static List<PrefabEntity> SceneObjects { get => _sceneObjects; }
         private static Transform PoolTransform {
@@ -107,6 +108,15 @@ namespace PixelComrades {
                 }
                 list.Clear();
             }
+            foreach (var prefabKey in Main._prefabKeys) {
+                // foreach (var l in Addressables.ResourceLocators) {
+                //     if (l.Locate(prefabKey.Key, prefabKey.GetType(), out var locs)) {
+                //         locs[0].PrimaryKey
+                //     }
+                // }
+                prefabKey.Key.ReleaseAsset();
+            }
+            Main._prefabKeys.Clear();
         }
 
         public static void ClearReferences() {
@@ -179,6 +189,14 @@ namespace PixelComrades {
 
         public static string GetAssetLocation<T>(T target) where T : UnityEngine.Object {
             return _loadedAssets.TryGetValue(target.GetInstanceID(), out var ar) ? ar : "";
+        }
+
+        public static void Spawn(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
+            Main.SpawnPrefabCopy(targetObject, action);
+        }
+
+        public static void Spawn<T>(T loadOp) where T : LoadOperationEvent {
+            Main.SpawnPrefabCopy(loadOp);
         }
         
         public static PrefabEntity Spawn(string itemName, bool isSceneObject = false, bool isCulled = true) {
@@ -364,6 +382,71 @@ namespace PixelComrades {
             return item;
         }
 
+        private void SpawnPrefabCopy(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                var go = (GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(targetObject.editorAsset);
+                action(go.GetOrAddComponent<PrefabEntity>());
+                return;
+            }
+#endif
+            if (!_prefabKeys.TryGetValue(targetObject, out var key)) {
+                SetupFirstAssetLoad(targetObject, action);
+                return;
+            }
+            PrefabEntity newItem = GetPooledEntity(key);
+            if (newItem == null) {
+                newItem = CreateNewPrefab(GetReferencePrefab(key));
+            }
+            newItem.transform.SetParent(null);
+            newItem.Register(true, true);
+            newItem.SetActive(true);
+            action(newItem);
+        }
+
+        private void SetupFirstAssetLoad(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
+            targetObject.LoadAssetAsync().Completed += handle => {
+                var result = handle.Result;
+                var prefab = result.GetOrAddComponent<PrefabEntity>();
+                if (prefab.PrefabId == 0) {
+                    prefab.SetId(targetObject.AssetGUID);
+                }
+                _prefabKeys.AddOrUpdate(targetObject, prefab.PrefabId);
+                SpawnPrefabCopy(targetObject, action);
+            };
+        }
+
+        private void SpawnPrefabCopy<T>(T loadOp) where T : LoadOperationEvent {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                loadOp.NewPrefab = ((GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(loadOp.SourcePrefab.editorAsset))
+                .GetOrAddComponent<PrefabEntity>();
+                loadOp.OnComplete();
+                return;
+            }
+#endif
+            if (!_prefabKeys.TryGetValue(loadOp.SourcePrefab, out var key)) {
+                loadOp.SourcePrefab.LoadAssetAsync().Completed += handle => {
+                    var result = handle.Result;
+                    var prefab = result.GetOrAddComponent<PrefabEntity>();
+                    if (prefab.PrefabId == 0) {
+                        prefab.SetId(loadOp.SourcePrefab.AssetGUID);
+                    }
+                    _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.PrefabId);
+                    SpawnPrefabCopy(loadOp);
+                };
+                return;
+            }
+            loadOp.NewPrefab = GetPooledEntity(key);
+            if (loadOp.NewPrefab == null) {
+                loadOp.NewPrefab = CreateNewPrefab(GetReferencePrefab(key));
+            }
+            loadOp.NewPrefab.transform.SetParent(null);
+            loadOp.NewPrefab.Register(true, true);
+            loadOp.NewPrefab.SetActive(true);
+            loadOp.OnComplete();
+        }
+        
         private PrefabEntity GetPrefabCopy(PrefabEntity prefab, bool isScene, bool isCulled, Vector3 pos, Quaternion rot, Transform parent = null) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -518,4 +601,11 @@ namespace PixelComrades {
         //    //}
         //}
     }
+
+    public abstract class LoadOperationEvent {
+        public PrefabAssetReference SourcePrefab;
+        public PrefabEntity NewPrefab;
+        public abstract void OnComplete();
+    }
+    
 }

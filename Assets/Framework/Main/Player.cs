@@ -23,8 +23,6 @@ namespace PixelComrades {
             }
             set { _tr = value; }
         }
-        public static IPlayerFlightController Flight { get; set; }
-
         public static PlayerSaveData Data { get { return _playerSaveData; } set { _playerSaveData = value; } }
         public static ItemInventory MainInventory { get; set; }
         public static Rigidbody Rb { get; set; }
@@ -39,7 +37,7 @@ namespace PixelComrades {
                     if (Player.Entities[i] == null) {
                         continue;
                     }
-                    level = MathEx.Max(Player.Entities[i].Get<EntityLevelComponent>().Level, level);
+                    level = MathEx.Max(Player.Entities[i].Get<EntityLevelComponent>().Value, level);
                 }
                 return level;
             }

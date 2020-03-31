@@ -95,8 +95,7 @@ namespace PixelComrades {
             public Sprite Sprite;
             public float Time;
 
-            public AnimationFrame.EventType Event = AnimationFrame.EventType.None;
-            public string EventName;
+            public AnimationEvent.Type Event = AnimationEvent.Type.None;
             public Vector2 EventPosition;
             public float EventDataFloat;
             public string EventDataString;
@@ -174,9 +173,8 @@ namespace PixelComrades {
                 _clip.Frames[i] = new AnimationFrame() {
                     Length = _frames[i].LengthMulti,
                     Event = _frames[i].Event,
-                    EventName = _frames[i].EventName,
                     EventPosition = _frames[i].EventPosition,
-                    EventDataFloat = _frames[i].EventDataFloat,
+                    //EventDataFloat = _frames[i].EventDataFloat,
                     EventDataString = _frames[i].EventDataString,
                     EventDataObject = _frames[i].EventDataObject,
                 };
@@ -337,7 +335,7 @@ namespace PixelComrades {
 
         private bool HasValidEvent(float time) {
             var frame = GetFrameAtTime(time);
-            return frame.Event != AnimationFrame.EventType.None;
+            return frame.Event != AnimationEvent.Type.None;
         }
 
         private Vector2 GetEventPosition(float time) {
@@ -584,9 +582,8 @@ namespace PixelComrades {
                     Event = _clip.Frames[i].Event,
                     LengthMulti = _clip.Frames[i].Length,
                     RealLength = MathEx.Max(GetFrameTime(), SnapTimeToFrameRate(_clip.Frames[i].Length)),
-                    EventName = _clip.Frames[i].EventName,
                     EventPosition = _clip.Frames[i].EventPosition,
-                    EventDataFloat = _clip.Frames[i].EventDataFloat,
+                    //EventDataFloat = _clip.Frames[i].EventDataFloat,
                     EventDataString = _clip.Frames[i].EventDataString,
                     EventDataObject = _clip.Frames[i].EventDataObject,
                 });

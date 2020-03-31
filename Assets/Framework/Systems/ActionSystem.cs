@@ -34,7 +34,7 @@ namespace PixelComrades {
             }
         }
 
-        public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, string animEvent) {
+        public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, AnimationEvent animEvent) {
             var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
             var ae = new ActionEvent(character, character, aeTemplate.AnimEvent.Position,
                 aeTemplate.AnimEvent.Rotation, AnimationEvents.ToStateEvent(animEvent));
@@ -43,10 +43,11 @@ namespace PixelComrades {
                     aeTemplate.AnimEvent.Position, aeTemplate.AnimEvent.Rotation.GetPosition(aeTemplate.AnimEvent.Position, 2.5f),
                     Color.red, 5f);
             }
-            var animationList = action.Config.GetEventHandler(animEvent);
+            var eventName = animEvent.EventType.ToString();
+            var animationList = action.Config.GetEventHandler(eventName);
             if (animationList != null) {
                 for (int i = 0; i < animationList.Count; i++) {
-                    animationList[i].Trigger(ae, animEvent);
+                    animationList[i].Trigger(ae, eventName);
                 }
             }
             if (ae.State != ActionState.None) {

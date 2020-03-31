@@ -36,21 +36,22 @@ namespace PixelComrades {
             return false;
         }
 
+        public bool Contains(string id) {
+            for (int i = 0; i < Count; i++) {
+                if (this[i].Get<TypeId>().Id == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void ContainerSystemSet(Entity item, int index) {
             _container.Add(item);
         }
         
         public int ContainerSystemAdd(Entity item) {
             var abilityData = item.Get<AbilityData>();
-            if (abilityData == null) {
-                var spellData = item.Get<SpellData>();
-                if (spellData != null) {
-                    AddSpell(spellData, item);
-                }
-            }
-            else {
-                AddAbility(abilityData, item);
-            }
+            AddAbility(abilityData, item);
             return _container.Add(item);
         }
 
@@ -75,18 +76,8 @@ namespace PixelComrades {
         private void AddAbility(AbilityData abilityData, Entity item) {
             var itemStats = item.Get<StatsContainer>();
             var ownerStats = this.GetEntity().Get<StatsContainer>();
-            ownerStats.Get(GameData.Skills.GetID(abilityData.Template.Skill)).AddDerivedStat(RpgSettings.SkillToHitBonus, itemStats.Get(Stats.ToHit));
+            ownerStats.Get(abilityData.Template.Skill).AddDerivedStat(RpgSettings.SkillToHitBonus, itemStats.Get(Stats.ToHit));
             var source = abilityData.Template.Source;
-            ownerStats.Get(source.GetPowerFromSource()).AddDerivedStat(1, itemStats.Get(Stats.Power));
-            ownerStats.Get(source.GetToHitFromSource()).AddDerivedStat(1, itemStats.Get(Stats.ToHit));
-            ownerStats.Get(source.GetCritFromSource()).AddDerivedStat(1, itemStats.Get(Stats.CriticalHit));
-        }
-
-        private void AddSpell(SpellData abilityData, Entity item) {
-            var itemStats = item.Get<StatsContainer>();
-            var ownerStats = this.GetEntity().Get<StatsContainer>();
-            var source = abilityData.Template.Source;
-            ownerStats.Get(GameData.Skills.GetID(abilityData.Template.Skill)).AddDerivedStat(RpgSettings.SkillToHitBonus, itemStats.Get(Stats.ToHit));
             ownerStats.Get(source.GetPowerFromSource()).AddDerivedStat(1, itemStats.Get(Stats.Power));
             ownerStats.Get(source.GetToHitFromSource()).AddDerivedStat(1, itemStats.Get(Stats.ToHit));
             ownerStats.Get(source.GetCritFromSource()).AddDerivedStat(1, itemStats.Get(Stats.CriticalHit));

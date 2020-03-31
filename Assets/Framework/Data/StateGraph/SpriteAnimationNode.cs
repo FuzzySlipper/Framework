@@ -47,40 +47,12 @@ namespace PixelComrades {
         public override string Title { get { return Animation != null ? Animation.SubObjectName : "SpriteAnimation"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
-            if (InstancedIndex >= 0) {
-                return new InstancedRuntimeAnimationNode(this, graph);
-            }
             if (Animation.IsDirectional) {
                 return new DirectionalRuntimeAnimationNode(this, graph);
             }
             return new RuntimeSpriteAnimationNode(this, graph);
         }
-        public class InstancedRuntimeAnimationNode : RuntimeSpriteAnimationNode {
-
-            private SpriteSimpleRendererComponent _simpleRenderer;
-            
-            public InstancedRuntimeAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base
-            (node, graph) {
-                _simpleRenderer = graph.Entity.Get<SpriteSimpleRendererComponent>();
-            }
-
-            public override void OnEnter(RuntimeStateNode lastNode) {
-                base.OnEnter(lastNode);
-            }
-
-            public override void OnExit() {
-                base.OnExit();
-            }
-
-            protected override void UpdateSprite() {
-                var data = _simpleRenderer.Sprites[AnimNode.InstancedIndex];
-                data.Sprite = Animation.GetSprite(Animator.FrameIndex);
-                data.Emissive = Animation.EmissiveMap;
-                data.Normal = Animation.NormalMap;
-                data.Flip = AnimNode.ForceReverse;
-            }
-        }
-
+    
         public class DirectionalRuntimeAnimationNode : RuntimeSpriteAnimationNode {
             
             private IDirectionalAnimation _animation;
@@ -131,7 +103,7 @@ namespace PixelComrades {
                     return;
                 }
                 var idx = animFacing.FrameIndices[Animator.FrameIndex];
-                Renderer.SetSprite(_animation.GetSprite(idx), _animation.NormalMap, _animation.EmissiveMap, _animation.GetSpriteCollider(idx));
+                Renderer.SetSprite(_animation.GetSprite(idx), _animation.NormalMap, _animation.EmissiveMap, _animation.GetSpriteCollider(idx), AnimNode.InstancedIndex, AnimNode.ForceReverse);
             }
 
             public override bool TryComplete(float dt) {
@@ -151,7 +123,7 @@ namespace PixelComrades {
         public class RuntimeSpriteAnimationNode : RuntimeStateNode {
 
             protected SpriteAnimationNode AnimNode;
-            protected SpriteRendererComponent Renderer;
+            protected ISpriteRendererComponent Renderer;
             protected SpriteAnimatorComponent Animator;
             protected SpriteAnimation Animation;
 
@@ -213,15 +185,15 @@ namespace PixelComrades {
 
             protected virtual void UpdateSprite() {
                 Renderer.SetSprite(Animation.GetSprite(Animator.FrameIndex), Animation.NormalMap, Animation.EmissiveMap,
-                    Animation.GetSpriteCollider(Animator.FrameIndex));
+                    Animation.GetSpriteCollider(Animator.FrameIndex), AnimNode.InstancedIndex, AnimNode.ForceReverse);
             }
 
             protected void UpdateFrame(AnimationFrame frame) {
                 Animator.FrameTimer = Animation.FrameTime * frame.Length;
                 Animator.CurrentFrame = frame;
                 if (frame.HasEvent) {
-                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, frame.Event == AnimationFrame.EventType.Default?
-                        AnimationEvents.Default : frame.EventName));
+                    var pos = aet.SpriteRenderer.GetEventPosition(ae.EventPosition);
+                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(frame,)));
                 }
             }
 

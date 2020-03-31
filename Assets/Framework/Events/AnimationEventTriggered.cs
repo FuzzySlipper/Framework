@@ -4,10 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public struct AnimationEventTriggered : IEntityMessage {
-        public string Event { get; }
+        public AnimationEvent Event { get; }
         public Entity Entity { get; }
 
-        public AnimationEventTriggered(Entity entity, string eventName) {
+        public AnimationEventTriggered(Entity entity, AnimationEvent eventName) {
             Event = eventName;
             Entity = entity;
         }

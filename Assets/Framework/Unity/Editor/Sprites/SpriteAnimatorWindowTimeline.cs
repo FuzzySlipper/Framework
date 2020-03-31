@@ -152,11 +152,11 @@ namespace PixelComrades {
 
             width = 80;
             frame.Event =
-                (AnimationFrame.EventType)
+                (AnimationEvent.Type)
                     EditorGUI.EnumPopup(new Rect(xOffset, 2, width, rect.height), frame.Event);
             xOffset += width;
 
-            if (frame.Event == AnimationFrame.EventType.None) {
+            if (frame.Event == AnimationEvent.Type.None) {
                 if (EditorGUI.EndChangeCheck()) {
                     ApplyChanges();
                 }
@@ -178,12 +178,12 @@ namespace PixelComrades {
             GUI.Label(new Rect(xOffset, 0, width, rect.height), "Event Name:", EditorStyles.miniLabel);
             xOffset += width;
 
-            width = 150;
-            // Give gui control name using it's time and function name so it can be auto-selected when creating new evnet
-            GUI.SetNextControlName("EventFunctionName");
-            frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
-                frame.EventName, EditorStyles.miniTextField);
-            xOffset += width + 5;
+            // width = 150;
+            // // Give gui control name using it's time and function name so it can be auto-selected when creating new evnet
+            // GUI.SetNextControlName("EventFunctionName");
+            // frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
+            //     frame.EventName, EditorStyles.miniTextField);
+            // xOffset += width + 5;
 
             width = 60;
             frame.EventDataString = EditorGUI.TextField(
@@ -300,7 +300,7 @@ namespace PixelComrades {
             // Calc some metadata about each event (start/end position on timeline, etc). This is stored in a temporary array, parallel to events
             int eventCount = 0;
             for (int i = 0; i < _frames.Count; i++) {
-                if (_frames[i].Event != AnimationFrame.EventType.None) {
+                if (_frames[i].Event != AnimationEvent.Type.None) {
                     eventCount++;
                 }
             }
@@ -309,14 +309,14 @@ namespace PixelComrades {
             // First loop over and calculate start/end positions of events
             for (var i = 0; i < _frames.Count; ++i) {
                 var frame = _frames[i];
-                if (_frames[i].Event == AnimationFrame.EventType.None) {
+                if (_frames[i].Event == AnimationEvent.Type.None) {
                     continue;
                 }
                 var eventData = new AnimEventLayoutData();
                 eventTimelineData.Add(eventData);
                 eventData.frame = frame;
                 eventData.start = AnimTimeToGuiPos(rect, SnapTimeToFrameRate(frame.Time));
-                eventData.text = frame.EventName; //.Replace(ANIM_EVENT_PREFIX,null);
+                eventData.text = frame.Event.ToString(); //.Replace(ANIM_EVENT_PREFIX,null);
                 eventData.textWidth = Styles.TIMELINE_EVENT_TEXT.CalcSize(new GUIContent(eventData.text)).x;
                 eventData.end = eventData.start + eventData.textWidth + 4;
                 eventData.selected = _selectedFrames.Contains(_frames[i]);

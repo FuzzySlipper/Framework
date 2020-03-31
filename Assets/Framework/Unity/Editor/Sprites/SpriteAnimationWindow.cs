@@ -217,8 +217,8 @@ namespace PixelComrades {
                 else if (e.type == EventType.MouseDown) {
                     if (e.button == 0) {
                         var frame = _clip.Frames[_currentFrame];
-                        if (frame.Event == AnimationFrame.EventType.None) {
-                            frame.Event = AnimationFrame.EventType.Default;
+                        if (frame.Event == AnimationEvent.Type.None) {
+                            frame.Event = AnimationEvent.Type.Default;
                         }
                         var mousePos = Event.current.mousePosition;
                         frame.EventPosition.x = Mathf.InverseLerp(rect.xMin, rect.xMax, mousePos.x);
@@ -226,7 +226,7 @@ namespace PixelComrades {
                         Repaint();
                     }
                     else if (e.button == 1) {
-                        _clip.Frames[_currentFrame].Event = AnimationFrame.EventType.None;
+                        _clip.Frames[_currentFrame].Event = AnimationEvent.Type.None;
                         Repaint();
                     }
                 }
@@ -293,7 +293,7 @@ namespace PixelComrades {
         
         private bool HasValidEvent(float time) {
             var frame = _clip.GetFrameAtTime(time);
-            return frame.Event != AnimationFrame.EventType.None;
+            return frame.Event != AnimationEvent.Type.None;
         }
         
         private void LayoutInfoPanel(Rect rect) {
@@ -591,11 +591,11 @@ namespace PixelComrades {
 
             width = 80;
             frame.Event =
-                (AnimationFrame.EventType)
+                (AnimationEvent.Type)
                     EditorGUI.EnumPopup(new Rect(xOffset, 2, width, rect.height), frame.Event);
             xOffset += width;
 
-            if (frame.Event == AnimationFrame.EventType.None) {
+            if (frame.Event == AnimationEvent.Type.None) {
                 if (EditorGUI.EndChangeCheck()) {
                     ApplyChanges();
                 }
@@ -619,21 +619,21 @@ namespace PixelComrades {
 
             width = 150;
             // Give gui control name using it's time and function name so it can be auto-selected when creating new evnet
-            GUI.SetNextControlName("EventFunctionName");
-            frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
-                frame.EventName, EditorStyles.miniTextField);
-            xOffset += width + 5;
+            // GUI.SetNextControlName("EventFunctionName");
+            // frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
+            //     frame.EventName, EditorStyles.miniTextField);
+            // xOffset += width + 5;
 
             width = 60;
             frame.EventDataString = EditorGUI.TextField(
                 new Rect(xOffset, 2, width, rect.height),
                 frame.EventDataString, EditorStyles.miniTextField);
             xOffset += width + 5;
-
-            frame.EventDataFloat = EditorGUI.FloatField(
-                new Rect(xOffset, 2, width, rect.height - 3),
-                frame.EventDataFloat, EditorStyles.miniTextField);
-            xOffset += width + 5;
+            //
+            // frame.EventDataFloat = EditorGUI.FloatField(
+            //     new Rect(xOffset, 2, width, rect.height - 3),
+            //     frame.EventDataFloat, EditorStyles.miniTextField);
+            // xOffset += width + 5;
 
             width = 150;
             frame.EventDataObject = EditorGUI.ObjectField(
@@ -658,12 +658,12 @@ namespace PixelComrades {
             }
             GUI.BeginGroup(rect);
             for (int i = 0; i < _clip.Frames.Length; i++) {
-                if (_clip.Frames[i].Event == AnimationFrame.EventType.None) {
+                if (_clip.Frames[i].Event == AnimationEvent.Type.None) {
                     continue;
                 }
                 var frame = _clip.Frames[i];
                 var start = AnimTimeToGuiPos(rect, SnapTimeToFrameRate(_clip.GetFrameStartTime(i)));
-                var text = frame.EventName;
+                var text = frame.EventDataString;
                 var textWidth = Styles.TimelineEventText.CalcSize(new GUIContent(text)).x;
                 var end = start + textWidth + 4;
                 DrawRect(new Rect(start, 0, 1, rect.height), Color.grey);
