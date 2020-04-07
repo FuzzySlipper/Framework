@@ -6,18 +6,16 @@ using PixelComrades.DungeonCrawler;
 namespace PixelComrades {
     
     public interface IActionConfig {
-        string ActionTrigger { get; }
         ActionDistance Range { get; }
         FloatRange Power { get; }
         CollisionType Collision { get; }
         ImpactRadiusTypes Radius { get; }
-        string DamageType { get; }
-        ProjectileConfig Projectile { get; }
         ActionFx ActionFx { get; }
         ScriptedEventConfig[] ScriptedEvents { get; }
         float CritMulti { get; }
         TargetType Targeting { get; }
         string AbilityType { get; }
+        StateGraph ActionGraph { get; }
     }
 
     public static class ActionProvider {
@@ -35,10 +33,6 @@ namespace PixelComrades {
                 entity.Add(new ImpactRadius(radius, true));
             }
             action.Range = (int) data.Range;
-            var spawn = data.Projectile;
-            if (spawn != null) {
-                action.AddEvent(AnimationEvents.Default, new EventSpawnProjectile(spawn.ID));
-            }
             var abilityType = data.AbilityType;
             switch (abilityType) {
                 case AbilityTypes.Attack:
@@ -60,21 +54,21 @@ namespace PixelComrades {
                 }
             }
         }
-
-        public static void AddCheckForCollision(ActionConfig action, IActionConfig data, bool limitEnemy) {
-            var raycastSize = ((int) data.Collision) * 0.01f;
-            switch (data.Collision) {
-                case CollisionType.Melee:
-                case CollisionType.MeleeBig:
-                    action.AddEvent(
-                        AnimationEvents.CollisionOrImpact, new CameraShakeEvent(
-                            new Vector3
-                                (0, 0, 1), 4, false));
-                    break;
-
-            }
-            //melee or hitscan need to make that clearer
-            action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(action.Range, raycastSize, limitEnemy));
-        }
+        //
+        // public static void AddCheckForCollision(ActionConfig action, IActionConfig data, bool limitEnemy) {
+        //     var raycastSize = ((int) data.Collision) * 0.01f;
+        //     switch (data.Collision) {
+        //         case CollisionType.Melee:
+        //         case CollisionType.MeleeBig:
+        //             action.AddEvent(
+        //                 AnimationEvents.CollisionOrImpact, new CameraShakeEvent(
+        //                     new Vector3
+        //                         (0, 0, 1), 4, false));
+        //             break;
+        //
+        //     }
+        //     //melee or hitscan need to make that clearer
+        //     action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(action.Range, raycastSize, limitEnemy));
+        // }
     }
 }

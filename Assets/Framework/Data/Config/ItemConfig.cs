@@ -7,14 +7,13 @@ namespace PixelComrades {
     public class ItemConfig : ScriptableObject {
 
         public string Name;
-        public string ItemType;
         public AssetReferenceSprite Icon;
-        public string ModifierGroup;
-        public string Description;
-        public ItemRarity Rarity;
+        [TextArea]public string Description;
+        public ItemRarity Rarity = ItemRarity.Common;
         public int Price;
         public List<string> GenericComponents = new List<string>();
         public string ID { get { return name; } }
+        public virtual string ItemType { get { return ItemTypes.Item; } }
 
         public virtual void AddComponents(Entity entity) {
             entity.Add(new InventoryItem(1, Price, Rarity));

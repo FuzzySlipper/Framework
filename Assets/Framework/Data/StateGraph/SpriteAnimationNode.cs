@@ -188,12 +188,16 @@ namespace PixelComrades {
                     Animation.GetSpriteCollider(Animator.FrameIndex), AnimNode.InstancedIndex, AnimNode.ForceReverse);
             }
 
-            protected void UpdateFrame(AnimationFrame frame) {
+            private void UpdateFrame(AnimationFrame frame) {
                 Animator.FrameTimer = Animation.FrameTime * frame.Length;
                 Animator.CurrentFrame = frame;
-                if (frame.HasEvent) {
-                    var pos = aet.SpriteRenderer.GetEventPosition(ae.EventPosition);
-                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(frame,)));
+                if (!frame.HasEvent) {
+                    return;
+                }
+                var pos = Renderer.GetEventPosition(frame.EventPosition, AnimNode.InstancedIndex);
+                var rot = Renderer.GetRotation();
+                for (int i = 0; i < frame.Events.Length; i++) {
+                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(frame.Events[i], pos, rot )));
                 }
             }
 

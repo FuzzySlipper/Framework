@@ -97,7 +97,6 @@ namespace PixelComrades {
         public static Type UnderlyingType { get { return typeof(U); } }
         public static int Count { get { return _names.Count; } }
         public static int Length { get { return _names.Count; } }
-
         public int Index {
             get { return _index; }
             set {

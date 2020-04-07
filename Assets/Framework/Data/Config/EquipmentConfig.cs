@@ -1,14 +1,24 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     public class EquipmentConfig : ItemConfig {
-        public string Skill;
+        [ValueDropdown("SkillSlotList")] public string Skill;
         public int RequiredSkillRank = 0;
-        public string EquipmentSlot;
+        [ValueDropdown("EquipmentSlotList")] public string EquipmentSlot;
         public int[] AttributeBonuses = new int[0];
         public int[] DefenseBonuses = new int[0];
+        public override string ItemType { get { return ItemTypes.Equipment; } }
+
+        private ValueDropdownList<string> EquipmentSlotList() {
+            return EquipmentSlotTypes.GetDropdownList();
+        }
+
+        private ValueDropdownList<string> SkillSlotList() {
+            return Skills.GetDropdownList();
+        }
         public override void AddComponents(Entity entity) {
             base.AddComponents(entity);
             entity.Add(new SkillRequirement(Skill, RequiredSkillRank));

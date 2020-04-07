@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class PriorityAttribute : Attribute {
-        public int Value = 0;
+        public readonly int Value = 0;
 
         public PriorityAttribute(int value) {
             Value = value;
@@ -13,6 +13,14 @@ namespace PixelComrades {
 
         public PriorityAttribute(Priority value) {
             Value = (int) value;
+        }
+    }
+
+    public class EnumLabelArrayAttribute : PropertyAttribute {
+        public readonly System.Type Labels;
+
+        public EnumLabelArrayAttribute(System.Type labels) {
+            Labels = labels;
         }
     }
 

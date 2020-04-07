@@ -24,6 +24,8 @@ namespace PixelComrades {
             bool flip);
 
         void Flip(bool isFlipped);
+        Vector3 GetEventPosition(Vector2 framePos, int instancedIndex);
+        Quaternion GetRotation();
     }
     
     [System.Serializable]
@@ -91,6 +93,10 @@ namespace PixelComrades {
             SetSprite(sprite,normal, emissive, spriteCollider);
         }
 
+        public Quaternion GetRotation() {
+            return BaseTr.rotation;
+        }
+
         public void UpdatedSprite() {
             IsDirty = false;
             //Value.sprite = _sprite;
@@ -101,10 +107,10 @@ namespace PixelComrades {
         }
 
         public Vector3 GetEventPosition(AnimationFrame frame) {
-            return GetEventPosition(frame.EventPosition);
+            return GetEventPosition(frame.EventPosition, 0);
         }
 
-        public Vector3 GetEventPosition(Vector2 frame) {
+        public Vector3 GetEventPosition(Vector2 frame, int instancedIndex) {
             var size = new Vector2(
                 Sprite.rect.width / Sprite.pixelsPerUnit,
                 Sprite.rect.height / Sprite.pixelsPerUnit);

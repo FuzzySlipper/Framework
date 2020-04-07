@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public sealed class ChangeEquipmentNode : StateGraphNode {
         public float Delay = 0f;
-        
+        public SpriteAnimationReference Default;
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
 
@@ -29,9 +29,10 @@ namespace PixelComrades {
         private class RuntimeNode : RuntimeStateNode {
 
             private ChangeEquipmentNode _changeNode;
-
+            private SpriteInstancedRendererComponent _instanced;
             public RuntimeNode(ChangeEquipmentNode node, RuntimeStateGraph graph) : base(node, graph) {
                 _changeNode = node;
+                _instanced = graph.Entity.Get<SpriteInstancedRendererComponent>();
             }
 
             public override void OnEnter(RuntimeStateNode lastNode) {
@@ -50,8 +51,24 @@ namespace PixelComrades {
                     readyActions.EquipAction(actionConfig, targetIndex);
                 }
                 if (targetIndex == 0) {
-                    Graph.SetVariable(GraphVariables.Equipment, actionConfig != null ? actionConfig.Config.EquipVariable : "");
-                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig != null ? actionConfig.Config.WeaponModel : "");
+                    var data = _instanced.Sprites[0];
+                    var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
+                    if (!targetAsset.RuntimeKeyIsValid()) {
+                        targetAsset.LoadAssetAsync<SpriteAnimation>().Completed += handle => {
+                            var targetAnimation = handle.Result;
+                            data.Sprite = targetAnimation.GetSprite(0);
+                            data.Emissive = targetAnimation.EmissiveMap;
+                            data.Normal = targetAnimation.NormalMap;
+                            data.Flip = false;
+                        };
+                    }
+                    else {
+                        var targetAnimation = (SpriteAnimation) targetAsset.Asset;
+                        data.Sprite = targetAnimation.GetSprite(0);
+                        data.Emissive = targetAnimation.EmissiveMap;
+                        data.Normal = targetAnimation.NormalMap;
+                        data.Flip = false;
+                    }
                 }
                 readyActions.QueuedChange = null;
             }

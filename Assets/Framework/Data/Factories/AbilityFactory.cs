@@ -68,7 +68,7 @@ namespace PixelComrades {
             entity.Add(new InventoryItem(1, 0, ItemRarity.Special));
             entity.Add(new StatusUpdateComponent());
             config.AddComponents(entity);
-            entity.Add(new DataDescriptionComponent(config.DataDescription));
+            // entity.Add(new DataDescriptionComponent(config.DataDescription));
             return entity;
         }
     }

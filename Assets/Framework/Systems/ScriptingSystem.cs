@@ -22,6 +22,25 @@ namespace PixelComrades {
             }
             return null;
         }
+
+        public static void ExecuteCameraMessage(string[] splitWords) {
+            var param0 = splitWords.Length < 2 ? "" : splitWords[1];
+            var param1 = splitWords.Length < 3 ? "" : splitWords[2];
+            switch (splitWords[0].ToLower()) {
+                case "fov":
+                case "zoom":
+                    World.Get<EntityEventSystem>().Post(new CameraZoomForceEvent(ParseUtilities.TryParse(param0, 5f), ParseUtilities.TryParse(param1, 4)));
+                    break;
+                case "pitch":
+                case "kick":
+                    World.Get<EntityEventSystem>().Post(new CameraPositionForceEvent(ParseUtilities.TryParse(param0, Vector3.up), ParseUtilities.TryParse(param1, 4)));
+                    break;
+                case "shake":
+                case "rotate":
+                    World.Get<EntityEventSystem>().Post(new CameraRotationForceEvent(ParseUtilities.TryParse(param0, Vector3.up), ParseUtilities.TryParse(param1, 4)));
+                    break;
+            }
+        }
     }
 
     [System.Serializable]

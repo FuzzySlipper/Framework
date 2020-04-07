@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 namespace PixelComrades {
     public abstract class SpriteAnimation : ScriptableObject {
@@ -31,9 +33,7 @@ namespace PixelComrades {
             get {
                 int cnt = 0;
                 for (int i = 0; i < Frames.Length; i++) {
-                    if (Frames[i].Event != AnimationEvent.Type.None) {
-                        cnt++;
-                    }
+                    cnt += Frames[i].Events.Length;
                 }
                 return cnt;
             }
@@ -115,6 +115,7 @@ namespace PixelComrades {
     public struct AnimationEvent {
         public readonly Type EventType;
         public readonly Vector3 EventPosition;
+        public readonly Quaternion EventRotation;
         public readonly string EventDataString;
         public readonly UnityEngine.Object EventDataObject;
 
@@ -126,21 +127,25 @@ namespace PixelComrades {
             Fx,
             StateEnter,
             StateExit,
+            Spawn,
+            RaycastCollisionCheck,
         }
 
-        public AnimationEvent(Type type, string eventName) : this() {
+        public AnimationEvent(Type type, string eventName) {
             EventType = type;
             EventDataString = eventName;
             EventPosition = Vector3.zero;
+            EventRotation = Quaternion.identity;
             EventDataString = null;
             EventDataObject = null;
         }
 
-        public AnimationEvent(AnimationFrame frame, Vector3 pos) {
-            EventType = frame.Event;
+        public AnimationEvent(AnimationFrame.Event frame, Vector3 pos, Quaternion rot) {
+            EventType = frame.Type;
             EventPosition = pos;
-            EventDataString = frame.EventDataString;
-            EventDataObject = frame.EventDataObject;
+            EventRotation = rot;
+            EventDataString = frame.DataString;
+            EventDataObject = frame.DataObject;
         }
     }
 
@@ -149,14 +154,16 @@ namespace PixelComrades {
     public class AnimationFrame {
         public float Length = 1;
 
-        public AnimationEvent.Type Event = AnimationEvent.Type.None;
         public Vector2 EventPosition;
-        public string EventDataString;
-        public UnityEngine.Object EventDataObject;
+        public Event[] Events = new Event[0];
+        public bool HasEvent { get { return Events.Length > 0; } }
 
-        public bool HasEvent { get { return Event != AnimationEvent.Type.None; } }
-
-        
+        [Serializable]
+        public class Event {
+            public AnimationEvent.Type Type = AnimationEvent.Type.None;
+            public string DataString;
+            public Object DataObject;
+        }
     }
 
     [System.Serializable]

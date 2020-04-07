@@ -18,6 +18,14 @@ namespace PixelComrades {
         }
 
         private void UpdateGraphComponent(ref AnimationGraphComponent animGraph) {
+            if (animGraph.Temporary != null) {
+                animGraph.Temporary.Update(TimeManager.DeltaTime);
+                if (animGraph.Temporary.IsActive) {
+                    return;
+                }
+                animGraph.Temporary.Stop();
+                animGraph.Temporary = null;
+            }
             if (animGraph.Value != null && animGraph.Value.IsActive) {
                 animGraph.Value.Update(TimeManager.DeltaTime);
             }

@@ -5,6 +5,8 @@ using UnityEditorInternal;
 
 namespace PixelComrades {
     public class ProjectileFactory : ScriptableSingleton<ProjectileFactory>, IEntityFactory {
+        private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePoolSize");
+
         private class ProjectileLoader : LoadOperationEvent {
             private Entity _entity;
             private Vector3 _target;
@@ -14,6 +16,7 @@ namespace PixelComrades {
             private ProjectileConfig _config;
 
             public void Set(ProjectileConfig config, Entity entity, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx actionFx) {
+                SourcePrefab = config.Prefab;
                 _config = config;
                 _entity = entity;
                 _target = target;
@@ -39,22 +42,6 @@ namespace PixelComrades {
                         _entity.Add(new ActionFxComponent(_actionFx));
                     }
                 }
-                switch (_config.Type) {
-                    default:
-                    case ProjectileType.Simple:
-                        break;
-                    case ProjectileType.SpriteAnimation:
-                        spawn.SetColor(_config.MainColor, Color.white * _config.GlowPower);
-                        if (_config.Animation != null) {
-                            var spriteRenderer = NewPrefab.Renderers[0] as SpriteRenderer;
-                            _entity.Add(new SpriteAnimationComponent(spriteRenderer, (SpriteAnimation) _config.Animation.Asset, false, _config
-                            .Billboard));
-                        }
-                        break;
-                    case ProjectileType.VolumeLaser:
-                        spawn.SetColor(_config.MainColor, _config.OffsetColor);
-                        break;
-                }
                 switch (_config.Movement) {
                     case ProjectileMovement.Arc:
                     case ProjectileMovement.Forward:
@@ -65,7 +52,7 @@ namespace PixelComrades {
                         //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
                         break;
                 }
-                spawn.SetSize(_config.Size, _config.Length);
+                spawn.SetConfig(_config, _entity);
                 if (spawn.Rigidbody != null) {
                     template.Rb.SetRb(spawn.Rigidbody);
                 }
@@ -137,11 +124,15 @@ namespace PixelComrades {
 #endif
                 return;
             }
+            SpawnProjectile(owner, config, target, spawnPos, spawnRot, actionFx);
+        }
+
+        public static void SpawnProjectile(Entity owner, ProjectileConfig config, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx actionFx = null) {
             var entity = Main.GetProjectile(config);
             entity.ParentId = owner.Id;
             var projectileEvent = _loadPool.New();
             if (config.Type == ProjectileType.SpriteAnimation && !config.Animation.RuntimeKeyIsValid()) {
-                config.Animation.LoadAssetAsync();
+                config.Animation.LoadAssetAsync<SpriteAnimation>();
             }
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);
@@ -158,7 +149,7 @@ namespace PixelComrades {
                 }
             }
             else {
-                stack = new ManagedArray<Entity>(data.PoolSize);
+                stack = new ManagedArray<Entity>(_defaultPool);
                 _poolDict.Add(data.ID, stack);
             }
             var entity = GetDefaultEntity(data.ID);

@@ -22,12 +22,7 @@ namespace PixelComrades {
         public void HandleGlobal(AnimationEventTriggered arg) {
             var aeTemplate = arg.Entity.GetTemplate<AnimationEventTemplate>();
             if (aeTemplate != null) {
-                aeTemplate.AnimEvent.CurrentAnimationEvent = arg.Event;
-                var action = aeTemplate.CurrentAction?.Value;
-                FindEventPositionRotation(aeTemplate, action, arg.Event);
-                if (action != null) {
-                    World.Get<ActionSystem>().ProcessAnimationAction(aeTemplate, action, arg.Event);
-                }
+                TriggerTemplateEvent(aeTemplate, arg);
             }
             if (!_eventReceivers.TryGetValue(arg.Event.EventType.ToString(), out var list)) {
                 return;
@@ -36,22 +31,59 @@ namespace PixelComrades {
                 list[i].Handle(arg);
             }
         }
+        
+        private const bool LimitToEnemy = true;
 
-        private void FindEventPositionRotation(AnimationEventTemplate aet, ActionTemplate action, AnimationEvent ae) {
-            var target = aet.Target;
-            aet.AnimEvent.Position = ae.EventPosition;
-            if (aet.SpriteRenderer != null) {
-                //aet.AnimEvent.Position = aet.SpriteRenderer.GetEventPosition(ae.EventPosition);
-                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpriteRenderer.BaseTr.rotation;
-            }
-            else {
-                //aet.AnimEvent.Position = aet.SimpleSpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame, action?.Config.EquippedSlot ?? 0);
-                aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SimpleSpriteRenderer.Rotation;
-            }
-            switch (ae.EventType) {
-                case AnimationEvent.Type.Default:
+        private void TriggerTemplateEvent(AnimationEventTemplate aet, AnimationEventTriggered arg) {
+            aet.AnimEvent.CurrentAnimationEvent = arg.Event;
+            var action = aet.CurrentAction?.Value;
+            aet.AnimEvent.Position = arg.Event.EventPosition;
+            aet.AnimEvent.Rotation = aet.Target?.GetLookAtTarget(aet.AnimEvent.Position) ?? arg.Event.EventRotation;
+            switch (arg.Event.EventType) {
+                case AnimationEvent.Type.Spawn:
+                    var spawn = arg.Event.EventDataObject as ProjectileConfig;
+                    if (spawn != null) {
+                        ProjectileFactory.SpawnProjectile(aet.Entity, spawn, aet.GetTargetPosition(), aet.AnimEvent.Position, aet.AnimEvent.Rotation);
+                    }
+                    break;
+                case AnimationEvent.Type.Camera:
+                    ScriptingSystem.ExecuteCameraMessage(arg.Event.EventDataString.SplitIntoWords());
+                    break;
+                case AnimationEvent.Type.RaycastCollisionCheck:
+                    if (action == null) {
+                        return;
+                    }
+                    Vector3 originPos;
+                    Vector3 target;
+                    if (aet.IsPlayer()) {
+                        originPos = PlayerInputSystem.GetLookTargetRay.origin;
+                        target = PlayerInputSystem.GetMouseRaycastPosition(action.Config.Range);
+                    }
+                    else {
+                        originPos = aet.AnimEvent.Position;
+                        target = aet.Target.GetPosition;
+                    }
+                    var ray = new Ray(originPos, (target - originPos).normalized);
+                    var raySize = ((int) action.Config.Source.Collision) * 0.01f;
+                    var rayDistance = action.Config.Range;
+                    if (CollisionCheckSystem.Raycast(action.Entity, ray, rayDistance, LimitToEnemy) == null && raySize > 0.01f) {
+                        CollisionCheckSystem.SphereCast(action.Entity, ray, rayDistance, raySize, LimitToEnemy);
+                    }
                     break;
             }
+            if (action != null) {
+                World.Get<ActionSystem>().ProcessAnimationAction(aet, action, arg.Event);
+            }
+        }
+
+       // private void FindEventPositionRotation(AnimationEventTemplate aet, AnimationEvent ae) {
+            // if (aet.SpriteRenderer != null) {
+            //     //aet.AnimEvent.Position = aet.SpriteRenderer.GetEventPosition(ae.EventPosition);
+            // }
+            // else {
+            //     //aet.AnimEvent.Position = aet.SimpleSpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame, action?.Config.EquippedSlot ?? 0);
+            //     aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SimpleSpriteRenderer.;
+            // }
             //if (action != null) {
                 // if (action.Weapon?.Loaded != null) {
                 //     aet.AnimEvent.Position = action.Weapon.Loaded.Spawn.position;
@@ -83,7 +115,7 @@ namespace PixelComrades {
             //     aet.AnimEvent.Position = aet.Tr.position;
             //     aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.Tr.rotation;
             // }
-        }
+        //}
     }
 
     public class AnimationEventTemplate : BaseTemplate {
@@ -106,6 +138,15 @@ namespace PixelComrades {
         public SpriteRendererComponent SpriteRenderer { get => _spriteRenderer; }
         public SpriteSimpleRendererComponent SimpleSpriteRenderer { get => _simpleSpriteRenderer; }
         public CommandTarget Target => _target.Value;
+
+
+        public Vector3 GetTargetPosition() {
+            if (this.IsPlayer()) {
+                return PlayerInputSystem.GetMouseRaycastPosition(CurrentAction.Value.Config.Range);
+            }
+            return Target.GetPosition;
+        }
+        
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _tr, _spawnPivot, _currentAction, _animGraph, _animEvent, _spriteAnimator, _spriteRenderer, _target, _simpleSpriteRenderer
         };

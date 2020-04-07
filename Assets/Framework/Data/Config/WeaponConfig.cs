@@ -1,26 +1,26 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public class WeaponConfig : EquipmentConfig, IActionConfig {
+    public class WeaponConfig : ItemConfig, IActionConfig {
         private static GameOptions.CachedFloat _brokenWeaponPercent = new GameOptions.CachedFloat("WeaponBrokenPercentDamage");
 
-        public string EquipVariable;
-        public string WeaponModel;
-        
+        public SpriteAnimationReference Idle;
+        [ValueDropdown("SkillSlotList")] public string Skill;
+
         [Header("IActionConfig")]
-        [SerializeField] private string _actionTrigger = "Attacking";
         [SerializeField] private ActionDistance _range = ActionDistance.Short;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
         [SerializeField] private CollisionType _collision = CollisionType.Point;
         [SerializeField] private TargetType _targeting = TargetType.Enemy;
         [SerializeField] private ImpactRadiusTypes _radius = ImpactRadiusTypes.Single;
-        [SerializeField] private string _damageType = Defenses.Physical;
-        [SerializeField] private ProjectileConfig _projectile = null;
+        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Physical;
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
+        [SerializeField] private StateGraph _actionGraph = null;
         
         [Header("Ammo")] 
         public AmmoConfig Ammo;
@@ -28,19 +28,26 @@ namespace PixelComrades {
         public ReloadType ReloadType = ReloadType.Repair;
         [Range(0, 5)] public float ReloadSpeedMulti = 1;
         
-        public string ActionTrigger { get => _actionTrigger; }
         public ActionDistance Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
         public ImpactRadiusTypes Radius { get => _radius; }
         public string DamageType { get => _damageType; }
-        public ProjectileConfig Projectile { get => _projectile; }
         public ActionFx ActionFx { get => _actionFx; }
         public ScriptedEventConfig[] ScriptedEvents { get => _scriptedEvents; }
         public float CritMulti { get => _critMulti; }
         public TargetType Targeting { get => _targeting; }
         public string AbilityType { get { return "Attack"; } }
+        public StateGraph ActionGraph { get => _actionGraph; }
 
+        private ValueDropdownList<string> DamageTypeList() {
+            return Defenses.GetDropdownList();
+        }
+
+        private ValueDropdownList<string> SkillSlotList() {
+            return Skills.GetDropdownList();
+        }
+        public override string ItemType { get { return ItemTypes.Weapon; } }
 
         public override void AddComponents(Entity entity) {
             base.AddComponents(entity);
@@ -48,13 +55,13 @@ namespace PixelComrades {
             stats.AddRange(StatExtensions.GetBasicCommandStats(stats));
             
             var action = entity.Add(new ActionConfig());
+            action.Source = this;
             action.Primary = true;
-            action.WeaponModel = WeaponModel;
+            action.Sprite = Idle;
             action.AnimationTrigger = GraphTriggers.Attack;
-            action.EquipVariable = EquipVariable;
             entity.Add(new DamageImpact(DamageType, Stats.Health, 1f));
             ActionProvider.AddComponent(entity, this, action);
-            ActionProvider.AddCheckForCollision(action, this, true);
+            //ActionProvider.AddCheckForCollision(action, this, true);
             AmmoComponent ammoComponent;
             switch (ReloadType) {
                 case ReloadType.Repair:

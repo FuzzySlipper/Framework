@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Rewired;
 using Sirenix.OdinInspector.Editor;
 using UnityEditor;
@@ -217,18 +218,18 @@ namespace PixelComrades {
                 else if (e.type == EventType.MouseDown) {
                     if (e.button == 0) {
                         var frame = _clip.Frames[_currentFrame];
-                        if (frame.Event == AnimationEvent.Type.None) {
-                            frame.Event = AnimationEvent.Type.Default;
-                        }
+                        // if (frame.Event == AnimationEvent.Type.None) {
+                        //     frame.Event = AnimationEvent.Type.Default;
+                        // }
                         var mousePos = Event.current.mousePosition;
                         frame.EventPosition.x = Mathf.InverseLerp(rect.xMin, rect.xMax, mousePos.x);
                         frame.EventPosition.y = Mathf.InverseLerp(rect.yMax, rect.yMin, mousePos.y);
                         Repaint();
                     }
-                    else if (e.button == 1) {
-                        _clip.Frames[_currentFrame].Event = AnimationEvent.Type.None;
-                        Repaint();
-                    }
+                    // else if (e.button == 1) {
+                    //     _clip.Frames[_currentFrame].Event = AnimationEvent.Type.None;
+                    //     Repaint();
+                    // }
                 }
             }
         }
@@ -293,7 +294,7 @@ namespace PixelComrades {
         
         private bool HasValidEvent(float time) {
             var frame = _clip.GetFrameAtTime(time);
-            return frame.Event != AnimationEvent.Type.None;
+            return frame.HasEvent;
         }
         
         private void LayoutInfoPanel(Rect rect) {
@@ -314,10 +315,10 @@ namespace PixelComrades {
                 ChangeFrameRate(newFrameRate, true);
             }
             GUI.SetNextControlName("Length");
-            var oldLength = Utils.Snap(_clip.LengthTime, 0.05f);
-            var newLength = Utils.Snap(EditorGUILayout.FloatField("Length (sec)", oldLength), 0.05f);
+            var oldLength = Snap(_clip.LengthTime, 0.05f);
+            var newLength = Snap(EditorGUILayout.FloatField("Length (sec)", oldLength), 0.05f);
             if (Mathf.Approximately(newLength, oldLength) == false && newLength > 0) {
-                newFrameRate = MathEx.Max(Utils.Snap(_clip.FramesPerSecond*(_clip.LengthTime/newLength), 1), 1);
+                newFrameRate = MathEx.Max(Snap(_clip.FramesPerSecond*(_clip.LengthTime/newLength), 1), 1);
                 ChangeFrameRate(newFrameRate, false);
             }
 
@@ -325,11 +326,57 @@ namespace PixelComrades {
             if (looping != _clip.Looping) {
                 ChangeLooping(looping);
             }
-
             GUILayout.Space(10);
+            EditorGUILayout.Separator();
+            EditorGUILayout.LabelField("Events");
+            if (_currentFrame < 0 ||!_clip.Frames.HasIndex(_currentFrame)) {
+                EditorGUILayout.LabelField("No Selected Frame");
+                return;
+            }
+            var frame = _clip.Frames[_currentFrame];
+            EditorGUI.BeginChangeCheck();
+
+            if (GUILayout.Button("Add Event")) {
+                System.Array.Resize(ref frame.Events, frame.Events.Length + 1);
+                frame.Events[frame.Events.LastIndex()] = new AnimationFrame.Event();
+            }
+
+            // Frames list
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, false, false);
+            for (int i = 0; i < frame.Events.Length; i++) {
+                GUILayout.Space(10);
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Event " + i);
+                if (GUILayout.Button("X")) {
+                    if (EditorUtility.DisplayDialog("Frame " + _currentFrame, "Delete Event " + i.ToString(), "Yes", "No" )) {
+                        var events = frame.Events.ToList();
+                        events.RemoveAt(i);
+                        frame.Events = events.ToArray();
+                        break;
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+                DisplayEvent(frame.Events[i]);
+            }
+
+            if (EditorGUI.EndChangeCheck()) {
+                Repaint();
+                ApplyChanges();
+            }
             EditorGUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DisplayEvent(AnimationFrame.Event fe) {
+            fe.Type = (AnimationEvent.Type) EditorGUILayout.EnumPopup(fe.Type);
+            // switch (fe.Type) {
+            //     case AnimationEvent.Type.Camera:
+            //         var camData = fe.DataString.SplitIntoWords();
+            //         
+            //         break;
+            // }
+            fe.DataString = EditorGUILayout.TextField(fe.DataString);
+            fe.DataObject = EditorGUILayout.ObjectField(fe.DataObject, typeof(UnityEngine.Object), false);
         }
         
         private void LayoutTimeline(Rect rect) {
@@ -589,18 +636,18 @@ namespace PixelComrades {
             //    "Default Event Trigger", Styles.TIMELINE_EVENT_TOGGLE);
             //xOffset += width;
 
-            width = 80;
-            frame.Event =
-                (AnimationEvent.Type)
-                    EditorGUI.EnumPopup(new Rect(xOffset, 2, width, rect.height), frame.Event);
-            xOffset += width;
-
-            if (frame.Event == AnimationEvent.Type.None) {
-                if (EditorGUI.EndChangeCheck()) {
-                    ApplyChanges();
-                }
-                return;
-            }
+            // width = 80;
+            // frame.Event =
+            //     (AnimationEvent.Type)
+            //         EditorGUI.EnumPopup(new Rect(xOffset, 2, width, rect.height), frame.Event);
+            // xOffset += width;
+            //
+            // if (frame.Event == AnimationEvent.Type.None) {
+            //     if (EditorGUI.EndChangeCheck()) {
+            //         ApplyChanges();
+            //     }
+            //     return;
+            // }
 
             width = 50;
             // Frame length (in samples)
@@ -611,34 +658,34 @@ namespace PixelComrades {
             frame.EventPosition.x = EditorGUI.Slider(new Rect(xOffset, 2, width, rect.height - 3), frame.EventPosition.x, -1, 1);
             xOffset += width + 5;
             frame.EventPosition.y = EditorGUI.Slider(new Rect(xOffset, 2, width, rect.height - 3), frame.EventPosition.y, -1, 1);
-            xOffset += width + 5;
+            //xOffset += width + 5;
+            //
+            // width = 70;
+            // GUI.Label(new Rect(xOffset, 0, width, rect.height), "Event Name:", EditorStyles.miniLabel);
+            // xOffset += width;
 
-            width = 70;
-            GUI.Label(new Rect(xOffset, 0, width, rect.height), "Event Name:", EditorStyles.miniLabel);
-            xOffset += width;
-
-            width = 150;
+            //width = 150;
             // Give gui control name using it's time and function name so it can be auto-selected when creating new evnet
             // GUI.SetNextControlName("EventFunctionName");
             // frame.EventName = EditorGUI.TextField(new Rect(xOffset, 2, width, rect.height + 5),
             //     frame.EventName, EditorStyles.miniTextField);
             // xOffset += width + 5;
 
-            width = 60;
-            frame.EventDataString = EditorGUI.TextField(
-                new Rect(xOffset, 2, width, rect.height),
-                frame.EventDataString, EditorStyles.miniTextField);
-            xOffset += width + 5;
+            // width = 60;
+            // frame.EventDataString = EditorGUI.TextField(
+            //     new Rect(xOffset, 2, width, rect.height),
+            //     frame.EventDataString, EditorStyles.miniTextField);
+            // xOffset += width + 5;
             //
             // frame.EventDataFloat = EditorGUI.FloatField(
             //     new Rect(xOffset, 2, width, rect.height - 3),
             //     frame.EventDataFloat, EditorStyles.miniTextField);
             // xOffset += width + 5;
 
-            width = 150;
-            frame.EventDataObject = EditorGUI.ObjectField(
-                new Rect(xOffset, 2, width, rect.height - 3), frame.EventDataObject, typeof(Object),
-                false);
+            // width = 150;
+            // frame.EventDataObject = EditorGUI.ObjectField(
+            //     new Rect(xOffset, 2, width, rect.height - 3), frame.EventDataObject, typeof(Object),
+            //     false);
 
             if (EditorGUI.EndChangeCheck()) {
                 ApplyChanges();
@@ -658,12 +705,12 @@ namespace PixelComrades {
             }
             GUI.BeginGroup(rect);
             for (int i = 0; i < _clip.Frames.Length; i++) {
-                if (_clip.Frames[i].Event == AnimationEvent.Type.None) {
+                if (!_clip.Frames[i].HasEvent) {
                     continue;
                 }
                 var frame = _clip.Frames[i];
                 var start = AnimTimeToGuiPos(rect, SnapTimeToFrameRate(_clip.GetFrameStartTime(i)));
-                var text = frame.EventDataString;
+                var text = frame.Events.Length.ToString();
                 var textWidth = Styles.TimelineEventText.CalcSize(new GUIContent(text)).x;
                 var end = start + textWidth + 4;
                 DrawRect(new Rect(start, 0, 1, rect.height), Color.grey);
@@ -759,7 +806,7 @@ namespace PixelComrades {
             var selected = _currentFrame == frameId;
             if (selected) {
                 // highlight selected frames
-                DrawRect(frameRect, Color.grey.WithAlpha(0.3f));
+                DrawRect(frameRect, WithAlpha(Color.grey, 0.3f));
             }
             DrawLine(new Vector2(endOffset, 0), new Vector2(endOffset, rect.height), new Color(0.4f, 0.4f, 0.4f));
             LayoutTimelineSprite(frameRect, sprite);
@@ -771,7 +818,10 @@ namespace PixelComrades {
                 e.Use();
             }
         }
-        
+
+        public static Color WithAlpha(Color col, float alpha) {
+            return new Color(col.r, col.g, col.b, alpha);
+        }
 
         private void LayoutScrubber(Rect rect) {
             var minUnitSecond = 1.0f/_clip.FramesPerSecond;
@@ -985,6 +1035,12 @@ namespace PixelComrades {
                 _textureCheckerboard.Apply();
             }
             return _textureCheckerboard;
+        }
+
+        public static float Snap(float value, float snapTo) {
+            if (snapTo <= 0)
+                return value;
+            return Mathf.Round(value / snapTo) * snapTo;
         }
 
         private class Styles {

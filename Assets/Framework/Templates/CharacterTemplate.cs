@@ -42,6 +42,8 @@ namespace PixelComrades {
         public CommandTarget Target => _target.Value;
         public TagsComponent Tags => Entity.Tags;
         public SteeringInput Steering => _steering.Value;
+        public AnimationGraphComponent AnimGraphComponent => _animGraph.Value;
+
         public RuntimeStateGraph AnimGraph => _animGraph.Value.Value;
         public ActionTemplate CurrentAction => _currentAction.Value?.Value;
         public CurrentAction CurrentActionComponent => _currentAction.Value;

@@ -93,39 +93,38 @@ namespace PixelComrades {
             entity.Add(new StatusUpdateComponent());
             config.AddComponents(entity);
             var dataDescr = entity.Add(new DataDescriptionComponent());
-            for (int i = 0; i < config.GenericComponents.Count; i++) {
+  //          for (int i = 0; i < config.GenericComponents.Count; i++) {
                 //World.Get<DataFactory>().AddComponentList(entity, config.Data, config.TypeComponents);
-            }
-            ItemModifierFactory.AddModifiers(config.ModifierGroup, level, entity, out DataEntry prefix, out DataEntry suffix);
+//            }
+            // ItemModifierFactory.AddModifiers(config.ModifierGroup, level, entity, out DataEntry prefix, out DataEntry suffix);
             StringBuilder sbName = new StringBuilder();
             StringBuilder sbDescr = new StringBuilder();
             sbDescr.Append(config.Description);
-            if (prefix != null) {
-                var prefixLabel = prefix.TryGetValue(DatabaseFields.Name, "");
-                if (!string.IsNullOrEmpty(prefixLabel)) {
-                    sbName.Append(prefixLabel);
-                    sbName.Append(" ");
-                }
-                var prefixDescr = prefix.TryGetValue(DatabaseFields.Description, "");
-                if (!string.IsNullOrEmpty(prefixDescr)) {
-                    sbDescr.NewLine();
-                    sbDescr.Append(prefixDescr);
-                }
-            }
-
+            // if (prefix != null) {
+            //     var prefixLabel = prefix.TryGetValue(DatabaseFields.Name, "");
+            //     if (!string.IsNullOrEmpty(prefixLabel)) {
+            //         sbName.Append(prefixLabel);
+            //         sbName.Append(" ");
+            //     }
+            //     var prefixDescr = prefix.TryGetValue(DatabaseFields.Description, "");
+            //     if (!string.IsNullOrEmpty(prefixDescr)) {
+            //         sbDescr.NewLine();
+            //         sbDescr.Append(prefixDescr);
+            //     }
+            // }
             sbName.Append(config.Name);
-            if (suffix != null) {
-                var suffixLabel = suffix.TryGetValue(DatabaseFields.Name, "");
-                if (!string.IsNullOrEmpty(suffixLabel)) {
-                    sbName.Append(" ");
-                    sbName.Append(suffixLabel);
-                }
-                var suffixDescr = suffix.TryGetValue(DatabaseFields.Description, "");
-                if (!string.IsNullOrEmpty(suffixDescr)) {
-                    sbDescr.NewLine();
-                    sbDescr.Append(suffixDescr);
-                }
-            }
+            // if (suffix != null) {
+            //     var suffixLabel = suffix.TryGetValue(DatabaseFields.Name, "");
+            //     if (!string.IsNullOrEmpty(suffixLabel)) {
+            //         sbName.Append(" ");
+            //         sbName.Append(suffixLabel);
+            //     }
+            //     var suffixDescr = suffix.TryGetValue(DatabaseFields.Description, "");
+            //     if (!string.IsNullOrEmpty(suffixDescr)) {
+            //         sbDescr.NewLine();
+            //         sbDescr.Append(suffixDescr);
+            //     }
+            // }
             entity.Add(new LabelComponent(sbName.ToString()));
             entity.Add(new DescriptionComponent(sbDescr.ToString()));
             entity.Post(new DataDescriptionUpdating(dataDescr));

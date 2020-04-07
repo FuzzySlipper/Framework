@@ -188,9 +188,9 @@ namespace PixelComrades {
             _currentFrameIndex++;
             if (CurrentFrame != null) {
                 if (CurrentFrame.HasEvent) {
-                    if (CurrentFrame.Event == AnimationEvent.Type.Default) {
-                        DefaultEventTriggered = true;
-                    }
+                    // if (CurrentFrame.Type == AnimationEvent.Type.Default) {
+                    //     DefaultEventTriggered = true;
+                    // }
                     _eventFrame = CurrentFrame;
                 }
                 _frameTimer.StartNewTime(_currentAnim.FrameTime * CurrentFrame.Length);

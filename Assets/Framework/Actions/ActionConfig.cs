@@ -12,11 +12,12 @@ namespace PixelComrades {
         
         public List<ICommandCost> Costs = new List<ICommandCost>();
         public float Range;
-        public string EquipVariable;
         public string AnimationTrigger;
-        public string WeaponModel;
         public bool Primary;
         public int EquippedSlot = -1;
+        public IActionConfig Source;
+        public RuntimeStateGraph Graph;
+        public SpriteAnimationReference Sprite;
         public ActionConfig() {}
 
         public ActionConfig(SerializationInfo info, StreamingContext context) {

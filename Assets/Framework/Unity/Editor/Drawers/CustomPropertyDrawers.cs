@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEditor;
 
 namespace PixelComrades {
@@ -13,6 +14,41 @@ namespace PixelComrades {
 //            TargetAnimator animator = PropertyDrawerUtility.GetActualObjectForSerializedProperty<TargetAnimator>(fieldInfo, property);
 //        }
 //    }
+
+
+    [CustomPropertyDrawer (typeof (EnumLabelArrayAttribute))]
+    public class EnumLabelArrayAttributeDrawer : PropertyDrawer {
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
+            // Properly configure height for expanded contents.
+            return EditorGUI.GetPropertyHeight(property, label, property.isExpanded);
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            try {
+                var config = (EnumLabelArrayAttribute) attribute;
+                var enumNames = Enum.GetNames(config.Labels);
+                if (property.isArray && property.arraySize != enumNames.Length) {
+                    property.arraySize = enumNames.Length;
+                    while (property.arraySize < enumNames.Length) {
+                        property.InsertArrayElementAtIndex(0);
+                    }
+                }
+
+                var match = Regex.Match(property.propertyPath, "\\[(\\d)\\]", RegexOptions.RightToLeft);
+                int pos = int.Parse(match.Groups[1].Value);
+
+                // Make names nicer to read (but won't exactly match enum definition).
+                var enumLabel = ObjectNames.NicifyVariableName(enumNames[pos].ToLower());
+                label = new GUIContent(enumLabel);
+            }
+            catch {
+                // keep default label
+            }
+            EditorGUI.PropertyField(position, property, label, property.isExpanded);
+        }
+    }
+
     [CustomPropertyDrawer(typeof(FloatRange))]
     public class FloatRangeDrawer : PropertyDrawer {
         private const float MinPercent = 0;
@@ -42,6 +78,31 @@ namespace PixelComrades {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             return base.GetPropertyHeight(property, label) * 2f + 5f;
         }
+    }
+
+    [CustomPropertyDrawer(typeof(IntRange))]
+    public class IntRangeDrawer : PropertyDrawer {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            label = EditorGUI.BeginProperty(position, label, property);
+            Rect contentPosition = EditorGUI.PrefixLabel(position, label);
+            EditorGUI.indentLevel = 0;
+            // contentPosition.height *= 0.5f;
+            contentPosition.width *= 0.5f;
+            SerializedProperty min = property.FindPropertyRelative("Min");
+            SerializedProperty max = property.FindPropertyRelative("Max");
+            min.intValue = EditorGUI.IntField(contentPosition, min.intValue);
+            contentPosition.x += contentPosition.width;
+            max.intValue = EditorGUI.IntField(contentPosition, max.intValue);
+            contentPosition.x -= contentPosition.width;
+            contentPosition.width *= 2f;
+            // contentPosition.y += contentPosition.height;
+            EditorGUI.EndProperty();
+        }
+        //
+        // public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
+        //     return base.GetPropertyHeight(property, label) * 2f + 5f;
+        // }
     }
 
     [CustomPropertyDrawer(typeof(NormalizedFloatRange))]

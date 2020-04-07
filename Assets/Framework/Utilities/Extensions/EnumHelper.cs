@@ -12,8 +12,7 @@ public static class EnumHelper {
     private static Dictionary<Type, SortedList<int, string>> _enumDescr = new Dictionary<Type, SortedList<int, string>>();
 
     public static string GetString<T>(int enumIndex) where T : struct, IConvertible {
-        string value;
-        return GetEnumList<T>().TryGetValue(enumIndex, out value) ? value : "";
+        return GetEnumList<T>().TryGetValue(enumIndex, out var value) ? value : "";
     }
 
     public static int GetLength<T>() where T : struct, IConvertible {
