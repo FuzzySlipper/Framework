@@ -70,6 +70,7 @@ namespace PixelComrades {
             var action = entity.Add(new ActionConfig());
             action.AnimationTrigger = ActionTrigger;
             action.Source = this;
+            action.Primary = false;
             bool generateCollision = false;
             if (_actionGraph == null) {
                 switch (AbilityType) {

@@ -21,8 +21,7 @@ namespace PixelComrades {
     public static class ActionProvider {
         public static void AddComponent(Entity entity, IActionConfig data, ActionConfig action) {
             var stats = entity.Get<StatsContainer>();
-            stats.Remove(stats.Get(Stats.Power));
-            stats.Get(Stats.CriticalMulti).ChangeBase(data.CritMulti);
+            stats.Add(new BaseStat(entity, Stats.CriticalMulti, data.CritMulti));
             stats.Add(new RangeStat(entity, Stats.Power, Stats.Power, data.Power.Min, data.Power.Max));
             var targeting = data.Targeting;
             if (targeting == TargetType.Self || targeting == TargetType.Friendly) {
@@ -33,14 +32,8 @@ namespace PixelComrades {
                 entity.Add(new ImpactRadius(radius, true));
             }
             action.Range = (int) data.Range;
-            var abilityType = data.AbilityType;
-            switch (abilityType) {
-                case AbilityTypes.Attack:
-                    
-                    break;
-            }
             if (data.ActionFx != null) {
-                entity.Add(new ActionFxComponent((ActionFx) data.ActionFx));
+                entity.Add(new ActionFxComponent(data.ActionFx));
             }
             for (int i = 0; i < data.ScriptedEvents.Length; i++) {
                 var scriptingData = data.ScriptedEvents[i];

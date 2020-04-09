@@ -63,6 +63,9 @@ namespace PixelComrades {
         }
 
         public void Remove(BaseStat item) {
+            if (item == null) {
+                return;
+            }
             _list.Remove(item);
             _dict.Remove(item.ID);
             if (item is VitalStat vital) {

@@ -64,7 +64,7 @@ namespace PixelComrades {
             CleanUpCurrentItem();
             _entity = item;
             _tooltip = item.Get<TooltipComponent>();
-            _iconDisplay.sprite = item.Get<IconComponent>().Sprite;
+            _iconDisplay.sprite = item.Get<IconComponent>()?.Sprite;
             _iconDisplay.enabled = _iconDisplay.sprite != null;
             var ammo = item.Get<AmmoComponent>();
             if (ammo != null) {

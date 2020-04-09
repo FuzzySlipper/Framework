@@ -30,7 +30,7 @@ namespace PixelComrades {
                     continue;
                 }
                 equipment.StatsToEquip.Add(Attributes.GetID(i));
-                stats.Get(Attributes.GetID(i)).ChangeBase(AttributeBonuses[i]);
+                stats.Add(new BaseStat(entity, Attributes.GetNameAt(i), Attributes.GetID(i), AttributeBonuses[i]));
             }
             for (int i = 0; i < DefenseBonuses.Length; i++) {
                 var defBonus = DefenseBonuses[i];
@@ -38,7 +38,7 @@ namespace PixelComrades {
                     continue;
                 }
                 equipment.StatsToEquip.Add(Defenses.GetID(i));
-                stats.Get(Defenses.GetID(i)).ChangeBase(DefenseBonuses[i]);
+                stats.Add(new BaseStat(entity, Defenses.GetNameAt(i), Defenses.GetID(i), DefenseBonuses[i]));
             }
         }
     }

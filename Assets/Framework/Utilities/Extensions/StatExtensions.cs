@@ -14,11 +14,8 @@ namespace PixelComrades {
             for (int i = 0; i < Attributes.Count; i++) {
                 stats.Add(new BaseStat(owner, Attributes.GetNameAt(i), Attributes.GetID(i), Attributes.GetAssociatedValue(i)));
             }
-            var atkStats = GameData.Enums[Stats.AttackStats];
-            if (atkStats != null) {
-                for (int i = 0; i < atkStats.Length; i++) {
-                    stats.Add(new BaseStat(owner, atkStats.Names[i], atkStats.IDs[i], 0));
-                }
+            for (int i = 0; i < Skills.Count; i++) {
+                stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetID(i), Skills.GetAssociatedValue(i)));
             }
         }
 

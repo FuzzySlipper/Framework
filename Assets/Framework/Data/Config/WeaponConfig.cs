@@ -53,7 +53,7 @@ namespace PixelComrades {
             base.AddComponents(entity);
             var stats = entity.Get<StatsContainer>();
             stats.AddRange(StatExtensions.GetBasicCommandStats(stats));
-            
+            entity.Add(new SkillRequirement(Skill, 0));
             var action = entity.Add(new ActionConfig());
             action.Source = this;
             action.Primary = true;
