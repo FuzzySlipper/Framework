@@ -45,6 +45,10 @@ namespace PixelComrades {
                     if (spawn != null) {
                         ProjectileFactory.SpawnProjectile(aet.Entity, spawn, aet.GetTargetPosition(), aet.AnimEvent.Position, aet.AnimEvent.Rotation);
                     }
+                    else {
+                        Debug.LogErrorFormat("No spawn for {0} {1}", aet.GetName(), arg.Event.EventDataObject != null ? arg.Event
+                        .EventDataObject.name : null);
+                    }
                     break;
                 case AnimationEvent.Type.Camera:
                     ScriptingSystem.ExecuteCameraMessage(arg.Event.EventDataString.SplitIntoWords());

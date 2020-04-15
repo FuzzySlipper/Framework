@@ -191,10 +191,6 @@ namespace PixelComrades {
             return _loadedAssets.TryGetValue(target.GetInstanceID(), out var ar) ? ar : "";
         }
 
-        public static void Spawn(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
-            Main.SpawnPrefabCopy(targetObject, action);
-        }
-
         public static void Spawn<T>(T loadOp) where T : LoadOperationEvent {
             Main.SpawnPrefabCopy(loadOp);
         }
@@ -220,26 +216,14 @@ namespace PixelComrades {
             _stringBuilder.Append(file);
             return GetWorldEntityComponent<T>(Main.SpawnByString(_stringBuilder.ToString(), isSceneObject, position, rotation, null, isCulled));
         }
-
-        public static T Spawn<T>(string itemName, bool isSceneObject = true, bool isCulled = true) where T : MonoBehaviour {
-            return GetWorldEntityComponent<T>(Main.SpawnByString(itemName, isSceneObject, Vector3.zero, Quaternion.identity, null, isCulled));
-        }
-
+        
         public static T Spawn<T>(string itemName, Vector3 position, Quaternion rotation, bool isScene = true, bool isCulled = true) where T : MonoBehaviour {
             return GetWorldEntityComponent<T>(Main.SpawnByString(itemName, isScene, position, rotation, null, isCulled));
-        }
-
-        public static PrefabEntity Spawn(PrefabEntity targetObject, bool isSceneObject = false, bool isCulled = false) {
-            return Main.GetPrefabCopy(targetObject, isSceneObject, isCulled, Vector3.zero, Quaternion.identity);
         }
 
         public static PrefabEntity Spawn(PrefabEntity targetObject, Vector3 pos, Quaternion rot, bool isScene = true, bool isCulled = 
         true) {
             return Main.GetPrefabCopy(targetObject, isScene, isCulled, pos, rot);
-        }
-
-        public static PrefabEntity Spawn(GameObject targetObject, Vector3 pos, Quaternion rot, bool isScene = true, bool isCulled = true) {
-            return Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), isScene, isCulled, pos, rot);
         }
 
         public static GameObject SpawnScenePrefab(GameObject targetObject, Vector3 pos, Quaternion rot) {
@@ -252,14 +236,6 @@ namespace PixelComrades {
 
         public static T Spawn<T>(GameObject targetObject, Vector3 pos, Quaternion rot, bool isSceneObject, bool isCulled) where T : MonoBehaviour {
             return GetWorldEntityComponent<T>(Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), isSceneObject, isCulled, pos, rot));
-        }
-
-        public static T Spawn<T>(PrefabEntity targetObject, Vector3 pos, Quaternion rot, bool isSceneObject = true, bool isCulled = true) where T : MonoBehaviour {
-            return GetWorldEntityComponent<T>(Main.GetPrefabCopy(targetObject, isSceneObject, isCulled, pos, rot));
-        }
-
-        public static T SpawnUIPrefab<T>(GameObject targetObject, Vector3 pos, Quaternion rot) where T : MonoBehaviour {
-            return GetWorldEntityComponent<T>(Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), false, false, pos, rot));
         }
 
         public static GameObject SpawnUIPrefab(PrefabEntity targetObject, Transform parent) {
@@ -354,7 +330,11 @@ namespace PixelComrades {
         }
 
         public static PrefabEntity GetReferencePrefab(int itemId) {
-            return Main._referenceItems.TryGetValue(itemId, out var prefab) ? prefab : null;
+            if (Main._referenceItems.TryGetValue(itemId, out var prefab)) {
+                return prefab;
+            }
+            Debug.LogErrorFormat("No item at id {0}", itemId );
+            return null;
         }
 
         private PrefabEntity SpawnByString(string itemName, bool isScene, Vector3 pos, Quaternion rot, Transform parent, bool isCulled) {
@@ -428,11 +408,16 @@ namespace PixelComrades {
             if (!_prefabKeys.TryGetValue(loadOp.SourcePrefab, out var key)) {
                 loadOp.SourcePrefab.LoadAssetAsync().Completed += handle => {
                     var result = handle.Result;
+                    if (result == null) {
+                        Debug.LogErrorFormat("No Prefab at {0}", loadOp.SourcePrefab.Asset != null? loadOp.SourcePrefab.Asset.name : "null");
+                        return;
+                    }
                     var prefab = result.GetOrAddComponent<PrefabEntity>();
                     if (prefab.PrefabId == 0) {
                         prefab.SetId(loadOp.SourcePrefab.AssetGUID);
                     }
                     _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.PrefabId);
+                    _referenceItems.Add(prefab.PrefabId, prefab);
                     SpawnPrefabCopy(loadOp);
                 };
                 return;
@@ -440,6 +425,10 @@ namespace PixelComrades {
             loadOp.NewPrefab = GetPooledEntity(key);
             if (loadOp.NewPrefab == null) {
                 loadOp.NewPrefab = CreateNewPrefab(GetReferencePrefab(key));
+            }
+            if (loadOp.NewPrefab == null) {
+                loadOp.OnComplete();
+                return;
             }
             loadOp.NewPrefab.transform.SetParent(null);
             loadOp.NewPrefab.Register(true, true);
@@ -483,6 +472,9 @@ namespace PixelComrades {
         }
 
         private PrefabEntity CreateNewPrefab(PrefabEntity prefab) {
+            if (prefab == null) {
+                return null;
+            }
             GameObject newItem = Instantiate(prefab.gameObject);
             var prefabCopy = newItem.GetComponent<PrefabEntity>();
             prefabCopy.Setup();

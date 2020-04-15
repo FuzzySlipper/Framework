@@ -188,6 +188,9 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
+                if (Objects[i].Asset == null) {
+                    continue;
+                }
                 Objects[i].ReleaseAsset();
             }
         }

@@ -107,10 +107,13 @@ namespace PixelComrades {
             }
 
             public override bool TryComplete(float dt) {
-                var idx = Animator.FrameIndex;
+                if (!Setup) {
+                    return false;
+                }
                 if (base.TryComplete(dt)) {
                     return true;
                 }
+                var idx = Animator.FrameIndex;
                 if (idx == Animator.FrameIndex) {
                     if (_billboard.Orientation != _lastOrientation) {
                         UpdateSprite();
@@ -127,26 +130,24 @@ namespace PixelComrades {
             protected SpriteAnimatorComponent Animator;
             protected SpriteAnimation Animation;
 
-            private bool _setup = false;
+            protected bool Setup = false;
             
             public override string DebugInfo { 
                 get {
                     if (Animation == null) {
-                        return "No Animation Setup: " + _setup;
+                        return "No Animation Setup: " + Setup;
                     }
                     return string.Format("{2} Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer, Animation.name)
             ; } }
 
             public RuntimeSpriteAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base(node, graph) {
                 AnimNode = node;
-                Renderer = graph.Entity.Get<SpriteRendererComponent>();
-                Animator = graph.Entity.Get<SpriteAnimatorComponent>();
             }
 
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                if (!_setup) {
+                if (!Setup) {
                     var op = AnimNode.Animation.LoadAssetAsync<SpriteAnimation>();
                     op.Completed += FinishSetup;
                 }
@@ -156,7 +157,14 @@ namespace PixelComrades {
             }
 
             private void FinishSetup(AsyncOperationHandle<SpriteAnimation> op) {
-                _setup = true;
+                Setup = true;
+                if (AnimNode.InstancedIndex >= 0) {
+                    Renderer = Graph.Entity.Get<SpriteSimpleRendererComponent>();
+                }
+                else {
+                    Renderer = Graph.Entity.Get<SpriteRendererComponent>();
+                }
+                Animator = Graph.Entity.Get<SpriteAnimatorComponent>();
                 if (op.Result == null) {
                     Debug.LogError(
                         op.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + AnimNode
@@ -205,7 +213,7 @@ namespace PixelComrades {
                 if (base.TryComplete(dt)) {
                     return true;
                 }
-                if (!_setup) {
+                if (!Setup) {
                     return false;
                 }
                 Animator.FrameTimer -= dt;
@@ -230,7 +238,7 @@ namespace PixelComrades {
 
             public override void Dispose() {
                 base.Dispose();
-                _setup = false;
+                Setup = false;
                 Animation = null;
                 AnimNode.Animation.ReleaseAsset();
             }

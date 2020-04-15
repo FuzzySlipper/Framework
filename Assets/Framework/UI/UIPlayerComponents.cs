@@ -28,7 +28,7 @@ public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
             return;
         }
         for (int i = 0; i < main._gameplayUI.Length; i++) {
-            main._gameplayUI[i].SetActive(status);
+            main._gameplayUI[i]?.SetActive(status);
         }
     }
 

@@ -262,10 +262,6 @@ namespace PixelComrades {
             return false;
         }
 
-        public static string GetNameAt(string id) {
-            return GetNameAt(IndexOf(id));
-        }
-
         public static string GetNameAt(int index) {
             if (index >= 0 && index < Count) {
                 return _names[index];

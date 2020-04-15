@@ -23,6 +23,9 @@ namespace PixelComrades {
         public void Load() {
             for (int i = 0; i < Clips.Count; i++) {
                 var clip = Clips[i];
+                if (clip.Audio == null || clip.Audio.Asset == null) {
+                    continue;
+                }
                 clip.Audio.LoadAssetAsync().Completed += handle => clip.LoadedAudio = handle.Result;
             }
         }
@@ -30,6 +33,9 @@ namespace PixelComrades {
         public void Unload() {
             for (int i = 0; i < Clips.Count; i++) {
                 var clip = Clips[i];
+                if (clip.Audio == null || clip.Audio.Asset == null) {
+                    continue;
+                }
                 clip.Audio.ReleaseAsset();
                 clip.LoadedAudio = null;
             }

@@ -72,9 +72,6 @@ namespace PixelComrades {
             }
         }
         
-        private static GameOptions.CachedFloat _defaultTimeout = new GameOptions.CachedFloat("ProjectileTimeout");
-        private static GameOptions.CachedFloat _defaultSpeed = new GameOptions.CachedFloat("ProjectileSpeed");
-        private static GameOptions.CachedFloat _defaultRotation = new GameOptions.CachedFloat("ProjectileRotation");
         private static Dictionary<string, ProjectileConfig> _configs = new Dictionary<string, ProjectileConfig>();
         private static GenericPool<ProjectileLoader> _loadPool = new GenericPool<ProjectileLoader>(2);
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
@@ -189,19 +186,19 @@ namespace PixelComrades {
             return entity;
         }
 
-        private Entity GetDefaultEntity(string name) {
-            var entity = Entity.New(name);
+        private Entity GetDefaultEntity(string nm) {
+            var entity = Entity.New(nm);
             entity.Factory = this;
             //if it has a label component it'll get picked up by center target
             //entity.Add(new LabelComponent(name));
             entity.Add(new RenderingComponent(null));
-            entity.Add(new DespawnTimer(_defaultTimeout.Value, false));
+            entity.Add(new DespawnTimer(1, false));
             entity.Add(new DespawnOnCollision());
-            entity.Add(new MoveSpeed(_defaultSpeed.Value));
-            entity.Add(new RotationSpeed(_defaultRotation.Value));
+            entity.Add(new MoveSpeed(100));
+            entity.Add(new RotationSpeed(100));
             entity.Add(new RigidbodyComponent(null));
             entity.Add(new MoveTarget());
-            entity.Add(new ProjectileComponent(name));
+            entity.Add(new ProjectileComponent(nm));
             return entity;
         }
 

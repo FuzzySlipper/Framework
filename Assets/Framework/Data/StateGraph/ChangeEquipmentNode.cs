@@ -29,16 +29,18 @@ namespace PixelComrades {
         private class RuntimeNode : RuntimeStateNode {
 
             private ChangeEquipmentNode _changeNode;
-            private SpriteInstancedRendererComponent _instanced;
             public RuntimeNode(ChangeEquipmentNode node, RuntimeStateGraph graph) : base(node, graph) {
                 _changeNode = node;
-                _instanced = graph.Entity.Get<SpriteInstancedRendererComponent>();
             }
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 var readyActions = Graph.Entity.Get<ReadyActions>();
                 if (readyActions == null) {
+                    return;
+                }
+                var instanced = Graph.Entity.Get<SpriteInstancedRendererComponent>();
+                if (instanced == null) {
                     return;
                 }
                 var actionConfig = readyActions.QueuedChange;
@@ -51,7 +53,7 @@ namespace PixelComrades {
                     readyActions.EquipAction(actionConfig, targetIndex);
                 }
                 if (targetIndex == 0) {
-                    var data = _instanced.Sprites[0];
+                    var data = instanced.Sprites[0];
                     var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
                     if (!targetAsset.RuntimeKeyIsValid()) {
                         targetAsset.LoadAssetAsync<SpriteAnimation>().Completed += handle => {

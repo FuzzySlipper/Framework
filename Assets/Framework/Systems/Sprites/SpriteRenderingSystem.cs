@@ -14,7 +14,6 @@ namespace PixelComrades {
         public static int ShaderPropertyNormal = Shader.PropertyToID("_BumpMap");
         public static int ShaderPropertyEmissive = Shader.PropertyToID("_EmissionMap");
         public static int ShaderPropertyEmissivePower = Shader.PropertyToID("_EmissionPower");
-        public static string MaterialAddress = "SpriteNpcInstanced.mat";
         public static int RenderLayer = LayerMasks.NumberWeapon;
         
         private TemplateList<SpriteRendererTemplate> _rendererList;
@@ -39,8 +38,7 @@ namespace PixelComrades {
 
             _simpleRenderers = EntityController.GetComponentArray<SpriteSimpleRendererComponent>();
             _simpleRendererDel = RunUpdate;
-            
-            ItemPool.LoadAsset<Material>(MaterialAddress, (m)=> _material = m);
+            _material = SimpleGameSpecificDb.Main.InstancedMat;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {
