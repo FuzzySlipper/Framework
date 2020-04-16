@@ -76,10 +76,8 @@ namespace PixelComrades {
         private void AddAbility(AbilityData abilityData, Entity item) {
             var itemStats = item.Get<StatsContainer>();
             var ownerStats = this.GetEntity().Get<StatsContainer>();
-            ownerStats.Get(abilityData.Template.Skill).AddDerivedStat(RpgSettings.SkillToHitBonus, itemStats.Get(Stats.ToHit));
             var source = abilityData.Template.Source;
             ownerStats.Get(source.GetPowerFromSource()).AddDerivedStat(1, itemStats.Get(Stats.Power));
-            ownerStats.Get(source.GetToHitFromSource()).AddDerivedStat(1, itemStats.Get(Stats.ToHit));
             ownerStats.Get(source.GetCritFromSource()).AddDerivedStat(1, itemStats.Get(Stats.CriticalHit));
         }
     }

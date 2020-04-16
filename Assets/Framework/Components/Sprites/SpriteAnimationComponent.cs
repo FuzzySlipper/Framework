@@ -37,7 +37,7 @@ namespace PixelComrades {
             info.AddValue(nameof(NextUpdateTime), NextUpdateTime);
             info.AddValue(nameof(CurrentFrameIndex), CurrentFrameIndex);
             info.AddValue(nameof(LastAngleHeight), LastAngleHeight);
-            info.AddValue(nameof(Animation), ItemPool.GetAssetLocation(Animation));
+            // info.AddValue(nameof(Animation), ItemPool.GetAssetLocation(Animation));
         }
 
         public SpriteAnimationComponent(SpriteRenderer renderer, SpriteAnimation animation, bool unscaled, BillboardMode billboard) {

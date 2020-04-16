@@ -15,16 +15,17 @@ namespace PixelComrades {
                 stats.Add(new BaseStat(owner, Attributes.GetNameAt(i), Attributes.GetID(i), Attributes.GetAssociatedValue(i)));
             }
             for (int i = 0; i < Skills.Count; i++) {
-                stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetID(i), Skills.GetAssociatedValue(i)));
+                stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetID(i), 0));
             }
         }
 
         public static void SetupVitalStats(StatsContainer stats) {
             var owner = stats.GetEntity();
             for (int i = 0; i < Vitals.Count; i++) {
-                var vital = new VitalStat(owner, Vitals.GetNameAt(i), Vitals.GetID(i), 1, i > 0 ? 0.02f : 0);
+                var vital = new VitalStat(owner, Vitals.GetNameAt(i), Vitals.GetID(i), Vitals.GetStartingValue(i), Vitals.GetRecoveryValue(i));
                 stats.Add(vital);
             }
+            stats.SetMax();
         }
 
         public static void SetupDefenseStats(StatsContainer stats) {

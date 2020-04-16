@@ -53,6 +53,10 @@ namespace PixelComrades {
             if (stat != null && stat.Current >= VitalAmount) {
                 return true;
             }
+            if (stat == null) {
+                owner.PostAll(new StatusUpdate(owner, "No stat " + TargetVital));
+                return false;
+            }
             //entity.Get<StatusUpdateComponent>(e => e.Status = string.Format("Not enough {0}", Vitals.GetDescriptionAt(TargetVital)));
             owner.PostAll(new StatusUpdate(owner, "Not enough " + TargetVital));
             return false;

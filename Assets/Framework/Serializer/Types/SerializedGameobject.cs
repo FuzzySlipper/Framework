@@ -110,16 +110,15 @@ namespace PixelComrades {
         public GameObject ToGameObject(Transform parent) {
             GameObject go = null;
             PrefabEntity mc = null;
-            switch (_metadata.AssetType) {
-                case AssetType.Prefab:
-                    mc = ItemPool.Spawn(_metadata.PrefabPath);
-                    if (mc != null) {
-                        go = mc.gameObject;
-                        //Metadata.ComponentDiff.ApplyPatch(go);
-                    }
-                    break;
-
-            }
+            // switch (_metadata.AssetType) {
+            //     case AssetType.Prefab:
+            //         mc = ItemPool.Spawn(_metadata.PrefabPath);
+            //         if (mc != null) {
+            //             go = mc.gameObject;
+            //             //Metadata.ComponentDiff.ApplyPatch(go);
+            //         }
+            //         break;
+            // }
             if (go == null) {
                 go = new GameObject();
                 mc = go.GetOrAddComponent<PrefabEntity>();

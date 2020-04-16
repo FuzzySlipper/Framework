@@ -19,11 +19,6 @@ namespace PixelComrades {
             Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
         }
 
-        public IconComponent(string dir, string icon) {
-            IconLocation = ItemPool.GetCombinedLocator(dir, icon, ".png");
-            Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
-        }
-
         public IconComponent(){}
 
         public static implicit operator Sprite(IconComponent component) {

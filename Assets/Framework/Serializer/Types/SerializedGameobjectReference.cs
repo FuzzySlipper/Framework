@@ -15,7 +15,8 @@ namespace PixelComrades {
         public string Name { get { return _name; } }
 
         public virtual object GetValue() {
-            return GetWorldEntity();
+            //return GetWorldEntity();
+            return null;
         }
 
         public SerializedGameObjectReference(PrefabEntity entity) {
@@ -32,9 +33,9 @@ namespace PixelComrades {
             info.AddValue(nameof(_path), _path);
             info.AddValue("Name", _name, typeof(string));
         }
-
-        protected PrefabEntity GetWorldEntity() {
-            return ItemPool.Spawn(_path);
-        }
+        //
+        // protected PrefabEntity GetWorldEntity() {
+        //     return ItemPool.Spawn(_path);
+        // }
     }
 }

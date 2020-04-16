@@ -39,7 +39,7 @@ namespace PixelComrades {
                 if (readyActions == null) {
                     return;
                 }
-                var instanced = Graph.Entity.Get<SpriteInstancedRendererComponent>();
+                var instanced = Graph.Entity.Get<SpriteSimpleRendererComponent>();
                 if (instanced == null) {
                     return;
                 }
@@ -55,7 +55,7 @@ namespace PixelComrades {
                 if (targetIndex == 0) {
                     var data = instanced.Sprites[0];
                     var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
-                    if (!targetAsset.RuntimeKeyIsValid()) {
+                    if (targetAsset.Asset == null) {
                         targetAsset.LoadAssetAsync<SpriteAnimation>().Completed += handle => {
                             var targetAnimation = handle.Result;
                             data.Sprite = targetAnimation.GetSprite(0);
