@@ -1,0 +1,96 @@
+using System;
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Sirenix.Utilities;
+using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace PixelComrades {
+    [InitializeOnLoad]
+    public static class ScriptableDatabases {
+        
+        private static Dictionary<System.Type, ScriptableDatabase> _databases = new Dictionary<Type, ScriptableDatabase>();
+        private static bool _setup = false;
+        
+        private const string EditorFolder = "Assets/GameData/Resources/";
+
+        static ScriptableDatabases() {
+            Init();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        public static void Init() {
+            if (_setup) {
+                return;
+            }
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (int a = 0; a < assemblies.Length; a++) {
+                var allTypes = assemblies[a].GetTypes();
+                for (int t = 0; t < allTypes.Length; t++) {
+                    var checkTyped = allTypes[t];
+                    if (!checkTyped.InheritsFrom(typeof(ScriptableDatabase<>)) || checkTyped.IsAbstract) {
+                        continue;
+                    }
+                    var db = Resources.Load(checkTyped.Name);
+                    if (db == null) {
+                        db = UnityEngine.ScriptableObject.CreateInstance(checkTyped);
+                        if (db == null) {
+                            Debug.Log("Bad class " + checkTyped.Name);
+                            continue;
+                        }
+#if UNITY_EDITOR
+                        var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(EditorFolder + checkTyped.Name + ".asset");
+                        AssetDatabase.CreateAsset(db, assetPathAndName);
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+#endif
+                    }
+                    _databases.AddOrUpdate(checkTyped, db as ScriptableDatabase);
+                }
+            }
+            _setup = true;
+        }
+        
+        public static void Register<T>(ScriptableDatabase db) where T : ScriptableDatabase {
+            _databases.AddOrUpdate(typeof(T), db);
+        }
+
+        public static T GetDatabase<T>() where T : ScriptableDatabase<T> {
+            var type = typeof(T);
+            return _databases.TryGetValue(type, out var db) ? db as T : null;
+        }
+
+        public static ScriptableDatabase GetDatabase(Type type) {
+            return _databases.TryGetValue(type, out var db) ? db : null;
+        }
+    }
+
+    public abstract class ScriptableDatabase : ScriptableObject {
+        public abstract T GetObject<T>(string id) where T : Object;
+        public abstract string GetId<T>(T obj) where T : Object;
+    }
+    
+    public abstract class ScriptableDatabase<TV> : ScriptableDatabase where TV : ScriptableDatabase<TV> {
+
+        private const string EditorFolder = "Assets/GameData/Resources/";
+        private const string FullDirectory = EditorFolder;
+        
+        private static TV _main;
+        public static TV Main {
+            get {
+                if (_main != null) {
+                    return _main;
+                }
+                if (_main == null) {
+                    _main = ScriptableDatabases.GetDatabase<TV>();
+                }
+                return _main;
+            }
+            protected set { _main = value; }
+        }
+    }
+}
