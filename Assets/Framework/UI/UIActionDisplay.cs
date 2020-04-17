@@ -16,7 +16,7 @@ namespace PixelComrades {
         [SerializeField] private Slider _durabilitySlider = null;
         [SerializeField] private Image _cooldownImage = null;
         [SerializeField] private bool _postStatusUpdates = true;
-        [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
+        [SerializeField] private UIFloatingText.Orientation _textOrientation = UIFloatingText.Orientation.Center;
         
         private UnscaledTimer _statusTimer = new UnscaledTimer(0.25f);
         private Entity _entity;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace PixelComrades {
-    public class ItemFactory : ScriptableSingleton<ItemFactory> {
+    public class ItemFactory : ScriptableDatabase<ItemFactory> {
         
         [SerializeField] private ItemConfig[] _allItems = new ItemConfig[0];
 
@@ -13,6 +13,14 @@ namespace PixelComrades {
         private static Dictionary<int, ShuffleBag<ItemConfig>> _specificRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
         private static Dictionary<string, ItemConfig> _items = new Dictionary<string, ItemConfig>();
 
+        public override T GetObject<T>(string id) {
+            return _items.TryGetValue(id, out var config) ? config as T : null;
+        }
+
+        public override string GetId<T>(T obj) {
+            return obj is ItemConfig config ? config.ID : "";
+        }
+        
         private static void Init() {
             GameData.AddInit(Init);
             _maxRarityBags.Clear();

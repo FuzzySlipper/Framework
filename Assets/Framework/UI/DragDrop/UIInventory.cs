@@ -50,16 +50,42 @@ namespace PixelComrades {
             ClearSlots();
             _slots = new UIItemDragDrop[_inventory.Max];
             for (int i = 0; i < _slots.Length; i++) {
-                _slots[i] = SpawnPrefab();
-                _slots[i].Index = i;
-                _slots[i].SetItem(_inventory[i]);
+                IconLoader.New(this, _inventory[i], i);
             }
             _inventory.Owner.AddObserver(this);
             RefreshInventory();
         }
+        
+        
 
-        protected virtual UIItemDragDrop SpawnPrefab() {
-            return ItemPool.SpawnUIPrefab<UIItemDragDrop>(StringConst.ItemDragDrop, _grid);
+        private class IconLoader : LoadOperationEvent {
+            private static GenericPool<IconLoader> _pool = new GenericPool<IconLoader>(5);
+
+            private Entity _item;
+            private int _index;
+            private UIInventory _inventory;
+                
+            public static void New(UIInventory inventory, Entity item, int index) {
+                var loader = _pool.New();
+                loader.SourcePrefab = LazyDb.Main.ItemDragDrop;
+                loader._inventory = inventory;
+                loader._item = item;
+                loader._index = index;
+            }
+
+            public override void OnComplete() {
+                var itemDragDrop = NewPrefab.GetComponent<UIItemDragDrop>();
+                itemDragDrop.RectTransform.SetParent(_inventory._grid);
+                itemDragDrop.Index = _index;
+                itemDragDrop.SetItem(_item);
+                _inventory._slots[_index] = itemDragDrop;
+                
+                _item = null;
+                _inventory = null;
+                SourcePrefab = null;
+                NewPrefab = null;
+                _pool.Store(this);
+            }
         }
 
         protected void SetItemStatus(int index) {

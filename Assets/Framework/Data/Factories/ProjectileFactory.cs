@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditorInternal;
 
 namespace PixelComrades {
-    public class ProjectileFactory : ScriptableSingleton<ProjectileFactory>, IEntityFactory {
+    public class ProjectileFactory : ScriptableDatabase<ProjectileFactory>, IEntityFactory {
         private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePoolSize");
 
         private class ProjectileLoader : LoadOperationEvent {
@@ -77,6 +77,14 @@ namespace PixelComrades {
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
         
         [SerializeField] private ProjectileConfig[] _allItems = new ProjectileConfig[0];
+
+        public override T GetObject<T>(string id) {
+            return _configs.TryGetValue(id, out var config) ? config as T : null;
+        }
+
+        public override string GetId<T>(T obj) {
+            return obj is ProjectileConfig config ? config.ID : "";
+        }
 
         private static void Init() {
             GameData.AddInit(Init);

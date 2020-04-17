@@ -9,7 +9,7 @@ namespace PixelComrades {
     public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, 
         IReceive<StatusUpdate>, IReceive<EquipmentChanged>, IPoolEvents {
 
-        [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
+        [SerializeField] private UIFloatingText.Orientation _textOrientation = UIFloatingText.Orientation.Center;
         [SerializeField] private TextMeshProUGUI _amount = null;
         [SerializeField] private Image _cooldownImage = null;
         [SerializeField] private Slider _durabilitySlider = null;

@@ -7,11 +7,11 @@ namespace PixelComrades {
     [System.Serializable]
 	public sealed class SpawnPrefabOnDeath : IComponent {
 
-        public string Prefab { get; }
+        public PrefabAssetReference Prefab { get; }
         public IntRange CountRange { get; }
         public float Radius { get; }
 
-        public SpawnPrefabOnDeath(string prefab, IntRange count, float radius) {
+        public SpawnPrefabOnDeath(PrefabAssetReference prefab, IntRange count, float radius) {
             Prefab = prefab;
             CountRange = count;
             Radius = radius;

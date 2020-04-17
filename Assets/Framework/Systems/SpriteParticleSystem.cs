@@ -66,7 +66,7 @@ namespace PixelComrades {
                 player.Renderer.enabled = true;
             }
             else {
-                var newPlayer = UnityEngine.Object.Instantiate(SimpleGameSpecificDb.Main.ParticleHolder);
+                var newPlayer = UnityEngine.Object.Instantiate(LazyDb.Main.ParticleHolder);
                 player = new ParticlePlayer(newPlayer.GetComponent<SpriteRenderer>());
             }
             player.Tr.SetParent(null);

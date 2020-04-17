@@ -198,7 +198,7 @@ namespace PixelComrades {
                 return;
             }
             _statusTimer.StartTimer();
-            UIFloatingText.Spawn(message, transform as RectTransform, color, UIFloatingText.Orietation.Center);
+            UIFloatingText.Spawn(message, transform as RectTransform, color, UIFloatingText.Orientation.Center);
         }
 
 

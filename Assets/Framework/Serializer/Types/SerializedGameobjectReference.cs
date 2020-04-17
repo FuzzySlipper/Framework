@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,33 +10,36 @@ using UnityEditor;
 namespace PixelComrades {
     public class SerializedGameObjectReference : ISerializable, ISerializableObjectWrapper {
 
-        private string _path;
+        private System.Type _db;
         private string _name;
 
-        public string Name { get { return _name; } }
-
         public virtual object GetValue() {
-            //return GetWorldEntity();
-            return null;
+            return GetWorldEntity();
         }
 
         public SerializedGameObjectReference(PrefabEntity entity) {
-            
             _name = entity.name;
+            _db = entity.Db.GetType();
         }
 
         public SerializedGameObjectReference(SerializationInfo info, StreamingContext context) {
-            _path = info.GetValue(nameof(_path), _path);
-            _name = (string)info.GetValue("Name", typeof(string));
+            _db = ParseUtilities.ParseType(info.GetValue(nameof(_db), ""));
+            _name = info.GetValue(nameof(_name), _name);
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_path), _path);
-            info.AddValue("Name", _name, typeof(string));
+            info.AddValue(nameof(_db), _db.ToString());
+            info.AddValue(nameof(_name), _name);
         }
-        //
-        // protected PrefabEntity GetWorldEntity() {
-        //     return ItemPool.Spawn(_path);
-        // }
+        
+        protected PrefabEntity GetWorldEntity() {
+            var db = ScriptableDatabases.GetDatabase(_db);
+            var entity = db.GetObject<PrefabEntity>(_name);
+            if (entity != null) {
+                return ItemPool.Spawn(entity);
+            }
+            var go = db.GetObject<GameObject>(_name);
+            return go != null ? ItemPool.Spawn(go) : null;
+        }
     }
 }

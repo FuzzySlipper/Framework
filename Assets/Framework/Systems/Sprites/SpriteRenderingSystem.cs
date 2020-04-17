@@ -38,7 +38,7 @@ namespace PixelComrades {
 
             _simpleRenderers = EntityController.GetComponentArray<SpriteSimpleRendererComponent>();
             _simpleRendererDel = RunUpdate;
-            _material = SimpleGameSpecificDb.Main.InstancedMat;
+            _material = LazyDb.Main.InstancedMat;
         }
 
         public void OnSystemUpdate(float dt, float unscaledDt) {

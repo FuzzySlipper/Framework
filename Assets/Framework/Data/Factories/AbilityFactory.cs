@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace PixelComrades {
-    public class AbilityFactory : ScriptableSingleton<AbilityFactory> {
+    public class AbilityFactory : ScriptableDatabase<AbilityFactory> {
 
         [SerializeField] private List<AbilityConfig> _allAbilities = new List<AbilityConfig>();
         
         private static Dictionary<string, AbilityConfig> _abilities = new Dictionary<string, AbilityConfig>();
+       
+        public override T GetObject<T>(string id) {
+            return _abilities.TryGetValue(id, out var target) ? target as T : null;
+        }
+
+        public override string GetId<T>(T obj) {
+            return obj is AbilityConfig config ? config.ID : "";
+        }
 
         private static void Init() {
             GameData.AddInit(Init);

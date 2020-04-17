@@ -6,7 +6,6 @@ namespace PixelComrades {
     public sealed class BlockDamageNode : StateGraphNode {
 
         public float WaitTime;
-        
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
             return false;
         }
@@ -41,7 +40,7 @@ namespace PixelComrades {
                 _actionEntity = action.Entity;
                 _owner = Graph.Entity.GetTemplate<ActionUsingTemplate>();
                 _config = _actionEntity.Get<BlockDamageAction>();
-                var model = ItemPool.Spawn(UnityDirs.Models, _config.ModelData, Vector3.zero, Quaternion.identity);
+                var model = ItemPool.Spawn(_config.ModelData);
                 if (model != null) {
                     var spawnPivot = _actionEntity.Get<SpawnPivotComponent>();
                     spawnPivot.SetNewChild(model.Transform);

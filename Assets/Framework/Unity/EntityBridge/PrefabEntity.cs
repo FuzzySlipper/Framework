@@ -11,6 +11,7 @@ namespace PixelComrades {
         [SerializeField] private bool _pooled = false;
         [SerializeField] private string _resourcePath = "";
         [SerializeField] private int _hashId = 0;
+        [SerializeField] private ScriptableDatabase _db = null;
 
         private ISystemFixedUpdate[] _systemFixedUpdate;
         private ISystemUpdate[] _systemUpdate;
@@ -30,6 +31,7 @@ namespace PixelComrades {
         public bool IsSceneObject { get { return _isSceneObject; } } // careful using this
         public Point3 SectorPosition { get; set; }
         public SerializedMetaData Metadata { get { return _metadata; } set { _metadata = value; } }
+        public ScriptableDatabase Db { get => _db; set => _db = value; }
         public Renderer[] Renderers { get { return _renderers; } }
         public bool SceneActive { get { return _active; } }
         public Transform Transform {
