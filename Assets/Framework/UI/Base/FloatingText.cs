@@ -43,12 +43,12 @@ namespace PixelComrades {
             private Color? _color;
             private ScaledTimer _timeoutTimer = new ScaledTimer(10);
 
-            public static void Start(PrefabAssetReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
+            public static void Start(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
                 var txtHolder = _pool.New();
                 txtHolder.Setup(prefab, text, duration, start, end, color);
             }
 
-            private void Setup(PrefabAssetReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
+            private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
                 SourcePrefab = prefab;
                 _text = text;
                 _start = start;

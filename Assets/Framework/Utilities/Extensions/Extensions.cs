@@ -74,37 +74,8 @@ namespace PixelComrades {
         public static AnimationCurve ClipBoardAnimationCurve;
     }
     
-    [Serializable]
-    public class PrefabHolder {
-        public GameObject Prefab;
-        public bool CenteredPrefab = false;
-        public Vector3 OffsetGridMulti = new Vector3(0, 0, 0);
-        //public Vector3 Rotation = Vector3.zero;
-    }
-
     [System.Serializable]
-    public class RandomPrefabHolder {
-        public PrefabHolder[] Prefabs = new PrefabHolder[0];
-        public AnimationCurve Curve = new AnimationCurve();
-
-        public PrefabHolder Get() {
-            if (Prefabs.Length == 0) {
-                return null;
-            }
-            if (Prefabs.Length == 1) {
-                return Prefabs[0];
-            }
-            //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0,1))));
-        }
-
-        public int GetIndex() {
-            return (int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
-        }
-    }
-    
-    [System.Serializable]
-    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetReferenceT<TV> {
+    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetEntry<TV> {
         public List<T> Objects = new List<T>();
         public AnimationCurve Curve = new AnimationCurve();
 
@@ -133,7 +104,7 @@ namespace PixelComrades {
         public TV Get(int index) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                return Objects[index].editorAsset;
+                return Objects[index].Asset as TV;
             }
 #endif
             if (Objects[index].Asset == null) {
@@ -167,7 +138,7 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class RandomObjectHolder {
-        public List<PrefabAssetReference> Objects = new List<PrefabAssetReference>();
+        public List<GameObjectReference> Objects = new List<GameObjectReference>();
         public AnimationCurve Curve = new AnimationCurve();
 
         public void Load() {
@@ -198,13 +169,14 @@ namespace PixelComrades {
         public GameObject Get(int index) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                return Objects[index].editorAsset;
+                return Objects[index].Asset as GameObject;
             }
 #endif
             if (Objects[index].Asset == null) {
                 var op = Objects[index].LoadAssetAsync();
                 if (!op.IsDone) {
-                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
+                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].AssetReference.RuntimeKeyIsValid(), op
+                    .PercentComplete);
                     op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
                 }
                 else {

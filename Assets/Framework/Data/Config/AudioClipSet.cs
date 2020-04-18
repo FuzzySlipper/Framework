@@ -9,7 +9,7 @@ namespace PixelComrades {
         public class Clip {
             [ValueDropdown("SignalsList")]
             public int Id;
-            public AudioClipAssetReference Audio;
+            public AudioClipReference Audio;
             [HideInInspector] public AudioClip LoadedAudio;
 
             private ValueDropdownList<int> SignalsList() {

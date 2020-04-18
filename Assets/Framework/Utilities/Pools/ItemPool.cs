@@ -15,7 +15,7 @@ namespace PixelComrades {
 
         private Dictionary<int, PrefabEntity> _referenceItems = new Dictionary<int, PrefabEntity>();
         private Dictionary<int, Queue<PrefabEntity>> _pooledDict = new Dictionary<int, Queue<PrefabEntity>>();
-        private Dictionary<PrefabAssetReference, int> _prefabKeys = new Dictionary<PrefabAssetReference, int>();
+        private Dictionary<GameObjectReference, int> _prefabKeys = new Dictionary<GameObjectReference, int>();
         private static List<PrefabEntity> _sceneObjects = new List<PrefabEntity>();
         public static List<PrefabEntity> SceneObjects { get => _sceneObjects; }
         private static Transform PoolTransform {
@@ -113,7 +113,7 @@ namespace PixelComrades {
                 //         locs[0].PrimaryKey
                 //     }
                 // }
-                prefabKey.Key.ReleaseAsset();
+                prefabKey.Key.AssetReference.ReleaseAsset();
             }
             Main._prefabKeys.Clear();
         }
@@ -181,7 +181,7 @@ namespace PixelComrades {
             Main.SpawnPrefabCopy(loadOp);
         }
 
-        public static void Spawn(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
+        public static void Spawn(GameObjectReference targetObject, Action<PrefabEntity> action) {
             Main.SpawnPrefabCopy(targetObject, action);
         }
         
@@ -276,10 +276,10 @@ namespace PixelComrades {
             return null;
         }
 
-        private void SpawnPrefabCopy(PrefabAssetReference targetObject, Action<PrefabEntity> action) {
+        private void SpawnPrefabCopy(GameObjectReference targetObject, Action<PrefabEntity> action) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                var go = (GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(targetObject.editorAsset);
+                var go = (GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(targetObject.Asset);
                 action(go.GetOrAddComponent<PrefabEntity>());
                 return;
             }
@@ -293,7 +293,7 @@ namespace PixelComrades {
                     }
                     var prefab = result.GetOrAddComponent<PrefabEntity>();
                     if (prefab.PrefabId == 0) {
-                        prefab.SetId(targetObject.AssetGUID);
+                        prefab.SetId(targetObject.AssetReference.AssetGUID);
                     }
                     _prefabKeys.AddOrUpdate(targetObject, prefab.PrefabId);
                     _referenceItems.Add(prefab.PrefabId, prefab);
@@ -314,7 +314,7 @@ namespace PixelComrades {
         private void SpawnPrefabCopy<T>(T loadOp) where T : LoadOperationEvent {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                loadOp.NewPrefab = ((GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(loadOp.SourcePrefab.editorAsset))
+                loadOp.NewPrefab = ((GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(loadOp.SourcePrefab.Asset))
                 .GetOrAddComponent<PrefabEntity>();
                 loadOp.OnComplete();
                 return;
@@ -329,7 +329,7 @@ namespace PixelComrades {
                     }
                     var prefab = result.GetOrAddComponent<PrefabEntity>();
                     if (prefab.PrefabId == 0) {
-                        prefab.SetId(loadOp.SourcePrefab.AssetGUID);
+                        prefab.SetId(loadOp.SourcePrefab.AssetReference.AssetGUID);
                     }
                     _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.PrefabId);
                     _referenceItems.Add(prefab.PrefabId, prefab);
@@ -480,7 +480,7 @@ namespace PixelComrades {
     }
 
     public abstract class LoadOperationEvent {
-        public PrefabAssetReference SourcePrefab;
+        public GameObjectReference SourcePrefab;
         public PrefabEntity NewPrefab;
         public abstract void OnComplete();
     }

@@ -47,7 +47,25 @@ namespace PixelComrades {
             catch {
                 // keep default label
             }
-            EditorGUI.PropertyField(position, property, label);
+            if (property.isArray) {
+                for (int i = 0; i < property.arraySize; i++) {
+                    var arrayProperty = property.GetArrayElementAtIndex(i);
+                    if (property.GetTargetObjectOfProperty() is AssetEntry arrayTarget) {
+                        AssetEntryDrawer.Display(position, property, label, arrayTarget);
+                    }
+                    else {
+                        EditorGUI.PropertyField(position, arrayProperty, label);
+                    }
+                    position.y += 20;
+                }
+                return;
+            }
+            if (property.GetTargetObjectOfProperty() is AssetEntry target) {
+                AssetEntryDrawer.Display(position, property, label, target);
+            }
+            else {
+                EditorGUI.PropertyField(position, property, label);
+            }
         }
     }
 
@@ -57,83 +75,53 @@ namespace PixelComrades {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             if (property.isArray) {
                 for (int i = 0; i < property.arraySize; i++) {
-                    Display(position, property.GetArrayElementAtIndex(i), label);
+                    var arrayProperty = property.GetArrayElementAtIndex(i);
+                    Display(position, arrayProperty, label, arrayProperty.GetTargetObjectOfProperty() as AssetEntry);
                     position.y += 20;
                 }
                 return;
             }
-            Display(position, property, label);
+            Display(position, property, label, property.GetTargetObjectOfProperty() as AssetEntry);
         }
 
-        public void Display(Rect position, SerializedProperty property, GUIContent label) {
-            if (property.GetTargetObjectOfProperty() is AssetEntry target) {
-                if (target.AssetObject == null) {
-                    if (!string.IsNullOrEmpty(target.Path)) {
-                        ApplyModified(property, target, AssetDatabase.LoadMainAssetAtPath(target.Path));
-                    }
+        public static void Display(Rect position, SerializedProperty property, GUIContent label, AssetEntry target) {
+            if (target == null) {
+                EditorGUI.LabelField(position, property.type);
+                return;
+            }
+            if (target.Asset == null) {
+                if (!string.IsNullOrEmpty(target.Path)) {
+                    ApplyModified(property, target, AssetDatabase.LoadMainAssetAtPath(target.Path));
                 }
-                else {
-                    var path = AssetDatabase.GetAssetPath(target.AssetObject);
-                    if (target.Path != path) {
-                        target.Path = path;
-                        property.serializedObject.ApplyModifiedProperties();
-                    }
+            }
+            else {
+                var path = AssetDatabase.GetAssetPath(target.Asset);
+                if (target.Path != path) {
+                    target.Path = path;
+                    property.serializedObject.ApplyModifiedProperties();
                 }
+            }
+            if (target.Path != null) {
                 label.tooltip = target.Path.Replace("Assets/", "");
                 if (!string.IsNullOrEmpty(target.AssetReference.SubObjectName)) {
                     label.tooltip += "/";
                     label.tooltip += target.AssetReference.SubObjectName;
                 }
-                var obj = EditorGUI.ObjectField(position, label, target.AssetObject, target.Type, false);
-                if (obj != target.AssetObject) {
-                    ApplyModified(property, target, obj);
-                }
             }
-            else {
-                EditorGUI.LabelField(position, property.type);
+            var obj = EditorGUI.ObjectField(position, label, target.Asset, target.Type, false);
+            if (obj != target.Asset) {
+                ApplyModified(property, target, obj);
             }
         }
 
-        private void ApplyModified(SerializedProperty property, AssetEntry entry, UnityEngine.Object obj) {
+        private static void ApplyModified(SerializedProperty property, AssetEntry entry, UnityEngine.Object obj) {
             if (obj != null) {
                 AddressableAssetEditorUtility.GetOrCreateEntry(obj);
             }
-            entry.AssetObject = obj;
             entry.AssetReference.SetEditorAsset(obj);
             entry.Path = obj != null ? AssetDatabase.GetAssetPath(obj) : "";
             property.serializedObject.ApplyModifiedProperties();
         }
-    }
-
-    [CustomPropertyDrawer(typeof(AssetReferenceCustom<>), true)]
-    public class PrefabAssetReferenceDrawer : PropertyDrawer {
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-            var all = property.GetTargetObjectOfProperty().GetType().GetBaseClasses();
-            Type targetType = null;
-            foreach (var type in all) {
-                if (type.GetGenericTypeDefinition() == typeof(AssetReferenceT<>)) {
-                    targetType = type.GetGenericArguments()[0];
-                }
-            }
-            if (property.GetTargetObjectOfProperty() is AssetReference target) {
-                if (targetType == null) {
-                    EditorGUI.LabelField(position, "No type");
-                    return;
-                }
-                var currentObj = target.editorAsset;
-                var obj = EditorGUI.ObjectField(position, label, currentObj, targetType, false);
-                if (obj != currentObj) {
-                    target.SetEditorAsset(obj);
-                    property.serializedObject.ApplyModifiedProperties();
-                }
-            }
-            else {
-                EditorGUI.LabelField(position, property.GetTargetObjectOfProperty().GetType().ToString());
-            }
-        }
-
-        
     }
 
     [CustomPropertyDrawer(typeof(FloatRange))]

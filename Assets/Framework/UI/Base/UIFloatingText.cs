@@ -107,10 +107,10 @@ namespace PixelComrades {
             public static void Start(Orientation type, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color 
             color, Sprite icon = null) {
                 var txtHolder = _pool.New();
-                //txtHolder.Setup(LazyDb.Main.UIFloatingText[(int) type], text, duration, start, end, parent, color, icon);
+                txtHolder.Setup(LazyDb.Main.UIFloatingText[(int) type], text, duration, start, end, parent, color, icon);
             }
 
-            private void Setup(PrefabAssetReference prefab, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color color, Sprite icon) {
+            private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color color, Sprite icon) {
                 SourcePrefab = prefab;
                 _text = text;
                 _start = start;
