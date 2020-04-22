@@ -44,10 +44,10 @@ namespace PixelComrades {
             return false;
         }
 
-        public override string Title { get { return Animation != null ? Animation.SubObjectName : "SpriteAnimation"; } }
+        public override string Title { get { return Animation != null ? Animation.AssetReference.SubObjectName : "SpriteAnimation"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
-            if (Animation.IsDirectional) {
+            if (Animation.Asset is DirectionalAnimation) {
                 return new DirectionalRuntimeAnimationNode(this, graph);
             }
             return new RuntimeSpriteAnimationNode(this, graph);
@@ -148,7 +148,7 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!Setup) {
-                    var op = AnimNode.Animation.LoadAssetAsync<SpriteAnimation>();
+                    var op = AnimNode.Animation.AssetReference.LoadAssetAsync<SpriteAnimation>();
                     op.Completed += FinishSetup;
                 }
                 else {
@@ -168,7 +168,7 @@ namespace PixelComrades {
                 if (op.Result == null) {
                     Debug.LogError(
                         op.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + AnimNode
-                            .Animation.SubObjectName);
+                            .Animation.AssetReference.SubObjectName);
                     return;
                 }
                 SetAnimation(op.Result);
@@ -240,7 +240,7 @@ namespace PixelComrades {
                 base.Dispose();
                 Setup = false;
                 Animation = null;
-                AnimNode.Animation.ReleaseAsset();
+                AnimNode.Animation.AssetReference.ReleaseAsset();
             }
         }
     }

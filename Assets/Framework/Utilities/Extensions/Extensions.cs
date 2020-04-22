@@ -75,7 +75,7 @@ namespace PixelComrades {
     }
     
     [System.Serializable]
-    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetEntry<TV> {
+    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetReferenceEntry<TV> {
         public List<T> Objects = new List<T>();
         public AnimationCurve Curve = new AnimationCurve();
 
@@ -2512,6 +2512,13 @@ namespace PixelComrades {
 
         public static string[] SplitIntoWords(this string text) {
             return text.Split(' ');
+        }
+
+        public static string[] SplitFromEntryBreak(this string text) {
+            if (text == null) {
+                return null;
+            }
+            return text.Split(StringConst.MultiEntryBreak);
         }
 
         public static string EncodeWithEntryBreak(this IList<string> text) {

@@ -1,17 +1,30 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Sirenix.OdinInspector;
+using Object = UnityEngine.Object;
 
 namespace PixelComrades {
     public class ItemFactory : ScriptableDatabase<ItemFactory> {
-        
+        [ListDrawerSettings(Expanded = true)]
         [SerializeField] private ItemConfig[] _allItems = new ItemConfig[0];
 
         private static Dictionary<string, List<ItemConfig>> _itemsByType = new Dictionary<string, List<ItemConfig>>();
         private static Dictionary<int, ShuffleBag<ItemConfig>> _maxRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
         private static Dictionary<int, ShuffleBag<ItemConfig>> _specificRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
         private static Dictionary<string, ItemConfig> _items = new Dictionary<string, ItemConfig>();
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return _allItems; } }
+        public override Type DbType { get { return typeof(ItemConfig); } }
+        
+        public override void AddObject(Object obj) {
+            var item = obj as ItemConfig;
+            if (item == null || _allItems.Contains(item)) {
+                return;
+            }
+            _allItems = _allItems.AddToArray(item);
+        }
 
         public override T GetObject<T>(string id) {
             return _items.TryGetValue(id, out var config) ? config as T : null;
@@ -20,7 +33,27 @@ namespace PixelComrades {
         public override string GetId<T>(T obj) {
             return obj is ItemConfig config ? config.ID : "";
         }
-        
+        //
+        // public class ItemWrapper : ScriptableObjectWrapper {
+        //     public ItemConfig Item { get; }
+        //     public override Texture Icon { get; }
+        //
+        //     public ItemWrapper(ScriptableDatabase db, ItemConfig item) : base(db, item) {
+        //         Item = item;
+        //         Icon = Sirenix.Utilities.Editor.GUIHelper.GetAssetThumbnail(item.Preview, typeof(Sprite), true);
+        //     }
+        //
+        //     [TableColumnWidth(120)]
+        //     [ShowInInspector]
+        //     public string Name {
+        //         get { return Item.Name; }
+        //         set {
+        //             Item.Name = value;
+        //             UnityEditor.EditorUtility.SetDirty(Item);
+        //         }
+        //     }
+        // }
+
         private static void Init() {
             GameData.AddInit(Init);
             _maxRarityBags.Clear();

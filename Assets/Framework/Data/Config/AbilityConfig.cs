@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 using UnityEngine.AddressableAssets;
 
 namespace PixelComrades {
-    public class AbilityConfig : ScriptableObject, IActionConfig {
+    public class AbilityConfig : ScriptableObject, IActionConfig, ICustomPreview {
 
         private const float EffectTime = 3f;
         private const float EffectChance = 10f;
@@ -14,7 +14,7 @@ namespace PixelComrades {
         public string Description;
         [Range(0, 10)]public int Level;
         [ValueDropdown("SkillSlotList")]public string Skill;
-        public AssetReferenceSprite Icon;
+        public SpriteReference Icon;
         public ActionSource Source;
         [Range(0, 50)]public float Cost;
         public GenericConfigEntry[] Config = new GenericConfigEntry[0];
@@ -49,6 +49,8 @@ namespace PixelComrades {
         public TargetType Targeting { get => _targeting; }
         public string AbilityType { get { return _abilityType; } }
         public StateGraph ActionGraph { get => _actionGraph; }
+        public UnityEngine.Object Preview { get { return AssetReferenceUtilities.LoadAsset(Icon); } }
+        public Object EditorObject { get { return this; } }
 
         private ValueDropdownList<string> AbilityTypesList() {
             return AbilityTypes.GetDropdownList();

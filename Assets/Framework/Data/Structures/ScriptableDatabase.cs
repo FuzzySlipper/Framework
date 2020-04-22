@@ -70,14 +70,22 @@ namespace PixelComrades {
     }
 
     public abstract class ScriptableDatabase : ScriptableObject {
+        public abstract void AddObject(UnityEngine.Object obj);
+        public abstract Type DbType { get; }
         public abstract T GetObject<T>(string id) where T : Object;
         public abstract string GetId<T>(T obj) where T : Object;
+        public abstract IEnumerable<UnityEngine.Object> AllObjects { get; }
+
+#if UNITY_EDITOR
+        public virtual System.Object GetEditorWindow() {
+            return null;
+        }
+#endif
     }
-    
+
     public abstract class ScriptableDatabase<TV> : ScriptableDatabase where TV : ScriptableDatabase<TV> {
 
         private const string EditorFolder = "Assets/GameData/Resources/";
-        private const string FullDirectory = EditorFolder;
         
         private static TV _main;
         public static TV Main {
@@ -92,5 +100,10 @@ namespace PixelComrades {
             }
             protected set { _main = value; }
         }
+    }
+
+    public interface ICustomPreview {
+        UnityEngine.Object Preview { get; }
+        UnityEngine.Object EditorObject { get; }
     }
 }

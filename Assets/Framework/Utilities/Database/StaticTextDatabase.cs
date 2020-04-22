@@ -17,7 +17,17 @@ namespace PixelComrades {
         private Dictionary<string, StaticTextHolder> _labelDict = new Dictionary<string, StaticTextHolder>();
         private Dictionary<string, StaticTextHolder> _nameDict = new Dictionary<string, StaticTextHolder>();
         private Dictionary<string, MarkovHolder> _markovDict = new Dictionary<string, MarkovHolder>();
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return _text; } }
+        public override System.Type DbType { get { return typeof(StaticTextHolder); } }
 
+        public override void AddObject(Object obj) {
+            var item = obj as StaticTextHolder;
+            if (item == null || _text.Contains(item)) {
+                return;
+            }
+            _text.Add(item);
+        }
+        
         public override T GetObject<T>(string id) {
             return NameDict.TryGetValue(id, out var config) ? config as T : null;
         }

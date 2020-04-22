@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PixelComrades {
@@ -9,7 +10,17 @@ namespace PixelComrades {
         [SerializeField] private List<AbilityConfig> _allAbilities = new List<AbilityConfig>();
         
         private static Dictionary<string, AbilityConfig> _abilities = new Dictionary<string, AbilityConfig>();
-       
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return _allAbilities; } }
+        public override System.Type DbType { get { return typeof(AbilityConfig); } }
+
+        public override void AddObject(Object obj) {
+            var item = obj as AbilityConfig;
+            if (item == null || _allAbilities.Contains(item)) {
+                return;
+            }
+            _allAbilities.Add(item);
+        }
+        
         public override T GetObject<T>(string id) {
             return _abilities.TryGetValue(id, out var target) ? target as T : null;
         }

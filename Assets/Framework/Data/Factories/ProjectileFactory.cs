@@ -6,78 +6,23 @@ using UnityEditorInternal;
 namespace PixelComrades {
     public class ProjectileFactory : ScriptableDatabase<ProjectileFactory>, IEntityFactory {
         private static GameOptions.CachedInt _defaultPool = new GameOptions.CachedInt("ProjectilePoolSize");
-
-        private class ProjectileLoader : LoadOperationEvent {
-            private Entity _entity;
-            private Vector3 _target;
-            private Vector3 _spawnPos;
-            private Quaternion _spawnRot;
-            private ActionFx _actionFx;
-            private ProjectileConfig _config;
-
-            public void Set(ProjectileConfig config, Entity entity, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx actionFx) {
-                SourcePrefab = config.Prefab;
-                _config = config;
-                _entity = entity;
-                _target = target;
-                _spawnPos = spawnPos;
-                _spawnRot = spawnRot;
-                _actionFx = actionFx;
-            }
-
-            public override void OnComplete() {
-                NewPrefab.transform.SetPositionAndRotation(_spawnPos, _spawnRot);
-                var spawn = NewPrefab.GetComponent<IProjectile>();
-                _entity.Add(new TransformComponent(NewPrefab.Transform));
-                var template = _entity.GetTemplate<ProjectileTemplate>();
-                template.MoveTarget.SetMoveTarget(_target);
-                if (_config.ActionFx != null) {
-                    template.ActionFx.ChangeFx(_config.ActionFx);
-                }
-                if (_actionFx != null) {
-                    if (template.ActionFx != null) {
-                        template.ActionFx.ChangeFx(_actionFx);
-                    }
-                    else {
-                        _entity.Add(new ActionFxComponent(_actionFx));
-                    }
-                }
-                switch (_config.Movement) {
-                    case ProjectileMovement.Arc:
-                    case ProjectileMovement.Forward:
-                        template.CollisionCheckForward.LastPos = null;
-                        NewPrefab.Transform.LookAt(_target, NewPrefab.Transform.up);
-                        break;
-                    case ProjectileMovement.Force:
-                        //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
-                        break;
-                }
-                spawn.SetConfig(_config, _entity);
-                if (spawn.Rigidbody != null) {
-                    template.Rb.SetRb(spawn.Rigidbody);
-                }
-                _entity.Tags.Add(EntityTags.Moving);
-                template.Rendering.Set(spawn);
-                UnityToEntityBridge.RegisterToEntity(NewPrefab.Transform.gameObject, _entity);
-                _entity.Post(new ProjectileSpawned(_config, _entity));
-                Clear();
-            }
-
-            private void Clear() {
-                SourcePrefab = null;
-                NewPrefab = null;
-                _entity = null;
-                _actionFx = null;
-                _loadPool.Store(this);
-            }
-        }
         
         private static Dictionary<string, ProjectileConfig> _configs = new Dictionary<string, ProjectileConfig>();
         private static GenericPool<ProjectileLoader> _loadPool = new GenericPool<ProjectileLoader>(2);
         private Dictionary<string, ManagedArray<Entity>> _poolDict = new Dictionary<string, ManagedArray<Entity>>();
         
         [SerializeField] private ProjectileConfig[] _allItems = new ProjectileConfig[0];
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return _allItems; } }
+        public override System.Type DbType { get { return typeof(ProjectileConfig); } }
 
+        public override void AddObject(Object obj) {
+            var item = obj as ProjectileConfig;
+            if (item == null || _allItems.Contains(item)) {
+                return;
+            }
+            _allItems = _allItems.AddToArray(item);
+        }
+        
         public override T GetObject<T>(string id) {
             return _configs.TryGetValue(id, out var config) ? config as T : null;
         }
@@ -136,8 +81,8 @@ namespace PixelComrades {
             var entity = Main.GetProjectile(config);
             entity.ParentId = owner.Id;
             var projectileEvent = _loadPool.New();
-            if (config.Type == ProjectileType.SpriteAnimation && !config.Animation.RuntimeKeyIsValid()) {
-                config.Animation.LoadAssetAsync<SpriteAnimation>();
+            if (config.Type == ProjectileType.SpriteAnimation && !config.Animation.AssetReference.RuntimeKeyIsValid()) {
+                config.Animation.AssetReference.LoadAssetAsync<SpriteAnimation>();
             }
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);
@@ -244,6 +189,71 @@ namespace PixelComrades {
                 };
             }
         }
+                private class ProjectileLoader : LoadOperationEvent {
+            private Entity _entity;
+            private Vector3 _target;
+            private Vector3 _spawnPos;
+            private Quaternion _spawnRot;
+            private ActionFx _actionFx;
+            private ProjectileConfig _config;
+
+            public void Set(ProjectileConfig config, Entity entity, Vector3 target, Vector3 spawnPos, Quaternion spawnRot, ActionFx actionFx) {
+                SourcePrefab = config.Prefab;
+                _config = config;
+                _entity = entity;
+                _target = target;
+                _spawnPos = spawnPos;
+                _spawnRot = spawnRot;
+                _actionFx = actionFx;
+            }
+
+            public override void OnComplete() {
+                NewPrefab.transform.SetPositionAndRotation(_spawnPos, _spawnRot);
+                var spawn = NewPrefab.GetComponent<IProjectile>();
+                _entity.Add(new TransformComponent(NewPrefab.Transform));
+                var template = _entity.GetTemplate<ProjectileTemplate>();
+                template.MoveTarget.SetMoveTarget(_target);
+                if (_config.ActionFx != null) {
+                    template.ActionFx.ChangeFx(_config.ActionFx);
+                }
+                if (_actionFx != null) {
+                    if (template.ActionFx != null) {
+                        template.ActionFx.ChangeFx(_actionFx);
+                    }
+                    else {
+                        _entity.Add(new ActionFxComponent(_actionFx));
+                    }
+                }
+                switch (_config.Movement) {
+                    case ProjectileMovement.Arc:
+                    case ProjectileMovement.Forward:
+                        template.CollisionCheckForward.LastPos = null;
+                        NewPrefab.Transform.LookAt(_target, NewPrefab.Transform.up);
+                        break;
+                    case ProjectileMovement.Force:
+                        //var force = transform.forward * ForceRange.Lerp(Mathf.Clamp01(charging.ElapsedTime / MaxChargeTime));
+                        break;
+                }
+                spawn.SetConfig(_config, _entity);
+                if (spawn.Rigidbody != null) {
+                    template.Rb.SetRb(spawn.Rigidbody);
+                }
+                _entity.Tags.Add(EntityTags.Moving);
+                template.Rendering.Set(spawn);
+                UnityToEntityBridge.RegisterToEntity(NewPrefab.Transform.gameObject, _entity);
+                _entity.Post(new ProjectileSpawned(_config, _entity));
+                Clear();
+            }
+
+            private void Clear() {
+                SourcePrefab = null;
+                NewPrefab = null;
+                _entity = null;
+                _actionFx = null;
+                _loadPool.Store(this);
+            }
+        }
+
     }
 
     public enum ProjectileType {
