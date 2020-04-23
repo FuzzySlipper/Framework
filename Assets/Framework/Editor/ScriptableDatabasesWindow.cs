@@ -9,6 +9,9 @@ using UnityEditor;
 
 namespace PixelComrades {
     public class ScriptableDatabasesWindow : OdinMenuEditorWindow {
+
+        private static List<ScriptableDatabase> _dbList = new List<ScriptableDatabase>();
+
         [MenuItem("Tools/Databases Window")]
         public static void ShowWindow() {
             var window = GetWindow<ScriptableDatabasesWindow>();
@@ -17,20 +20,23 @@ namespace PixelComrades {
         }
         
         protected override OdinMenuTree BuildMenuTree() {
+            _dbList.Clear();
             var tree = new OdinMenuTree(true);
             tree.DefaultMenuStyle.IconSize = 28.00f;
             tree.Config.DrawSearchToolbar = true;
             
             var ids = AssetDatabase.FindAssets("t:ScriptableDatabase");
-            var dbList = new List<ScriptableDatabase>();
             for (int i = 0; i < ids.Length; i++) {
                 var obj = AssetDatabase.LoadAssetAtPath<ScriptableDatabase>(AssetDatabase.GUIDToAssetPath(ids[i]));
                 if (obj != null) {
-                    dbList.Add(obj);
+                    _dbList.Add(obj);
                 }
             }
-            for (int i = 0; i < dbList.Count; i++) {
-                var db = dbList[i];
+            
+            RefreshDbs();
+            
+            for (int i = 0; i < _dbList.Count; i++) {
+                var db = _dbList[i];
                 var dbTable = db.GetEditorWindow();
                 if (dbTable != null) {
                     tree.Add(db.name, dbTable);
@@ -49,13 +55,15 @@ namespace PixelComrades {
                     tree.AddAssetAtPath(db.name + "/" + dbObj.name, AssetDatabase.GetAssetPath(dbObj));
                 }
             }
-            // tree.AddAllAssetsAtPath("", "Assets/Plugins/Sirenix/Demos/SAMPLE - RPG Editor/Items", typeof(Item), true)
-            //     .ForEach(this.AddDragHandles);
-            // Add drag handles to items, so they can be easily dragged into the inventory if characters etc...
-            //tree.EnumerateTree().Where(x => x.Value as Item).ForEach(AddDragHandles);
 
-            tree.EnumerateTree().AddIcons<ICustomPreview>(x => GUIHelper.GetAssetThumbnail(x.Preview, x.Preview.GetType(), true));
+            tree.EnumerateTree().AddIcons<ICustomPreview>(m=> m.GetPreviewTexture());
             return tree;
+        }
+
+        private void RefreshDbs() {
+            for (int i = 0; i < _dbList.Count; i++) {
+                ScriptableDatabaseEditorExtension.RefreshDbProjectAssets(_dbList[i]);
+            }
         }
 
         private void AddDragHandles(OdinMenuItem menuItem) {
@@ -69,27 +77,39 @@ namespace PixelComrades {
             SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight); {
                 if (selected != null) {
                     GUILayout.Label(selected.Name);
+                    if (selected.Value is ScriptableDatabase db) {
+                        GUILayout.Label(db.DbType?.Name);
+                    }
+                    else {
+                        if (SirenixEditorGUI.ToolbarButton(new GUIContent("Rename " + selected.Name))) {
+                            RenameWindow.Open(
+                                (m) => {
+                                    AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(selected.Value as UnityEngine.Object), ((RenameWindow) m).Text);
+                                    AssetDatabase.SaveAssets();
+                                    AssetDatabase.Refresh();
+                                    BuildMenuTree();
+                                }, "Rename", selected.Name);
+                        }
+                        if (SirenixEditorGUI.ToolbarButton(new GUIContent("Duplicate " + selected.Name))) {
+                            var dupePath = AssetDatabase.GetAssetPath(selected.Value as UnityEngine.Object);
+                            var newAssetPath = AssetDatabase.GenerateUniqueAssetPath(dupePath);
+                            AssetDatabase.CopyAsset(dupePath, newAssetPath);
+                            AssetDatabase.SaveAssets();
+                            AssetDatabase.Refresh();
+                            var newObj = AssetDatabase.LoadMainAssetAtPath(newAssetPath);
+                            if (newObj != null) {
+                                BuildMenuTree();
+                                base.TrySelectMenuItemWithObject(newObj);
+                            }
+                        } 
+                    }
+                    if (SirenixEditorGUI.ToolbarButton(new GUIContent("Select " + selected.Name))) {
+                        Selection.activeObject = selected.Value as UnityEngine.Object;
+                    }
                 }
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Close"))) {
                     Close();
                 }
-                // if ()
-                // {
-                //     Sirenix.OdinInspector.Demos.RPGEditor.ScriptableObjectCreator.ShowDialog<Item>("Assets/Plugins/Sirenix/Demos/Sample - RPG Editor/Items", obj =>
-                //     {
-                //         obj.Name = obj.name;
-                //         base.TrySelectMenuItemWithObject(obj); // Selects the newly created item in the editor
-                //     });
-                // }
-                //
-                // if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Character")))
-                // {
-                //     Sirenix.OdinInspector.Demos.RPGEditor.ScriptableObjectCreator.ShowDialog<Character>("Assets/Plugins/Sirenix/Demos/Sample - RPG Editor/Character", obj =>
-                //     {
-                //         obj.Name = obj.name;
-                //         base.TrySelectMenuItemWithObject(obj); // Selects the newly created item in the editor
-                //     });
-                // }
             }
             SirenixEditorGUI.EndHorizontalToolbar();
         }

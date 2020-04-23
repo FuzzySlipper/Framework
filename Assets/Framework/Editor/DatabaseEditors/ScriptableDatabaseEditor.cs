@@ -12,17 +12,25 @@ namespace PixelComrades {
         public override void OnInspectorGUI() {
             var script = (ScriptableDatabase) target;
             if (GUILayout.Button("Add All Types")) {
-                var ids = AssetDatabase.FindAssets(string.Format("t:{0}", script.DbType));
-                for (int i = 0; i < ids.Length; i++) {
-                    var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(ids[i]), script.DbType);
-                    if (obj != null) {
-                        script.AddObject(obj);
-                    }
-                }
-                EditorUtility.SetDirty(script);
+                ScriptableDatabaseEditorExtension.RefreshDbProjectAssets(script);
             }
             base.OnInspectorGUI();
         }
+    }
+
+    public static class ScriptableDatabaseEditorExtension {
+        public static void RefreshDbProjectAssets(ScriptableDatabase db) {
+            var ids = AssetDatabase.FindAssets(string.Format("t:{0}", db.DbType));
+            for (int i = 0; i < ids.Length; i++) {
+                var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(ids[i]), db.DbType);
+                if (obj != null) {
+                    db.AddObject(obj);
+                }
+            }
+            EditorUtility.SetDirty(db);
+        }
+
+        
     }
 
     public class CustomPreviewDrawer<TItem> : OdinValueDrawer<TItem> where TItem : ICustomPreview {

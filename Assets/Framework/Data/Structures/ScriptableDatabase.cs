@@ -106,4 +106,22 @@ namespace PixelComrades {
         UnityEngine.Object Preview { get; }
         UnityEngine.Object EditorObject { get; }
     }
+
+    public static class CustomPreviewExtension {
+        
+        public static Texture GetPreviewTexture(this ICustomPreview x) {
+            if (x == null) {
+                return null;
+            }
+            var preview = x.Preview;
+            if (preview == null) {
+                return null;
+            }
+#if UNITY_EDITOR
+            return Sirenix.Utilities.Editor.GUIHelper.GetAssetThumbnail(preview, preview.GetType(), true);
+#else
+            return null;
+#endif
+        }
+    }
 }

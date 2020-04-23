@@ -56,7 +56,7 @@ namespace PixelComrades {
                     var data = instanced.Sprites[0];
                     var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
                     if (targetAsset.Asset == null) {
-                        targetAsset.AssetReference.LoadAssetAsync<SpriteAnimation>().Completed += handle => {
+                        targetAsset.LoadAssetAsync().Completed += handle => {
                             var targetAnimation = handle.Result;
                             data.Sprite = targetAnimation.GetSprite(0);
                             data.Emissive = targetAnimation.EmissiveMap;

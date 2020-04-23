@@ -81,8 +81,8 @@ namespace PixelComrades {
             var entity = Main.GetProjectile(config);
             entity.ParentId = owner.Id;
             var projectileEvent = _loadPool.New();
-            if (config.Type == ProjectileType.SpriteAnimation && !config.Animation.AssetReference.RuntimeKeyIsValid()) {
-                config.Animation.AssetReference.LoadAssetAsync<SpriteAnimation>();
+            if (config.Type == ProjectileType.SpriteAnimation) {
+                config.Animation.LoadAssetAsync();
             }
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);

@@ -23,6 +23,9 @@ namespace PixelComrades {
         public static Object LoadAsset(AssetReferenceEntry target) {
 #if UNITY_EDITOR
             var pathSplit = target.Path.SplitFromEntryBreak();
+            if (pathSplit == null) {
+                return null;
+            }
             if (pathSplit.Length == 2) {
                 // }
                 // if (target is SubAssetReferenceEntry subAsset) {

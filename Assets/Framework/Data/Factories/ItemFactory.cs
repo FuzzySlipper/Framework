@@ -17,6 +17,25 @@ namespace PixelComrades {
         private static Dictionary<string, ItemConfig> _items = new Dictionary<string, ItemConfig>();
         public override IEnumerable<UnityEngine.Object> AllObjects { get { return _allItems; } }
         public override Type DbType { get { return typeof(ItemConfig); } }
+#if UNITY_EDITOR
+        public override System.Object GetEditorWindow() {
+            var wrappers = new List<ScriptableObjectWrapper>();
+            for (int i = 0; i < _allItems.Length; i++) {
+                var item = _allItems[i];
+                if (item is EquipmentConfig equipmentConfig) {
+                    wrappers.Add(new EquipmentWrapper(this, equipmentConfig));
+                }
+                else if (item is WeaponConfig weaponConfig) {
+                    wrappers.Add(new WeaponWrapper(this, weaponConfig));
+                }
+                else {
+                    wrappers.Add(new ItemWrapper(this, item));
+                }
+            }
+            wrappers.Sort((x, y) => x.GetType().Name.CompareTo(y.GetType().Name));
+            return new ScriptableDatabaseTable(wrappers);
+        }
+#endif
         
         public override void AddObject(Object obj) {
             var item = obj as ItemConfig;

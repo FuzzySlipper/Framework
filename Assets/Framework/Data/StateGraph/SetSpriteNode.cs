@@ -39,7 +39,7 @@ namespace PixelComrades {
             return false;
         }
 
-        public override string Title { get { return Sprite != null ? Sprite.AssetReference.SubObjectName : "Sprite"; } }
+        public override string Title { get { return Sprite != null ? Sprite.Path : "Sprite"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
             return new RuntimeNode(this, graph);
@@ -65,7 +65,7 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_setup) {
-                    var op = _spriteNode.Sprite.AssetReference.LoadAssetAsync<SpriteAnimation>();
+                    var op = _spriteNode.Sprite.LoadAssetAsync();
                     op.Completed += FinishSetup;
                 }
                 else {
@@ -114,7 +114,7 @@ namespace PixelComrades {
             public override void Dispose() {
                 base.Dispose();
                 _setup = false;
-                _spriteNode.Sprite.AssetReference.ReleaseAsset();
+                _spriteNode.Sprite.ReleaseAsset();
             }
         }
     }

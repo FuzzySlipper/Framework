@@ -33,5 +33,7 @@ namespace PixelComrades {
             //     return string.Format("{0}[{1}]", m_AssetGUID, m_SubObjectName);
             // return m_AssetGUID;
         }
+        
+        
     }
 }

@@ -113,7 +113,7 @@ namespace PixelComrades {
                 //         locs[0].PrimaryKey
                 //     }
                 // }
-                prefabKey.Key.AssetReference.ReleaseAsset();
+                prefabKey.Key.ReleaseAsset();
             }
             Main._prefabKeys.Clear();
         }

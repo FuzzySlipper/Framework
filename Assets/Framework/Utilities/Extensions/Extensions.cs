@@ -175,7 +175,7 @@ namespace PixelComrades {
             if (Objects[index].Asset == null) {
                 var op = Objects[index].LoadAssetAsync();
                 if (!op.IsDone) {
-                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].AssetReference.RuntimeKeyIsValid(), op
+                    Debug.LogFormat("Failed to load {0} {1}", Objects[0].ToString(), op
                     .PercentComplete);
                     op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
                 }
