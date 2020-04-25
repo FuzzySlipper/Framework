@@ -1114,7 +1114,7 @@ namespace PixelComrades {
                 value = (T) self.GetValue(name, typeof(T));
             }
             catch (Exception e) {
-                Debug.LogFormat("Name {0} {1} {2}", name, e.TargetSite.ToString(), e.StackTrace);
+                Debug.LogFormat("Name {0} Target {1} Stack {2}", name, e.TargetSite.ToString(), e.StackTrace);
                 value = currentValue;
             }
             return value;
