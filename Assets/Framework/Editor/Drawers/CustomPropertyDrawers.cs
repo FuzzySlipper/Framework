@@ -136,6 +136,7 @@ namespace PixelComrades {
             entry.AssetReference.SetEditorAsset(obj);
             AssetReferenceUtilities.SetPath(entry);
             property.serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(property.serializedObject.targetObject);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {

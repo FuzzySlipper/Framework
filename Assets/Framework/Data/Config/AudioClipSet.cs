@@ -23,17 +23,17 @@ namespace PixelComrades {
         public void Load() {
             for (int i = 0; i < Clips.Count; i++) {
                 var clip = Clips[i];
-                if (clip.Audio == null || clip.Audio.Asset == null) {
+                if (clip.Audio == null) {
                     continue;
                 }
-                clip.Audio.LoadAssetAsync().Completed += handle => clip.LoadedAudio = handle.Result;
+                clip.Audio.LoadAsset(handle => clip.LoadedAudio = handle);
             }
         }
 
         public void Unload() {
             for (int i = 0; i < Clips.Count; i++) {
                 var clip = Clips[i];
-                if (clip.Audio == null || clip.Audio.Asset == null) {
+                if (clip.Audio == null || !clip.Audio.IsLoaded) {
                     continue;
                 }
                 clip.Audio.ReleaseAsset();

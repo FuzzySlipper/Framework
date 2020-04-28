@@ -4,15 +4,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Object = UnityEngine.Object;
 
 namespace PixelComrades {
     public class SerializedDatabaseCollection : ISerializable {
         public SerializedScriptableObjectCollection[] Databases;
 
-        public SerializedDatabaseCollection(IEnumerable<ScriptableDatabase> list) {
+        public SerializedDatabaseCollection(List<ScriptableDatabase> list) {
             Databases = new SerializedScriptableObjectCollection[list.Count()];
             int index = 0;
             foreach (var child in list) {
+                if (child == null || child.AllObjects == null) {
+                    continue;
+                }
                 Databases[index] = new SerializedScriptableObjectCollection(child, child.AllObjects);
                 index++;
             }
@@ -39,6 +43,9 @@ namespace PixelComrades {
                 return;
             }
             for (int i = 0; i < Databases.Length; i++) {
+                if (Databases[i] == null) {
+                    continue;
+                }
                 Databases[i].Create();
             }
         }
@@ -48,6 +55,9 @@ namespace PixelComrades {
                 return;
             }
             for (int i = 0; i < Databases.Length; i++) {
+                if (Databases[i] == null) {
+                    continue;
+                }
                 Databases[i].Connect();
             }
         }
@@ -59,9 +69,13 @@ namespace PixelComrades {
 
         public SerializedScriptableObjectCollection(ScriptableObject main, IEnumerable<UnityEngine.Object> list) {
             Main = new SerializedScriptableObject(main);
-            Children = new SerializedScriptableObject[list.Count()];
+            var enumerable = list as Object[] ?? list.ToArray();
+            Children = new SerializedScriptableObject[enumerable.Count()];
             int index = 0;
-            foreach (var child in list) {
+            foreach (var child in enumerable) {
+                if (child == null) {
+                    continue;
+                }
                 Children[index] = new SerializedScriptableObject(child as ScriptableObject);
                 index++;
             }
@@ -87,6 +101,9 @@ namespace PixelComrades {
                 return;
             }
             for (int i = 0; i < Children.Length; i++) {
+                if (Children[i] == null) {
+                    continue;
+                }
                 Children[i].Create();
             }
         }
@@ -97,6 +114,9 @@ namespace PixelComrades {
                 return;
             }
             for (int i = 0; i < Children.Length; i++) {
+                if (Children[i] == null) {
+                    continue;
+                }
                 Children[i].Connect();
             }
         }

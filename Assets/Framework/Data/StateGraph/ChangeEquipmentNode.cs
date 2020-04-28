@@ -55,17 +55,17 @@ namespace PixelComrades {
                 if (targetIndex == 0) {
                     var data = instanced.Sprites[0];
                     var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
-                    if (targetAsset.Asset == null) {
-                        targetAsset.LoadAssetAsync().Completed += handle => {
-                            var targetAnimation = handle.Result;
+                    if (!targetAsset.IsLoaded) {
+                        targetAsset.LoadAsset(handle => {
+                            var targetAnimation = handle;
                             data.Sprite = targetAnimation.GetSprite(0);
                             data.Emissive = targetAnimation.EmissiveMap;
                             data.Normal = targetAnimation.NormalMap;
                             data.Flip = false;
-                        };
+                        });
                     }
                     else {
-                        var targetAnimation = (SpriteAnimation) targetAsset.Asset;
+                        var targetAnimation = targetAsset.LoadedAsset;
                         data.Sprite = targetAnimation.GetSprite(0);
                         data.Emissive = targetAnimation.EmissiveMap;
                         data.Normal = targetAnimation.NormalMap;

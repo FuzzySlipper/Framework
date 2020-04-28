@@ -36,6 +36,13 @@ namespace PixelComrades {
             return new ScriptableDatabaseTable(wrappers);
         }
 #endif
+        public override void CleanObjectList() {
+            for (int i = _allItems.Length - 1; i >= 0; i--) {
+                if (_allItems[i] == null) {
+                    _allItems.RemoveAt(i);
+                }
+            }
+        }
         
         public override void AddObject(Object obj) {
             var item = obj as ItemConfig;
@@ -142,11 +149,11 @@ namespace PixelComrades {
             var entity = Entity.New(config.ID);
             entity.Add(new TypeId(config.ID));
             entity.Add(new StatsContainer());
-            if (config.Icon.Asset != null) {
-                entity.Add(new IconComponent((Sprite)config.Icon.Asset, ""));
+            if (config.Icon.IsLoaded) {
+                entity.Add(new IconComponent(config.Icon.LoadedAsset, ""));
             }
             else {
-                config.Icon.LoadAssetAsync().Completed += handle => entity.Add(new IconComponent(handle.Result, ""));
+                config.Icon.LoadAsset(handle => entity.Add(new IconComponent(handle, "")));
             }
             entity.Add(new EntityLevelComponent(level));
             entity.Add(new TooltipComponent());

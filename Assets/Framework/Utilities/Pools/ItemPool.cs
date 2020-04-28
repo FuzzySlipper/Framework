@@ -285,8 +285,8 @@ namespace PixelComrades {
             }
 #endif
             if (!_prefabKeys.TryGetValue(targetObject, out var key)) {
-                targetObject.LoadAssetAsync().Completed += handle => {
-                    var result = handle.Result;
+                targetObject.LoadAsset(handle => {
+                    var result = handle;
                     if (result == null) {
                         Debug.LogErrorFormat("No Prefab at {0}", targetObject.Asset != null ? targetObject.Asset.name : "null");
                         return;
@@ -298,7 +298,7 @@ namespace PixelComrades {
                     _prefabKeys.AddOrUpdate(targetObject, prefab.PrefabId);
                     _referenceItems.Add(prefab.PrefabId, prefab);
                     SpawnPrefabCopy(targetObject, action);
-                };
+                });
                 return;
             }
             PrefabEntity newItem = GetPooledEntity(key);
@@ -321,8 +321,8 @@ namespace PixelComrades {
             }
 #endif
             if (!_prefabKeys.TryGetValue(loadOp.SourcePrefab, out var key)) {
-                loadOp.SourcePrefab.LoadAssetAsync().Completed += handle => {
-                    var result = handle.Result;
+                loadOp.SourcePrefab.LoadAsset(handle => {
+                    var result = handle;
                     if (result == null) {
                         Debug.LogErrorFormat("No Prefab at {0}", loadOp.SourcePrefab.Asset != null? loadOp.SourcePrefab.Asset.name : "null");
                         return;
@@ -334,7 +334,7 @@ namespace PixelComrades {
                     _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.PrefabId);
                     _referenceItems.Add(prefab.PrefabId, prefab);
                     SpawnPrefabCopy(loadOp);
-                };
+                });
                 return;
             }
             loadOp.NewPrefab = GetPooledEntity(key);

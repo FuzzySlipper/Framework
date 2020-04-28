@@ -59,7 +59,7 @@ namespace PixelComrades {
             _spriteRenderer.SetPropertyBlock(MaterialBlocks[0]);
             SpriteRenderer.color = config.MainColor;
             if (config.Animation != null) {
-                entity.Add(new SpriteAnimationComponent(_spriteRenderer, (SpriteAnimation) config.Animation.Asset, false, _billboard));
+                entity.Add(new SpriteAnimationComponent(_spriteRenderer, config.Animation.LoadedAsset, false, _billboard));
             }
             if (_sphereCollider == null) {
                 return;

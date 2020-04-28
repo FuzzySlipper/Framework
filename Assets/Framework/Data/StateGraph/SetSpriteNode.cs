@@ -65,17 +65,16 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_setup) {
-                    var op = _spriteNode.Sprite.LoadAssetAsync();
-                    op.Completed += FinishSetup;
+                    _spriteNode.Sprite.LoadAsset(FinishSetup);
                 }
                 else {
                     SetSprite();
                 }
             }
 
-            private void FinishSetup(AsyncOperationHandle<SpriteAnimation> animation) {
+            private void FinishSetup(SpriteAnimation animation) {
                 _setup = true;
-                _spriteAnimation = animation.Result;
+                _spriteAnimation = animation;
                 if (_spriteAnimation == null) {
                     return;
                 }

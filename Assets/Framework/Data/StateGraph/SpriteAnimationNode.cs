@@ -77,15 +77,14 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_setup) {
-                    var op = _animNode.Animation.LoadAssetAsync();
-                    op.Completed += FinishSetup;
+                    _animNode.Animation.LoadAsset(FinishSetup);
                 }
                 else {
                     SetupAnimation();
                 }
             }
 
-            private void FinishSetup(AsyncOperationHandle<SpriteAnimation> op) {
+            private void FinishSetup(SpriteAnimation op) {
                 _setup = true;
                 if (_animNode.InstancedIndex >= 0) {
                     _renderer = Graph.Entity.Get<SpriteSimpleRendererComponent>();
@@ -94,13 +93,13 @@ namespace PixelComrades {
                     _renderer = Graph.Entity.Get<SpriteRendererComponent>();
                 }
                 _animator = Graph.Entity.Get<SpriteAnimatorComponent>();
-                if (op.Result == null) {
+                if (op == null) {
                     Debug.LogError(
-                        op.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + _animNode
+                        op + " " + Graph.OriginalGraph.name + " couldn't load animation " + _animNode
                             .Animation.Path);
                     return;
                 }
-                SetAnimation(op.Result);
+                SetAnimation(op);
             }
 
             protected virtual void SetAnimation(SpriteAnimation animation) {

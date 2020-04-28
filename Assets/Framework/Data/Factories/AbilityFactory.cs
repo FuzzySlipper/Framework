@@ -23,10 +23,18 @@ namespace PixelComrades {
         
         public override T GetObject<T>(string id) {
             return _abilities.TryGetValue(id, out var target) ? target as T : null;
-        }
+        } 
 
         public override string GetId<T>(T obj) {
             return obj is AbilityConfig config ? config.ID : "";
+        }
+
+        public override void CleanObjectList() {
+            for (int i = _allAbilities.Count - 1; i >= 0; i--) {
+                if (_allAbilities[i] == null) {
+                    _allAbilities.RemoveAt(i);
+                }
+            }
         }
 
         private static void Init() {
@@ -34,6 +42,9 @@ namespace PixelComrades {
             _abilities.Clear();
             for (int i = 0; i < Main._allAbilities.Count; i++) {
                 var ability = Main._allAbilities[i];
+                if (ability == null) {
+                    continue;
+                }
                 _abilities.AddOrUpdate(ability.ID, ability);
             }
         }
@@ -78,11 +89,14 @@ namespace PixelComrades {
             entity.Add(new LabelComponent(entity.Name));
             entity.Add(new DescriptionComponent(config.Description));
             entity.Add(new StatsContainer());
-            if (config.Icon.Asset != null) {
-                entity.Add(new IconComponent((Sprite) config.Icon.Asset, ""));
+            if (config.Icon.IsLoaded) {
+                entity.Add(new IconComponent(config.Icon.LoadedAsset, ""));
             }
             else {
-                config.Icon.LoadAssetAsync().Completed += handle => entity.Add(new IconComponent(handle.Result, ""));
+                config.Icon.LoadAsset(
+                    handle => {
+                        entity.Add(new IconComponent(handle, ""));
+                    });
             }
             entity.Add(new InventoryItem(1, 0, ItemRarity.Special));
             entity.Add(new StatusUpdateComponent());

@@ -86,7 +86,7 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
-                Objects[i].LoadAssetAsync();
+                Objects[i].LoadAsset();
             }
         }
 
@@ -107,17 +107,7 @@ namespace PixelComrades {
                 return Objects[index].Asset as TV;
             }
 #endif
-            if (Objects[index].Asset == null) {
-                var op = Objects[index].LoadAssetAsync();
-                if (!op.IsDone) {
-                    //Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
-                    //op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
-                }
-                else {
-                    return op.Result;
-                }
-            }
-            return Objects[index].Asset as TV;
+            return Objects[index].LoadedAsset;
         }
 
         public TV Get() {
@@ -148,7 +138,7 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
-                Objects[i].LoadAssetAsync();
+                Objects[i].LoadAsset();
             }
         }
 
@@ -172,18 +162,7 @@ namespace PixelComrades {
                 return Objects[index].Asset as GameObject;
             }
 #endif
-            if (Objects[index].Asset == null) {
-                var op = Objects[index].LoadAssetAsync();
-                if (!op.IsDone) {
-                    Debug.LogFormat("Failed to load {0} {1}", Objects[0].ToString(), op
-                    .PercentComplete);
-                    op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
-                }
-                else {
-                    return op.Result;
-                }
-            }
-            return Objects[index].Asset as GameObject;
+            return Objects[index].LoadedAsset;
         }
 
         public GameObject Get() {

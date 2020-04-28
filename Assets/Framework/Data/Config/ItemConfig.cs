@@ -21,19 +21,5 @@ namespace PixelComrades {
             //var stats = entity.Get<StatsContainer>();
             //stats.GetOrAdd(Stats.Weight).ChangeBase(data.GetValue<int>(DatabaseFields.Weight));
         }
-
-        [Button]
-        public void TestSpriteLoad() {
-            Debug.Log(Icon.AssetReference.editorAsset != null ? Icon.AssetReference.editorAsset.name : " null");
-            Icon.AssetReference.SetEditorAsset(null);
-            Debug.Log(Icon.AssetReference.editorAsset != null ? Icon.AssetReference.editorAsset.name : " null");
-            Icon.AssetReference.SetEditorAsset(AssetReferenceUtilities.LoadAsset(Icon));
-            Debug.Log(Icon.AssetReference.editorAsset != null ? Icon.AssetReference.editorAsset.name + Icon.AssetReference.SubObjectName : " null");
-            // if (!string.IsNullOrEmpty(m_SubObjectName))
-            //     return string.Format("{0}[{1}]", m_AssetGUID, m_SubObjectName);
-            // return m_AssetGUID;
-        }
-        
-        
     }
 }

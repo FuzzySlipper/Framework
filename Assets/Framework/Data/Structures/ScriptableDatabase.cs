@@ -70,11 +70,12 @@ namespace PixelComrades {
     }
 
     public abstract class ScriptableDatabase : ScriptableObject {
-        public abstract void AddObject(UnityEngine.Object obj);
         public abstract Type DbType { get; }
+        public abstract IEnumerable<UnityEngine.Object> AllObjects { get; }
         public abstract T GetObject<T>(string id) where T : Object;
         public abstract string GetId<T>(T obj) where T : Object;
-        public abstract IEnumerable<UnityEngine.Object> AllObjects { get; }
+        public abstract void AddObject(UnityEngine.Object obj);
+        public abstract void CleanObjectList();
 
 #if UNITY_EDITOR
         public virtual System.Object GetEditorWindow() {

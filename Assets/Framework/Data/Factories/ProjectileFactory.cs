@@ -15,6 +15,14 @@ namespace PixelComrades {
         public override IEnumerable<UnityEngine.Object> AllObjects { get { return _allItems; } }
         public override System.Type DbType { get { return typeof(ProjectileConfig); } }
 
+        public override void CleanObjectList() {
+            for (int i = _allItems.Length - 1; i >= 0; i--) {
+                if (_allItems[i] == null) {
+                    _allItems.RemoveAt(i);
+                }
+            }
+        }
+        
         public override void AddObject(Object obj) {
             var item = obj as ProjectileConfig;
             if (item == null || _allItems.Contains(item)) {
@@ -82,7 +90,7 @@ namespace PixelComrades {
             entity.ParentId = owner.Id;
             var projectileEvent = _loadPool.New();
             if (config.Type == ProjectileType.SpriteAnimation) {
-                config.Animation.LoadAssetAsync();
+                config.Animation.LoadAsset();
             }
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);

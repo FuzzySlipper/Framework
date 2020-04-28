@@ -20,6 +20,14 @@ namespace PixelComrades {
         public override IEnumerable<UnityEngine.Object> AllObjects { get { return _text; } }
         public override System.Type DbType { get { return typeof(StaticTextHolder); } }
 
+        public override void CleanObjectList() {
+            for (int i = _text.Count - 1; i >= 0; i--) {
+                if (_text[i] == null) {
+                    _text.RemoveAt(i);
+                }
+            }
+        }
+        
         public override void AddObject(Object obj) {
             var item = obj as StaticTextHolder;
             if (item == null || _text.Contains(item)) {

@@ -54,23 +54,71 @@ namespace PixelComrades {
         public string Path;
         public abstract System.Type Type { get; }
         public abstract UnityEngine.Object Asset { get; }
+        public abstract bool IsLoaded { get; }
     }
 
     [System.Serializable]
     public class AssetReferenceEntry<T> : AssetReferenceEntry where T : UnityEngine.Object {
+        private bool _isLoaded = false;
+
+        private T _loadedAsset;
+        private List<Action<T>> _dels = new List<Action<T>>();
         public override Type Type { get { return typeof(T); } }
+
 #if UNITY_EDITOR
         public override UnityEngine.Object Asset { get { return AssetReference.editorAsset; } }
 #else
         public override UnityEngine.Object Asset { get { return AssetReference.Asset; } }
 
 #endif
-        public AsyncOperationHandle<T> LoadAssetAsync() {
-            return AssetReference.LoadAssetAsync<T>();
+        public T LoadedAsset {
+            get {
+#if UNITY_EDITOR
+                if (!Application.isPlaying) {
+                    return AssetReference.editorAsset as T;
+                }
+#endif
+                return _loadedAsset;
+            }
+        }
+        public override bool IsLoaded {
+            get {
+#if UNITY_EDITOR
+                if (!Application.isPlaying) {
+                    return true;
+                }
+#endif
+                return _isLoaded;
+            }
+        }
+
+        public void LoadAsset() {
+            AssetReference.LoadAssetAsync<T>().Completed += CompleteLoad;
+        }
+
+        public void LoadAsset(Action<T> del) {
+            if (IsLoaded) {
+                del(_loadedAsset);
+                return;
+            }
+            _dels.Add(del);
+            LoadAsset();
+        }
+
+        private void CompleteLoad(AsyncOperationHandle<T> load) {
+            _loadedAsset = load.Result;
+            _isLoaded = true;
+            for (int i = 0; i < _dels.Count; i++) {
+                _dels[i](_loadedAsset);
+            }
+            _dels.Clear();
         }
 
         public void ReleaseAsset() {
             AssetReference.ReleaseAsset();
+            _loadedAsset = null;
+            _dels.Clear();
+            _isLoaded = false;
         }
     }
 //
