@@ -117,6 +117,40 @@ public static class DebugExtension
 		Debug.DrawLine(lfd, lbd, color, duration, depthTest);
 		Debug.DrawLine(lbd, rdb, color, duration, depthTest);
 	}
+
+	public static void GizmoBounds(Bounds bounds, Color color) {
+		Vector3 center = bounds.center;
+
+		float x = bounds.extents.x;
+		float y = bounds.extents.y;
+		float z = bounds.extents.z;
+
+		Vector3 ruf = center + new Vector3(x, y, z);
+		Vector3 rub = center + new Vector3(x, y, -z);
+		Vector3 luf = center + new Vector3(-x, y, z);
+		Vector3 lub = center + new Vector3(-x, y, -z);
+
+		Vector3 rdf = center + new Vector3(x, -y, z);
+		Vector3 rdb = center + new Vector3(x, -y, -z);
+		Vector3 lfd = center + new Vector3(-x, -y, z);
+		Vector3 lbd = center + new Vector3(-x, -y, -z);
+		
+		Gizmos.color = color;
+		Gizmos.DrawLine(ruf, luf);
+		Gizmos.DrawLine(ruf, rub);
+		Gizmos.DrawLine(luf, lub);
+		Gizmos.DrawLine(rub, lub);
+
+		Gizmos.DrawLine(ruf, rdf);
+		Gizmos.DrawLine(rub, rdb);
+		Gizmos.DrawLine(luf, lfd);
+		Gizmos.DrawLine(lub, lbd);
+
+		Gizmos.DrawLine(rdf, lfd);
+		Gizmos.DrawLine(rdf, rdb);
+		Gizmos.DrawLine(lfd, lbd);
+		Gizmos.DrawLine(lbd, rdb);
+	}
 	
 	/// <summary>
 	/// 	- Debugs an axis-aligned bounding box.
