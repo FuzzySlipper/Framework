@@ -7,43 +7,57 @@ namespace PixelComrades {
     [System.Serializable]
     public class SimpleBufferedList<T> : IEnumerable<T> {
 
-        [SerializeField] private List<T>[] _list = new List<T>[2];
-        
-        public SimpleBufferedList(int size = 10){
-            _list[0] = new List<T>(size);
-            _list[1] = new List<T>(size);
+        [SerializeField] private List<T>[] _list;
+
+        public SimpleBufferedList(int size = 10) {
+            _list = new[] {
+                new List<T>(size), new List<T>(size), new List<T>(size)
+            };
         }
 
         private List<T> CurrentList { get { return _list[0]; } }
-        private List<T> Pending { get { return _list[1]; } }
+        private List<T> PendingAdd { get { return _list[1]; } }
+        private List<T> PendingRemove { get { return _list[2]; } }
+
         
         public T this[int index] { get { return CurrentList[index]; } }
         public int Count { get { return CurrentList.Count; } }
 
         public void Add(T newVal) {
-            Pending.Add(newVal);
+            PendingAdd.Add(newVal);
         }
 
         public void Remove(T newVal) {
-            Pending.Remove(newVal);
+            PendingRemove.Add(newVal);
         }
 
-        public bool PendingContains(T obj) {
-            return Pending.Contains(obj);
+        public void Remove(int index) {
+            PendingRemove.Add(CurrentList[index]);
         }
 
         public bool CurrentContains(T obj) {
             return CurrentList.Contains(obj);
         }
 
-        public void Swap() {
-            CurrentList.Clear();
-            CurrentList.AddRange(Pending);
+        public void Sort(IComparer<T> comparer) {
+            CurrentList.Sort(comparer);
+        }
+
+        public void Update() {
+            for (int i = 0; i < PendingAdd.Count; i++) {
+                CurrentList.Add(PendingAdd[i]);
+            }
+            for (int i = 0; i < PendingRemove.Count; i++) {
+                CurrentList.Remove(PendingRemove[i]);
+            }
+            PendingAdd.Clear();
+            PendingRemove.Clear();
         }
 
         public void Clear() {
-            CurrentList.Clear();
-            Pending.Clear();
+            for (int i = 0; i < _list.Length; i++) {
+                _list[i].Clear();
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
