@@ -13,9 +13,10 @@ namespace PixelComrades {
         //private Transform _activeSceneTr = null;
         private Transform _inactiveSceneTr = null;
 
-        private Dictionary<int, PrefabEntity> _referenceItems = new Dictionary<int, PrefabEntity>();
-        private Dictionary<int, Queue<PrefabEntity>> _pooledDict = new Dictionary<int, Queue<PrefabEntity>>();
-        private Dictionary<GameObjectReference, int> _prefabKeys = new Dictionary<GameObjectReference, int>();
+        private Dictionary<string, Queue<PrefabEntity>> _pooledDict = new Dictionary<string, Queue<PrefabEntity>>();
+        private Dictionary<GameObjectReference, string> _prefabKeys = new Dictionary<GameObjectReference, string>();
+        
+        private static GenericPool<GenericLoadOperation> _loadPool = new GenericPool<GenericLoadOperation>(5, null);
         private static List<PrefabEntity> _sceneObjects = new List<PrefabEntity>();
         public static List<PrefabEntity> SceneObjects { get => _sceneObjects; }
         private static Transform PoolTransform {
@@ -42,10 +43,6 @@ namespace PixelComrades {
                 RegisterSceneEntities(scene);
             }
             SystemManager.CheckForDuplicates();
-        }
-
-        public static Queue<PrefabEntity> GetQueue(int id) {
-            return Main._pooledDict.TryGetValue(id, out var queue) ? queue : null;
         }
 
         public static void RegisterSceneEntities(Scene scene) {
@@ -118,11 +115,6 @@ namespace PixelComrades {
             Main._prefabKeys.Clear();
         }
 
-        public static void ClearReferences() {
-            Main._referenceItems.Clear();
-            Resources.UnloadUnusedAssets();
-        }
-
         private static FastString _stringBuilder = new FastString();
 
         public static T LoadAsset<T>(string dir, string file, System.Action<T> del = null) where T : UnityEngine.Object {
@@ -182,14 +174,11 @@ namespace PixelComrades {
         }
 
         public static void Spawn(GameObjectReference targetObject, Action<PrefabEntity> action) {
-            Main.SpawnPrefabCopy(targetObject, action);
+            var loader = _loadPool.New();
+            loader.Set(targetObject, action);
+            Main.SpawnPrefabCopy(loader);
         }
         
-        public static PrefabEntity Spawn(PrefabEntity targetObject, Vector3 pos, Quaternion rot, bool isScene = true, bool isCulled = 
-        true) {
-            return Main.GetPrefabCopy(targetObject, isScene, isCulled, pos, rot);
-        }
-
         public static GameObject SpawnScenePrefab(GameObject targetObject, Vector3 pos, Quaternion rot) {
             return Main.GetPrefabCopy(targetObject.GetOrAddComponent<PrefabEntity>(), true, true, pos, rot).gameObject;
         }
@@ -268,49 +257,6 @@ namespace PixelComrades {
             return returnType;
         }
 
-        public static PrefabEntity GetReferencePrefab(int itemId) {
-            if (Main._referenceItems.TryGetValue(itemId, out var prefab)) {
-                return prefab;
-            }
-            Debug.LogErrorFormat("No item at id {0}", itemId );
-            return null;
-        }
-
-        private void SpawnPrefabCopy(GameObjectReference targetObject, Action<PrefabEntity> action) {
-#if UNITY_EDITOR
-            if (!Application.isPlaying) {
-                var go = (GameObject) UnityEditor.PrefabUtility.InstantiatePrefab(targetObject.Asset);
-                action(go.GetOrAddComponent<PrefabEntity>());
-                return;
-            }
-#endif
-            if (!_prefabKeys.TryGetValue(targetObject, out var key)) {
-                targetObject.LoadAsset(handle => {
-                    var result = handle;
-                    if (result == null) {
-                        Debug.LogErrorFormat("No Prefab at {0}", targetObject.Asset != null ? targetObject.Asset.name : "null");
-                        return;
-                    }
-                    var prefab = result.GetOrAddComponent<PrefabEntity>();
-                    if (prefab.PrefabId == 0) {
-                        prefab.SetId(targetObject.AssetReference.AssetGUID);
-                    }
-                    _prefabKeys.AddOrUpdate(targetObject, prefab.PrefabId);
-                    _referenceItems.Add(prefab.PrefabId, prefab);
-                    SpawnPrefabCopy(targetObject, action);
-                });
-                return;
-            }
-            PrefabEntity newItem = GetPooledEntity(key);
-            if (newItem == null) {
-                newItem = CreateNewPrefab(GetReferencePrefab(key));
-            }
-            newItem.transform.SetParent(null);
-            newItem.Register(true, true);
-            newItem.SetActive(true);
-            action(newItem);
-        }
-
         private void SpawnPrefabCopy<T>(T loadOp) where T : LoadOperationEvent {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -328,18 +274,17 @@ namespace PixelComrades {
                         return;
                     }
                     var prefab = result.GetOrAddComponent<PrefabEntity>();
-                    if (prefab.PrefabId == 0) {
+                    if (prefab.IdInvalid) {
                         prefab.SetId(loadOp.SourcePrefab.AssetReference.AssetGUID);
                     }
-                    _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.PrefabId);
-                    _referenceItems.Add(prefab.PrefabId, prefab);
+                    _prefabKeys.AddOrUpdate(loadOp.SourcePrefab, prefab.Guid);
                     SpawnPrefabCopy(loadOp);
                 });
                 return;
             }
             loadOp.NewPrefab = GetPooledEntity(key);
             if (loadOp.NewPrefab == null) {
-                loadOp.NewPrefab = CreateNewPrefab(GetReferencePrefab(key));
+                loadOp.NewPrefab = CreateNewPrefab(loadOp.SourcePrefab.LoadedAsset);
             }
             if (loadOp.NewPrefab == null) {
                 loadOp.OnComplete();
@@ -364,12 +309,12 @@ namespace PixelComrades {
                 Debug.LogError("spawn is null");
                 return null;
             }
-            if (prefab.PrefabId == 0) {
-                prefab.SetId(GetResourcePath(prefab.gameObject));
+            if (prefab.IdInvalid) {
+                prefab.SetId(ref _pooledDict, null);
             }
-            PrefabEntity newItem = GetPooledEntity(prefab.PrefabId);
+            PrefabEntity newItem = GetPooledEntity(prefab.Guid);
             if (newItem == null) {
-                newItem = CreateNewPrefab(prefab);
+                newItem = CreateNewPrefab(prefab.gameObject);
             }
             SetEntityPosition(newItem, isScene, pos, rot, parent);
             newItem.Register(isScene, isCulled);
@@ -386,11 +331,11 @@ namespace PixelComrades {
             //}
         }
 
-        private PrefabEntity CreateNewPrefab(PrefabEntity prefab) {
+        private PrefabEntity CreateNewPrefab(GameObject prefab) {
             if (prefab == null) {
                 return null;
             }
-            GameObject newItem = Instantiate(prefab.gameObject);
+            GameObject newItem = Instantiate(prefab);
             var prefabCopy = newItem.GetComponent<PrefabEntity>();
             prefabCopy.Setup();
             return prefabCopy;
@@ -415,7 +360,7 @@ namespace PixelComrades {
         }
 
         private void ReturnToPool(PrefabEntity poolObj) {
-            if (!Application.isPlaying && !TimeManager.IsQuitting || poolObj.PrefabId == 0 || poolObj.ObjectType == AssetType.Scene) {
+            if (!Application.isPlaying && !TimeManager.IsQuitting || poolObj.IdInvalid || poolObj.ObjectType == AssetType.Scene) {
                 if (Application.isPlaying) {
                     poolObj.Unregister();
                 }
@@ -430,17 +375,17 @@ namespace PixelComrades {
             poolObj.SetActive(false);
             poolObj.transform.SetParent(PoolTransform);
             Queue<PrefabEntity> activeObjects = null;
-            if (_pooledDict.TryGetValue(poolObj.PrefabId, out activeObjects)) {
+            if (_pooledDict.TryGetValue(poolObj.Guid, out activeObjects)) {
                 activeObjects.Enqueue(poolObj);
             }
             else {
                 activeObjects = new Queue<PrefabEntity>();
                 activeObjects.Enqueue(poolObj);
-                _pooledDict.Add(poolObj.PrefabId, activeObjects);
+                _pooledDict.Add(poolObj.Guid, activeObjects);
             }
         }
 
-        private PrefabEntity GetPooledEntity(int uniqueId) {
+        private PrefabEntity GetPooledEntity(string uniqueId) {
             if (!_pooledDict.TryGetValue(uniqueId, out var list) || list.Count == 0) {
                 return null;
             }
@@ -477,6 +422,27 @@ namespace PixelComrades {
         //    //    _pooledDict.Add(i, new Dictionary<int, List<WorldEntity>>());
         //    //}
         //}
+
+        private class GenericLoadOperation : LoadOperationEvent {
+            public Action<PrefabEntity> Del;
+
+            public void Set(GameObjectReference reference, Action<PrefabEntity> del) {
+                Del = del;
+                SourcePrefab = reference;
+            }
+
+            public override void OnComplete() {
+                Del(NewPrefab);
+                Clear();
+                ItemPool._loadPool.Store(this);
+            }
+
+            public void Clear() {
+                Del = null;
+                NewPrefab = null;
+                SourcePrefab = null;
+            }
+        }
     }
 
     public abstract class LoadOperationEvent {
@@ -484,5 +450,5 @@ namespace PixelComrades {
         public PrefabEntity NewPrefab;
         public abstract void OnComplete();
     }
-    
+
 }

@@ -57,7 +57,7 @@ namespace PixelComrades {
             if (value is UnityEngine.Component unityComponent) {
                 var prefab = PrefabEntity.FindPrefabRoot(unityComponent.transform);
                 if (prefab != null) {
-                    _serializedId = prefab.PrefabId;
+                    _serializedId = prefab.Metadata.SerializationId;
                     _transformChild = unityComponent.transform.GetPath();
                 }
                 else {

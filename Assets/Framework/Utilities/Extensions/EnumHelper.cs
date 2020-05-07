@@ -54,18 +54,15 @@ public static class EnumHelper {
     }
 
     public static string GetDescription<T>(T en) where T : struct, IConvertible {
-        string value;
-        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out value) ? value : "";
+        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out var value) ? value : "";
     }
 
     public static string ToDescription<T>(this T en) where T : struct, IConvertible {
-        string value;
-        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out value) ? value : "";
+        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out var value) ? value : "";
     }
 
     public static string GetDescription<T>(int enumIndex) where T : struct, IConvertible {
-        string value;
-        return GetEnumDescrList<T>().TryGetValue(enumIndex, out value) ? value : "";
+        return GetEnumDescrList<T>().TryGetValue(enumIndex, out var value) ? value : "";
     }
 
     public static SortedList<int, string> GetEnumDescrList<T>() {

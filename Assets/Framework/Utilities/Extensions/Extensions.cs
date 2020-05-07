@@ -162,11 +162,16 @@ namespace PixelComrades {
                 return Objects[index].Asset as GameObject;
             }
 #endif
+            if (!Objects[index].IsLoaded) {
+                Debug.LogErrorFormat("Not Loaded: {0}", Objects[index].Path);
+                return null;
+            }
             return Objects[index].LoadedAsset;
         }
 
         public GameObject Get() {
             if (Objects.Count == 0) {
+                Debug.Log("No Objects");
                 return null;
             }
             if (Objects.Count == 1) {

@@ -13,19 +13,6 @@ namespace PixelComrades {
             }));
         }
 
-        public void TriggerSpawn(SpawnOnEvent spawnEvent, ActionEvent arg) {
-            if (arg.State == spawnEvent.End && spawnEvent.ActiveGameObject != null) {
-                ItemPool.Despawn(spawnEvent.ActiveGameObject);
-            }
-            else if (arg.State == spawnEvent.Start && spawnEvent.Prefab != null) {
-                arg.GetSpawnPositionRotation(out var spawnPos, out var spawnRot);
-                spawnEvent.ActiveGameObject = ItemPool.Spawn(spawnEvent.Prefab, spawnPos, spawnRot);
-                if (spawnEvent.End == ActionState.None) {
-                    spawnEvent.ActiveGameObject = null;
-                }
-            }
-        }
-
         public void Handle(DeathEvent arg) {
             var spawnOnDeath = arg.Target.Entity.Get<SpawnPrefabOnDeath>();
             if (spawnOnDeath != null) {

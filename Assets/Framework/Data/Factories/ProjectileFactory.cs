@@ -197,7 +197,7 @@ namespace PixelComrades {
                 };
             }
         }
-                private class ProjectileLoader : LoadOperationEvent {
+        private class ProjectileLoader : LoadOperationEvent {
             private Entity _entity;
             private Vector3 _target;
             private Vector3 _spawnPos;

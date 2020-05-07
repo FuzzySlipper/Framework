@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         public ActionState Start { get; }
         public ActionState End { get; }
-        public PrefabEntity Prefab { get; }
+        public string Prefab { get; }
         public bool Parent { get; }
 
         public PrefabEntity ActiveGameObject;
@@ -17,7 +17,7 @@ namespace PixelComrades {
         public SpawnOnEvent(ActionState start, ActionState end, bool parent, PrefabEntity prefab) {
             Start = start;
             End = end;
-            Prefab = prefab;
+            Prefab = prefab.Guid;
             Parent = parent;
         }
 
@@ -26,7 +26,6 @@ namespace PixelComrades {
             End = info.GetValue(nameof(End), End);
             Parent = info.GetValue(nameof(Parent), Parent);
             ActiveGameObject = Serializer.GetPrefabEntity(info.GetValue(nameof(ActiveGameObject), -1));
-            Prefab = ItemPool.GetReferencePrefab(info.GetValue(nameof(Prefab), -1));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
@@ -34,7 +33,7 @@ namespace PixelComrades {
             info.AddValue(nameof(End), End);
             info.AddValue(nameof(Parent), Parent);
             info.AddValue(nameof(ActiveGameObject), ActiveGameObject != null ? ActiveGameObject.Metadata.SerializationId : -1);
-            info.AddValue(nameof(Prefab), Prefab.PrefabId);
+            info.AddValue(nameof(Prefab), Prefab);
         }
     }
 }
