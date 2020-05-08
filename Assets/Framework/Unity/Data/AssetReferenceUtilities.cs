@@ -107,6 +107,14 @@ namespace PixelComrades {
 
         private void CompleteLoad(AsyncOperationHandle<T> load) {
             _loadedAsset = load.Result;
+            if (load.Status == AsyncOperationStatus.Failed) {
+                Debug.LogErrorFormat("Failed Loading {0} {1}", Path, load.OperationException.Message);
+                return;
+            }
+            if (load.Status == AsyncOperationStatus.None) {
+                Debug.LogErrorFormat("Failed Loading {0} {1}", Path, load.OperationException.Message);
+                return;
+            }
             _isLoaded = true;
             for (int i = 0; i < _dels.Count; i++) {
                 _dels[i](_loadedAsset);
@@ -115,6 +123,9 @@ namespace PixelComrades {
         }
 
         public void ReleaseAsset() {
+            if (!_isLoaded) {
+                return;
+            }
             AssetReference.ReleaseAsset();
             _loadedAsset = null;
             _dels.Clear();

@@ -32,7 +32,7 @@ namespace PixelComrades {
         private static float _time = 0;
         private static float _timeUnscaled = 0;
         private static float _timeScale = 1;
-        private static ProfilerMarker _profileUpdate = new ProfilerMarker("TimeManagerUpdate");
+        private static ProfilerMarker _profileUpdate = new ProfilerMarker("Time Manager Update");
 
         public static float DeltaTime { get { return _deltaTime; } }
         public static float FixedDelta { get { return _fixedDelta; } }

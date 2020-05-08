@@ -79,6 +79,15 @@ namespace PixelComrades {
         public List<T> Objects = new List<T>();
         public AnimationCurve Curve = new AnimationCurve();
 
+        public bool IsLoaded() {
+            for (int i = 0; i < Objects.Count; i++) {
+                if (!Objects[i].IsLoaded) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         public void Load() {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -131,6 +140,15 @@ namespace PixelComrades {
         public List<GameObjectReference> Objects = new List<GameObjectReference>();
         public AnimationCurve Curve = new AnimationCurve();
 
+        public bool IsLoaded() {
+            for (int i = 0; i < Objects.Count; i++) {
+                if (!Objects[i].IsLoaded) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         public void Load() {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -177,7 +195,6 @@ namespace PixelComrades {
             if (Objects.Count == 1) {
                 return Get(0);
             }
-            //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
             return Get((int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
         }
 
