@@ -31,7 +31,7 @@ namespace PixelComrades {
         
         public void AddToSpellLists(SpellData item) {
             GetLevelList(item.Template.Level).Add(item);
-            GetSkillList(item.Template.Skill).Add(item);
+            GetSkillList(item.Template.Class).Add(item);
         }
 
         public List<SpellData> GetLevelList(int level) {

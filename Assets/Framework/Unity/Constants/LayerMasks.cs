@@ -3,7 +3,7 @@ using System.Collections;
 
 public static class LayerMasks  {
     public static int NumberDefault = 0;
-    public static int NumberActorMovement = 8;
+    public static int NumberActor = 8;
     public static int NumberEnvironment = 9;
     public static int NumberCollision = 10;
     public static int NumberWorldControls = 11;
@@ -27,7 +27,7 @@ public static class LayerMasks  {
     private static LayerMask _map = 1 << NumberMap;
     //private static LayerMask _worldControls = 1 << NumberWorldControls;
     private static LayerMask _player = 1 << NumberPlayer;
-    private static LayerMask _actorMovement = 1 << NumberActorMovement;
+    private static LayerMask _actor = 1 << NumberActor;
     private static LayerMask _ceiling = 1 << NumberCeiling;
     private static LayerMask _wall = 1 << NumberWall;
     private static LayerMask _floor = 1 << NumberFloor;
@@ -36,12 +36,13 @@ public static class LayerMasks  {
     private static LayerMask _wallsEnvironment = _environmentOnly | _wall;
     private static LayerMask _defaultCollision = _default | _collision | _environment | _player | _enemy;
     private static LayerMask _dropPanel = _default | _environment;
-
+    private static LayerMask _checkClick = _floor | _actor;
     public static LayerMask DefaultCollision { get { return _defaultCollision; } }
     public static LayerMask DropPanel { get { return _dropPanel; } }
     public static LayerMask Environment {get { return _environment; } }
     public static LayerMask WallsEnvironment { get { return _wallsEnvironment; } }
-    public static LayerMask ActorMovement {get { return _actorMovement; } }
+    public static LayerMask CheckClick { get { return _checkClick; } }
+    public static LayerMask Actor {get { return _actor; } }
     public static LayerMask Map { get { return _map; } }
     public static LayerMask Floor { get { return _floor; } }
     public static LayerMask Ceiling { get { return _ceiling; } }

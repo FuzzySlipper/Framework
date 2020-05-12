@@ -7,24 +7,24 @@ namespace PixelComrades {
     [System.Serializable]
 	public struct FactionComponent : IComponent {
 
-        private int _faction;
+        private int _value;
 
-        public int Faction { get { return _faction; } } 
+        public int Value { get { return _value; } } 
 
-        public FactionComponent(int faction) : this() {
-            _faction = faction;
+        public FactionComponent(int value) : this() {
+            _value = value;
         }
 
         public static implicit operator int(FactionComponent reference) {
-            return reference.Faction;
+            return reference.Value;
         }
 
         public FactionComponent(SerializationInfo info, StreamingContext context) {
-            _faction = info.GetValue(nameof(_faction), 0);
+            _value = info.GetValue(nameof(_value), 0);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_faction), _faction);
+            info.AddValue(nameof(_value), _value);
         }
     }
 }

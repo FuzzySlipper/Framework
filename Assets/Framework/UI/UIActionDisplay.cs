@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace PixelComrades {
-    public class UIActionDisplay : MonoBehaviour, IReceive<ReadyActionsChanged>, IReceive<EntityDetailsChanged>,
+    public class UIActionDisplay : MonoBehaviour, IReceive<EntityDetailsChanged>,
         IReceive<StatusUpdate>, IPointerEnterHandler, IPointerExitHandler  {
         
         [SerializeField] private Image _iconDisplay = null;
@@ -37,17 +37,6 @@ namespace PixelComrades {
 
         public void OnPointerExit(PointerEventData eventData) {
             UITooltip.main.HideTooltip();
-        }
-        
-        public void Handle(ReadyActionsChanged arg) {
-            if (arg.Index != _index) {
-                return;
-            }
-            if (arg.Action == null) {
-                Clear();
-                return;
-            }
-            SetItem(arg.Action.Entity);
         }
 
         public void Handle(EntityDetailsChanged arg) {

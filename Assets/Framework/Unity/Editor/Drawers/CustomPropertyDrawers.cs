@@ -44,6 +44,32 @@ namespace PixelComrades {
         }
     }
 
+    [CustomPropertyDrawer(typeof(IntRange))]
+    public class IntRangeDrawer : PropertyDrawer {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            label = EditorGUI.BeginProperty(position, label, property);
+            Rect contentPosition = EditorGUI.PrefixLabel(position, label);
+            EditorGUI.indentLevel = 0;
+            // contentPosition.height *= 0.5f;
+            contentPosition.width *= 0.5f;
+            SerializedProperty min = property.FindPropertyRelative("Min");
+            SerializedProperty max = property.FindPropertyRelative("Max");
+            min.intValue = EditorGUI.IntField(contentPosition, min.intValue);
+            contentPosition.x += contentPosition.width;
+            max.intValue = EditorGUI.IntField(contentPosition, max.intValue);
+            contentPosition.x -= contentPosition.width;
+            contentPosition.width *= 2f;
+            // contentPosition.y += contentPosition.height;
+            EditorGUI.EndProperty();
+        }
+
+        //
+        // public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
+        //     return base.GetPropertyHeight(property, label) * 2f + 5f;
+        // }
+    }
+    
     [CustomPropertyDrawer(typeof(NormalizedFloatRange))]
     public class NormalizedFloatRangeDrawer : PropertyDrawer {
         private const float MinPercent = 0;

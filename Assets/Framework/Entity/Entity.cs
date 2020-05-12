@@ -8,7 +8,7 @@ namespace PixelComrades {
     public class Entity : IEquatable<Entity> {
 
         private static EntityPool _pool = new EntityPool(100);
-        private GenericPool<TagsComponent> _tagPool = new GenericPool<TagsComponent>(50, t => t.ClearEntity());
+        private GenericPool<EntityTagsComponent> _tagPool = new GenericPool<EntityTagsComponent>(50, t => t.ClearEntity());
         private static List<Entity> _toDeleteList = new List<Entity>(25);
         private static TypeComparer _typeComparer = new TypeComparer();
 
@@ -56,10 +56,10 @@ namespace PixelComrades {
         public IEntityFactory Factory;
 
         private Dictionary<System.Type, ComponentReference> _components = new Dictionary<Type, ComponentReference>();
-        private TagsComponent _tags; 
+        private EntityTagsComponent _tags; 
         
         public string DebugId { get { return Id + "_" + Name; } }
-        public TagsComponent Tags {
+        public EntityTagsComponent Tags {
             get {
                 if (_tags == null) {
                     _tags = _tagPool.New();

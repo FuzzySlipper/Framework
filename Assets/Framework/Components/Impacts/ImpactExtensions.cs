@@ -16,20 +16,16 @@ namespace PixelComrades {
         Party = 8,
     }
 
+    public class ImpactRadius : StringEnum<ImpactRadius> {
+        public const string Target = "Target";
+        public const string CloseBurst = "CloseBurst";
+        public const string CloseBlast = "CloseBlast";
+        public const string AreaBurst = "AreaBurst";
+        public const string AreaWall = "AreaWall";
+    }
+
     public static class ImpactExtensions {
 
-
-        public static float ToFloat(this ImpactRadiusTypes radius) {
-            switch (radius) {
-                case ImpactRadiusTypes.Radius1:
-                    return Game.MapCellSize;
-                case ImpactRadiusTypes.Radius2:
-                    return Game.MapCellSize * 2;
-                case ImpactRadiusTypes.Radius3:
-                    return Game.MapCellSize * 3;
-            }
-            return 0;
-        }
 
         public static List<Point3> RadiusPoints(this ImpactRadiusTypes radius, Point3 center, Directions fwd) {
             if (radius == ImpactRadiusTypes.Single) {
@@ -96,7 +92,7 @@ namespace PixelComrades {
 
         private static List<Shadow> _shadows = new List<Shadow>();
 
-        public static void GetVisibleCells(Point3 start, int octant, int maxRowDistance, Action<BaseCell, float> del) {
+        public static void GetVisibleCells(Point3 start, int octant, int maxRowDistance, Action<LevelCell, float> del) {
             if (del == null) {
                 return;
             }

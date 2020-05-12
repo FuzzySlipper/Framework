@@ -87,7 +87,7 @@ namespace PixelComrades {
             _moveEnabled.RemoveValue(id);
         }
 
-        protected virtual void OnDeath() {
+        public virtual void OnDeath() {
             MessageKit.post(Messages.PlayerDead);
             Game.SetGameActive(false);
         }

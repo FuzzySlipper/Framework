@@ -41,7 +41,7 @@ namespace PixelComrades {
             }
             var factionList = EntityController.GetComponentArray<FactionComponent>();
             foreach (FactionComponent f in factionList) {
-                if (list.Contains(f.Faction)) {
+                if (list.Contains(f.Value)) {
                     var entity = f.GetEntity();
                     if (entity != null) {
                         entityList.Add(entity);
@@ -62,7 +62,7 @@ namespace PixelComrades {
             }
             var factionList = EntityController.GetComponentArray<FactionComponent>();
             foreach (FactionComponent f in factionList) {
-                if (list.Contains(f.Faction)) {
+                if (list.Contains(f.Value)) {
                     entityList.Add(f.GetEntity());
                 }
             }
@@ -89,14 +89,28 @@ namespace PixelComrades {
             if (source == null || target == null) {
                 return false;
             }
-            return AreFriends(source.Find<FactionComponent>().Faction, target.Find<FactionComponent>().Faction);
+            return AreFriends(source.Find<FactionComponent>().Value, target.Find<FactionComponent>().Value);
         }
 
         public bool AreEnemies(Entity source, Entity target) {
             if (source == null || target == null) {
                 return false;
             }
-            return AreEnemies(source.Find<FactionComponent>().Faction, target.Find<FactionComponent>().Faction);
+            return AreEnemies(source.Find<FactionComponent>().Value, target.Find<FactionComponent>().Value);
+        }
+
+        public bool AreEnemies(CharacterTemplate source, CharacterTemplate target) {
+            if (source == null || target == null) {
+                return false;
+            }
+            return AreEnemies(source.Faction, target.Faction);
+        }
+
+        public bool AreFriends(CharacterTemplate source, CharacterTemplate target) {
+            if (source == null || target == null) {
+                return false;
+            }
+            return AreFriends(source.Faction, target.Faction);
         }
     }
 }

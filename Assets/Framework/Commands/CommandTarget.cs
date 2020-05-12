@@ -11,14 +11,14 @@ namespace PixelComrades {
         private CachedEntity _target = new CachedEntity(-1);
         private Vector3? _explicitPosition;
         
-        public VisibleTemplate TargetTr { get; private set; }
+        public CharacterTemplate TargetChar { get; private set; }
         public Entity Target {
             get {
                 return _target;
             }
             set {
                 _target.Set(value);
-                TargetTr = value != null ? value.GetTemplate<VisibleTemplate>() : null;
+                TargetChar = value != null ? value.GetTemplate<CharacterTemplate>() : null;
                 if (value != null) {
                     _explicitPosition = null;
                 }
@@ -26,13 +26,24 @@ namespace PixelComrades {
         }
         public Vector3 GetPosition {
             get {
-                if (TargetTr != null) {
-                    return TargetTr.position;
+                if (TargetChar != null) {
+                    return TargetChar.Tr.position;
                 }
                 if (_explicitPosition != null) {
                     return _explicitPosition.Value;
                 }
                 return Target?.GetPosition() ?? this.GetEntity().GetPosition();
+            }
+        }
+        public Point3 GetPositionP3 {
+            get {
+                if (TargetChar != null) {
+                    return TargetChar.Position;
+                }
+                if (_explicitPosition != null) {
+                    return _explicitPosition.Value.ToCellGridP3();
+                }
+                return (Target?.GetPosition() ?? this.GetEntity().GetPosition()).ToCellGridP3();
             }
         }
         public bool Valid { get { return _explicitPosition != null || _target != null; } }
@@ -42,22 +53,28 @@ namespace PixelComrades {
             return Quaternion.LookRotation(relativePos, Vector3.up);
         }
 
-        public CommandTarget(Entity target, Vector3? explicitPosition, VisibleTemplate targetTr) {
+        public CommandTarget(Entity target, Vector3? explicitPosition, CharacterTemplate targetChar) {
             _target.Set(target);
             _explicitPosition = explicitPosition;
-            TargetTr = targetTr;
+            TargetChar = targetChar;
         }
 
         public CommandTarget(Entity target) {
             _target.Set(target);
-            TargetTr = target.GetTemplate<VisibleTemplate>();
+            TargetChar = target.GetTemplate<CharacterTemplate>();
             _explicitPosition = null;
         }
 
         public void Set(Vector3 explicitPosition) {
             _explicitPosition = explicitPosition;
             _target.Clear();
-            TargetTr = null;
+            TargetChar = null;
+        }
+
+        public void Set(CharacterTemplate target) {
+            _target.Set(target);
+            TargetChar = target;
+            _explicitPosition = null;
         }
 
         public CommandTarget(){}

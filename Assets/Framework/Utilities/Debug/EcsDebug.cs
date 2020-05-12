@@ -66,7 +66,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
+            World.Get<RulesSystem>().Post(new HealingEvent(null, amount, null, null, "Vitals.Energy"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString());
         }
         
@@ -78,7 +78,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Health"));
+            World.Get<RulesSystem>().Post(new HealingEvent(null, amount, null, null, "Vitals.Health"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString());
         }
 

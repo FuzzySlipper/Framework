@@ -20,8 +20,8 @@ namespace PixelComrades {
         public static FakeEnum DamageTypes { get { return _enums[StatTypes.DamageTypes]; } }
         public static FakeEnum EquipmentSlotTypes { get { return _enums[EnumTypes.EquipmentSlotType]; } }
         public static FakeEnum Skills { get { return _enums[StatTypes.Skills]; } }
-        public static FakeEnum ActionDistance { get { return _enums[EnumTypes.ActionDistance]; } }
-        public static FakeEnum CollisionType { get { return _enums[EnumTypes.CollisionType]; } }
+        public static FakeEnum Classes { get { return _enums[StatTypes.Classes]; } }
+
         
         private static System.Action _onInit;
 

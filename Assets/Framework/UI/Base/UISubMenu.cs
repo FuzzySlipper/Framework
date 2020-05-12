@@ -118,6 +118,7 @@ namespace PixelComrades {
                 if (_menuActions[index].OnFail != null) {
                     _menuActions[index].OnFail(_items[index].transform as RectTransform);
                 }
+                return;
             }
             Disable();
         }

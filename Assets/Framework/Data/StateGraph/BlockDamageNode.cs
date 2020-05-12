@@ -107,7 +107,7 @@ namespace PixelComrades {
                 }
                 if (_fxComponent != null) {
                     _fxComponent.TriggerEvent(
-                        new ActionEvent(arg.Origin, arg.Target, arg.Impact.HitPoint, Quaternion.LookRotation(arg.Impact.HitNormal),
+                        new ActionEvent(arg.Origin, arg.Target, arg.Hit.Point, Quaternion.LookRotation(arg.Hit.Normal),
                             ActionState.Collision));
                 }
                 _vitalStat.Current -= _finalCost;

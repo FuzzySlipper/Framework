@@ -11,7 +11,7 @@ namespace PixelComrades {
         public int MaxVisionDistance { get; private set; }
         public int MaxTurnsNpcVisible = 12;
 
-        public BufferedList<BaseCell> Cells = new BufferedList<BaseCell>();
+        public BufferedList<LevelCell> Cells = new BufferedList<LevelCell>();
 
         public SensorCellsComponent(int maxHearDistance = 12, int maxVisionDistance = 5) {
             MaxHearDistance = maxHearDistance;
@@ -41,7 +41,7 @@ namespace PixelComrades {
             //watch.Stop();
             //Debug.LogFormat("Found {0} in {1}" ,CurrentList.Count, watch.Elapsed.TotalMilliseconds);
             var owner = this.GetEntity();
-            var start = owner.Get<GridPosition>().Position;
+            var start = owner.Get<GridPosition>().Value;
             var fwd = owner.Get<TransformComponent>().ForwardDirection2D();
             for (int i = 0; i < DirectionsExtensions.Length2D; i++) {
                 var dir = (Directions) i;
@@ -115,7 +115,7 @@ namespace PixelComrades {
             }
         }
 
-        public void UpdateCellMapVisible(BaseCell cell) {
+        public void UpdateCellMapVisible(LevelCell cell) {
             if (Cells.Contains(cell)) {
                 return;
             }

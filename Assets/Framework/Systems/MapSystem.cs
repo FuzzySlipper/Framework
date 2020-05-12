@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface IMapProvider {
-        BaseCell GetCell(Point3 pos);
+        LevelCell GetCell(Point3 pos);
     }
 
     [Priority(Priority.Highest), AutoRegister]
@@ -13,7 +13,7 @@ namespace PixelComrades {
 
         private IMapProvider _map;
         private TemplateList<UnitOccupyingCellTemplate> _templateList;
-        private List<BaseCell> _occupiedCells = new List<BaseCell>(50);
+        private List<LevelCell> _occupiedCells = new List<LevelCell>(50);
         private ManagedArray<UnitOccupyingCellTemplate>.RefDelegate _del;
         public MapSystem() {
             TemplateFilter<UnitOccupyingCellTemplate>.Setup();
@@ -40,7 +40,7 @@ namespace PixelComrades {
             }
             var position = template.Tr.position.ToCellGridP3ZeroY();
             ref var gridPos = ref template.PositionComponent.GetReference();
-            gridPos.Position = position;
+            gridPos.Value = position;
             var cell = GetCell(position);
             if (cell == null) {
                 return;
@@ -54,7 +54,7 @@ namespace PixelComrades {
             _map = provider;
         }
         
-        public BaseCell GetCell(Point3 pos) {
+        public LevelCell GetCell(Point3 pos) {
             if (_map == null) {
                 return null;
             }

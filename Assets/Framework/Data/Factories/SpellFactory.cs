@@ -61,7 +61,7 @@ namespace PixelComrades {
             if (!_setup) {
                 Init();
             }
-            return AbilityFactory.BuildAbility(_spellLevels[level].RandomElement(), false).Get<SpellData>();
+            return AbilityFactory.BuildAbility(_spellLevels[level].RandomElement()).Get<SpellData>();
         }
 
         public static AbilityConfig GetRandomExactTemplate(int level) {
@@ -75,7 +75,7 @@ namespace PixelComrades {
             if (!_setup) {
                 Init();
             }
-            return AbilityFactory.BuildAbility(_spellMinLevels[level].RandomElement(), false).Get<SpellData>();
+            return AbilityFactory.BuildAbility(_spellMinLevels[level].RandomElement()).Get<SpellData>();
         }
 
         public static SpellData GetRandomMinNoDuplicate(int level, string skill, CharacterTemplate actor) {
@@ -87,8 +87,8 @@ namespace PixelComrades {
             while (chk < 10000) {
                 chk++;
                 var template = _spellMinLevels[level].RandomElement();
-                if (template.Skill == skill && !spellsContainer.HasSpell(template)) {
-                    return AbilityFactory.BuildAbility(template, false).Get<SpellData>();
+                if (template.Class == skill && !spellsContainer.HasSpell(template)) {
+                    return AbilityFactory.BuildAbility(template).Get<SpellData>();
                 }
             }
             return null;
@@ -107,7 +107,7 @@ namespace PixelComrades {
             var spellsContainer = actor.Entity.Get<SpellsContainer>();
             var list = _spellMaxLevels[level];
             for (int i = 0; i < list.Count; i++) {
-                if (list[i].Skill == skill && !spellsContainer.HasSpell(list[i])) {
+                if (list[i].Class == skill && !spellsContainer.HasSpell(list[i])) {
                     spells.Add(list[i]);
                 }
             }

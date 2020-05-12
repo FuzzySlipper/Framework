@@ -36,24 +36,23 @@ namespace PixelComrades {
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-                var readyActions = Graph.Entity.Get<ReadyActions>();
-                if (readyActions == null) {
-                    return;
-                }
-                var actionConfig = readyActions.QueuedChange;
-                var targetIndex = readyActions.QueuedSlot;
-                if (actionConfig == null || readyActions.GetAction(targetIndex) == actionConfig) {
-                    readyActions.RemoveAction(targetIndex);
-                    actionConfig = null;
-                }
-                else {
-                    readyActions.EquipAction(actionConfig, targetIndex);
-                }
-                if (targetIndex == 0) {
-                    Graph.SetVariable(GraphVariables.Equipment, actionConfig != null ? actionConfig.Config.EquipVariable : "");
-                    Graph.SetVariable(GraphVariables.WeaponModel, actionConfig != null ? actionConfig.Config.WeaponModel : "");
-                }
-                readyActions.QueuedChange = null;
+                // if (readyActions == null) {
+                //     return;
+                // }
+                // var actionConfig = readyActions.QueuedChange;
+                // var targetIndex = readyActions.QueuedSlot;
+                // if (actionConfig == null || readyActions.GetAction(targetIndex) == actionConfig) {
+                //     readyActions.RemoveAction(targetIndex);
+                //     actionConfig = null;
+                // }
+                // else {
+                //     readyActions.EquipAction(actionConfig, targetIndex);
+                // }
+                // if (targetIndex == 0) {
+                //     Graph.SetVariable(GraphVariables.Equipment, actionConfig != null ? actionConfig.Config.AnimationTrigger : "");
+                //     Graph.SetVariable(GraphVariables.WeaponModel, actionConfig != null ? actionConfig.Config.WeaponModel : "");
+                // }
+                // readyActions.QueuedChange = null;
             }
 
             public override void OnExit() {

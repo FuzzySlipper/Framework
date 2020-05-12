@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using PixelComrades;
+using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
 
@@ -13,8 +14,7 @@ namespace PixelComrades {
 
         protected Command(){}
 
-        public Entity EntityOwner;
-        public CommandTargeting Targeting;
+        public TurnBasedCharacterTemplate Owner;
 
         private List<ICommandCost> _costs = new List<ICommandCost>();
         protected float TimeStart { get; private set; }
@@ -27,16 +27,16 @@ namespace PixelComrades {
         }
 
         public virtual void Cancel() {
-            EntityOwner.Tags.Remove(EntityTags.PerformingAction);
+            Owner.Tags.Remove(EntityTags.PerformingAction);
             CommandLog.CommandCompleted(this);
         }
 
         public virtual bool CanStart() {
-            if (EntityOwner == null) {
+            if (Owner == null) {
                 return false;
             }
             for (int i = 0; i < Costs.Count; i++) {
-                if (!Costs[i].CanAct(EntityOwner, null)) {
+                if (!Costs[i].CanAct(Owner, null)) {
                     return false;
                 }
             }
@@ -44,7 +44,7 @@ namespace PixelComrades {
         }
 
         public virtual void Complete() {
-            EntityOwner.Tags.RemoveWithRoot(EntityTags.PerformingAction);
+            Owner.Tags.RemoveWithRoot(EntityTags.PerformingAction);
             Post(EntitySignals.CommandComplete);
             ProcessCost();
             if (GameOptions.TurnBased) {
@@ -55,54 +55,51 @@ namespace PixelComrades {
 
         public virtual void ProcessCost() {
             for (int i = 0; i < Costs.Count; i++) {
-                Costs[i].ProcessCost(EntityOwner, null);
+                Costs[i].ProcessCost(Owner, null);
             }
         }
 
         public virtual void StartCommand() {
             TimeStart = TimeManager.TimeUnscaled;
             CommandLog.CommandActive(this);
-            EntityOwner.Tags.AddWithRoot(EntityTags.PerformingAction);
+            Owner.Tags.AddWithRoot(EntityTags.PerformingAction);
             Post(new StartedCommand(this));
-            //Post(new ActionStateEvent(EntityOwner, EntityOwner, EntityOwner.GetPosition(), EntityOwner.GetRotation(), ActionStateEvents.Start));
+        }
+
+        public virtual void Clear() {
+            Owner = null;
         }
 
         public void Post<T>(T msg) where T : struct, IEntityMessage {
-            EntityOwner.Post<T>(msg);
+            Owner.Post<T>(msg);
         }
 
         public void Post(int msg) {
-            EntityOwner.Post(msg);
+            Owner.Entity.Post(msg);
         }
 
         public virtual bool TryStart(bool postUpdates = true) {
-            if (Targeting.Criteria != TargetType.Any) {
-                var target = EntityOwner.GetSelfOrParent<CommandTarget>();
-                if (target == null || !Targeting.SatisfiesCondition(EntityOwner, target, postUpdates)) {
-                    return false;
-                }
-            }
             if (!CanStart()) {
                 return false;
             }
-            return World.Get<CommandSystem>().TryAddCommand(this);
+            return World.Get<TurnBasedCommandSystem>().TryAddCommand(this);
         }
 
-        public virtual bool TryStart(Entity target, bool postUpdates = true) {
+        public virtual bool TryStart(CharacterTemplate target, bool postUpdates = true) {
             if (target == null) {
                 return TryStart(postUpdates);
             }
-            var cmdTarget = EntityOwner.GetSelfOrParent<CommandTarget>();
+            var cmdTarget = Owner.Target;
             if (cmdTarget != null) {
                 cmdTarget.Target = target;
             }
-            if (Targeting.Criteria != TargetType.Any && !Targeting.SatisfiesCondition(EntityOwner, target, postUpdates)) {
-                return false;
-            }
+            // if (Targeting.Criteria != TargetType.Any && !Targeting.SatisfiesCondition(Owner, target, postUpdates)) {
+            //     return false;
+            // }
             if (!CanStart()) {
                 return false;
             }
-            return World.Get<CommandSystem>().TryAddCommand(this);
+            return World.Get<TurnBasedCommandSystem>().TryAddCommand(this);
         }
 
         protected Command(IList<ICommandCost> costs) {

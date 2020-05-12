@@ -70,7 +70,7 @@ namespace PixelComrades {
                 return;
             }
             _tempEnemyList.Clear();
-            World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, template.Faction.Faction);
+            World.Get<FactionSystem>().FillFactionEnemiesList(_tempEnemyList, template.Faction.Value);
             var nodePos = template.Tr.position.WorldToGenericGrid(HearingSectorSize);
             for (int f = 0; f < _tempEnemyList.Count; f++) {
                 var enemy = _tempEnemyList[f];
@@ -101,7 +101,7 @@ namespace PixelComrades {
         private void RunUpdate(ref SensorDetectingTemplate template) {
             var sensor = template.Sensor;
             sensor.DetectedCells.Clear();
-            var start = template.Position.Position;
+            var start = template.Position.Value;
             sensor.LastDetectedCenter = start;
             var fwd = template.Tr.ForwardDirection2D();
             var ls = World.Get<LineOfSightSystem>();
@@ -176,7 +176,7 @@ namespace PixelComrades {
             if (sensorTargets.Shouted) {
                 return;
             }
-            var sourceFaction = arg.Target.Faction.Faction;
+            var sourceFaction = arg.Target.Faction.Value;
             var factionSystem = World.Get<FactionSystem>();
             sensorTargets.Shouted = true;
             var sourcePos = arg.Target.Tr.position;
@@ -186,7 +186,7 @@ namespace PixelComrades {
                 if (sensorTemplate == null) {
                     continue;
                 }
-                if (!factionSystem.AreFriends(sourceFaction, sensorTemplate.Faction.Faction)) {
+                if (!factionSystem.AreFriends(sourceFaction, sensorTemplate.Faction.Value)) {
                     continue;
                 }
                 if (Physics.Linecast(sourcePos, sensorTemplate.Tr.position, LayerMasks.Walls)) {

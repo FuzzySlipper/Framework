@@ -46,7 +46,7 @@ namespace PixelComrades {
             TemplateFilter<VisibleTemplate>.Setup();
             TemplateFilter<CharacterTemplate>.Setup();
             TemplateFilter<CollidableTemplate>.Setup();
-            Get<CommandSystem>();
+            Get<TurnBasedCommandSystem>();
             Get<CollisionCheckSystem>();
             Get<DespawnEntitySystem>();
             Get<DistanceSystem>();
@@ -66,6 +66,18 @@ namespace PixelComrades {
                     var type = types[t];
                     if (type.IsDefined(typeof(AutoRegisterAttribute), false)) {
                         CreateSystem(type);
+                    }
+                    var actionAttribs = type.GetCustomAttributes(typeof(ActionProviderAttribute), false);
+                    for (int i = 0; i < actionAttribs.Length; i++) {
+                        if (actionAttribs[i] is ActionProviderAttribute attrib) {
+                            ActionProviderSystem.Add(attrib.Action, Activator.CreateInstance(type) as IActionProvider);
+                        }
+                    }
+                    var abilityAttribs = type.GetCustomAttributes(typeof(AbilityProviderAttribute), false);
+                    for (int i = 0; i < abilityAttribs.Length; i++) {
+                        if (abilityAttribs[i] is AbilityProviderAttribute attrib) {
+                            AbilityFactory.AddProvider(attrib.Ability, Activator.CreateInstance(type) as IAbilityProvider);
+                        }
                     }
                 }
             }

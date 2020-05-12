@@ -17,7 +17,7 @@ namespace PixelComrades {
         }
 
         public void Handle(CausedDamageEvent arg) {
-            var component = arg.TakeDamage.Impact.Source.Find<LeachImpact>();
+            var component = arg.TakeDamage.Action.Entity.Find<LeachImpact>();
             if (component == null) {
                 return;
             }
@@ -40,7 +40,8 @@ namespace PixelComrades {
             hoverMsg.Append(" = ");
             hoverMsg.Append(amt.ToString("F0"));
             logSystem.PostCurrentStrings(GameLogSystem.HealColor);
-            World.Get<RulesSystem>().Post(new HealingEvent(amt, arg.TakeDamage.Target, arg.TakeDamage.Origin, component.TargetVital));
+            World.Get<RulesSystem>().Post(new HealingEvent(arg.Action, amt, arg.TakeDamage.Target, arg.TakeDamage.Origin, component
+            .TargetVital));
         }
     }
 

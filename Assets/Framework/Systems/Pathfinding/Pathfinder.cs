@@ -51,6 +51,7 @@ namespace PixelComrades {
 
 
             public virtual void Clear() {
+                Queue = null;
                 StartCost = float.MaxValue;
                 EndCost = float.MaxValue;
                 Parent = null;
@@ -85,7 +86,8 @@ namespace PixelComrades {
         public abstract List<TV> GetPathTrace(T endNode, List<TV> existing);
 
         public virtual T FindPath() {
-            var startNode = CreateNode(Start);
+            Clear();
+            var startNode = Get(Start) ?? CreateNode(Start);
             startNode.StartCost = 0;
             OpenSet.Enqueue(startNode, startNode.TotalCost);
             _loopLimiter.Reset();
@@ -98,39 +100,22 @@ namespace PixelComrades {
                     return centerNode;
                 }
                 ClosedSet.Add(centerNode.Value);
-                //OpenSet.Remove(centerNode);
                 var surrounding = GetSurrounding(centerNode);
                 for (int i = 0; i < surrounding.Count; i++) {
                     var neighborPos = surrounding[i];
                     if (neighborPos == null) {
                         continue;
                     }
-                    if (ClosedSet.Contains(neighborPos)) {
+                    if (ClosedSet.Contains(neighborPos) || !CheckWalkable(centerNode.Value, neighborPos)) {
                         continue;
                     }
-                    if (!CheckWalkable(centerNode.Value, neighborPos)) {
-                        continue;
-                    }
-                    var neighbor = Get(neighborPos);
+                    var neighbor = Get(neighborPos) ?? CreateNode(neighborPos);
                     if (neighbor == null) {
-                        //if (CheckWalkable(centerNode.Value, neighborPos)) {
-                            neighbor = CreateNode(neighborPos);
-                        //}
-                        // else {
-                        //     ClosedSet.Add(neighborPos);
-                        // }
-                    }
-                    if (neighborPos.Equals(End)) {
-                        if (neighbor != null) {
-                            neighbor.Parent = centerNode;
-                            return neighbor;
+                        if (neighborPos.Equals(End)) {
+                            if (IgnoreEndWalkable) {
+                                return centerNode;
+                            }
                         }
-                        if (IgnoreEndWalkable) {
-                            return centerNode;
-                        }
-                    }
-                    
-                    if (neighbor == null) {
                         continue;
                     }
                     var newStartCost = centerNode.StartCost + neighbor.GetTravelCost(centerNode);
@@ -143,6 +128,10 @@ namespace PixelComrades {
                         else {
                             OpenSet.Enqueue(neighbor, neighbor.TotalCost);
                         }
+                    }
+                    if (neighborPos.Equals(End)) {
+                        neighbor.Parent = centerNode;
+                        return neighbor;
                     }
                 }
             }

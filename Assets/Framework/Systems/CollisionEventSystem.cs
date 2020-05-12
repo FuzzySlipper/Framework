@@ -49,12 +49,9 @@ namespace PixelComrades {
             if (criticalHit != null && criticalHit.IsCritical(msg.Target.Tr, msg.HitPoint)) {
                 msg.Hit = CollisionResult.CriticalHit;
             }
-            var ae = new ActionEvent(msg.Origin.Entity, msg.Target.Entity, msg.HitPoint,
-                msg.HitNormal == Vector3.zero ? Quaternion.identity :Quaternion.LookRotation(msg.HitNormal), 
-            ActionState.Impact);
             var origin = msg.Origin.Entity.FindTemplate<CharacterTemplate>();
-            World.Get<RulesSystem>().Post(new ImpactEvent(msg, ae.Action,  origin, msg.Target.Entity.FindTemplate<CharacterTemplate>()));
-            msg.Origin.Post(ae);
+            var target = msg.Target.Entity.FindTemplate<CharacterTemplate>();
+            PostImpactEvent(origin, target, null, msg.HitPoint, msg.HitNormal  );
             if (!_collisionMessage) {
                 return;
             }
@@ -74,6 +71,14 @@ namespace PixelComrades {
             }
         }
 
+        public static void PostImpactEvent(CharacterTemplate origin, CharacterTemplate target, BaseActionTemplate action, Vector3 hitPoint, 
+        Vector3 hitNormal) {
+            var hitRotation = hitNormal == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(hitNormal);
+            var ae = new ActionEvent(action, origin, target, hitPoint,hitRotation, ActionState.Impact);
+            World.Get<RulesSystem>().Post(new ImpactEvent(action, origin, target, hitPoint, hitNormal));
+            origin.Post(ae);
+        }
+
         public void Handle(EnvironmentCollisionEvent msg) {
             if (msg.EntityHit.HasComponent<DespawnOnCollision>()) {
                 msg.EntityHit.Destroy();
@@ -87,22 +92,46 @@ namespace PixelComrades {
         }
     }
 
+    public struct HitData {
+        public CharacterTemplate Target { get; }
+        public int Result { get; }
+        public Vector3 Point { get; }
+        public Vector3 Normal { get; }
+
+        public HitData(int result, CharacterTemplate target, Vector3 point, Vector3 normal) {
+            Result = result;
+            Target = target;
+            Point = point;
+            Normal = normal;
+        }
+
+        public static implicit operator int(HitData reference) {
+            return reference.Result;
+        }
+    }
+
     public struct ImpactEvent : IRuleEvent {
+        public BaseActionTemplate Action { get; }
         public Entity Source { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public Vector3 HitPoint { get; }
-        public Vector3 HitNormal { get; }
-        public ActionTemplate Action { get; }
-        public int Hit { get; }
+        public Vector3 Point { get { return Hit.Point; } }
+        public Vector3 Normal { get { return Hit.Normal; } }
+        public HitData Hit { get; }
 
-        public ImpactEvent(CollisionEvent collisionEvent, ActionTemplate action, CharacterTemplate origin, CharacterTemplate target) {
+        public ImpactEvent(CollisionEvent collisionEvent, BaseActionTemplate action, CharacterTemplate origin, CharacterTemplate target) {
             Source = collisionEvent.Source;
-            Hit = collisionEvent.Hit;
+            Hit = new HitData(CollisionResult.Hit, target, collisionEvent.HitPoint, collisionEvent.HitNormal);
             Origin = origin;
             Target = target;
-            HitPoint = collisionEvent.HitPoint;
-            HitNormal = collisionEvent.HitNormal;
+            Action = action;
+        }
+
+        public ImpactEvent(BaseActionTemplate action, CharacterTemplate origin, CharacterTemplate target, Vector3 hitPoint, Vector3 hitNormal) {
+            Source = action.Entity;
+            Hit = new HitData(CollisionResult.Hit, target, hitPoint, hitNormal);
+            Origin = origin;
+            Target = target;
             Action = action;
         }
     }

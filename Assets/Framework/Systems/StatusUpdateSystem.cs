@@ -30,7 +30,7 @@ namespace PixelComrades {
             if (!arg.Target.Entity.HasComponent<FloatingText>()) {
                 return;
             }
-            if (arg.Impact.Hit == CollisionResult.CriticalHit) {
+            if (arg.Hit.Result == CollisionResult.CriticalHit) {
                 UIFloatingText.WorldSpawn(arg.Amount.ToString("F0") + "!", arg.Target.Tr.position, new Color(1f, 0.6f, 0.14f));
             }
             else {

@@ -2429,7 +2429,7 @@ namespace PixelComrades {
         public static void SortByDistanceAsc(this List<Entity> list, Point3 center) {
             for (int write = 0; write < list.Count; write++) {
                 for (int sort = 0; sort < list.Count - 1; sort++) {
-                    if (list[sort].Get<GridPosition>().Position.SqrDistance(center) > list[sort + 1].Get<GridPosition>().Position.SqrDistance(center)) {
+                    if (list[sort].Get<GridPosition>().Value.SqrDistance(center) > list[sort + 1].Get<GridPosition>().Value.SqrDistance(center)) {
                         var lesser = list[sort + 1];
                         list[sort + 1] = list[sort];
                         list[sort] = lesser;
@@ -2476,10 +2476,10 @@ namespace PixelComrades {
     }
 
     public static class Point3Extensions {
-        public static int DistanceSquared(this Point3 a, Point3 b) {
-            int dx = b.x - a.x;
-            int dy = b.y - a.y;
-            int dz = b.z - a.z;
+        public static float DistanceSquared(this Point3 a, Point3 b) {
+            float dx = b.x - a.x;
+            float dy = b.y - a.y;
+            float dz = b.z - a.z;
             return dx * dx + dy * dy + dz * dz;
         }
 
@@ -2489,6 +2489,23 @@ namespace PixelComrades {
             return dx * dx + dz * dz;
         }
 
+        private const float MoveDouble = 2;
+        private const float MoveDouble2 = 3;
+
+        private const float Move = 1;
+        private const float Move2 = 1.5f;
+
+        public static float DistanceChebDouble(this Point3 a, Point3 b) {
+            float dx = System.Math.Abs(b.x - a.x);
+            float dz = System.Math.Abs(b.z - a.z);
+            return MoveDouble * (dx + dz) + (MoveDouble2 - 2 * MoveDouble) * System.Math.Min(dx, dz);
+        }
+
+        public static float DistanceCheb(this Point3 a, Point3 b) {
+            float dx = System.Math.Abs(b.x - a.x);
+            float dz = System.Math.Abs(b.z - a.z);
+            return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
+        }
 
         public static Point3 Reverse(this Point3 pos) {
             Point3 newPos = Point3.zero;

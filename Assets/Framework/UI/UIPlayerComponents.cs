@@ -5,7 +5,7 @@ using PixelComrades;
 
 public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
 
-    public static UISimpleInventoryList InventoryUI { get { return main._inventoryUI; } }
+    public static UIInventory InventoryUI { get { return main._inventoryUI; } }
     public static RectTransform CenterMessage { get { return main._centerMessagePivot; } }
     public static RectTransform LeftMessage { get { return main._leftMessagePivot; } }
 
@@ -32,7 +32,7 @@ public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
         }
     }
 
-    [SerializeField] private UISimpleInventoryList _inventoryUI = null;
+    [SerializeField] private UIInventory _inventoryUI = null;
     [SerializeField] private RectTransform _centerMessagePivot = null;
     [SerializeField] private RectTransform _leftMessagePivot = null;
     [SerializeField] private CanvasGroup[] _gameplayUI = new CanvasGroup[0];

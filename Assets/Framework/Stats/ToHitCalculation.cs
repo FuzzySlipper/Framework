@@ -15,7 +15,7 @@ namespace PixelComrades {
             if (origin == null || target == null || target == origin) {
                 return CollisionResult.Hit;
             }
-            if (target.Get<FactionComponent>().Faction == origin.Get<FactionComponent>().Faction) {
+            if (target.Get<FactionComponent>().Value == origin.Get<FactionComponent>().Value) {
                 return CollisionResult.Hit;
             }
             var defendTotal = targetStats.GetValue(Stats.Evasion);

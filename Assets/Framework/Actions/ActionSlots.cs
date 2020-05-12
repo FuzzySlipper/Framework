@@ -9,17 +9,7 @@ namespace PixelComrades {
 
         private GenericContainer<ActionSlot> _list = new GenericContainer<ActionSlot>();
         
-        public ActionSlots(int amountPrimary, int amountSecondary, int amtHidden) {
-            for (int i = 0; i <= amountPrimary; i++) {
-                _list.Add(new ActionSlot(this, false, false));
-            }
-            for (int i = 0; i <= amountSecondary; i++) {
-                _list.Add(new ActionSlot(this, true,false));
-            }
-            for (int i = 0; i <= amtHidden; i++) {
-                _list.Add(new ActionSlot(this, true, true));
-            }
-        }
+        public ActionSlots() { }
 
         public ActionSlots(SerializationInfo info, StreamingContext context) {
             _list = info.GetValue(nameof(_list), _list);
@@ -35,6 +25,10 @@ namespace PixelComrades {
 
         public ActionSlot GetSlot(int slot) {
             return _list[slot];
+        }
+
+        public void AddSlot(ActionSlot slot) {
+            _list.Add(slot);
         }
 
         public int ContainerSystemAdd(Entity item) {
@@ -89,7 +83,7 @@ namespace PixelComrades {
 
         public bool EquipToHidden(Entity actionEntity) {
             for (int i = 0; i < _list.Count; i++) {
-                if (!_list[i].IsHidden) {
+                if (_list[i].Type != PivotTypes.Hidden ) {
                     continue;
                 }
                 if (_list[i].Item == null && World.Get<EquipmentSystem>().TryEquip(_list[i], actionEntity)) {
@@ -104,51 +98,46 @@ namespace PixelComrades {
         public System.Action<Entity> OnItemChanged { get; set; }
         
         private CachedEntity _cachedItem = new CachedEntity();
-        private bool _isSecondary;
-        private bool _isHidden;
         private CachedComponent<ActionSlots> _owner;
-        private ActionTemplate _action;
+        private BaseActionTemplate _action;
         
         public Entity Owner { get { return _owner.Value.GetEntity(); } }
         public string[] CompatibleSlots { get; }
         public Type[] RequiredTypes { get; }
         public List<StatModHolder> CurrentStats { get; }
         public IEntityContainer Container { get { return _owner.Value; } }
-        public ActionTemplate Action { get { return _action; } }
+        public BaseActionTemplate Action { get { return _action; } }
         public string LastEquipStatus { get; set; }
         public string TargetSlot { get { return "Usable"; } }
         public Transform EquipTr { get { return null; } }
-        public bool IsSecondary { get => _isSecondary; }
-        public bool IsHidden { get => _isHidden; }
+        public string Type { get; }
         public Entity Item {
             get {
                 return _cachedItem.Entity;
             }
             set {
-                if (value == null) {
-                    if (Action?.Config.EquippedSlot >= 0) {
-                        Owner.Get<ReadyActions>().RemoveAction(Action.Config.EquippedSlot);
-                    }
-                }
+                // if (value == null) {
+                //     if (Action?.Config.EquippedSlot >= 0) {
+                //         Owner.Get<ReadyActions>().RemoveAction(Action.Config.EquippedSlot);
+                //     }
+                // }
                 _cachedItem.Set(value);
                 if (value != null) {
-                    _action = value.GetTemplate<ActionTemplate>();
+                    _action = value.GetTemplate<BaseActionTemplate>();
                 }
             }
         }
 
-        public ActionSlot(ActionSlots slotOwner, bool isSecondary, bool isHidden) {
+        public ActionSlot(ActionSlots slotOwner, string type) {
             _owner = new CachedComponent<ActionSlots>(slotOwner);
-            _isSecondary = isSecondary;
-            _isHidden = isHidden;
+            Type = type;
             CompatibleSlots = null;
             CurrentStats = null;
             RequiredTypes = new[] {typeof(ActionConfig)};
         }
 
         public ActionSlot(SerializationInfo info, StreamingContext context) {
-            _isSecondary = info.GetValue(nameof(_isSecondary), _isSecondary);
-            _isHidden = info.GetValue(nameof(_isHidden), _isHidden);
+            Type = info.GetValue(nameof(Type), Type);
             _cachedItem = info.GetValue(nameof(_cachedItem), _cachedItem);
             _owner = info.GetValue(nameof(_owner), _owner);
             _action = info.GetValue(nameof(_action), _action);
@@ -159,8 +148,7 @@ namespace PixelComrades {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(_isSecondary), _isSecondary);
-            info.AddValue(nameof(_isHidden), _isHidden);
+            info.AddValue(nameof(Type), Type);
             info.AddValue(nameof(_cachedItem), _cachedItem);
             info.AddValue(nameof(_owner), _owner);
             info.AddValue(nameof(_action), _action);
@@ -169,12 +157,8 @@ namespace PixelComrades {
 
         public bool FinalCheck(Entity item, out string error) {
             var action = item.Get<ActionConfig>();
-            if (action.Primary && IsSecondary) {
-                error = "Requires Primary Slot";
-                return false;
-            }
-            if (!action.Primary && !IsSecondary) {
-                error = "Requires Secondary Slot";
+            if (action.Type != Type) {
+                error = string.Format("Requires {0} Slot", Type);
                 return false;
             }
             error = null;

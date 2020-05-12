@@ -35,7 +35,7 @@ namespace PixelComrades {
         public Vector3 InverseTransformDirection(Vector3 dir) {
             return Value.InverseTransformDirection(dir);
         }
-        
+
         public Vector3 TransformPoint(Vector3 pos) {
             return Value.TransformPoint(pos);
         }
@@ -50,6 +50,15 @@ namespace PixelComrades {
 
         public void SetChild(Transform other) {
             other.SetParent(Value);
+        }
+
+        public Quaternion GetLookAtRotation(Vector3 origin, bool ignoreElevation = false) {
+            var targetPos = position;
+            if (ignoreElevation) {
+                targetPos.y = origin.y;
+            }
+            Vector3 relativePos = targetPos - origin;
+            return Quaternion.LookRotation(relativePos);
         }
         
         /// <summary>

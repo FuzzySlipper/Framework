@@ -26,7 +26,7 @@ namespace PixelComrades {
     public struct InstantKillEvent : IRuleEvent {
         public CharacterTemplate Origin { get { return ImpactEvent.Origin; } }
         public CharacterTemplate Target { get { return ImpactEvent.Target; } }
-        public ActionTemplate Action { get { return ImpactEvent.Action; } }
+        public BaseActionTemplate Action { get { return ImpactEvent.Action; } }
         public ImpactEvent ImpactEvent { get; }
         public InstantKillImpact InstantKill { get; }
 

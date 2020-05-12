@@ -6,6 +6,8 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [System.Serializable]
     public sealed class PlayerRaycastTargeting : IComponent {
+
+        public float Range = 1000f;
         
         public PlayerRaycastTargeting(){}
         

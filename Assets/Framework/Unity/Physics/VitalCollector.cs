@@ -12,7 +12,7 @@ namespace PixelComrades {
             if (collision.transform.CompareTag(StringConst.TagPlayer)) {
                 var entity = UnityToEntityBridge.GetEntity(collision.collider).GetTemplate<CharacterTemplate>();
                 if (entity != null) {
-                    World.Get<RulesSystem>().Post(new HealingEvent(_amount, entity, entity, _vital));
+                    World.Get<RulesSystem>().Post(new HealingEvent(null, _amount, entity, entity, _vital));
                     ItemPool.Despawn(gameObject);
                 }
             }
@@ -21,7 +21,7 @@ namespace PixelComrades {
         public void Collision(Entity hitEntity) {
             var template = hitEntity.GetTemplate<CharacterTemplate>();
             if (template != null && template.Tags.Contain(EntityTags.Player)) {
-                World.Get<RulesSystem>().Post(new HealingEvent(_amount, template, template, _vital));
+                World.Get<RulesSystem>().Post(new HealingEvent(null, _amount, template, template, _vital));
                 ItemPool.Despawn(gameObject);
             }
         }

@@ -25,6 +25,12 @@ namespace PixelComrades {
     }
 
     [Serializable]
+    public class MaterialAssetReference : AssetReferenceT<Material> {
+        public MaterialAssetReference(string guid) : base(guid) {
+        }
+    }
+
+    [Serializable]
     public class SpriteReference : AssetReference {
         [SerializeField] public bool IsSprite;
 

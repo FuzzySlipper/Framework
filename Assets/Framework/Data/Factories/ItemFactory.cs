@@ -6,12 +6,12 @@ using System.Text;
 namespace PixelComrades {
     public static class ItemFactory  {
 
-        private static Dictionary<string, List<ItemTemplate>> _itemsByType = new Dictionary<string, List<ItemTemplate>>();
-        private static Dictionary<int, ShuffleBag<ItemTemplate>> _maxRarityBags = new Dictionary<int, ShuffleBag<ItemTemplate>>();
-        private static Dictionary<int, ShuffleBag<ItemTemplate>> _specificRarityBags = new Dictionary<int, ShuffleBag<ItemTemplate>>();
-        private static Dictionary<string, ItemTemplate> _items = new Dictionary<string, ItemTemplate>();
-        private static Dictionary<string, ItemTemplate> _itemsFullID = new Dictionary<string, ItemTemplate>();
-        private static Dictionary<string, List<ItemTemplate>> _outfits = new Dictionary<string, List<ItemTemplate>>();
+        private static Dictionary<string, List<ItemConfig>> _itemsByType = new Dictionary<string, List<ItemConfig>>();
+        private static Dictionary<int, ShuffleBag<ItemConfig>> _maxRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
+        private static Dictionary<int, ShuffleBag<ItemConfig>> _specificRarityBags = new Dictionary<int, ShuffleBag<ItemConfig>>();
+        private static Dictionary<string, ItemConfig> _items = new Dictionary<string, ItemConfig>();
+        private static Dictionary<string, ItemConfig> _itemsFullID = new Dictionary<string, ItemConfig>();
+        private static Dictionary<string, List<ItemConfig>> _outfits = new Dictionary<string, List<ItemConfig>>();
 
         private static void Init() {
             GameData.AddInit(Init);
@@ -31,14 +31,14 @@ namespace PixelComrades {
                         CreateOutfit(outfitList, item);
                         continue;
                     }
-                    AddItem(new ItemTemplate(item));
+                    AddItem(new ItemConfig(item));
                 }
             }
         }
 
         private static void CreateOutfit(DataList outfitList, DataEntry originalData) {
             var outfitID = originalData.ID;
-            var list = new List<ItemTemplate>();
+            var list = new List<ItemConfig>();
             var originName = originalData.TryGetValue(DatabaseFields.Name, originalData.ID);
             for (int i = 0; i < outfitList.Count; i++) {
                 var line = outfitList[i];
@@ -59,7 +59,7 @@ namespace PixelComrades {
                     stats[s].Replace(DatabaseFields.Amount, new DataCell<int>(DatabaseFields.Amount, stats[s], amount));
                     stats[s].Replace(DatabaseFields.Multiplier, new DataCell<float>(DatabaseFields.Multiplier, stats[s], multi));
                 }
-                var config = new ItemTemplate(newData);
+                var config = new ItemConfig(newData);
                 AddItem(config);
                 list.Add(config);
             }
@@ -67,11 +67,11 @@ namespace PixelComrades {
         }
 
 
-        public static void AddItem(ItemTemplate item) {
+        public static void AddItem(ItemConfig item) {
             var itemTypeData = item.ItemType;
             if (itemTypeData != null) {
                 if (!_itemsByType.TryGetValue(itemTypeData, out var list)) {
-                    list = new List<ItemTemplate>();
+                    list = new List<ItemConfig>();
                     _itemsByType.Add(itemTypeData, list);
                 }
                 list.Add(item);
@@ -94,11 +94,11 @@ namespace PixelComrades {
             return CreateItem(data, level);
         }
 
-        public static ItemTemplate GetData(string itemID) {
+        public static ItemConfig GetData(string itemID) {
             return FindItem(itemID);
         }
 
-        private static List<ItemTemplate> GetOutfitList(string outfit) {
+        private static List<ItemConfig> GetOutfitList(string outfit) {
             if (_outfits.TryGetValue(outfit, out var list)) {
                 return list;
             }
@@ -148,7 +148,7 @@ namespace PixelComrades {
             return Mathf.Clamp(Game.Random.Next(max - range, max + range), 2, 99);
         }
 
-        public static ItemTemplate RandomTemplate(int rarity, bool isMaxRare = true) {
+        public static ItemConfig RandomTemplate(int rarity, bool isMaxRare = true) {
             if (_items.Count == 0) {
                 Init();
             }
@@ -159,27 +159,29 @@ namespace PixelComrades {
             return null;
         }
 
-        public static Entity CreateItem(ItemTemplate data, int level) {
-            var entity = Entity.New(data.ID);
-            entity.Add(new TypeId(data.ID));
+        public static Entity CreateItem(ItemConfig config, int level) {
+            var entity = Entity.New(config.ID);
+            entity.Add(new TypeId(config.ID));
             entity.Add(new StatsContainer());
-            if (!string.IsNullOrEmpty(data.Icon)) {
-                entity.Add(new IconComponent(UnityDirs.ItemIcons, data.Icon));
+            if (!string.IsNullOrEmpty(config.Icon)) {
+                entity.Add(new IconComponent(UnityDirs.ItemIcons, config.Icon));
             }
             entity.Add(new EntityLevelComponent(level));
             entity.Add(new TooltipComponent());
             entity.Add(new StatusUpdateComponent());
+            var data = entity.Add(new GenericDataComponent());
+            data.SetData(GenericDataTypes.ItemType, config.ItemType);
             var dataDescr = entity.Add(new DataDescriptionComponent());
-            if (data.TypeComponents != null) {
-                World.Get<DataFactory>().AddComponentList(entity, data.Data, data.TypeComponents);
+            if (config.TypeComponents != null) {
+                World.Get<DataFactory>().AddComponentList(entity, config.Data, config.TypeComponents);
             }
-            if (data.Components != null) {
-                World.Get<DataFactory>().AddComponentList(entity, data.Data, data.Components);
+            if (config.Components != null) {
+                World.Get<DataFactory>().AddComponentList(entity, config.Data, config.Components);
             }
-            ItemModifierFactory.AddModifiers(data.ModifierGroup, level, entity, out DataEntry prefix, out DataEntry suffix);
+            ItemModifierFactory.AddModifiers(config.ModifierGroup, level, entity, out DataEntry prefix, out DataEntry suffix);
             StringBuilder sbName = new StringBuilder();
             StringBuilder sbDescr = new StringBuilder();
-            sbDescr.Append(data.Description);
+            sbDescr.Append(config.Description);
             if (prefix != null) {
                 var prefixLabel = prefix.TryGetValue(DatabaseFields.Name, "");
                 if (!string.IsNullOrEmpty(prefixLabel)) {
@@ -193,7 +195,7 @@ namespace PixelComrades {
                 }
             }
 
-            sbName.Append(data.Name);
+            sbName.Append(config.Name);
             if (suffix != null) {
                 var suffixLabel = suffix.TryGetValue(DatabaseFields.Name, "");
                 if (!string.IsNullOrEmpty(suffixLabel)) {
@@ -212,7 +214,7 @@ namespace PixelComrades {
             return entity;
         }
 
-        private static ShuffleBag<ItemTemplate> GetRarity(int rarity, bool isMaxRare) {
+        private static ShuffleBag<ItemConfig> GetRarity(int rarity, bool isMaxRare) {
             int currentRarity = (int) rarity;
             var rarityCollection = isMaxRare ? _maxRarityBags : _specificRarityBags;
             while (true) {
@@ -226,15 +228,15 @@ namespace PixelComrades {
             }
         }
 
-        private static void AddToShuffleBag(Dictionary<int, ShuffleBag<ItemTemplate>> dict, ItemTemplate item, int chance, int bagIndex) {
+        private static void AddToShuffleBag(Dictionary<int, ShuffleBag<ItemConfig>> dict, ItemConfig item, int chance, int bagIndex) {
             if (!dict.TryGetValue(bagIndex, out var bag)) {
-                bag = new ShuffleBag<ItemTemplate>();
+                bag = new ShuffleBag<ItemConfig>();
                 dict.Add(bagIndex, bag);
             }
             bag.Add(item, chance);
         }
 
-        private static ItemTemplate FindItem(string itemID) {
+        private static ItemConfig FindItem(string itemID) {
             if (_items.Count == 0) {
                 Init();
             }
@@ -245,7 +247,7 @@ namespace PixelComrades {
         }
     }
 
-    public class ItemTemplate {
+    public class ItemConfig {
 
         public DataEntry Data { get;}
         public string Name { get; }
@@ -259,7 +261,7 @@ namespace PixelComrades {
         public DataList TypeComponents { get; }
         public DataList Components { get; }
 
-        public ItemTemplate(DataEntry data) {
+        public ItemConfig(DataEntry data) {
             Data = data;
             ID = data.ID;
             FullID = data.FullID;

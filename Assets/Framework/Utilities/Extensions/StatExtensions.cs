@@ -14,12 +14,7 @@ namespace PixelComrades {
             for (int i = 0; i < GameData.Attributes.Count; i++) {
                 stats.Add(new BaseStat(owner, GameData.Attributes.Names[i], GameData.Attributes.GetID(i), GameData.Attributes.GetAssociatedValue(i)));
             }
-            var atkStats = GameData.Enums[Stats.AttackStats];
-            if (atkStats != null) {
-                for (int i = 0; i < atkStats.Length; i++) {
-                    stats.Add(new BaseStat(owner, atkStats.Names[i], atkStats.IDs[i], 0));
-                }
-            }
+            stats.Add(new BaseStat(owner, Stats.MoveSpeed, "Move Speed", 0));
         }
 
         public static void SetupVitalStats(StatsContainer stats) {
@@ -38,7 +33,12 @@ namespace PixelComrades {
                 stats.Add(typeDef);
                 defend.AddStat(GameData.DamageTypes.GetID(i), typeDef.ID, typeDef);
             }
-            stats.Add(new BaseStat(owner, Stats.Evasion, 0));
+            for (int i = 0; i < DefenseStats.Count; i++) {
+                var defenseId = DefenseStats.GetIdAt(i);
+                var defenseLabel = DefenseStats.GetNameAt(i);
+                var defenseStat = new BaseStat(owner, defenseLabel, defenseId, 0);
+                stats.Add(defenseStat);
+            }
         }
 
         public static BaseStat[] GetBasicCommandStats(StatsContainer stats) {
@@ -53,12 +53,6 @@ namespace PixelComrades {
         public static void GetCharacterStatValues(this StatsContainer statsContainer, ref StringBuilder sb) {
             for (int i = 0; i < GameData.Attributes.Count; i++) {
                 sb.AppendNewLine(statsContainer.Get(GameData.Attributes.GetID(i)).ToString());
-            }
-            var atkStats = GameData.Enums[Stats.AttackStats];
-            if (atkStats != null) {
-                for (int i = 0; i < atkStats.Length; i++) {
-                    sb.AppendNewLine(statsContainer.Get(atkStats.IDs[i]).ToString());
-                }
             }
             for (int i = 0; i < GameData.DamageTypes.Count; i++) {
                 sb.AppendNewLine(statsContainer.Get(GameData.DamageTypes.GetID(i)).ToString());

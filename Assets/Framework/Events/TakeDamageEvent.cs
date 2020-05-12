@@ -23,18 +23,18 @@ namespace PixelComrades {
     }
     
     public struct TakeDamageEvent : IRuleEvent {
-        public ImpactEvent Impact { get; }
+        public HitData Hit { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
         public float Amount { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public List<DamageEntry> Entries;
 
         public TakeDamageEvent(ref PrepareDamageEvent prepareEvent) {
             Action = prepareEvent.Action;
             Origin = prepareEvent.Origin;
             Target = prepareEvent.Target;
-            Impact = prepareEvent.Impact;
+            Hit = prepareEvent.Hit;
             Entries = prepareEvent.Entries;
             Amount = prepareEvent.CurrentTotal();
             prepareEvent.Entries = null;
@@ -47,10 +47,10 @@ namespace PixelComrades {
     }
 
     public struct PrepareDamageEvent : IRuleEvent {
-        public ImpactEvent Impact { get; }
+        public HitData Hit { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public List<DamageEntry> Entries;
 
         public float CurrentTotal() {
@@ -61,12 +61,20 @@ namespace PixelComrades {
             return amt;
         }
 
-        public PrepareDamageEvent(ImpactEvent impact, CharacterTemplate origin, CharacterTemplate target) {
+        public PrepareDamageEvent(ImpactEvent impact) {
+            Entries = GenericPools.New<List<DamageEntry>>();
+            Origin = impact.Origin;
+            Target = impact.Target;
+            Action = impact.Action;
+            Hit = impact.Hit;
+        }
+
+        public PrepareDamageEvent(CharacterTemplate origin, CharacterTemplate target, BaseActionTemplate action, HitData hit) {
             Entries = GenericPools.New<List<DamageEntry>>(); 
-            Impact = impact;
             Origin = origin;
             Target = target;
-            Action = impact.Action;
+            Action = action;
+            Hit = hit;
         }
     }
 
@@ -74,7 +82,7 @@ namespace PixelComrades {
         public float Amount { get; }
         public CharacterTemplate Origin { get { return TakeDamage.Origin; } }
         public CharacterTemplate Target { get { return TakeDamage.Target; } }
-        public ActionTemplate Action { get { return TakeDamage.Action; } }
+        public BaseActionTemplate Action { get { return TakeDamage.Action; } }
         public TakeDamageEvent TakeDamage { get; }
 
         public CausedDamageEvent(float amount, TakeDamageEvent damageEvent) {
@@ -87,7 +95,7 @@ namespace PixelComrades {
         public float Amount { get; }
         public CharacterTemplate Origin { get { return TakeDamage.Origin; } }
         public CharacterTemplate Target { get { return TakeDamage.Target; } }
-        public ActionTemplate Action { get { return TakeDamage.Action; } }
+        public BaseActionTemplate Action { get { return TakeDamage.Action; } }
         public TakeDamageEvent TakeDamage { get; }
 
         public ReceivedDamageEvent(float amount, TakeDamageEvent damageEvent) {
@@ -100,11 +108,11 @@ namespace PixelComrades {
         public float Amount { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public string TargetVital { get; }
 
-        public HealingEvent(float amount, CharacterTemplate origin, CharacterTemplate target, string targetVital) {
-            Action = origin.CurrentAction;
+        public HealingEvent(BaseActionTemplate action, float amount, CharacterTemplate origin, CharacterTemplate target, string targetVital) {
+            Action = action;
             Amount = amount;
             Origin = origin;
             Target = target;
@@ -115,26 +123,24 @@ namespace PixelComrades {
     public struct DeathEvent : IEntityMessage {
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
-        public ImpactEvent Impact { get; }
+        public Vector3 HitPoint { get; }
         public float OverKill { get; }
 
-        public DeathEvent(CharacterTemplate caused, CharacterTemplate target, ImpactEvent impact, float overKill) {
-            Action = impact.Action;
+        public DeathEvent(CharacterTemplate caused, CharacterTemplate target, Vector3 hitPoint, float overKill) {
             Origin = caused;
             Target = target;
             OverKill = overKill;
-            Impact = impact;
+            HitPoint = hitPoint;
         }
     }
 
     public struct RaiseDeadEvent : IEntityMessage {
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
 
-        public RaiseDeadEvent(CharacterTemplate source, CharacterTemplate target) {
-            Action = source.CurrentAction;
+        public RaiseDeadEvent(BaseActionTemplate action, CharacterTemplate source, CharacterTemplate target) {
+            Action = action;
             Origin = source;
             Target = target;
         }

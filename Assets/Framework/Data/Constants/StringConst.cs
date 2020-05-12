@@ -72,7 +72,6 @@ namespace PixelComrades {
         public const string Power = "Power";
         public const string Weight = "Weight";
         public const string Range = "Range";
-        public const string AttackStats = "AttackStats";
         public const string BonusPowerMelee = "BonusPowerMelee";
         public const string BonusCritMelee = "BonusCritMelee";
         public const string BonusToHitMelee = "BonusToHitMelee";
@@ -105,6 +104,7 @@ namespace PixelComrades {
         public const string PowerMin = "PowerMin";
         public const string PowerMax = "PowerMax";
         public const string Components = "Components";
+        public const string Type = "Type";
         public const string Component = "Component";
         public const string MaxStack = "MaxStack";
         public const string Rarity = "Rarity";
@@ -301,6 +301,15 @@ namespace PixelComrades {
         public const string LoopCastEnd = "LoopCastEnd";
     }
 
+    public partial class ItemTypes : StringEnum<ItemTypes> {
+        public const string Ability = "Ability";
+        public const string Weapon = "Weapon";
+    }
+
+    public class WeaponTypes : StringEnum<WeaponTypes> {
+        public const string Melee = "Melee";
+        public const string Ranged = "Ranged";
+    }
     //public static class AttackStats {
     //    public static string[] Power = new[] {
     //        Stats.BonusPowerMelee, Stats.BonusPowerRanged, Stats.BonusPowerMagic

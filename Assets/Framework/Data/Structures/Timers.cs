@@ -236,12 +236,12 @@ namespace PixelComrades {
         [SerializeField, HideInInspector] private int _start = 0;
         [SerializeField] private int _length = 0;
         public int Length { get { return _length; } }
-        public int TimeLeft { get { return _active ? (_start + Length) - TurnBased.TurnNumber : 0; } }
-        public float Percent { get { return _active ? (TurnBased.TurnNumber - _start) / Length : 1; } }
+        public int TimeLeft { get { return _active ? (_start + Length) - TurnBasedSystem.TurnNumber : 0; } }
+        public float Percent { get { return _active ? (TurnBasedSystem.TurnNumber - _start) / Length : 1; } }
         public bool IsActive { get { return _active && TimeLeft > 0; } }
 
         public void UpdateCount() {
-            _active = TurnBased.TurnNumber <= _start + Length;
+            _active = TurnBasedSystem.TurnNumber <= _start + Length;
         }
 
         public void Cancel() {
@@ -259,7 +259,7 @@ namespace PixelComrades {
         public void StartTime(int length) {
             _length = length;
             _active = true;
-            _start = TurnBased.TurnNumber;
+            _start = TurnBasedSystem.TurnNumber;
         }
     }
 }

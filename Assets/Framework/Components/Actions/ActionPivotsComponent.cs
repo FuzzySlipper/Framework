@@ -23,4 +23,10 @@ namespace PixelComrades {
             //info.AddValue(nameof(BuildingIndex), BuildingIndex);
         }
     }
+
+    public partial class PivotTypes : StringEnum<PivotTypes> {
+        public const string Primary = "Primary";
+        public const string Secondary = "Secondary";
+        public const string Hidden = "Hidden";
+    }
 }

@@ -11,20 +11,20 @@ namespace PixelComrades {
         [SerializeField] private Dictionary<string, List<IActionEventHandler>> _events = new Dictionary<string, List<IActionEventHandler>>();
         
         public List<ICommandCost> Costs = new List<ICommandCost>();
-        public float Range;
-        public string EquipVariable;
+        public List<ActionProviderEntry> Actions = new List<ActionProviderEntry>();
+        public List<ActionPhases> Phases = new List<ActionPhases>();
+        public List<IActionRequirement> Requirements = new List<IActionRequirement>();
         public string AnimationTrigger;
         public string WeaponModel;
-        public bool Primary;
-        public int EquippedSlot = -1;
+        public string Type;
+        public string Focus;
+        public string BonusStat;
         public ActionConfig() {}
 
         public ActionConfig(SerializationInfo info, StreamingContext context) {
             _events = info.GetValue(nameof(_events), _events);
             Costs = info.GetValue(nameof(Costs), Costs);
-            Range = info.GetValue(nameof(Range), Range);
-            Primary = info.GetValue(nameof(Primary), Primary);
-            EquippedSlot = info.GetValue(nameof(EquippedSlot), EquippedSlot);
+            Type = info.GetValue(nameof(Type), Type);
         }
 
         public void AddEvent(string eventName, IActionEventHandler eventHandler) {
@@ -42,9 +42,25 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_events), _events);
             info.AddValue(nameof(Costs), Costs);
-            info.AddValue(nameof(Range), Range);
-            info.AddValue(nameof(Primary), Primary);
-            info.AddValue(nameof(EquippedSlot), EquippedSlot);
+            info.AddValue(nameof(Type), Type);
+        }
+
+        public bool CanTarget(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
+            for (int i = 0; i < Requirements.Count; i++) {
+                if (!Requirements[i].CanTarget(template, character, target)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
+            for (int i = 0; i < Requirements.Count; i++) {
+                if (!Requirements[i].CanEffect(template, character, target)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

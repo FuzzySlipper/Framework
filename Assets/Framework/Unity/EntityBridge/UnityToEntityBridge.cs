@@ -30,6 +30,11 @@ namespace PixelComrades {
             return _colliderToDictionary.TryGetValue(collider, out var id) ? EntityController.GetEntity(id) : null;
         }
 
+        public static void RegisterToEntity(Collider collider, int entId) {
+            EntityController.Get(entId).Tags.Set(EntityTags.CanUnityCollide, 1);
+            _colliderToDictionary.AddOrUpdate(collider, entId);
+        }
+
         public static void RegisterToEntity(GameObject go, int entId) {
             go.GetComponentsInChildren(_tempIdentifiers);
             for (int i = 0; i < _tempIdentifiers.Count; i++) {

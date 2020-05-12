@@ -39,7 +39,7 @@ namespace PixelComrades {
         }
 
         public bool CanRuleEventStart(ref ImpactEvent context) {
-            var ammo = context.Action?.Ammo;
+            var ammo = context.Action?.Get<AmmoComponent>();
             if (ammo?.DamageModStat == null) {
                 return true;
             }

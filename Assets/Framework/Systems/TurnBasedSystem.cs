@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Priority_Queue;
+using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
     public enum TurnBasedState {
@@ -13,20 +13,6 @@ namespace PixelComrades {
         WaitingOnInput,
         TurnEnded,
         Disabled,
-    }
-
-    public static class TurnBased {
-
-        public const float RecoveryNeededToEndTurn = 100;
-        public static int TurnNumber { get { return World.Get<TurnBasedSystem>().TurnCounter; } }
-        
-    }
-
-    public interface ITurnBasedUnit {
-        int Owner { get; }
-        float Speed { get; }
-        void TurnUpdate(float turnEnergy);
-        bool TryStartTurn();
     }
 
     public struct StartTurnEvent : IEntityMessage {
@@ -45,178 +31,136 @@ namespace PixelComrades {
         }
     }
 
-    public class TurnBasedSystem : SystemBase, IMainSystemUpdate {
+    public class TurnBasedSystem : SystemBase {
 
-        private class TurnNode : IComparable<TurnNode>, IComparable {
-
-            public ITurnBasedUnit Value;
-            public float Priority;
-            public void Clear() {
-                Value = null;
-                Priority = 999;
-            }
-
-            public override bool Equals(object obj) {
-                return obj is TurnNode node && node.Value == Value;
-            }
-
-            public bool Equals(TurnNode node) {
-                return node.Value == Value;
-            }
-
-            public override int GetHashCode() {
-                if (Value != null) {
-                    return Value.GetHashCode();
-                }
-                return Priority.GetHashCode();
-            }
-
-            public int CompareTo(object obj) {
-                return obj is TurnNode pn ? CompareTo(pn) : -1;
-            }
-
-            public int CompareTo(TurnNode other) {
-                return Priority.CompareTo(other.Priority);
-            }
-        }
-
-        private class NodeSorter : Comparer<TurnNode> {
-            public override int Compare(TurnNode x, TurnNode y) {
-                if (x == null || y == null) {
-                    return 0;
-                }
-                return -1 * x.Priority.CompareTo(y.Priority);
-            }
-        }
-        
-        private static List<TurnNode> _active = new List<TurnNode>();
-        private static List<ITurnBasedUnit> _queueActivate = new List<ITurnBasedUnit>();
         private static TurnBasedState _turnState = TurnBasedState.Inactive;
-        private static GameOptions.CachedFloat _turnRecoveryAmount = new GameOptions.CachedFloat("TurnRecoverAmount");
-        private static GenericPool<TurnNode> _nodePool = new GenericPool<TurnNode>(50, t => t.Clear());
 
-        private float _turnLengthCounter = 0;
-        private ITurnBasedUnit _current;
-        private NodeSorter _nodeSorter = new NodeSorter();
-
+        private TurnBasedCharacterTemplate _current;
+        
         public static TurnBasedState TurnState {  get { return _turnState; } }
-        public int TurnCounter { get; private set; }
-        private float TurnRecoverAmount { get { return _turnRecoveryAmount.Value * TimeManager.DeltaTime; } }
+        public static int TurnNumber { get; private set; }
 
-        public static void Add(ITurnBasedUnit unit) {
-            if (!_queueActivate.Contains(unit) && GetNode(unit) == null) {
-                _queueActivate.Add(unit);
-            }
+        private TemplateList<TurnBasedCharacterTemplate> _turnTemplates;
+        private ManagedArray<TurnBasedCharacterTemplate>.RefDelegate _findCurrentFastest;
+        private ManagedArray<TurnBasedCharacterTemplate>.RefDelegate _setupUnitTurns;
+
+        public TurnBasedSystem() {
+            TemplateFilter<TurnBasedCharacterTemplate>.Setup();
+            _turnTemplates = EntityController.GetTemplateList<TurnBasedCharacterTemplate>();
+            _findCurrentFastest = FindCurrent;
+            _setupUnitTurns = SetupUnitTurn;
         }
 
         public void TurnStats() {
-            Debug.LogFormat("Turn: {0} Active {1}, Queue {2} State {3}", TurnCounter,_active.Count, _queueActivate.Count, _turnState);
+            Debug.LogFormat("Turn: {0} State {1}", TurnNumber, _turnState);
         }
 
-        public static void Remove(ITurnBasedUnit unit) {
-            if (_queueActivate.Contains(unit)) {
-                _queueActivate.Remove(unit);
+        private void FindCurrent(ref TurnBasedCharacterTemplate template) {
+            if (template.TurnBased.TurnNumber != TurnNumber) {
+                SetupUnitTurn(ref template);    
             }
-            else {
-                var node = GetNode(unit);
-                if (node != null) {
-                    _active.Remove(node);
-                    _nodePool.Store(node);
-                }
-            }
-        }
-
-        private static TurnNode GetNode(ITurnBasedUnit unit) {
-            for (int i = 0; i < _active.Count; i++) {
-                if (_active[i].Value == unit) {
-                    return _active[i];
-                }
-            }
-            return null;
-        }
-
-        public void OnSystemUpdate(float dt, float unscaledDt) {
-            PrepareTurn();
-            TurnUpdate();
-            //if (Game.Debug) {
-            //    DebugText.UpdatePermText("Turn Status", string.Format("{0} : {1}", main.TurnCounter, _turnState));
-            //}
-        }
-
-        public void Clear() {
-            _active.Clear();
-            _queueActivate.Clear();
-        }
-
-        public void NewTurn() {
-            _turnLengthCounter = 0;
-            SystemManager.TurnUpdate(true);
-            TurnCounter++;
-            _turnState = TurnBasedState.TurnEnded;
-        }
-
-        private void PrepareTurn() {
-            for (int i = 0; i < _queueActivate.Count; i++) {
-                var node = _nodePool.New();
-                node.Value = _queueActivate[i];
-                _active.Add(node);
-            }
-            _queueActivate.Clear();
-            for (int i = 0; i < _active.Count; i++) {
-                _active[i].Priority = _active[i].Value.Speed;
-            }
-        }
-
-        private void TurnUpdate() {
-            if (TurnCancel()) {
+            if (template.TurnBased.ActionPoints <= 0) {
                 return;
             }
-            //_active.Sort(_nodeSorter);
-            //_active.BubbleSort((i, i1) => i.Priority < i1.Priority);
-            for (int i = 0; i < _active.Count; i++) {
-                if (TurnCancel()) {
-                    return;
-                }
-                if (_active[i] == null || _active[i].Value == null) {
-                    continue;
-                }
-                _active[i].Value.TurnUpdate(TurnRecoverAmount);
-                //need to check it is the first activation
-                if (_active[i].Value.TryStartTurn()) {
-                    EntityController.GetEntity(_active[i].Value.Owner).Post(EntitySignals.TurnReady);
-                    if (GameOptions.TurnBased) {
-                        _current = _active[i].Value;
-                        break;
-                    }
-                }
-            }
-            _turnLengthCounter += TurnRecoverAmount;
-            if (_turnLengthCounter >= TurnBased.RecoveryNeededToEndTurn) {
-                NewTurn();
-            }
-            else {
-                SystemManager.TurnUpdate(false);
-                _turnState = TurnBasedState.Performing;
+            if (_current == null || template.TurnBased.Speed > _current.TurnBased.Speed) {
+                _current = template;
             }
         }
 
-        private bool TurnCancel() {
-            if (_active.Count == 0) {
-                _turnState = TurnBasedState.NoUnits;
-                return true;
+        private void SetupUnitTurn(ref TurnBasedCharacterTemplate template) {
+            if (template.TurnBased.InitiativeRoll < 0) {
+                template.TurnBased.InitiativeRoll = RulesSystem.CalculateD20Roll(1);
+                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Dexterity), (int) template.Stats.GetValue(Stats.Level));
+                var resultEvent = World.Get<RulesSystem>().Post(new RollInitiativeEvent(template, template.TurnBased.InitiativeRoll, template.TurnBased.InitiativeStatBonus));
+                template.TurnBased.InitiativeStatBonus = resultEvent.Bonus;
+                var logSystem = World.Get<GameLogSystem>();
+                logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
+                logMsg.Append(template.GetName());
+                logMsg.Append(" initiative: ");
+                logMsg.Append(resultEvent.Total);
+                logMsg.Append(" ");
+                hoverMsg.AppendNewLine(RulesSystem.LastQueryString.ToString());
+                logSystem.PostCurrentStrings(GameLogSystem.NormalColor);
             }
-            if (_current != null) {
-                if (_current.TryStartTurn()) {
-                    _turnState = TurnBasedState.Performing;
-                    return true;
+            else {
+                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Dexterity), (int) template.Stats.GetValue(Stats.Level));
+                var resultEvent = World.Get<RulesSystem>().Post(new RollInitiativeEvent(template, template.TurnBased.InitiativeRoll, template.TurnBased.InitiativeStatBonus));
+                template.TurnBased.InitiativeStatBonus = resultEvent.Bonus;
+            }
+            template.TurnBased.StandardActions = 1;
+            template.TurnBased.MinorActions = 1;
+            template.TurnBased.MoveActions = 1;
+            template.TurnBased.TurnNumber = TurnNumber;
+        }
+
+        public void CommandComplete(TurnBasedCharacterTemplate template) {
+            if (template == null || template.TurnBased.ActionPoints == 0) {
+                if (_current != null) {
+                    _current.Entity.Post(new EndTurnEvent(_current.Entity));
+                    if (_current.IsPlayer()) {
+                        World.Get<PlayerTurnBasedSystem>().TurnEnd(_current);
+                    }
+                    else {
+                        World.Get<NpcTurnBasedSystem>().TurnEnd(_current);
+                    }
                 }
-                _current = null;
+                _turnTemplates.Run(_findCurrentFastest);
+                if (_current == null) {
+                    NewTurn();
+                }
             }
-            if (!Game.GameActive || Game.Paused) {
-                _turnState = Game.GameActive ? TurnBasedState.WaitingOnInput : TurnBasedState.Disabled;
-                return true;
+            else {
+                if (_current != template) {
+                    _current = template;
+                    StartTurn();
+                }
+                else {
+                    RunTurn();
+                }
             }
-            return false;
+        }
+
+        private void StartTurn() {
+            _current.Entity.Post(new StartTurnEvent(_current.Entity));
+            if (_current.IsPlayer()) {
+                World.Get<PlayerTurnBasedSystem>().TurnStart(_current);
+            }
+            else {
+                World.Get<NpcTurnBasedSystem>().TurnStart(_current);
+            }
+        }
+
+        public void StartTurns() {
+            TurnNumber = 0;
+            SetupNewTurn();
+        }
+        
+        private void NewTurn() {
+            _turnState = TurnBasedState.TurnEnded;
+            SystemManager.TurnUpdate(true);
+            TurnNumber++;
+            SetupNewTurn();
+        }
+
+        private void SetupNewTurn() {
+            _turnTemplates.Run(_setupUnitTurns);
+            _turnTemplates.Run(_findCurrentFastest);
+            if (_current == null) {
+                _turnState = TurnBasedState.NoUnits;
+            }
+            else {
+                _turnState = TurnBasedState.Performing;
+                StartTurn();
+            }
+        }
+
+        private void RunTurn() {
+            if (_current.IsPlayer()) {
+                World.Get<PlayerTurnBasedSystem>().TurnContinue(_current);
+            }
+            else {
+                World.Get<NpcTurnBasedSystem>().TurnContinue(_current);
+            }
         }
     }
 }

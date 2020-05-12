@@ -169,7 +169,7 @@ namespace PixelComrades {
     public struct TryApplyMod : IRuleEvent {
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public float Length { get; }
         public string TargetStat { get; }
         public float NormalizedPercent { get; }
@@ -191,7 +191,7 @@ namespace PixelComrades {
     public struct TryApplyEntityTag : IRuleEvent {
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public int Tag { get; }
         public float Chance { get; }
         public float Length { get; }

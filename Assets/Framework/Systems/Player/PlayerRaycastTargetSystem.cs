@@ -19,8 +19,8 @@ namespace PixelComrades {
         }
 
         private void Update(ref PlayerRaycastTargetTemplate template) {
-            if (template.Graph.CurrentTag == GraphNodeTags.Action && template.CurrentAction.Value != null) {
-                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.CurrentAction.Value.Config.Range));
+            if (template.Graph.CurrentTag == GraphNodeTags.Action) {
+                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.Raycast.Range));
             }
         }
     }
@@ -29,13 +29,13 @@ namespace PixelComrades {
 
         private CachedComponent<AnimationGraphComponent> _graph = new CachedComponent<AnimationGraphComponent>();
         private CachedComponent<CommandTarget> _target = new CachedComponent<CommandTarget>();
-        private CachedComponent<CurrentAction> _current = new CachedComponent<CurrentAction>();
+        private CachedComponent<PlayerRaycastTargeting> _raycast = new CachedComponent<PlayerRaycastTargeting>();
 
         public RuntimeStateGraph Graph { get => _graph.Value.Value; }
         public CommandTarget Target { get => _target.Value; }
-        public CurrentAction CurrentAction { get => _current.Value; }
+        public PlayerRaycastTargeting Raycast { get => _raycast.Value; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _graph, _target, _current
+            _graph, _target, _raycast
         };
 
         public override System.Type[] GetTypes() {

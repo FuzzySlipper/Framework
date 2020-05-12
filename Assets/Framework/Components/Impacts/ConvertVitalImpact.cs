@@ -39,7 +39,7 @@ namespace PixelComrades {
     public struct ConvertVitalEvent : IRuleEvent {
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public ActionTemplate Action { get; }
+        public BaseActionTemplate Action { get; }
         public ConvertVitalImpact ConvertVital { get; }
 
         public ConvertVitalEvent(ImpactEvent impactEvent, ConvertVitalImpact convertVital) {

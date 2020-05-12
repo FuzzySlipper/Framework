@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public interface IRuleEvent {
-        ActionTemplate Action { get; }
+        BaseActionTemplate Action { get; }
         CharacterTemplate Origin { get; }
         CharacterTemplate Target { get; }
     }

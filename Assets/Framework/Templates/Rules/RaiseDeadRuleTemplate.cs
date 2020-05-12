@@ -19,7 +19,7 @@ namespace PixelComrades {
         }
 
         public void RuleEventEnded(ref ImpactEvent context) {
-            context.Target.Post(new RaiseDeadEvent(context.Origin, context.Target));
+            context.Target.Post(new RaiseDeadEvent(context.Action, context.Origin, context.Target));
         }
     }
 }

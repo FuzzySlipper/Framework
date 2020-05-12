@@ -57,7 +57,6 @@ namespace PixelComrades {
                     aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SpriteRenderer.BaseTr.rotation;
                 }
                 else {
-                    aet.AnimEvent.Position = aet.SimpleSpriteRenderer.GetEventPosition(aet.SpriteAnimator.CurrentFrame, action?.Config.EquippedSlot ?? 0);
                     aet.AnimEvent.Rotation = target?.GetLookAtTarget(aet.AnimEvent.Position) ?? aet.SimpleSpriteRenderer.Rotation;
                 }
                 return;

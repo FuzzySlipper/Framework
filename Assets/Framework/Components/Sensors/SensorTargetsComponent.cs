@@ -34,7 +34,7 @@ namespace PixelComrades {
                 return;
             }
             entity = entity.GetRoot();
-            if (entity.Get<FactionComponent>().Faction == Faction) {
+            if (entity.Get<FactionComponent>().Value == Faction) {
                 return;
             }
             var watcher = GetWatchTarget(entity);

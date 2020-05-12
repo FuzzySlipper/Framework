@@ -10,5 +10,7 @@ namespace PixelComrades {
         public const string Skills = "Skills";
         public const string DamageTypes = "DamageTypes";
         public const string ItemRarity = "ItemRarity";
+        public const string Classes = "Classes";
+
     }
 }

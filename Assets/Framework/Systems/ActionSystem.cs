@@ -13,6 +13,7 @@ namespace PixelComrades {
         public ActionSystem() {
             TemplateFilter<ActionUsingTemplate>.Setup();
             TemplateFilter<ActionTemplate>.Setup();
+            TemplateFilter<BaseActionTemplate>.Setup();
         }
 
         public void HandleGlobal(ActionEvent arg) {
@@ -36,7 +37,7 @@ namespace PixelComrades {
 
         public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, string animEvent) {
             var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
-            var ae = new ActionEvent(character, character, aeTemplate.AnimEvent.Position,
+            var ae = new ActionEvent(action, character, character, aeTemplate.AnimEvent.Position,
                 aeTemplate.AnimEvent.Rotation, AnimationEvents.ToStateEvent(animEvent));
             if (ae.State == ActionState.Activate) {
                 Debug.DrawLine(
