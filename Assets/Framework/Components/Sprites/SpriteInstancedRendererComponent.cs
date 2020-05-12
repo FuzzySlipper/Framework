@@ -81,8 +81,12 @@ namespace PixelComrades {
 
         public void Flip(bool isFlipped) { }
 
-        public SpriteSimpleRendererComponent(Transform spriteTr) {
+        public SpriteSimpleRendererComponent(Transform spriteTr, int cnt) {
             _spriteTr = new CachedTransform(spriteTr);
+            Sprites = new SpriteData[cnt];
+            for (int i = 0; i < Sprites.Length; i++) {
+                Sprites[i] = new SpriteData();
+            }
         }
 
         public SpriteSimpleRendererComponent(SerializationInfo info, StreamingContext context) {

@@ -53,23 +53,33 @@ namespace PixelComrades {
                     readyActions.EquipAction(actionConfig, targetIndex);
                 }
                 if (targetIndex == 0) {
-                    var data = instanced.Sprites[0];
+                    // var data = instanced.Sprites[0];
                     var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
                     if (!targetAsset.IsLoaded) {
                         targetAsset.LoadAsset(handle => {
                             var targetAnimation = handle;
-                            data.Sprite = targetAnimation.GetSprite(0);
-                            data.Emissive = targetAnimation.EmissiveMap;
-                            data.Normal = targetAnimation.NormalMap;
-                            data.Flip = false;
+                            if (handle == null) {
+                                Debug.LogError("Error loading " + actionConfig.Config);
+                                return;
+                            }
+                            instanced.SetSprite(
+                                targetAnimation.GetSprite(0),
+                                targetAnimation.NormalMap,
+                                targetAnimation.EmissiveMap,
+                                null,
+                                targetIndex,
+                                false);
                         });
                     }
                     else {
                         var targetAnimation = targetAsset.LoadedAsset;
-                        data.Sprite = targetAnimation.GetSprite(0);
-                        data.Emissive = targetAnimation.EmissiveMap;
-                        data.Normal = targetAnimation.NormalMap;
-                        data.Flip = false;
+                        instanced.SetSprite(
+                            targetAnimation.GetSprite(0),
+                            targetAnimation.NormalMap,
+                            targetAnimation.EmissiveMap,
+                            null,
+                            targetIndex,
+                            false);
                     }
                 }
                 readyActions.QueuedChange = null;

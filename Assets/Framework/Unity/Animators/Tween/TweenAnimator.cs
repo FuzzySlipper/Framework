@@ -38,6 +38,9 @@ namespace PixelComrades {
             StartTween();
             bool flipped = false;
             while (true) {
+                if (!enabled) {
+                    yield break;
+                }
                 UpdateTween();
                 if (Tween.Active) {
                     yield return null;

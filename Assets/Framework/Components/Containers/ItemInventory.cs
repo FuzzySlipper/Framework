@@ -47,6 +47,9 @@ namespace PixelComrades {
         }
 
         public int ContainerSystemAdd(Entity entity) {
+            if (entity == null || _array == null) {
+                return -1;
+            }
             return _array.Add(GetCachedEntity(entity));
         }
         

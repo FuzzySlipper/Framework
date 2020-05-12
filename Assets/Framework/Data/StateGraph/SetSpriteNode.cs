@@ -84,11 +84,13 @@ namespace PixelComrades {
             private void SetSprite() {
                 var frame = _spriteNode.Frame;
                 if (_spriteNode.InstancedIndex >= 0) {
-                    var data = _simpleRenderer.Sprites[_spriteNode.InstancedIndex];
-                    data.Sprite = _spriteAnimation.GetSprite(frame);
-                    data.Emissive = _spriteAnimation.EmissiveMap;
-                    data.Normal = _spriteAnimation.NormalMap;
-                    data.Flip = false;
+                    _simpleRenderer.SetSprite(
+                        _spriteAnimation.GetSprite(frame),
+                        _spriteAnimation.NormalMap,
+                        _spriteAnimation.EmissiveMap,
+                        null,
+                        _spriteNode.InstancedIndex,
+                        false);
                 }
                 else {
                     _spriteRenderer.SetSprite(_spriteAnimation.GetSprite(frame), _spriteAnimation.NormalMap, _spriteAnimation.EmissiveMap,
