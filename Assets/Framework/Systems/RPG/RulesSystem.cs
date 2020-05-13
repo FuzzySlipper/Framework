@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Random = UnityEngine.Random;
 
 namespace PixelComrades {
 
@@ -204,6 +205,10 @@ namespace PixelComrades {
 
         public static int TotalPrice(InventoryItem item) {
             return item.Price * item.Count;
+        }
+
+        public static bool CheckVisible(CharacterTemplate npc) {
+            return Game.Random.CoinFlip();
         }
     }
 }

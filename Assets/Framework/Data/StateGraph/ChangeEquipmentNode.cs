@@ -16,6 +16,13 @@ namespace PixelComrades {
             so.ApplyModifiedProperties();
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
+            
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
+            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Default)), GUIContent.none, true);
+            so.ApplyModifiedProperties();
+            GUILayout.Space(20);
+            GUILayout.EndHorizontal();
 #endif
             return false;
         }

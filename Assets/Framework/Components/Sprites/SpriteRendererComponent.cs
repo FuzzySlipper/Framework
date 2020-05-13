@@ -48,6 +48,7 @@ namespace PixelComrades {
         public bool FlipX { get; private set; }
         public Transform BaseTr { get => _baseTr; }
         public Transform SpriteTr { get => _spriteTr; }
+        public SpriteHolder SpriteHolder { get; private set; }
         
         public void ApplyMaterialBlock() {
             if (MeshRenderer != null) {
@@ -119,6 +120,15 @@ namespace PixelComrades {
         }
 
         public SpriteRendererComponent(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {
+            Setup(renderer,filter, baseTr);
+        }
+
+        public SpriteRendererComponent(SpriteHolder spriteHolder) {
+            SpriteHolder = spriteHolder;
+            Setup(spriteHolder.MeshRenderer, spriteHolder.MeshFilter, spriteHolder.SpriteBaseTr);
+        }
+
+        private void Setup(MeshRenderer renderer, MeshFilter filter, Transform baseTr) {
             _meshRenderer = new CachedUnityComponent<MeshRenderer>(renderer);
             filter.sharedMesh = ProceduralMeshUtility.GenerateQuad(Vector2.one, new Vector2(0.5f, 0));
             _filter = new CachedUnityComponent<MeshFilter>(filter);
@@ -150,6 +160,7 @@ namespace PixelComrades {
             _spriteTr = null;
             _baseTr?.Dispose();
             _baseTr = null;
+            SpriteHolder = null;
         }
     }
 }

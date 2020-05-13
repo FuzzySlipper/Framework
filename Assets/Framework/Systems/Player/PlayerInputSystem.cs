@@ -53,6 +53,19 @@ namespace PixelComrades {
             return ray.origin + (ray.direction * range);
         }
 
+        public static bool AreMenusOpen() {
+            if (IsCursorOverUI) {
+                return true;
+            }
+            if (UIBasicMenu.OpenMenus.Count > 0) {
+                return true;
+            }
+            if (UISubMenu.Default.Active) {
+                UISubMenu.Default.Disable();
+            }
+            return false;
+        }
+
         public static bool GetButton(string button) {
             return LocalInput.GetButton(button);
         }
