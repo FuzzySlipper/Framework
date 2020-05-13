@@ -7,7 +7,8 @@ namespace PixelComrades {
 
         public void AddComponent(Entity entity, DataEntry data) {
             entity.Add(new InventoryItem(data.TryGetValue(DatabaseFields.MaxStack, 1), 
-                data.TryGetValue(DatabaseFields.Price, 1), data.TryGetValue(DatabaseFields.Rarity, 0)));
+                data.TryGetValue(DatabaseFields.Price, 1),(ItemRarity) 
+                data.TryGetValue(DatabaseFields.Rarity, 0)));
             var stats = entity.Get<StatsContainer>();
             stats.GetOrAdd(Stats.Weight).ChangeBase(data.GetValue<int>(DatabaseFields.Weight));
         }

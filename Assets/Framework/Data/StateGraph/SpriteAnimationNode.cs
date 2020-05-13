@@ -44,184 +44,118 @@ namespace PixelComrades {
             return false;
         }
 
-        public override string Title { get { return Animation != null ? Animation.SubObjectName : "SpriteAnimation"; } }
+        public override string Title { get { return Animation != null ? Animation.Path : "SpriteAnimation"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
-            if (InstancedIndex >= 0) {
-                return new InstancedRuntimeAnimationNode(this, graph);
-            }
-            if (Animation.IsDirectional) {
-                return new DirectionalRuntimeAnimationNode(this, graph);
-            }
             return new RuntimeSpriteAnimationNode(this, graph);
         }
-        public class InstancedRuntimeAnimationNode : RuntimeSpriteAnimationNode {
-
-            private SpriteSimpleRendererComponent _simpleRenderer;
-            
-            public InstancedRuntimeAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base
-            (node, graph) {
-                _simpleRenderer = graph.Entity.Get<SpriteSimpleRendererComponent>();
-            }
-
-            public override void OnEnter(RuntimeStateNode lastNode) {
-                base.OnEnter(lastNode);
-            }
-
-            public override void OnExit() {
-                base.OnExit();
-            }
-
-            protected override void UpdateSprite() {
-                var data = _simpleRenderer.Sprites[AnimNode.InstancedIndex];
-                data.Sprite = Animation.GetSprite(Animator.FrameIndex);
-                data.Emissive = Animation.EmissiveMap;
-                data.Normal = Animation.NormalMap;
-                data.Flip = AnimNode.ForceReverse;
-            }
-        }
-
-        public class DirectionalRuntimeAnimationNode : RuntimeSpriteAnimationNode {
-            
-            private IDirectionalAnimation _animation;
-            private SpriteBillboardComponent _billboard;
-            private DirectionsEight _lastOrientation;
-            
-            public DirectionalRuntimeAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base
-            (node, graph) {
-                _billboard = graph.Entity.Get<SpriteBillboardComponent>();
-            }
-
-            public override void OnEnter(RuntimeStateNode lastNode) {
-                base.OnEnter(lastNode);
-            }
-            
-            protected override void SetAnimation(SpriteAnimation animation) {
-                _animation = animation as IDirectionalAnimation;
-                if (_animation == null) {
-                    Debug.Log(Animation != null ? Animation.name : "Null animation");
-                }
-                base.SetAnimation(animation);
-            }
-
-            public override void OnExit() {
-                base.OnExit();
-            }
-
-            public override void Dispose() {
-                base.Dispose();
-                _animation = null;
-            }
-
-            protected override void UpdateSprite() {
-                if (_animation == null) {
-                    _animation = Animation as IDirectionalAnimation;
-                    if (_animation == null) {
-                        return;
-                    }
-                }
-                _lastOrientation = _billboard.Orientation;
-                var facing = _billboard.Orientation;
-                if (_billboard.Facing.RequiresFlipping()) {
-                    facing = _billboard.Orientation.GetFlippedSide();
-                    Renderer.Flip(_billboard.Orientation.IsFlipped());
-                }
-                var animFacing = _animation.GetFacing(facing);
-                if (animFacing == null || Animator.FrameIndex >= animFacing.FrameIndices.Length) {
-                    return;
-                }
-                var idx = animFacing.FrameIndices[Animator.FrameIndex];
-                Renderer.SetSprite(_animation.GetSprite(idx), _animation.NormalMap, _animation.EmissiveMap, _animation.GetSpriteCollider(idx));
-            }
-
-            public override bool TryComplete(float dt) {
-                var idx = Animator.FrameIndex;
-                if (base.TryComplete(dt)) {
-                    return true;
-                }
-                if (idx == Animator.FrameIndex) {
-                    if (_billboard.Orientation != _lastOrientation) {
-                        UpdateSprite();
-                    }
-                }
-                return false;
-            }
-        }
-
+    
         public class RuntimeSpriteAnimationNode : RuntimeStateNode {
 
-            protected SpriteAnimationNode AnimNode;
-            protected SpriteRendererComponent Renderer;
-            protected SpriteAnimatorComponent Animator;
-            protected SpriteAnimation Animation;
-
+            private SpriteAnimationNode _animNode;
+            private ISpriteRendererComponent _renderer;
+            private SpriteAnimatorComponent _animator;
+            private SpriteAnimation _animation;
+            private IDirectionalAnimation _directionalAnimation;
+            private SpriteBillboardComponent _billboard;
+            private DirectionsEight _lastOrientation;
             private bool _setup = false;
             
             public override string DebugInfo { 
                 get {
-                    if (Animation == null) {
+                    if (_animation == null) {
                         return "No Animation Setup: " + _setup;
                     }
-                    return string.Format("{2} Frame {0:F3} Frame Time {1}", Animator.FrameIndex, Animator.FrameTimer, Animation.name)
+                    return string.Format("{2} Frame {0:F3} Frame Time {1}", _animator.FrameIndex, _animator.FrameTimer, _animation.name)
             ; } }
 
             public RuntimeSpriteAnimationNode(SpriteAnimationNode node, RuntimeStateGraph graph) : base(node, graph) {
-                AnimNode = node;
-                Renderer = graph.Entity.Get<SpriteRendererComponent>();
-                Animator = graph.Entity.Get<SpriteAnimatorComponent>();
+                _animNode = node;
             }
 
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_setup) {
-                    var op = AnimNode.Animation.LoadAssetAsync<SpriteAnimation>();
-                    op.Completed += FinishSetup;
+                    _animNode.Animation.LoadAsset(FinishSetup);
                 }
                 else {
                     SetupAnimation();
                 }
             }
 
-            private void FinishSetup(AsyncOperationHandle<SpriteAnimation> op) {
+            private void FinishSetup(SpriteAnimation op) {
                 _setup = true;
-                if (op.Result == null) {
+                if (_animNode.InstancedIndex >= 0) {
+                    _renderer = Graph.Entity.Get<SpriteSimpleRendererComponent>();
+                }
+                else {
+                    _renderer = Graph.Entity.Get<SpriteRendererComponent>();
+                }
+                _animator = Graph.Entity.Get<SpriteAnimatorComponent>();
+                if (op == null) {
                     Debug.LogError(
-                        op.DebugName + " " + Graph.OriginalGraph.name + " couldn't load animation " + AnimNode
-                            .Animation.SubObjectName);
+                        op + " " + Graph.OriginalGraph.name + " couldn't load animation " + _animNode
+                            .Animation.Path);
                     return;
                 }
-                SetAnimation(op.Result);
+                SetAnimation(op);
             }
 
             protected virtual void SetAnimation(SpriteAnimation animation) {
-                Animation = animation;
+                _animation = animation;
+                _directionalAnimation = animation as DirectionalAnimation;
+                if (_directionalAnimation != null) {
+                    _billboard = Graph.Entity.Get<SpriteBillboardComponent>();
+                }
                 SetupAnimation();
             }
 
             private void SetupAnimation() {
-                Animator.CurrentAnimation = Animation;
-                Animator.FrameIndex = 0;
-                Renderer?.Flip(AnimNode.ForceReverse);
-                UpdateFrame(Animation.GetFrame(0));
+                _animator.CurrentAnimation = _animation;
+                _animator.FrameIndex = 0;
+                _renderer?.Flip(_animNode.ForceReverse);
+                UpdateFrame(_animation.GetFrame(0));
                 UpdateSprite();
             }
 
-            public override void OnExit() {
-                base.OnExit();
-            }
-
             protected virtual void UpdateSprite() {
-                Renderer.SetSprite(Animation.GetSprite(Animator.FrameIndex), Animation.NormalMap, Animation.EmissiveMap,
-                    Animation.GetSpriteCollider(Animator.FrameIndex));
+                if (_directionalAnimation == null) {
+                    _renderer.SetSprite(
+                        _animation.GetSprite(_animator.FrameIndex), _animation.NormalMap, _animation.EmissiveMap,
+                        _animation.GetSpriteCollider(_animator.FrameIndex), _animNode.InstancedIndex, _animNode.ForceReverse);
+                    return;
+                }
+                _lastOrientation = _billboard.Orientation;
+                var facing = _billboard.Orientation;
+                if (_billboard.Facing.RequiresFlipping()) {
+                    facing = _billboard.Orientation.GetFlippedSide();
+                    _renderer.Flip(_billboard.Orientation.IsFlipped());
+                }
+                var animFacing = _directionalAnimation.GetFacing(facing);
+                if (animFacing == null || _animator.FrameIndex >= animFacing.FrameIndices.Length) {
+                    return;
+                }
+                var idx = animFacing.FrameIndices[_animator.FrameIndex];
+                _renderer.SetSprite(_directionalAnimation.GetSprite(idx), _directionalAnimation.NormalMap, _directionalAnimation.EmissiveMap, _directionalAnimation.GetSpriteCollider(idx), _animNode.InstancedIndex, _animNode.ForceReverse);
             }
+            
 
-            protected void UpdateFrame(AnimationFrame frame) {
-                Animator.FrameTimer = Animation.FrameTime * frame.Length;
-                Animator.CurrentFrame = frame;
+            private void UpdateFrame(AnimationFrame frame) {
+                _animator.FrameTimer = _animation.FrameTime * frame.Length;
+                _animator.CurrentFrame = frame;
+                if (!frame.HasEvent) {
+                    return;
+                }
+                // var pos = _renderer.GetEventPosition(frame.EventPosition, _animNode.InstancedIndex);
+                // var rot = _renderer.GetRotation();
                 if (frame.HasEvent) {
-                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, frame.Event == AnimationFrame.EventType.Default?
-                        AnimationEvents.Default : frame.EventName));
+                    Graph.Entity.Post(
+                        new AnimationEventTriggered(
+                            Graph.Entity,
+                            frame.Event == AnimationFrame.EventType.Default ?
+                                AnimationEvents.Default :
+                                frame.EventName));
                 }
             }
 
@@ -232,31 +166,44 @@ namespace PixelComrades {
                 if (!_setup) {
                     return false;
                 }
-                Animator.FrameTimer -= dt;
-                if (Animator.FrameTimer > 0) {
+                _animator.FrameTimer -= dt;
+                if (_animator.FrameTimer > 0) {
+                    if (_directionalAnimation != null) {
+                        CheckBillboard();
+                    }
                     return false;
                 }
-                Animator.FrameIndex++;
-                var frame = Animation.GetFrame(Animator.FrameIndex);
+                _animator.FrameIndex++;
+                var frame = _animation.GetFrame(_animator.FrameIndex);
                 if (frame != null) {
                     UpdateFrame(frame);
                     UpdateSprite();
                     return false;
                 }
-                if (Animation.Looping && AnimNode.AllowLooping) {
-                    Animator.FrameIndex = 0;
-                    UpdateFrame(Animation.GetFrame(Animator.FrameIndex));
+                if (_animation.Looping && _animNode.AllowLooping) {
+                    _animator.FrameIndex = 0;
+                    UpdateFrame(_animation.GetFrame(_animator.FrameIndex));
                     UpdateSprite();
                     return false;
                 }
+                if (_directionalAnimation != null) {
+                    CheckBillboard();
+                }
                 return true;
+            }
+
+            private void CheckBillboard() {
+                if (_billboard.Orientation != _lastOrientation) {
+                    UpdateSprite();
+                }
             }
 
             public override void Dispose() {
                 base.Dispose();
                 _setup = false;
-                Animation = null;
-                AnimNode.Animation.ReleaseAsset();
+                _animation = null;
+                _directionalAnimation = null;
+                _animNode.Animation.ReleaseAsset();
             }
         }
     }

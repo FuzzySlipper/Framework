@@ -73,12 +73,6 @@ namespace PixelComrades {
                             ActionProviderSystem.Add(attrib.Action, Activator.CreateInstance(type) as IActionProvider);
                         }
                     }
-                    var abilityAttribs = type.GetCustomAttributes(typeof(AbilityProviderAttribute), false);
-                    for (int i = 0; i < abilityAttribs.Length; i++) {
-                        if (abilityAttribs[i] is AbilityProviderAttribute attrib) {
-                            AbilityFactory.AddProvider(attrib.Ability, Activator.CreateInstance(type) as IAbilityProvider);
-                        }
-                    }
                 }
             }
         }

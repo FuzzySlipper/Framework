@@ -9,7 +9,7 @@ namespace PixelComrades {
     public class UIItemDragDrop : UIDragDrop, IReceive<ContainerStatusChanged>, IReceive<EntityDetailsChanged>, 
         IReceive<StatusUpdate>, IReceive<EquipmentChanged>, IPoolEvents {
 
-        [SerializeField] private UIFloatingText.Orietation _textOrientation = UIFloatingText.Orietation.Center;
+        [SerializeField] private UIFloatingText.Orientation _textOrientation = UIFloatingText.Orientation.Center;
         [SerializeField] private TextMeshProUGUI _amount = null;
         [SerializeField] private Image _cooldownImage = null;
         [SerializeField] private Slider _durabilitySlider = null;
@@ -54,7 +54,7 @@ namespace PixelComrades {
 
         public override void OnPointerClick(PointerEventData eventData) {
             //if (Game.InCombat) {
-            //    UIFloatingText.Spawn("Can't adjust items during combat", transform as RectTransform, Color.yellow, UIFloatingText.Orietation.Center);
+            //    UIFloatingText.Spawn("Can't adjust items during combat", transform as RectTransform, Color.yellow, UIFloatingText.Orientation.Center);
             //    return;
             //}
             if (eventData.button == PointerEventData.InputButton.Left) {

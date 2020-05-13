@@ -39,7 +39,7 @@ namespace PixelComrades {
             return false;
         }
 
-        public override string Title { get { return Sprite != null ? Sprite.SubObjectName : "Sprite"; } }
+        public override string Title { get { return Sprite != null ? Sprite.Path : "Sprite"; } }
 
         public override RuntimeStateNode GetRuntimeNode(RuntimeStateGraph graph) {
             return new RuntimeNode(this, graph);
@@ -65,17 +65,16 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_setup) {
-                    var op = _spriteNode.Sprite.LoadAssetAsync<SpriteAnimation>();
-                    op.Completed += FinishSetup;
+                    _spriteNode.Sprite.LoadAsset(FinishSetup);
                 }
                 else {
                     SetSprite();
                 }
             }
 
-            private void FinishSetup(AsyncOperationHandle<SpriteAnimation> animation) {
+            private void FinishSetup(SpriteAnimation animation) {
                 _setup = true;
-                _spriteAnimation = animation.Result;
+                _spriteAnimation = animation;
                 if (_spriteAnimation == null) {
                     return;
                 }
@@ -85,11 +84,13 @@ namespace PixelComrades {
             private void SetSprite() {
                 var frame = _spriteNode.Frame;
                 if (_spriteNode.InstancedIndex >= 0) {
-                    var data = _simpleRenderer.Sprites[_spriteNode.InstancedIndex];
-                    data.Sprite = _spriteAnimation.GetSprite(frame);
-                    data.Emissive = _spriteAnimation.EmissiveMap;
-                    data.Normal = _spriteAnimation.NormalMap;
-                    data.Flip = false;
+                    _simpleRenderer.SetSprite(
+                        _spriteAnimation.GetSprite(frame),
+                        _spriteAnimation.NormalMap,
+                        _spriteAnimation.EmissiveMap,
+                        null,
+                        _spriteNode.InstancedIndex,
+                        false);
                 }
                 else {
                     _spriteRenderer.SetSprite(_spriteAnimation.GetSprite(frame), _spriteAnimation.NormalMap, _spriteAnimation.EmissiveMap,

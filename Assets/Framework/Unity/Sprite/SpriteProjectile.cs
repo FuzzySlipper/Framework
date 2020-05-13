@@ -5,10 +5,8 @@ using System.Collections.Generic;
 namespace PixelComrades {
 
     public interface IProjectile : IRenderingComponent {
-        void SetColor(Color main, Color offset);
-        void SetSize(float size, float length);
+        void SetConfig(ProjectileConfig config, Entity entity);
         Rigidbody Rigidbody { get; }
-        Collider Collider { get; }
     }
 
     public class SpriteProjectile : MonoBehaviour, IOnCreate, IProjectile{
@@ -16,7 +14,7 @@ namespace PixelComrades {
         [SerializeField] private SpriteRenderer _spriteRenderer = null;
         [SerializeField] private SphereCollider _sphereCollider = null;
         [SerializeField] private Rigidbody _rigidbody = null;
-
+        [SerializeField] private BillboardMode _billboard = BillboardMode.FaceCamYDiff;
         public SpriteRenderer SpriteRenderer { get => _spriteRenderer; }
         public Collider Collider { get => _sphereCollider; }
         public Rigidbody Rigidbody { get => _rigidbody; }
@@ -56,17 +54,18 @@ namespace PixelComrades {
             Renderers[0] = _spriteRenderer;
         }
 
-        public void SetColor(Color main, Color offset) {
-            MaterialBlocks[0].SetColor("_TintColor", offset);
+        public void SetConfig(ProjectileConfig config, Entity entity) {
+            MaterialBlocks[0].SetColor("_TintColor", Color.white * config.GlowPower);
             _spriteRenderer.SetPropertyBlock(MaterialBlocks[0]);
-            SpriteRenderer.color = main;
-        }
-
-        public void SetSize(float size, float length) {
+            SpriteRenderer.color = config.MainColor;
+            if (config.Animation != null) {
+                entity.Add(new SpriteAnimationComponent(_spriteRenderer, config.Animation.LoadedAsset, false, _billboard));
+            }
             if (_sphereCollider == null) {
                 return;
             }
-            _sphereCollider.radius = size;
+            _sphereCollider.radius = config.Size;
         }
+
     }
 }

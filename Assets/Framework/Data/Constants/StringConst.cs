@@ -62,16 +62,15 @@ namespace PixelComrades {
         public const string LevelMatConfigs = "Assets/GameData/MatConfigs/";
     }
 
-    public static partial class Stats {
-        public const string Energy = "Vitals.Energy";
-        public const string Health = "Vitals.Health";
+    public static class Stats {
+        public static readonly string Health = Vitals.GetID(0);
+        public static readonly string Energy = Vitals.GetID(1);
         public const string Evasion = "Evasion";
-        public const string ToHit = "ToHit";
         public const string CriticalHit = "CriticalHit";
         public const string CriticalMulti = "CriticalMulti";
         public const string Power = "Power";
         public const string Weight = "Weight";
-        public const string Range = "Range";
+        public const string AttackStats = "AttackStats";
         public const string BonusPowerMelee = "BonusPowerMelee";
         public const string BonusCritMelee = "BonusCritMelee";
         public const string BonusToHitMelee = "BonusToHitMelee";
@@ -85,6 +84,90 @@ namespace PixelComrades {
         public const string Recovery = "Vitals.Recovery";
         public const string CombatRating = "CombatPower";
         public const string MaxWeight = "MaxWeight";
+  
+        public const string Strength = "Attributes.Strength";
+        public const string Dexterity = "Attributes.Dexterity";
+        public const string Constitution = "Attributes.Constitution";
+        public const string Intelligence = "Attributes.Intelligence";
+        public const string Wisdom = "Attributes.Wisdom";
+        public const string Charisma = "Attributes.Charisma";
+        public const string Level = "Level";
+        public const string MoveSpeed = "DerivedStats.MoveSpeed";
+        public const string WeaponAttackDamage = "DerivedStats.WeaponAttackDamage";
+        public const string WeaponAttackAccuracy = "DerivedStats.WeaponAttackAccuracy";
+        public const string WeaponAttackRange = "DerivedStats.WeaponAttackRange";
+        public const string UnarmedAttackDamage = "DerivedStats.UnarmedAttackDamage";
+        public const string UnarmedAttackRange = "DerivedStats.UnarmedAttackRange";
+        public const string Reach = "DerivedStats.Reach";
+        public const string Attack = "Attack";
+        public const string Damage = "Damage";
+    }
+
+
+    public class Attributes : StringEnum<Attributes> {
+        public const string Strength = "Strength";
+        public const string Agility = "Agility";
+        public const string Endurance = "Endurance";
+        public const string Psyche = "Psyche";
+        public const string Perception = "Perception";
+    }
+    //
+    // public enum Attributes {
+    //     Strength,
+    //     Agility,
+    //     Endurance,
+    //     Psyche,
+    //     Perception
+    // }
+
+    public class Vitals : StringEnum<Vitals> {
+        public const string Health = "Health";
+        public const string Energy = "Energy";
+
+        public static int GetStartingValue(int attribute) {
+            switch (attribute) {
+                case 0:
+                    return 150;
+                case 1:
+                    return 100;
+            }
+            return 0;
+        }
+
+        public static float GetRecoveryValue(int attribute) {
+            switch (attribute) {
+                case 0:
+                    return 0;
+                case 1:
+                    return 0.02f;
+            }
+            return 0;
+        }
+        
+    }
+    
+    public class Defenses : StringEnum<Defenses> {
+        public const string Physical = "Physical";
+        public const string Burn = "Burn";
+        public const string Freeze = "Freeze";
+        public const string Mental = "Mental";
+        public const string Spirit = "Spirit";
+    }
+
+    public class Skills : StringEnum<Skills> {
+        public const string Firearms = "Firearms";
+        public const string Melee = "Melee";
+        public const string Magic = "Magic";
+        public const string Science = "Science";
+    }
+
+    public class Currencies : StringEnum<Currencies> {
+        public const string Credits = "Credits";
+        public const string Metal = "Metal";
+        public const string Magic = "Magic";
+        public const string Tech = "Tech";
+        public const string Energy = "Energy";
+        public const string RiftGas = "Rift Power";
     }
 
     public static partial class DatabaseSheets {
@@ -299,11 +382,6 @@ namespace PixelComrades {
         public const string LoopCastStart = "LoopCastStart";
         public const string LoopCast = "LoopCast";
         public const string LoopCastEnd = "LoopCastEnd";
-    }
-
-    public partial class ItemTypes : StringEnum<ItemTypes> {
-        public const string Ability = "Ability";
-        public const string Weapon = "Weapon";
     }
 
     public class WeaponTypes : StringEnum<WeaponTypes> {

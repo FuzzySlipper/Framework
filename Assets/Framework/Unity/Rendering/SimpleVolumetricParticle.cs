@@ -66,6 +66,11 @@ namespace PixelComrades {
             }
         }
 
+        public void SetConfig(ProjectileConfig config, Entity entity) {
+            SetColor(config.MainColor, config.OffsetColor);
+            SetSize(config.Size, config.Length);
+        }
+
         public void SetColor(Color main, Color offset) {
             var colorKeys = _currentColors.gradient.colorKeys;
             var alphaKeys = _currentColors.gradient.alphaKeys;

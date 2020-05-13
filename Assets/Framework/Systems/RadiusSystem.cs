@@ -29,9 +29,9 @@ namespace PixelComrades {
             if (component.Radius == ImpactRadiusTypes.Single) {
                 return;
             }
-            CollisionCheckSystem.OverlapSphere(
-                context.Origin, context.Target, context.HitPoint,
-                component.Radius.ToFloat(), component.LimitToEnemy);
+            // CollisionCheckSystem.OverlapSphere(
+            //     context.Origin, context.Target, context.HitPoint,
+            //     component.Radius.ToFloat(), component.LimitToEnemy);
         }
 
         public void Handle(EnvironmentCollisionEvent arg) {
@@ -39,8 +39,8 @@ namespace PixelComrades {
             if (component == null) {
                 return;
             }
-            CollisionCheckSystem.OverlapSphere(arg.EntityHit, arg.EntityHit, arg.HitPoint,
-                component.Radius.ToFloat(), component.LimitToEnemy);
+            // CollisionCheckSystem.OverlapSphere(arg.EntityHit, arg.EntityHit, arg.HitPoint,
+            //     component.Radius.ToFloat(), component.LimitToEnemy);
         }
     }
 }

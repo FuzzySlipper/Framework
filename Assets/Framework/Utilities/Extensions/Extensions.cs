@@ -74,40 +74,20 @@ namespace PixelComrades {
         public static AnimationCurve ClipBoardAnimationCurve;
     }
     
-    [Serializable]
-    public class PrefabHolder {
-        public GameObject Prefab;
-        public bool CenteredPrefab = false;
-        public Vector3 OffsetGridMulti = new Vector3(0, 0, 0);
-        //public Vector3 Rotation = Vector3.zero;
-    }
-
     [System.Serializable]
-    public class RandomPrefabHolder {
-        public PrefabHolder[] Prefabs = new PrefabHolder[0];
-        public AnimationCurve Curve = new AnimationCurve();
-
-        public PrefabHolder Get() {
-            if (Prefabs.Length == 0) {
-                return null;
-            }
-            if (Prefabs.Length == 1) {
-                return Prefabs[0];
-            }
-            //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
-            return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0,1))));
-        }
-
-        public int GetIndex() {
-            return (int) (Prefabs.Length * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1)));
-        }
-    }
-    
-    [System.Serializable]
-    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetReferenceT<TV> {
+    public class GenericAssetHolder<T,TV> where TV : UnityEngine.Object where T : AssetReferenceEntry<TV> {
         public List<T> Objects = new List<T>();
         public AnimationCurve Curve = new AnimationCurve();
 
+        public bool IsLoaded() {
+            for (int i = 0; i < Objects.Count; i++) {
+                if (!Objects[i].IsLoaded) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         public void Load() {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -115,7 +95,7 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
-                Objects[i].LoadAssetAsync();
+                Objects[i].LoadAsset();
             }
         }
 
@@ -133,20 +113,10 @@ namespace PixelComrades {
         public TV Get(int index) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                return Objects[index].editorAsset;
+                return Objects[index].Asset as TV;
             }
 #endif
-            if (Objects[index].Asset == null) {
-                var op = Objects[index].LoadAssetAsync();
-                if (!op.IsDone) {
-                    //Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
-                    //op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
-                }
-                else {
-                    return op.Result;
-                }
-            }
-            return Objects[index].Asset as TV;
+            return Objects[index].LoadedAsset;
         }
 
         public TV Get() {
@@ -166,13 +136,19 @@ namespace PixelComrades {
     }
 
     [System.Serializable]
-    public class SpriteAssetHolder : GenericAssetHolder<SpriteAssetReference, Sprite> { }
-    
-    [System.Serializable]
     public class RandomObjectHolder {
-        public List<PrefabAssetReference> Objects = new List<PrefabAssetReference>();
+        public List<GameObjectReference> Objects = new List<GameObjectReference>();
         public AnimationCurve Curve = new AnimationCurve();
 
+        public bool IsLoaded() {
+            for (int i = 0; i < Objects.Count; i++) {
+                if (!Objects[i].IsLoaded) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         public void Load() {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
@@ -180,7 +156,7 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
-                Objects[i].LoadAssetAsync();
+                Objects[i].LoadAsset();
             }
         }
 
@@ -191,6 +167,9 @@ namespace PixelComrades {
             }
 #endif
             for (int i = 0; i < Objects.Count; i++) {
+                if (Objects[i].Asset == null) {
+                    continue;
+                }
                 Objects[i].ReleaseAsset();
             }
         }
@@ -198,30 +177,24 @@ namespace PixelComrades {
         public GameObject Get(int index) {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
-                return Objects[index].editorAsset;
+                return Objects[index].Asset as GameObject;
             }
 #endif
-            if (Objects[index].Asset == null) {
-                var op = Objects[index].LoadAssetAsync();
-                if (!op.IsDone) {
-                    Debug.LogFormat("Failed to load {0} {1} {2}", Objects[0].ToString(), Objects[0].RuntimeKeyIsValid(), op.PercentComplete);
-                    op.Completed += handle => Debug.LogFormat("Finished Loading {0} {1}", handle.IsDone, handle.Result);
-                }
-                else {
-                    return op.Result;
-                }
+            if (!Objects[index].IsLoaded) {
+                Debug.LogErrorFormat("Not Loaded: {0}", Objects[index].Path);
+                return null;
             }
-            return Objects[index].Asset as GameObject;
+            return Objects[index].LoadedAsset;
         }
 
         public GameObject Get() {
             if (Objects.Count == 0) {
+                Debug.Log("No Objects");
                 return null;
             }
             if (Objects.Count == 1) {
                 return Get(0);
             }
-            //return Prefabs.SafeAccess((int) (Prefabs.Length * Curve.Evaluate(UnityEngine.Random.value)));
             return Get((int) (Objects.Count * Curve.Evaluate(Game.LevelRandom.NextFloat(0, 1))));
         }
 
@@ -1142,7 +1115,7 @@ namespace PixelComrades {
                 value = (T) self.GetValue(name, typeof(T));
             }
             catch (Exception e) {
-                Debug.LogFormat("Name {0} {1} {2}", name, e.TargetSite.ToString(), e.StackTrace);
+                Debug.LogFormat("Name {0} Target {1} Stack {2}", name, e.TargetSite.ToString(), e.StackTrace);
                 value = currentValue;
             }
             return value;
@@ -1521,7 +1494,7 @@ namespace PixelComrades {
         }
     }
 
-    public static class V3Extensions {
+ public static class V3Extensions {
 
         public static Point3 toPoint3(this Vector3 v3) {
             return new Point3(v3);
@@ -1664,9 +1637,8 @@ namespace PixelComrades {
         public static float AbsDistance(Point3 p1, Point3 p2) {
             return Mathf.Abs(p1.x - p2.x) + Mathf.Abs(p1.y - p2.y) + Mathf.Abs(p1.z - p2.z);
         }
-
     }
-
+ 
     public static class CornerDirectionsExtensions {
 
         public static void GetAdjacentCorners(this Directions direction, out CornerDirections dir01, out CornerDirections dir02) {
@@ -2476,10 +2448,10 @@ namespace PixelComrades {
     }
 
     public static class Point3Extensions {
-        public static float DistanceSquared(this Point3 a, Point3 b) {
-            float dx = b.x - a.x;
-            float dy = b.y - a.y;
-            float dz = b.z - a.z;
+        public static int DistanceSquared(this Point3 a, Point3 b) {
+            int dx = b.x - a.x;
+            int dy = b.y - a.y;
+            int dz = b.z - a.z;
             return dx * dx + dy * dy + dz * dz;
         }
 
@@ -2506,6 +2478,7 @@ namespace PixelComrades {
             float dz = System.Math.Abs(b.z - a.z);
             return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
         }
+
 
         public static Point3 Reverse(this Point3 pos) {
             Point3 newPos = Point3.zero;
@@ -2557,6 +2530,13 @@ namespace PixelComrades {
 
         public static string[] SplitIntoWords(this string text) {
             return text.Split(' ');
+        }
+
+        public static string[] SplitFromEntryBreak(this string text) {
+            if (text == null) {
+                return null;
+            }
+            return text.Split(StringConst.MultiEntryBreak);
         }
 
         public static string EncodeWithEntryBreak(this IList<string> text) {

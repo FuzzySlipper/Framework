@@ -264,6 +264,12 @@ namespace PixelComrades {
 
     }
 
+    public enum ProjectileMovement {
+        Forward,
+        Arc,
+        Force
+    }
+    
     public enum ProjectileType {
         Simple,
         SpriteAnimation,

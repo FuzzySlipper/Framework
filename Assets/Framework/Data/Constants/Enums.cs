@@ -49,6 +49,62 @@ namespace PixelComrades {
         public const string CollisionType = "CollisionType";
     }
 
+    public enum ItemRarity {
+        Common,
+        Uncommon,
+        Rare,
+        UltraRare,
+        Legendary,
+        Special
+    }
+
+    public class ImpactTypes : StringEnum<ImpactTypes> {
+        public const string Instant = "Instant";
+        public const string TargetHit = "TargetHit";
+        public const string TargetCloseBurst = "TargetCloseBurst";
+        public const string TargetCloseBlast = "TargetCloseBlast";
+        public const string TargetAreaBurst = "TargetAreaBurst";
+        public const string TargetAreaWall = "TargetAreaWall";
+    }
+
+    public class TargetEventTypes : StringEnum<TargetEventTypes> {
+        public const string Attack = "Attack";
+        public const string Hit = "Hit";
+        public const string Miss = "Miss";
+        public const string Effect = "Effect";
+        public const string Conjuration = "Conjuration";
+        public const string Zones = "Zones";
+        public const string Sustain = "Sustain";
+        public const string Start = "Start";
+    }
+
+    public class AbilityRange : StringEnum<AbilityRange> {
+        public const string Self = "Self";
+        public const string Melee = "Melee";
+        public const string MeleeTouch = "MeleeTouch";
+        public const string Weapon = "Weapon";
+        public const string Ranged = "Ranged";
+        public const string RangedSight = "RangedSight";
+    }
+
+    public class AbilityFocus : StringEnum<AbilityFocus> {
+        public const string None = "None";
+        public const string Weapon = "Weapon";
+        public const string Holy = "Holy";
+        public const string Orb = "Orb";
+        public const string Rod = "Rod";
+        public const string Staff = "Staff";
+        public const string Tome = "Tome";
+        public const string Totem = "Totem";
+    }
+    
+    public class ItemTypes : StringEnum<ItemTypes> {
+        public const string Item = "Item";
+        public const string Equipment = "Equipment";
+        public const string Weapon = "Weapon";
+        public const string Ability = "Ability";
+    }
+    
     public enum ActionSource {
         [Description("Melee")] Melee = 0,
         [Description("Ranged")] Ranged = 1,

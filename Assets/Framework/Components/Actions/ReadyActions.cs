@@ -63,7 +63,7 @@ namespace PixelComrades {
                 return;
             }
             _actions[slot] = template;
-            template.Config.EquippedSlot = slot;
+            // template.Config.EquippedSlot = slot;
             this.GetEntity().Post(new ReadyActionsChanged(slot, template, this));
         }
 
@@ -71,9 +71,8 @@ namespace PixelComrades {
             if (_actions.Length <= slot) {
                 return;
             }
-            if (_actions[slot] != null && _actions[slot].Config.EquippedSlot == slot) {
+            if (_actions[slot] != null) {
                 var action = _actions[slot];
-                action.Config.EquippedSlot = -1;
                 action.Entity.Post(new ReadyActionsChanged(-1, action, null));
             }
             _actions[slot] = null;

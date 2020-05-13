@@ -41,13 +41,13 @@ namespace PixelComrades {
                 _actionEntity = action.Entity;
                 _owner = Graph.Entity.GetTemplate<ActionUsingTemplate>();
                 _config = _actionEntity.Get<BlockDamageAction>();
-                var model = ItemPool.Spawn(UnityDirs.Models, _config.ModelData, Vector3.zero, Quaternion.identity);
-                if (model != null) {
-                    var spawnPivot = _actionEntity.Get<SpawnPivotComponent>();
-                    spawnPivot.SetNewChild(model.Transform);
-                    _actionEntity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
-                    _actionEntity.Add(new TransformComponent(model.transform));
-                }
+                // var model = ItemPool.Spawn(UnityDirs.Models, _config.ModelData, Vector3.zero, Quaternion.identity);
+                // if (model != null) {
+                //     var spawnPivot = _actionEntity.Get<SpawnPivotComponent>();
+                //     spawnPivot.SetNewChild(model.Transform);
+                //     _actionEntity.Add(new RenderingComponent(model.GetComponent<IRenderingComponent>()));
+                //     _actionEntity.Add(new TransformComponent(model.transform));
+                // }
                 if (!Graph.Entity.Tags.Contain(EntityTags.Player)) {
                     Graph.Entity.Add(new BlockDamageFlat());
                     _isWaiting = true;

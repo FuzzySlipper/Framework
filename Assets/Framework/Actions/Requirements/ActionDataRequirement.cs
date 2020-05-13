@@ -26,10 +26,10 @@ namespace PixelComrades {
                     data = template.Data;
                     break;
                 case ActionDataTargetType.Target:
-                    data = character.Data;
+                    data = character.GenericData;
                     break;
                 case ActionDataTargetType.Owner:
-                    data = target.Data;
+                    data = target.GenericData;
                     break;
             }
             return data != null && data.HasString(_data);
@@ -37,7 +37,7 @@ namespace PixelComrades {
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
             if (_type == ActionDataTargetType.Target) {
-                var data = target.Data;
+                var data = target.GenericData;
                 return data != null && data.HasString(_data);
             }
             return true;
@@ -69,10 +69,10 @@ namespace PixelComrades {
                     data = template.Data;
                     break;
                 case ActionDataTargetType.Target:
-                    data = character.Data;
+                    data = character.GenericData;
                     break;
                 case ActionDataTargetType.Owner:
-                    data = target.Data;
+                    data = target.GenericData;
                     break;
             }
             if (data == null) {
@@ -83,7 +83,7 @@ namespace PixelComrades {
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
             if (_type == ActionDataTargetType.Target) {
-                var data = target.Data;
+                var data = target.GenericData;
                 return data != null && data.GetInt(_data) >= _minAmount;
             }
             return true;

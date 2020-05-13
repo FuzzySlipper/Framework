@@ -115,7 +115,7 @@ namespace PixelComrades {
         public Entity Source { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
-        public Vector3 Point { get { return Hit.Point; } }
+        public Vector3 HitPoint { get { return Hit.Point; } }
         public Vector3 Normal { get { return Hit.Normal; } }
         public HitData Hit { get; }
 

@@ -19,7 +19,7 @@ namespace PixelComrades {
                 return CollisionResult.Hit;
             }
             var defendTotal = targetStats.GetValue(Stats.Evasion);
-            var attackTotal = originStats.GetValue(Stats.ToHit);
+            var attackTotal = originStats.GetValue(Stats.Attack);
             //var finalAttack = Mathf.Clamp((attackTotal - defendTotal), 5, 100) + Game.Random.Next(1, 100);
             var finalAttack = Game.Random.Next(1, 100) + (attackTotal - defendTotal);
             var result = CollisionResult.Miss;

@@ -11,10 +11,9 @@ namespace PixelComrades {
         [ValueDropdown("SkillSlotList")] public string Skill;
 
         [Header("IActionConfig")]
-        [SerializeField] private ActionDistance _range = ActionDistance.Short;
+        [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
-        [SerializeField] private CollisionType _collision = CollisionType.Point;
         [SerializeField] private TargetType _targeting = TargetType.Enemy;
         [SerializeField] private ImpactRadiusTypes _radius = ImpactRadiusTypes.Single;
         [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Physical;
@@ -28,9 +27,8 @@ namespace PixelComrades {
         public ReloadType ReloadType = ReloadType.Repair;
         [Range(0, 5)] public float ReloadSpeedMulti = 1;
         
-        public ActionDistance Range { get => _range; }
+        public int Range { get => _range; }
         public FloatRange Power { get => _power; }
-        public CollisionType Collision { get => _collision; }
         public ImpactRadiusTypes Radius { get => _radius; }
         public string DamageType { get => _damageType; }
         public ActionFx ActionFx { get => _actionFx; }
@@ -56,8 +54,6 @@ namespace PixelComrades {
             entity.Add(new SkillRequirement(Skill, 0));
             var action = entity.Add(new ActionConfig());
             action.Source = this;
-            action.Primary = true;
-            action.Sprite = Idle;
             action.AnimationTrigger = GraphTriggers.Attack;
             entity.Add(new DamageImpact(DamageType, Stats.Health, 1f));
             ActionProvider.AddComponent(entity, this, action);

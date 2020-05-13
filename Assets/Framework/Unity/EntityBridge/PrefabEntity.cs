@@ -9,8 +9,8 @@ namespace PixelComrades {
         [SerializeField, HideInInspector] private SerializedMetaData _metadata = new SerializedMetaData();
         [SerializeField] private AssetType _objectType = AssetType.Prefab;
         [SerializeField] private bool _pooled = false;
-        [SerializeField] private string _resourcePath = "";
-        [SerializeField] private int _hashId = 0;
+        [SerializeField] private string _guid = "";
+        [SerializeField] private ScriptableDatabase _db = null;
 
         private ISystemFixedUpdate[] _systemFixedUpdate;
         private ISystemUpdate[] _systemUpdate;
@@ -24,14 +24,15 @@ namespace PixelComrades {
         private bool _isCulled = false;
 
         public bool Pooled { get { return _pooled; } }
-        public int PrefabId { get { return _hashId; } }
-        public string ResourcePath { get => _resourcePath; }
+        public string Guid { get => _guid; }
         public AssetType ObjectType { get { return _objectType; } }
         public bool IsSceneObject { get { return _isSceneObject; } } // careful using this
         public Point3 SectorPosition { get; set; }
         public SerializedMetaData Metadata { get { return _metadata; } set { _metadata = value; } }
+        public ScriptableDatabase Db { get => _db; set => _db = value; }
         public Renderer[] Renderers { get { return _renderers; } }
         public bool SceneActive { get { return _active; } }
+        public bool IdInvalid { get { return string.IsNullOrEmpty(_guid); } }
         public Transform Transform {
             get {
                 if (_transform == null) {
@@ -42,7 +43,6 @@ namespace PixelComrades {
         }
 
         public void SetStatic() {
-            _hashId = -1;
             _objectType = AssetType.Scene;
             ScanObject();
             CheckCreate();
@@ -50,18 +50,31 @@ namespace PixelComrades {
             RegisterInterfaces(true);
         }
 
-        public void SetId(ref HashSet<int> ids, string path) {
-            _resourcePath = path;
-            _hashId = _resourcePath.GetHashCode();
-            while (ids.Contains(_hashId)) {
-                _hashId = _resourcePath.GetHashCode();
+        public void SetId(ref HashSet<string> ids, string guid) {
+            if (!string.IsNullOrEmpty(_guid) && !ids.Contains(_guid)) {
+                ids.Add(_guid);
+                return;
             }
-            ids.Add(_hashId);
+            _guid = guid;
+            while (ids.Contains(_guid)) {
+                _guid = System.Guid.NewGuid().ToString();
+            }
+            ids.Add(_guid);
         }
 
-        public void SetId(string path) {
-            _resourcePath = path;
-            _hashId = _resourcePath.GetHashCode();
+        public void SetId(ref Dictionary<string, Queue<PrefabEntity>> ids, string guid) {
+            if (!string.IsNullOrEmpty(_guid) && !ids.ContainsKey(_guid)) {
+                _guid = guid;
+                return;
+            }
+            _guid = string.IsNullOrEmpty(guid) ? System.Guid.NewGuid().ToString() : guid;
+            while (ids.ContainsKey(_guid)) {
+                _guid = System.Guid.NewGuid().ToString();
+            }
+        }
+
+        public void SetId(string id) {
+            _guid = id;
         }
 
         public void Setup() {

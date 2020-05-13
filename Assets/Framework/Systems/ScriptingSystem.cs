@@ -30,6 +30,40 @@ namespace PixelComrades {
 
 
     [System.Serializable]
+    public class ScriptedEventConfig {
+        public string Event;
+        public string Script;
+    }
+
+    [System.Serializable]
+    public class GenericConfigEntry {
+        public string ID;
+        public string Value;
+    }
+
+    public static class GenericConfigEntryExtensions {
+        public static float FindFloat(this IList<GenericConfigEntry> list, string id, float defaultVal) {
+            for (int i = 0; i < list.Count; i++) {
+                if (list[i].ID == id) {
+                    if (float.TryParse(list[i].Value, out var convertVal)) {
+                        return convertVal;
+                    }
+                }
+            }
+            return defaultVal;
+        }
+
+        public static string FindString(this IList<GenericConfigEntry> list, string id) {
+            for (int i = 0; i < list.Count; i++) {
+                if (list[i].ID == id) {
+                    return list[i].Value;
+                }
+            }
+            return "";
+        }
+    }
+    
+    [System.Serializable]
     public class WaitEvent : IActionEventHandler, ISerializable {
         
         private Timer _timer;

@@ -57,7 +57,7 @@ namespace PixelComrades {
             cmd.StartCommand();
 #if DEBUG
             DebugLog.Add(cmd.Owner.Entity.DebugId + " started command " + cmd.GetType());
-#endifda
+#endif
             _commands.Add(cmd);
             return true;
         }

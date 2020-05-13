@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Runtime.Serialization;
 
 namespace PixelComrades {
     
@@ -14,19 +15,14 @@ namespace PixelComrades {
         Cross2 = 6,
         Line = 7,
         Party = 8,
-    }
-
-    public class ImpactRadius : StringEnum<ImpactRadius> {
-        public const string Target = "Target";
-        public const string CloseBurst = "CloseBurst";
-        public const string CloseBlast = "CloseBlast";
-        public const string AreaBurst = "AreaBurst";
-        public const string AreaWall = "AreaWall";
+        Target,
+        CloseBurst,
+        CloseBlast,
+        AreaBurst,
+        AreaWall
     }
 
     public static class ImpactExtensions {
-
-
         public static List<Point3> RadiusPoints(this ImpactRadiusTypes radius, Point3 center, Directions fwd) {
             if (radius == ImpactRadiusTypes.Single) {
                 return null;

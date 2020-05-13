@@ -23,4 +23,11 @@ namespace PixelComrades {
             LastRoll = Game.Random.Next(0, Chance);
         }
     }
+
+    [System.Serializable]
+    public class AbilityHolder {
+        [Range(0, 100)] public int Chance;
+        public AbilityConfig Ability;
+        public AdvancedTargeting Targeting;
+    }
 }

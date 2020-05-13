@@ -28,20 +28,20 @@ namespace PixelComrades {
             var component = ae.Action.Data;
             if (component != null) {
                 ae.Target.RuleEvents.Handlers.Add(this);
-                ae.Target.Data.SetData(Label, Label);
-                ae.Target.Data.SetData(Amount, component.GetInt(Amount));
-                ae.Target.Data.SetData(Uses, component.GetInt(Uses));
+                ae.Target.GenericData.SetData(Label, Label);
+                ae.Target.GenericData.SetData(Amount, component.GetInt(Amount));
+                ae.Target.GenericData.SetData(Uses, component.GetInt(Uses));
             }
         }
 
         public void RuleEventRun(ref CheckHitEvent context) {
-            var targetData = context.Origin.Data;
+            var targetData = context.Origin.GenericData;
             var targetChar = context.Origin;
             if (targetData != null && targetData.HasString(Label)) {
                 context.AttackTotal += targetData.GetInt(Amount);
             }
             else {
-                targetData = context.Target.Data;
+                targetData = context.Target.GenericData;
                 targetChar = context.Target;
                 if (targetData != null && targetData.HasString(Label)) {
                     context.DefenseTotal += targetData.GetInt(Amount);
@@ -90,14 +90,14 @@ namespace PixelComrades {
             var component = ae.Action.Data;
             if (component != null) {
                 ae.Target.RuleEvents.Handlers.Add(this);
-                ae.Target.Data.SetData(Label, Label);
-                ae.Target.Data.SetData(Amount, component.GetInt(Amount));
-                ae.Target.Data.SetData(Uses, component.GetInt(Uses));
+                ae.Target.GenericData.SetData(Label, Label);
+                ae.Target.GenericData.SetData(Amount, component.GetInt(Amount));
+                ae.Target.GenericData.SetData(Uses, component.GetInt(Uses));
             }
         }
 
         public void RuleEventRun(ref CheckHitEvent context) {
-            var targetData = context.Origin.Data;
+            var targetData = context.Origin.GenericData;
             var targetChar = context.Origin;
             if (targetData != null && targetData.HasString(Label)) {
                 context.AttackTotal += targetData.GetInt(Amount);

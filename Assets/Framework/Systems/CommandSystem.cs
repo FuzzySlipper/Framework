@@ -15,10 +15,10 @@ namespace PixelComrades {
             if (!cmd.CanStart()) {
                 return false;
             }
-            var otherCmd = GetCommand(cmd.EntityOwner);
+            var otherCmd = GetCommand(cmd.Owner.Entity);
             if (otherCmd != null) {
                 if (!otherCmd.CanBeReplacedBy(cmd)) {
-                    cmd.EntityOwner.Post(new StatusUpdate(cmd.EntityOwner,"Can't replace current command"));
+                    cmd.Owner.Entity.Post(new StatusUpdate(cmd.Owner.Entity,"Can't replace current command"));
                     return false;
                 }
                 otherCmd.Cancel();
@@ -26,7 +26,7 @@ namespace PixelComrades {
             }
             cmd.StartCommand();
 #if DEBUG
-            DebugLog.Add(cmd.EntityOwner.DebugId + " started command " + cmd.GetType());
+            DebugLog.Add(cmd.Owner.Entity.DebugId + " started command " + cmd.GetType());
 #endif
             _commands.Add(cmd);
             return true;
@@ -34,7 +34,7 @@ namespace PixelComrades {
 
         public Command GetCommand(int id) {
             for (int i = 0; i < _commands.Count; i++) {
-                if (_commands[i]?.EntityOwner.Id == id) {
+                if (_commands[i]?.Owner.Entity.Id == id) {
                     return _commands[i];
                 }
             }
@@ -43,7 +43,7 @@ namespace PixelComrades {
 
         public Command GetCommandOrParent(int id) {
             for (int i = 0; i < _commands.Count; i++) {
-                if (_commands[i]?.EntityOwner.Id == id || _commands[i]?.EntityOwner.ParentId == id) {
+                if (_commands[i]?.Owner.Entity.Id == id || _commands[i]?.Owner.Entity.ParentId == id) {
                     return _commands[i];
                 }
             }

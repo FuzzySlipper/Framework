@@ -26,7 +26,7 @@ namespace PixelComrades {
 
         public int Level { get => _level.Value.Level; }
         public EntityLevelComponent LevelComponent { get => _level.Value; }
-        public GenericDataComponent Data { get => _data.Value; }
+        public GenericDataComponent GenericData { get => _data.Value; }
         public ActionSlots ActionSlots { get => _actionSlots; }
         public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }

@@ -13,7 +13,7 @@ namespace PixelComrades {
         public override string ItemType { get { return ItemTypes.Equipment; } }
 
         private ValueDropdownList<string> EquipmentSlotList() {
-            return EquipmentSlotTypes.GetDropdownList();
+            return EquipmentSlotType.GetDropdownList();
         }
 
         private ValueDropdownList<string> SkillSlotList() {

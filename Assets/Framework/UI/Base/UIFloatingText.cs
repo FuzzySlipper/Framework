@@ -30,47 +30,25 @@ namespace PixelComrades {
 
         public static void SpawnIcon(Sprite icon, string text, RectTransform start, Color color) {
             var startPosition = start.position;
-            UIFloatingText spawn = ItemPool.SpawnUIPrefab<UIFloatingText>("UI/UIFloatingTextIcon", start);
-            spawn.RectTransform.SetParent(UIRoot.Misc.Get().transform);
-            spawn.RectTransform.SetAsLastSibling();
             if (_iconTimer.IsActive) {
                 startPosition = start.position + new Vector3(_negative ? -Offset : Offset, 0, 0);
-                spawn.RectTransform.position = startPosition;
                 _negative = !_negative;
             }
             _iconTimer.StartTimer();
-            spawn._icon.overrideSprite = icon;
-            TimeManager.StartUnscaled(spawn.SetTargetText(text, 2f, startPosition + new Vector3(0, 150, 0), color));
+            FloatingTextHolder.Start(Orientation.Icon, text, 2f, startPosition, startPosition + new Vector3(0, 150, 0), UIRoot.Misc.Get()
+            .transform, color, icon);
+
         }
 
         private static bool _negative;
         private static UnscaledTimer _iconTimer = new UnscaledTimer(0.5f);
         private const float Offset = 150f;
 
-        public static UIFloatingText Spawn(string text, RectTransform start, Color color, Orietation orientation) {
+        public static void Spawn(string text, RectTransform start, Color color, Orientation orientation) {
             if (string.IsNullOrEmpty(text)) {
-                return null;
+                return;
             }
-            UIFloatingText spawn;
-            switch (orientation) {
-                case Orietation.Right:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextRight", start);
-                    break;
-                case Orietation.Left:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextLeft", start);
-                    break;
-                case Orietation.Icon:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextIcon", start);
-                    break;
-                default:
-                    spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", start);
-                    break;
-            }
-            //spawn.RectTransform.sizeDelta = start.sizeDelta;
-            spawn.RectTransform.SetParent(UIRoot.Player.Get().transform);
-            spawn.RectTransform.SetAsLastSibling();
-            TimeManager.StartUnscaled(spawn.SetTargetText(text, 2f, start.position + new Vector3(0, 150, 0), color));
-            return spawn;
+            FloatingTextHolder.Start(orientation, text, 2f, start.position, start.position + new Vector3(0, 150, 0), UIRoot.Player.Get().transform, color);
         }
 
         public static void WorldSpawn(string text, Vector3 start, Color color) {
@@ -78,11 +56,10 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, UIRoot.Misc.Get().transform);
-            UIFloatingText spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", UIRoot.Misc.Get().transform);
-            spawn.transform.position = RectTransformUtility.WorldToScreenPoint(Player.Cam, start);
+            start = RectTransformUtility.WorldToScreenPoint(Player.Cam, start);
             var end = RectTransformUtility.WorldToScreenPoint(Player.Cam, start + new Vector3(0, 1, 0));
-            spawn.RectTransform.SetAsLastSibling();
-            TimeManager.StartUnscaled(spawn.SetTargetText(text, 2f, end, color));
+            FloatingTextHolder.Start(Orientation.Center, text, 2f, start, end, UIRoot.Misc.Get().transform, color);
+
         }
 
         public static void Spawn(string text, float duration, RectTransform start, Vector3 end, Color startColor) {
@@ -90,10 +67,8 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, start);
-            var spawn = ItemPool.SpawnUIPrefab<UIFloatingText>(UnityDirs.UI, "UIFloatingTextStandard", start);
-            spawn.RectTransform.SetParent(UIRoot.Player.Get().transform);
-            spawn.RectTransform.SetAsLastSibling();
-            TimeManager.StartUnscaled(spawn.SetTargetText(text, duration, end, startColor));
+            FloatingTextHolder.Start(Orientation.Center, text, duration, start.position, end, UIRoot.Player.Get().transform, startColor);
+
         }
 
         [SerializeField] private Color _endColor = Color.clear;
@@ -108,27 +83,75 @@ namespace PixelComrades {
             RectTransform = GetComponent<RectTransform>();
         }
 
-        public IEnumerator SetTargetText(string text, float duration, Vector3 end, Color start) {
-            _text.text = text;
-            _text.color = start;
-            _moveTween.Restart(transform.position, end, duration);
-            _colorTween.Restart(0, 1, duration);
-            while (_moveTween.Active) {
-                _text.color = Color.Lerp(start, _endColor, _colorTween.Get());
-                transform.position = _moveTween.Get();
-                yield return null;
-            }
-            ItemPool.Despawn(gameObject);
-        }
-
-        public enum Orietation {
+        public enum Orientation {
             Center,
             Right,
             Left,
             Icon,
         }
 
+        private class FloatingTextHolder : LoadOperationEvent {
+            
+            private static GenericPool<FloatingTextHolder> _pool = new GenericPool<FloatingTextHolder>(5);
 
+            private UIFloatingText _floating;
+            private string _text;
+            private float _duration;
+            private Vector3 _start;
+            private Vector3 _end;
+            private Color _startColor;
+            private Transform _parent;
+            private Sprite _icon;
+            private ScaledTimer _timeoutTimer = new ScaledTimer(10);
+
+            public static void Start(Orientation type, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color 
+            color, Sprite icon = null) {
+                var txtHolder = _pool.New();
+                txtHolder.Setup(LazyDb.Main.UIFloatingText[(int) type], text, duration, start, end, parent, color, icon);
+            }
+
+            private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color color, Sprite icon) {
+                SourcePrefab = prefab;
+                _text = text;
+                _start = start;
+                _duration = duration;
+                _end = end;
+                _startColor = color;
+                _parent = parent;
+                _icon = icon;
+            }
+
+            public override void OnComplete() {
+                _floating = NewPrefab.GetComponent<UIFloatingText>();
+                if (_icon != null) {
+                    _floating._icon.overrideSprite = _icon;
+                }
+                _floating.RectTransform.SetParent(_parent);
+                _floating.RectTransform.SetAsLastSibling();
+                TimeManager.StartTask(SetTargetText());
+            }
+
+            private IEnumerator SetTargetText() {
+                var tr = _floating.transform;
+                tr.position = _start;
+                _floating._text.text = _text;
+                _floating._moveTween.Restart(tr.position, _end, _duration);
+                _floating._colorTween.Restart(0, 1, _duration);
+                _timeoutTimer.RestartTimer();
+                while (_floating._moveTween.Active) {
+                    _floating._text.color = Color.Lerp(_startColor, _floating._endColor, _floating._colorTween.Get());
+                    tr.position = _floating._moveTween.Get();
+                    yield return null;
+                }
+                ItemPool.Despawn(_floating.gameObject);
+                _floating = null;
+                _parent = null;
+                _icon = null;
+                SourcePrefab = null;
+                NewPrefab = null;
+                _pool.Store(this);
+            }
+        }
 
         private class MsgChecker {
             private float _minDuplicateTime;

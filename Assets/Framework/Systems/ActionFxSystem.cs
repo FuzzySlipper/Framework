@@ -13,19 +13,6 @@ namespace PixelComrades {
             }));
         }
 
-        public void TriggerSpawn(SpawnOnEvent spawnEvent, ActionEvent arg) {
-            if (arg.State == spawnEvent.End && spawnEvent.ActiveGameObject != null) {
-                ItemPool.Despawn(spawnEvent.ActiveGameObject);
-            }
-            else if (arg.State == spawnEvent.Start && spawnEvent.Prefab != null) {
-                arg.GetSpawnPositionRotation(out var spawnPos, out var spawnRot);
-                spawnEvent.ActiveGameObject = ItemPool.Spawn(spawnEvent.Prefab, spawnPos, spawnRot);
-                if (spawnEvent.End == ActionState.None) {
-                    spawnEvent.ActiveGameObject = null;
-                }
-            }
-        }
-
         public void Handle(DeathEvent arg) {
             var spawnOnDeath = arg.Target.Entity.Get<SpawnPrefabOnDeath>();
             if (spawnOnDeath != null) {
@@ -66,6 +53,7 @@ namespace PixelComrades {
                 ActionState.Collision, hitPoint + (hitNormal * 0.1f), Quaternion.LookRotation(hitNormal),
                 target?.GetTemplate<CharacterTemplate>());
         }
+
         private void SpawnPrefab(SpawnPrefabOnDeath spawnComponent, DeathEvent arg) {
             var position = arg.Target.Tr.position;
             var count = spawnComponent.CountRange.Get();
@@ -75,27 +63,27 @@ namespace PixelComrades {
             for (int i = 0; i < count; i++) {
                 var spawnPos = position + Random.insideUnitSphere * (spawnComponent.Radius * 0.5f);
                 spawnPos.y = position.y;
-                var spawn = ItemPool.Spawn(UnityDirs.Items, spawnComponent.Prefab, 
-                    Vector3.Lerp(spawnPos, spawnPos + Vector3.up, Random.value), Quaternion.identity, true);
-                if (spawn == null) {
-                    continue;
-                }
-                var rb = spawn.GetComponent<FakePhysicsObject>();
-                if (rb == null) {
-                    continue;
-                }
-                WhileLoopLimiter.ResetInstance();
-                while (WhileLoopLimiter.InstanceAdvance()) {
-                    var throwPos = spawnPos + (Random.insideUnitSphere * spawnComponent.Radius);
-                    throwPos.y = position.y;
-                    if (!Physics.Linecast(spawn.transform.position, throwPos, LayerMasks.Environment)) {
-                        if (Physics.Raycast(throwPos, Vector3.down, out var hit, 5f, LayerMasks.Floor)) {
-                            throwPos = hit.point;
+                ItemPool.Spawn(
+                    spawnComponent.Prefab,
+                    spawn => {
+                        spawn.Transform.position = Vector3.Lerp(spawnPos, spawnPos + Vector3.up, Random.value);
+                        var rb = spawn.GetComponent<FakePhysicsObject>();
+                        if (rb == null) {
+                            return;
                         }
-                        rb.Throw(throwPos);
-                        break;
-                    }
-                }
+                        WhileLoopLimiter.ResetInstance();
+                        while (WhileLoopLimiter.InstanceAdvance()) {
+                            var throwPos = spawnPos + (Random.insideUnitSphere * spawnComponent.Radius);
+                            throwPos.y = position.y;
+                            if (!Physics.Linecast(spawn.transform.position, throwPos, LayerMasks.Environment)) {
+                                if (Physics.Raycast(throwPos, Vector3.down, out var hit, 5f, LayerMasks.Floor)) {
+                                    throwPos = hit.point;
+                                }
+                                rb.Throw(throwPos);
+                                break;
+                            }
+                        }
+                    });
             }
         }
     }

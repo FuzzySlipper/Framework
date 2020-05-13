@@ -21,12 +21,12 @@ namespace PixelComrades {
                 return;
             }
             _actor.Entity.AddObserver(this);
-            var ammo = _actor.ReadyActions.GetAction(_targetUsable)?.Entity.Get<AmmoComponent>();
-            if (ammo != null) {
-                _currentAmmo = ammo.Amount;
-                _currentAmmo.OnResourceChanged += CheckAmmo;
-                _statSlider.value = _currentAmmo.CurrentPercent;
-            }
+            // var ammo = _actor.ReadyActions.GetAction(_targetUsable)?.Entity.Get<AmmoComponent>();
+            // if (ammo != null) {
+            //     _currentAmmo = ammo.Amount;
+            //     _currentAmmo.OnResourceChanged += CheckAmmo;
+            //     _statSlider.value = _currentAmmo.CurrentPercent;
+            // }
         }
 
         public void RemoveActor() {

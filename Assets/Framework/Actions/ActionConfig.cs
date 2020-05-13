@@ -15,10 +15,11 @@ namespace PixelComrades {
         public List<ActionPhases> Phases = new List<ActionPhases>();
         public List<IActionRequirement> Requirements = new List<IActionRequirement>();
         public string AnimationTrigger;
-        public string WeaponModel;
         public string Type;
         public string Focus;
-        public string BonusStat;
+        public int Range;
+        public IActionConfig Source;
+
         public ActionConfig() {}
 
         public ActionConfig(SerializationInfo info, StreamingContext context) {

@@ -23,7 +23,7 @@ namespace PixelComrades {
         }
 
         public bool CanTarget(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Data.GetInt(_classId) >= _minLevel;
+            return character.GenericData.GetInt(_classId) >= _minLevel;
         }
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {

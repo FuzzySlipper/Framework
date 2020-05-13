@@ -10,13 +10,13 @@ namespace PixelComrades {
                 return;
             }
             //if (UIDragDropHandler.CurrentData.Durability.CurrentPercent > 0.99f) {
-            //    UIFloatingText.Spawn("Doesn't need repairs", transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            //    UIFloatingText.Spawn("Doesn't need repairs", transform as RectTransform, Color.green, UIFloatingText.Orientation.Center);
             //    UIDragDropHandler.Return();
             //    return;
             //}
             //var price = RpgSystem.RepairEstimate(UIDragDropHandler.CurrentData);
             //if (Player.Currency.Value < price) {
-            //    UIFloatingText.Spawn(string.Format("Repair Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            //    UIFloatingText.Spawn(string.Format("Repair Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orientation.Center);
             //    UIDragDropHandler.Return();
             //    return;
             //}
@@ -31,7 +31,7 @@ namespace PixelComrades {
                 return;
             }
             var price = GameOptions.RepairEstimate(UIDragDropHandler.CurrentData);
-            UIFloatingText.Spawn(string.Format("Repaired for {0} {1}", price, GameText.DefaultCurrencyLabel), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+            UIFloatingText.Spawn(string.Format("Repaired for {0} {1}", price, GameText.DefaultCurrencyLabel), transform as RectTransform, Color.green, UIFloatingText.Orientation.Center);
             Player.DefaultCurrencyHolder.AddToValue(-price);
             //UIDragDropHandler.CurrentData.Durability.SetMax();
             UIDragDropHandler.Return();

@@ -22,68 +22,28 @@ namespace PixelComrades {
             if (arg.Action == null) {
                 return;
             }
-            var weaponModelComponent = arg.Action.Weapon;
-            if (weaponModelComponent == null) {
-                if (arg.Container == null) {
-                    arg.Action.Entity.Remove<SpawnPivotComponent>();
-                }
-                else {
-                    var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
-                    if (actionPivots != null) {
-                        arg.Action.Entity.Add(new SpawnPivotComponent(arg.Action.Config.Primary ? actionPivots.PrimaryPivot : actionPivots
-                        .SecondaryPivot));
-                    }
-                }
-                return;
-            }
             if (arg.Container == null) {
-                ItemPool.Despawn(weaponModelComponent.Loaded.Tr.gameObject);
-                arg.Action.Entity.Remove<TransformComponent>();
                 arg.Action.Entity.Remove<SpawnPivotComponent>();
-                weaponModelComponent.Set(null);
             }
             else {
-                if (weaponModelComponent.Loaded != null) {
-                    return;
-                }
-                var weaponModel = ItemPool.Spawn(UnityDirs.Weapons, weaponModelComponent.Prefab, Vector3.zero, Quaternion.identity, false,
-                 false);
-                if (weaponModel == null) {
-                    return;
-                }
-                var projectileSpawn = arg.Container.GetEntity().Get<ActionPivotsComponent>();
-                if (projectileSpawn != null) {
-                    weaponModel.Transform.SetParentResetPos(arg.Action.Config.Primary? projectileSpawn.PrimaryPivot : projectileSpawn
-                    .SecondaryPivot);
-                }
-                weaponModelComponent.Set(weaponModel.GetComponent<IWeaponModel>());
-                arg.Action.Entity.Add(new TransformComponent(weaponModel.transform));
-                arg.Action.Entity.Add(new SpawnPivotComponent(weaponModel.Transform));
+                // var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
+                // if (actionPivots != null) {
+                //     arg.Action.Entity.Add(
+                //         new SpawnPivotComponent(
+                //             arg.Action.Config.Primary
+                //                 ? actionPivots.PrimaryPivot
+                //                 : actionPivots
+                //                     .SecondaryPivot));
+                // }
             }
         }
 
         public void Handle(AnimationEventTriggered arg) {
-            switch (arg.Event) {
-                case AnimationEvents.Default:
-                    break;
-                case AnimationEvents.FxOn:
-                    var weaponModelOn = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
-                    if (weaponModelOn?.Loaded != null) {
-                        weaponModelOn.Loaded.SetFx(true);
-                    }
-                    break;
-                case AnimationEvents.FxOff:
-                    var weaponModelOff = arg.Entity.Get<CurrentAction>()?.Value?.Weapon ?? arg.Entity.Get<WeaponModelComponent>();
-                    if (weaponModelOff?.Loaded != null) {
-                        weaponModelOff.Loaded.SetFx(false);
-                    }
-                    break;
-                default:
-                    if (arg.Entity.IsPlayer()) {
-                        World.Get<CameraSystem>().PlaySpringAnimation(arg.Event);
-                    }
-                    break;
-            } 
+            // switch (arg.Event.EventType) {
+            //     case AnimationEvent.Type.Camera:
+            //         World.Get<CameraSystem>().PlaySpringAnimation(arg.Event.EventDataString);
+            //         break;
+            // } 
         }
     }
 

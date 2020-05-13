@@ -66,7 +66,7 @@ namespace PixelComrades {
         }
 
         private void FloatingText(RectTransform rectTr, string text) {
-            UIFloatingText.Spawn(text, rectTr, Color.red, UIFloatingText.Orietation.Center);
+            UIFloatingText.Spawn(text, rectTr, Color.red, UIFloatingText.Orientation.Center);
         }
 
         private void SetModeText() {

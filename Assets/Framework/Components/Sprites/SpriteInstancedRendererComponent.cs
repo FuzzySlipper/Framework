@@ -32,7 +32,7 @@ namespace PixelComrades {
     }
 
     [System.Serializable]
-    public sealed class SpriteSimpleRendererComponent : IComponent {
+    public sealed class SpriteSimpleRendererComponent : IComponent, ISpriteRendererComponent {
         private CachedTransform _spriteTr;
         
         public SpriteData[] Sprites = new SpriteData[0];
@@ -50,11 +50,11 @@ namespace PixelComrades {
                 Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
         }
 
-        public Vector3 GetEventPosition(AnimationFrame frame, int index) {
-            if (index >= Sprites.Length || index < 0) {
+        public Vector3 GetEventPosition(Vector2 framePos, int instancedIndex) {
+            if (instancedIndex >= Sprites.Length || instancedIndex < 0) {
                 return _spriteTr.Tr.position;
             }
-            var sprite = Sprites[index].Sprite;
+            var sprite = Sprites[instancedIndex].Sprite;
             if (sprite == null) {
                 return _spriteTr.Tr.position;
             }
@@ -62,11 +62,31 @@ namespace PixelComrades {
                 sprite.rect.width / sprite.pixelsPerUnit,
                 sprite.rect.height / sprite.pixelsPerUnit);
             return _spriteTr.Tr.TransformPoint(
-                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0.2f);
+                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), framePos.x), size.y * framePos.y, 0.2f);
         }
 
-        public SpriteSimpleRendererComponent(Transform spriteTr) {
+        public void SetSprite(
+            Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx,
+            bool flip) {
+            var data = Sprites[instanceIdx];
+            data.Sprite = sprite;
+            data.Emissive = emissive;
+            data.Normal = normal;
+            data.Flip = flip;
+        }
+
+        public Quaternion GetRotation() {
+            return Rotation;
+        }
+
+        public void Flip(bool isFlipped) { }
+
+        public SpriteSimpleRendererComponent(Transform spriteTr, int cnt) {
             _spriteTr = new CachedTransform(spriteTr);
+            Sprites = new SpriteData[cnt];
+            for (int i = 0; i < Sprites.Length; i++) {
+                Sprites[i] = new SpriteData();
+            }
         }
 
         public SpriteSimpleRendererComponent(SerializationInfo info, StreamingContext context) {

@@ -66,7 +66,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            World.Get<RulesSystem>().Post(new HealingEvent(null, amount, null, null, "Vitals.Energy"));
+            // World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString());
         }
         
@@ -78,7 +78,7 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
-            World.Get<RulesSystem>().Post(new HealingEvent(null, amount, null, null, "Vitals.Health"));
+            //World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Health"));
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString());
         }
 
@@ -169,14 +169,14 @@ namespace PixelComrades {
             var status = entity.Get<StatusUpdateComponent>();
             Debug.Log(status?.Status ?? "No Status Component");
         }
-
-        public static void DebugVelocity(Entity entity) {
-            var rb = entity.Get<RigidbodyComponent>().Rb;
-            if (rb != null) {
-                UIGenericValueWatcher.Get(UIAnchor.TopLeft, 0.25f, () => string.Format("Velocity: {0:F1} / {1:F1}",  
-                    rb.velocity.magnitude, entity.Get<StatsContainer>().GetValue("Attributes.Speed")));
-            }
-        }
+        //
+        // public static void DebugVelocity(Entity entity) {
+        //     var rb = entity.Get<RigidbodyComponent>().Rb;
+        //     if (rb != null) {
+        //         UIGenericValueWatcher.Get(UIAnchor.TopLeft, 0.25f, () => string.Format("Velocity: {0:F1} / {1:F1}",  
+        //             rb.velocity.magnitude, entity.Get<StatsContainer>().GetValue("Attributes.Speed")));
+        //     }
+        // }
 
         //public static void TestAnimationEvent(int entityId, string clip) {
         //    var entity = EntityController.GetEntity(entityId);

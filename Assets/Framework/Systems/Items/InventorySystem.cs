@@ -24,7 +24,7 @@ namespace PixelComrades {
             if (!inventoryItem.Identified) {
                 FastString.Instance.AppendNewLine("Unidentified");
             }
-            FastString.Instance.AppendBoldLabelNewLine("Rarity", GameData.Enums[EnumTypes.ItemRarity].GetNameAt(inventoryItem.Rarity));
+            FastString.Instance.AppendBoldLabelNewLine("Rarity", inventoryItem.Rarity.ToString());
             arg.Data.Text += FastString.Instance.ToString();
         }
 

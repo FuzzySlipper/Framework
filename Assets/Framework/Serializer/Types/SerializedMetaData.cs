@@ -18,7 +18,6 @@ namespace PixelComrades {
         [SerializeField] private int _serializationId = -1;
         [SerializeField] private SerializedComponentDifferences _componentDiff;
 
-        public string PrefabPath { get { return _prefabPath; } }
         public SerializedComponentDifferences ComponentDiff { get { return _componentDiff; } }
         public AssetType AssetType { get { return _assetType; } set { _assetType = value; } }
         public int SerializationId {
@@ -56,7 +55,7 @@ namespace PixelComrades {
         }
 
         public void SetDatabaseEntry(PrefabEntity entity) {
-            _prefabPath = entity.ResourcePath;
+            _prefabPath = entity.Guid;
             _assetType = AssetType.Prefab;
             _componentDiff = new SerializedComponentDifferences();
         }

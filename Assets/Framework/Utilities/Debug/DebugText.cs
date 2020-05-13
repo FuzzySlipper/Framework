@@ -59,11 +59,13 @@ namespace PixelComrades {
             }
             _lastText = text;
             var newText = main._textTimers.New();
-            var textObject = ItemPool.SpawnUIPrefab("UI/DebugTextTemp", main.TempRoot);
-            textObject.GetComponent<Text>().text = text;
-            newText.Time.StartNewTime(length);
-            newText.TextObject = textObject;
-            main._tempText.Add(newText);
+            ItemPool.Spawn(LazyDb.Main.DebugTextTemp, textObject => {
+                textObject.Transform.parent = main.TempRoot;
+                textObject.GetComponent<Text>().text = text;
+                newText.Time.StartNewTime(length);
+                newText.TextObject = textObject.gameObject;
+                main._tempText.Add(newText);
+            });
         }
 
         public static void UpdatePermText(string label, string text) {
@@ -74,13 +76,17 @@ namespace PixelComrades {
             if (main == null) {
                 return;
             }
-            Text objText;
-            if (!main._permTextDict.TryGetValue(label, out objText)) {
-                var textObject = ItemPool.SpawnUIPrefab("UI/DebugTextPerm", main.PermRoot);
-                objText = textObject.GetComponent<Text>();
-                main._permTextDict.Add(label, objText);
+            if (!main._permTextDict.TryGetValue(label, out var objText)) {
+                ItemPool.Spawn(LazyDb.Main.DebugTextPerm, textObject => {
+                    textObject.Transform.parent = main.PermRoot;
+                    objText = textObject.GetComponent<Text>();
+                    objText.text = string.Format("{0} - {1}", label, text);
+                    main._permTextDict.Add(label, objText);
+                });
             }
-            objText.text = string.Format("{0} - {1}", label, text);
+            else {
+                objText.text = string.Format("{0} - {1}", label, text);
+            }
         }
 
         public static void RemovePermText(string label) {

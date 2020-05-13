@@ -50,7 +50,7 @@ namespace PixelComrades {
             var strVal = lines[parseIndex];
             parseIndex++;
             for (int i = 0; i < Count; i++) {
-                if (strVal == GetNameAt(i) || strVal == GetIdAt(i)) {
+                if (strVal == GetNameAt(i) || strVal == GetID(i)) {
                     return GetValueAt(i);
                 }
             }
@@ -214,7 +214,7 @@ namespace PixelComrades {
             return _names;
         }
 
-        public static List<string> GetIds() {
+        public static List<string> GetIDs() {
             return _ids;
         }
 
@@ -268,7 +268,7 @@ namespace PixelComrades {
             throw new IndexOutOfRangeException(string.Format("Index must be between 0 and {0}", Count - 1));
         }
 
-        public static string GetIdAt(int index) {
+        public static string GetID(int index) {
             if (index >= 0 && index < Count) {
                 return _ids[index];
             }
