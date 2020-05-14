@@ -49,8 +49,16 @@ namespace PixelComrades {
             }
         }
 
-        public static Entity GetRandom() {
-            return BuildAbility(Main._allAbilities.RandomElement());
+        public static Entity GetRandom(ItemRarity maxRarity = ItemRarity.Legendary) {
+            AbilityConfig targetConfig = null;
+            WhileLoopLimiter.ResetInstance();
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                targetConfig = Main._allAbilities.RandomElement();
+                if (targetConfig.Rarity.IsLesserOrEqual(maxRarity)) {
+                    break;
+                }
+            }
+            return targetConfig != null ? BuildAbility(targetConfig) : null;
         }
 
         public static Entity Get(string id, bool ignoreCost = false) {
@@ -98,7 +106,7 @@ namespace PixelComrades {
                         entity.Add(new IconComponent(handle, ""));
                     });
             }
-            entity.Add(new InventoryItem(1, 0, ItemRarity.Special));
+            entity.Add(new InventoryItem(1, 0, config.Rarity));
             entity.Add(new StatusUpdateComponent());
             config.AddComponents(entity);
             // entity.Add(new DataDescriptionComponent(config.DataDescription));

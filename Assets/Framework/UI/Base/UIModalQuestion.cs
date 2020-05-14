@@ -15,6 +15,8 @@ namespace PixelComrades {
         private System.Action _simpleYes;
         private CanvasGroup _canvasGroup;
         private bool _active = false;
+        
+        public static bool Active { get => main._active; }
 
         void Awake() {
             main = this;

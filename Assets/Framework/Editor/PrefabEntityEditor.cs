@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 
 namespace PixelComrades {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(PrefabEntity), true)]
-    public class WorldEntityEditor : Editor {
+    public class PrefabEntityEditor : OdinEditor {
         
         public override void OnInspectorGUI() {
             var script = (PrefabEntity)target;

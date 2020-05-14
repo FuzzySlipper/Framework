@@ -60,6 +60,9 @@ namespace PixelComrades {
             if (UIBasicMenu.OpenMenus.Count > 0) {
                 return true;
             }
+            if (UIModalQuestion.Active) {
+                return true;
+            }
             if (UISubMenu.Default.Active) {
                 UISubMenu.Default.Disable();
             }

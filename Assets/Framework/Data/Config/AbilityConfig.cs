@@ -35,6 +35,9 @@ namespace PixelComrades {
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private StateGraph _actionGraph = null;
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
+        [SerializeField] private bool _addEvents = true;
+        [SerializeField] private ItemRarity _rarity = ItemRarity.Common;
+        
         public string ID { get { return name; } }
         public string ActionTrigger { get => _actionTrigger; }
         public ActionDistance Range { get => _range; }
@@ -51,6 +54,7 @@ namespace PixelComrades {
         public StateGraph ActionGraph { get => _actionGraph; }
         public UnityEngine.Object Preview { get { return AssetReferenceUtilities.LoadAsset(Icon); } }
         public Object EditorObject { get { return this; } }
+        public ItemRarity Rarity { get => _rarity; }
 
         private ValueDropdownList<string> AbilityTypesList() {
             return AbilityTypes.GetDropdownList();
@@ -74,7 +78,7 @@ namespace PixelComrades {
             action.Source = this;
             action.Primary = false;
             bool generateCollision = false;
-            if (_actionGraph == null) {
+            if (_addEvents) {
                 switch (AbilityType) {
                     case AbilityTypes.Heal:
                         generateCollision = true;
