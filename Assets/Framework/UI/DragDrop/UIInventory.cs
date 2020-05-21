@@ -53,7 +53,6 @@ namespace PixelComrades {
                 IconLoader.New(this, _inventory[i], i);
             }
             _inventory.Owner.AddObserver(this);
-            RefreshInventory();
         }
         
         
@@ -123,6 +122,9 @@ namespace PixelComrades {
 
         protected void RefreshInventory() {
             for (int i = 0; i < _slots.Length; i++) {
+                if (_slots[i] == null) {
+                    continue;
+                }
                 if (_slots[i].Data != _inventory[i]) {
                     SetItemStatus(i);
                 }

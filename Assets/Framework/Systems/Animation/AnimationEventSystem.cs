@@ -68,7 +68,7 @@ namespace PixelComrades {
                         target = aet.Target.GetPosition;
                     }
                     var ray = new Ray(originPos, (target - originPos).normalized);
-                    var raySize = ((int) action.Config.Source.Collision) * 0.01f;
+                    var raySize = action.Config.Source.Collision.GetRaySize();
                     var rayDistance = action.Config.Range;
                     if (CollisionCheckSystem.Raycast(action.Entity, ray, rayDistance, LimitToEnemy) == null && raySize > 0.01f) {
                         CollisionCheckSystem.SphereCast(action.Entity, ray, rayDistance, raySize, LimitToEnemy);

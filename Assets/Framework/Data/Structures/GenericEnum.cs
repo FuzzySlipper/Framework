@@ -215,7 +215,7 @@ namespace PixelComrades {
             return _names;
         }
 
-        public static List<string> GetIds() {
+        public static List<string> GetIDs() {
             return _ids;
         }
 

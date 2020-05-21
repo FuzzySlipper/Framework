@@ -11,7 +11,7 @@ namespace PixelComrades {
         [ValueDropdown("SkillSlotList")] public string Skill;
 
         [Header("IActionConfig")]
-        [SerializeField] private ActionDistance _range = ActionDistance.Short;
+        [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
         [SerializeField] private CollisionType _collision = CollisionType.Point;
@@ -28,7 +28,7 @@ namespace PixelComrades {
         public ReloadType ReloadType = ReloadType.Repair;
         [Range(0, 5)] public float ReloadSpeedMulti = 1;
         
-        public ActionDistance Range { get => _range; }
+        public int Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
         public ImpactRadiusTypes Radius { get => _radius; }

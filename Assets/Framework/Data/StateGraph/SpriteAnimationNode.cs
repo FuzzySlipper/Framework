@@ -11,7 +11,7 @@ namespace PixelComrades {
         public bool ForceReverse = false;
         public int InstancedIndex = -1;
         
-        protected override Vector2 GetNodeSize { get { return new Vector2(DefaultNodeSize.x, DefaultNodeSize.y * 1.25f); } }
+        protected override Vector2 GetNodeSize { get { return new Vector2(DefaultNodeSize.x, DefaultNodeSize.y * 1.75f); } }
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
             UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);

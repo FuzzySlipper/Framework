@@ -44,14 +44,12 @@ namespace PixelComrades {
             }
             return false;
         }
-
+        
         public void ContainerSystemSet(Entity item, int index) {
             _container.Add(item);
         }
         
         public int ContainerSystemAdd(Entity item) {
-            var abilityData = item.Get<AbilityData>();
-            AddAbility(abilityData, item);
             return _container.Add(item);
         }
 
@@ -71,14 +69,6 @@ namespace PixelComrades {
             var msg = new ContainerStatusChanged(this, null);
             this.GetEntity().Post(msg);
             OnRefreshItemList.SafeInvoke();
-        }
-
-        private void AddAbility(AbilityData abilityData, Entity item) {
-            var itemStats = item.Get<StatsContainer>();
-            var ownerStats = this.GetEntity().Get<StatsContainer>();
-            var source = abilityData.Template.Source;
-            ownerStats.Get(source.GetPowerFromSource()).AddDerivedStat(1, itemStats.Get(Stats.Power));
-            ownerStats.Get(source.GetCritFromSource()).AddDerivedStat(1, itemStats.Get(Stats.CriticalHit));
         }
     }
 }

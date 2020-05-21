@@ -10,7 +10,9 @@ using UnityEditor;
 #endif
 
 namespace PixelComrades {
+#if UNITY_EDITOR
     [InitializeOnLoad]
+#endif
     public static class ScriptableDatabases {
         
         private static Dictionary<System.Type, ScriptableDatabase> _databases = new Dictionary<Type, ScriptableDatabase>();

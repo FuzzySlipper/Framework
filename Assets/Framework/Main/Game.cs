@@ -199,6 +199,9 @@ namespace PixelComrades {
         public static GameObject MainObject {
             get {
                 if (_mainObject == null) {
+                    if (TimeManager.IsQuitting) {
+                        return null;
+                    }
                     _mainObject = GameObject.Find(StringConst.MainObject);
                     if (_mainObject == null) {
                         _mainObject = new GameObject(StringConst.MainObject);

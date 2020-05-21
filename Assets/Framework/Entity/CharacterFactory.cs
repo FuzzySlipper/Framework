@@ -20,6 +20,7 @@ namespace PixelComrades {
             entity.Add(new PronounComponent(PlayerPronouns.They));
             entity.Add(new CurrentAction());
             entity.Add(new AnimationEventComponent());
+            entity.Add(new GenericDataComponent());
             return entity;
         }
     }

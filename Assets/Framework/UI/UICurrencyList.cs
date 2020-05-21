@@ -11,7 +11,7 @@ namespace PixelComrades {
         [SerializeField] private Transform _currencyPivot = null;
 
         public void OnCreate(PrefabEntity entity) {
-            var currencies = Currencies.GetIds();
+            var currencies = Currencies.GetIDs();
             for (int i = 0; i < currencies.Count; i++) {
                 var prefab = ItemPool.SpawnUIPrefab(_currencyPrefab, _currencyPivot);
                 prefab.GetComponentInChildren<Image>().overrideSprite = SpriteDatabase.CurrencyIcons.SafeAccess(i);

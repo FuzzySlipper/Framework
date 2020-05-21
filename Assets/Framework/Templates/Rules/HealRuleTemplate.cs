@@ -11,7 +11,6 @@ namespace PixelComrades {
             _heal, EntityStats
         };
 
-
         public override System.Type[] GetTypes() {
             return new System.Type[] {
                 typeof(HealImpact),

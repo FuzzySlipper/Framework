@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditorInternal;
 
 namespace PixelComrades {
     public class ProjectileFactory : ScriptableDatabase<ProjectileFactory>, IEntityFactory {

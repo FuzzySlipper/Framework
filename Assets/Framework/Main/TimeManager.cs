@@ -14,6 +14,9 @@ namespace PixelComrades {
         private static TimeManager main {
             get {
                 if (_main == null) {
+                    if (IsQuitting) {
+                        return null;
+                    }
                     _main = FindObjectOfType<TimeManager>();
                 }
                 if (_main == null) {
@@ -64,7 +67,7 @@ namespace PixelComrades {
                 return _timeUnscaled;
             }
         }
-        public static int ActiveCount { get { return main._active.Count; } }
+        public static int ActiveCount { get { return main != null ? main._active.Count : -1; } }
         public Task this[int index] { get { return index < _active.Count ? _active[index] : null; } }
 
         public static Task GetTask(int index) { return index < main._active.Count ? main._active[index] : null; }

@@ -25,10 +25,13 @@ namespace PixelComrades {
                 }
                 animGraph.Temporary.Stop();
                 animGraph.Temporary = null;
+                animGraph.GetEntity().Post(new TemporaryGraphCompleted());
             }
             if (animGraph.Value != null && animGraph.Value.IsActive) {
                 animGraph.Value.Update(TimeManager.DeltaTime);
             }
         }
     }
+    
+    public struct TemporaryGraphCompleted : IEntityMessage{}
 }

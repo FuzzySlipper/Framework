@@ -72,8 +72,8 @@ namespace PixelComrades {
         }
 
         protected Vector3 FindFloorPoint(Vector3 location) {
-            var ray = new Ray(location + (Vector3.up * Game.MapCellSize), -Tr.up);
-            if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 1.5f, LayerMasks.Floor)) {
+            var ray = new Ray(location + (Vector3.up * Game.MapCellSize), Vector3.down);
+            if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 3f, LayerMasks.Floor)) {
                 return hit.point;
             }
             return location;

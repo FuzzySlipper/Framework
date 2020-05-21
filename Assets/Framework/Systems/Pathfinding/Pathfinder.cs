@@ -51,7 +51,9 @@ namespace PixelComrades {
 
 
             public virtual void Clear() {
+#if UNITY_EDITOR
                 Queue = null;
+#endif
                 StartCost = float.MaxValue;
                 EndCost = float.MaxValue;
                 Parent = null;

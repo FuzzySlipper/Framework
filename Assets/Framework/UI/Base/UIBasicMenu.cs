@@ -16,7 +16,6 @@ namespace PixelComrades {
 
         public event System.Action OnWindowClosed;
         public static List<UIBasicMenu> OpenMenus = new List<UIBasicMenu>();
-
         protected float TransitionLength { get { return _transitionLength; } }
         protected CanvasGroup CanvasGroup{get { return _canvasgroup; }}
         public virtual bool Active { get {
@@ -27,6 +26,8 @@ namespace PixelComrades {
                 //return _canvasgroup.alpha > 0 && gameObject.activeInHierarchy;
             }
         }
+        
+        public virtual string GetTitleText() { return null; }
 
         protected virtual void OnStatusChanged(bool status) {
             if (!status && OnWindowClosed != null) {

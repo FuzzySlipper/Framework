@@ -24,7 +24,7 @@ namespace PixelComrades {
         [SerializeField, ValueDropdown("AbilityTypesList")] private string _secondaryType = AbilityTypes.None;
         [SerializeField, Range(0, 100)] private float _secondaryPower = EffectChance;
         [SerializeField, ValueDropdown("GraphTriggersList")] private string _actionTrigger = GraphTriggers.UseAbility;
-        [SerializeField] private ActionDistance _range = ActionDistance.Short;
+        [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
         [SerializeField] private CollisionType _collision = CollisionType.Point;
@@ -40,7 +40,7 @@ namespace PixelComrades {
         
         public string ID { get { return name; } }
         public string ActionTrigger { get => _actionTrigger; }
-        public ActionDistance Range { get => _range; }
+        public int Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
         public ImpactRadiusTypes Radius { get => _radius; }
@@ -88,6 +88,11 @@ namespace PixelComrades {
                         break;
                     case AbilityTypes.Teleport:
                     case AbilityTypes.Unlock:
+                        break;
+                    case AbilityTypes.Attack:
+                        if (Projectile == null) {
+                            action.AddEvent(AnimationEvents.Default, new EventCheckRaycastCollision(_range, _collision.GetRaySize(),false));
+                        }
                         break;
                     //case "Teleport":
                     //    sequence.Add(new PlayActionAnimation(ActionStateEvents.None, animation, true, false, true));

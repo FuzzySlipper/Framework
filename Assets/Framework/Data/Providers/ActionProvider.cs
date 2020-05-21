@@ -6,7 +6,7 @@ using PixelComrades.DungeonCrawler;
 namespace PixelComrades {
     
     public interface IActionConfig {
-        ActionDistance Range { get; }
+        int Range { get; }
         FloatRange Power { get; }
         CollisionType Collision { get; }
         ImpactRadiusTypes Radius { get; }

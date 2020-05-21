@@ -16,6 +16,7 @@ namespace PixelComrades {
         void ToggleActive();
         void SetSceneStatus(bool status);
         void SetStatus(bool status);
+        string GetTitleText();
     }
 
     public class WorldControlMonitor : MonoBehaviour {
