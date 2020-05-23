@@ -2449,6 +2449,7 @@ namespace PixelComrades {
     }
 
     public static class Point3Extensions {
+        
         public static int DistanceSquared(this Point3 a, Point3 b) {
             int dx = b.x - a.x;
             int dy = b.y - a.y;
@@ -2462,12 +2463,27 @@ namespace PixelComrades {
             return dx * dx + dz * dz;
         }
 
+        private const int ManhattanMoveCost = 1;
+
+        public static int DistanceManhattan3D(this Point3 a, Point3 b) {
+            int dx = System.Math.Abs(b.x - a.x);
+            int dy = System.Math.Abs(b.y - a.y);
+            int dz = System.Math.Abs(b.z - a.z);
+            return ManhattanMoveCost * (dx + dy + dz);
+        }
+
+        public static int DistanceManhattan(this Point3 a, Point3 b) {
+            int dx = System.Math.Abs(b.x - a.x);
+            int dz = System.Math.Abs(b.z - a.z);
+            return ManhattanMoveCost * (dx + dz);
+        }
+
         private const float MoveDouble = 2;
         private const float MoveDouble2 = 3;
 
         private const float Move = 1;
         private const float Move2 = 1.5f;
-
+        
         public static float DistanceChebDouble(this Point3 a, Point3 b) {
             float dx = System.Math.Abs(b.x - a.x);
             float dz = System.Math.Abs(b.z - a.z);
@@ -3533,25 +3549,38 @@ namespace PixelComrades {
 
     public static class GridExtension {
         public static Vector3 GridPositionPlace(this Point3 gridPos) {
-            var ray = new Ray(gridPos.CellToWorldV3(), Vector3.down);
+            var ray = new Ray(gridPos.MapGridToWorldV3(), Vector3.down);
             if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 5, LayerMasks.Floor)) {
                 return hit.point;
             }
             return ray.origin;
         }
 
-
-        public static Vector3 CellToWorldV3(this Point3 p) {
-            return Game.GridToWorld(p);
+        public static Vector3 MapGridToWorldV3(this Point3 p) {
+            return Game.MapGridToWorld(p);
         }
 
-        public static Point3 ToCellGridP3(this Vector3 p) {
-            return Game.WorldToGrid(p);
+        public static Point3 ToMapGridP3(this Vector3 p) {
+            return Game.WorldToMapGrid(p);
         }
 
-        public static Point3 ToCellGridP3ZeroY(this Vector3 p) {
-            return Game.WorldToGrid(new Vector3(p.x, 0, p.z));
+        public static Point3 ToMapGridP3ZeroY(this Vector3 p) {
+            return Game.WorldToMapGrid(new Vector3(p.x, 0, p.z));
         }
+
+        public static Vector3 UnitGridToWorld(this Point3 p) {
+            return Game.UnitGridToWorld(p);
+        }
+
+        public static Point3 ToUnitGrid(this Vector3 p) {
+            return Game.WorldToUnitGrid(p);
+        }
+
+        public static Point3 ToUnitGridZeroY(this Vector3 p) {
+            return Game.WorldToUnitGridZeroY(p);
+        }
+        
+        
         /*
         [16][15][14][13][12]
         [17][ 4][ 3][ 2][11]

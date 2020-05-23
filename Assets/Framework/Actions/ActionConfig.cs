@@ -11,19 +11,21 @@ namespace PixelComrades {
         [SerializeField] private Dictionary<string, List<IActionEventHandler>> _events = new Dictionary<string, List<IActionEventHandler>>();
         
         public List<ICommandCost> Costs = new List<ICommandCost>();
-        public float Range;
         public string AnimationTrigger;
         public bool Primary;
         public int EquippedSlot = -1;
-        public IActionConfig Source;
         public RuntimeStateGraph Graph;
         public SpriteAnimationReference Sprite;
-        public ActionConfig() {}
+        
+        public IActionConfig Source { get; private set; }
+        public int Range { get { return Source.Range; } }
+        public ActionConfig(IActionConfig config) {
+            Source = config;
+        }
 
         public ActionConfig(SerializationInfo info, StreamingContext context) {
             _events = info.GetValue(nameof(_events), _events);
             Costs = info.GetValue(nameof(Costs), Costs);
-            Range = info.GetValue(nameof(Range), Range);
             Primary = info.GetValue(nameof(Primary), Primary);
             EquippedSlot = info.GetValue(nameof(EquippedSlot), EquippedSlot);
         }
@@ -43,7 +45,6 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_events), _events);
             info.AddValue(nameof(Costs), Costs);
-            info.AddValue(nameof(Range), Range);
             info.AddValue(nameof(Primary), Primary);
             info.AddValue(nameof(EquippedSlot), EquippedSlot);
         }

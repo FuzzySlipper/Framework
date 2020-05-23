@@ -225,15 +225,6 @@ namespace PixelComrades {
             return go.transform;
         }
 
-
-        public static Point3 WorldToGrid(Vector3 position) {
-            //we are XZ locked so don't allow Y position to change 
-            return new Point3(
-                (int) Math.Round((double) position.x / MapCellSize),
-                (int) Math.Round((double) position.y / MapCellSize),
-                (int) Math.Round((double) position.z / MapCellSize));
-        }
-
         public static Point3 LocalGridRotated(Point3 pos, Transform tr) {
             var calcPosV3 = Quaternion.AngleAxis(tr.rotation.eulerAngles.y, Vector3.up) * pos.toVector3();
             return new Point3(
@@ -250,8 +241,33 @@ namespace PixelComrades {
                 (int) Math.Round(calcPosV3.z));
         }
 
-        public static Vector3 GridToWorld(Point3 position) {
+        public static Point3 WorldToMapGrid(Vector3 position) {
+            return new Point3(
+                (int) Math.Round((double) position.x / MapCellSize),
+                (int) Math.Round((double) position.y / MapCellSize),
+                (int) Math.Round((double) position.z / MapCellSize));
+        }
+
+        public static Vector3 MapGridToWorld(Point3 position) {
             return new Vector3(position.x * MapCellSize, position.y * MapCellSize, position.z * MapCellSize);
+        }
+
+        public static Point3 WorldToUnitGrid(Vector3 position) {
+            return new Point3(
+                (int) Math.Round((double) position.x / GameConstants.UnitGrid),
+                (int) Math.Round((double) position.y / GameConstants.UnitGrid),
+                (int) Math.Round((double) position.z / GameConstants.UnitGrid));
+        }
+
+        public static Point3 WorldToUnitGridZeroY(Vector3 position) {
+            return new Point3(
+                (int) Math.Round((double) position.x / GameConstants.UnitGrid),
+                0,
+                (int) Math.Round((double) position.z / GameConstants.UnitGrid));
+        }
+
+        public static Vector3 UnitGridToWorld(Point3 position) {
+            return new Vector3(position.x * GameConstants.UnitGrid, position.y * GameConstants.UnitGrid, position.z * GameConstants.UnitGrid);
         }
     }
 }

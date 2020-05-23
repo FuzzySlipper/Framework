@@ -73,9 +73,8 @@ namespace PixelComrades {
         }
         
         public void AddComponents(Entity entity) {
-            var action = entity.Add(new ActionConfig());
+            var action = entity.Add(new ActionConfig(this));
             action.AnimationTrigger = ActionTrigger;
-            action.Source = this;
             action.Primary = false;
             bool generateCollision = false;
             if (_addEvents) {

@@ -130,7 +130,7 @@ namespace PixelComrades {
                 return;
             }
             var ms = mover.MoveSpeed?.Speed ?? 1;
-            mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * ms * TimeManager.DeltaTime));
+            mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * (ms * TimeManager.DeltaTime)));
         }
 
         private void HandleRotation(ref RotateToTemplate r) {

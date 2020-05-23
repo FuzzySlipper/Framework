@@ -161,7 +161,7 @@ namespace PixelComrades {
                 }
             }
             if (targeting.Range > 0.25f) {
-                var dist = DistanceSystem.GetDistance(owner, target);
+                var dist = DistanceSystem.GetUnitDistance2D(owner, target);
                 return  dist <= targeting.Range;
             }
             return true;

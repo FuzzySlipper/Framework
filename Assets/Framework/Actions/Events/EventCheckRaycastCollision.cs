@@ -21,7 +21,7 @@ namespace PixelComrades {
             Vector3 target;
             if (origin.Tags.Contain(EntityTags.Player)) {
                 originPos = PlayerInputSystem.GetLookTargetRay.origin;
-                target = PlayerInputSystem.GetMouseRaycastPosition(ae.Action.Config.Range);
+                target = PlayerInputSystem.GetMouseRaycastPosition(ae.Action.Config);
             }
             else {
                 originPos = ae.Position;

@@ -15,7 +15,7 @@ namespace PixelComrades {
         public TweenAnimator Chain {get { return _chain; } }
         public override float Length { get { return Tween.Length; } }
         public override bool IsPlaying { get { return Tween.Active; } }
-        protected bool IsInvalid { get { return Target == null || gameObject == null || !gameObject.activeInHierarchy; } }
+        protected virtual bool IsInvalid { get { return Target == null || gameObject == null || !gameObject.activeInHierarchy; } }
 
         public abstract Tweener Tween { get; }
         public abstract void StartTween();

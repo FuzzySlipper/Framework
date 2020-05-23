@@ -61,15 +61,16 @@ namespace PixelComrades {
                     Vector3 target;
                     if (aet.IsPlayer()) {
                         originPos = PlayerInputSystem.GetLookTargetRay.origin;
-                        target = PlayerInputSystem.GetMouseRaycastPosition(action.Config.Range);
+                        target = PlayerInputSystem.GetMouseRaycastPosition(action.Config);
                     }
                     else {
                         originPos = aet.AnimEvent.Position;
                         target = aet.Target.GetPosition;
                     }
+                    
                     var ray = new Ray(originPos, (target - originPos).normalized);
                     var raySize = action.Config.Source.Collision.GetRaySize();
-                    var rayDistance = action.Config.Range;
+                    var rayDistance = DistanceSystem.FromUnitGridDistance(action.Config.Range);
                     if (CollisionCheckSystem.Raycast(action.Entity, ray, rayDistance, LimitToEnemy) == null && raySize > 0.01f) {
                         CollisionCheckSystem.SphereCast(action.Entity, ray, rayDistance, raySize, LimitToEnemy);
                     }
@@ -146,7 +147,7 @@ namespace PixelComrades {
 
         public Vector3 GetTargetPosition() {
             if (this.IsPlayer()) {
-                return PlayerInputSystem.GetMouseRaycastPosition(CurrentAction.Value.Config.Range);
+                return PlayerInputSystem.GetMouseRaycastPosition(DistanceSystem.FromUnitGridDistance( CurrentAction.Value.Config.Range));
             }
             return Target.GetPosition;
         }

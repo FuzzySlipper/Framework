@@ -20,7 +20,7 @@ namespace PixelComrades {
 
         private void Update(ref PlayerRaycastTargetTemplate template) {
             if (template.Graph.CurrentTag == GraphNodeTags.Action && template.CurrentAction.Value != null) {
-                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.CurrentAction.Value.Config.Range));
+                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(DistanceSystem.FromUnitGridDistance(template.CurrentAction.Value.Config.Range)));
             }
         }
     }

@@ -31,7 +31,6 @@ namespace PixelComrades {
             if (radius != ImpactRadiusTypes.Single) {
                 entity.Add(new ImpactRadius(radius, true));
             }
-            action.Range = (int) data.Range;
             if (data.ActionFx != null) {
                 entity.Add(new ActionFxComponent(data.ActionFx));
             }

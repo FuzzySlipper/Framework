@@ -40,6 +40,10 @@ namespace PixelComrades {
             _local.Set(component);
         }
 
+        public static Vector3 GetMouseRaycastPosition(ActionConfig config) {
+            return GetMouseRaycastPosition(DistanceSystem.FromUnitGridDistance(config.Range));
+        }
+
         public static Vector3 GetMouseRaycastPosition(float range = 500) {
             var ray = GetLookTargetRay;
             var cnt = Physics.RaycastNonAlloc(ray, _hits, range, LayerMasks.DefaultCollision);

@@ -15,7 +15,7 @@ namespace PixelComrades {
         public Transform Tr { get; private set; }
         public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
         public Transform ActorPivot { get { return _actorPivot; } }
-        public virtual Point3 GridPosition { get { return (Tr.position + Vector3.up).ToCellGridP3(); } }
+        public virtual Point3 GridPosition { get { return (Tr.position + Vector3.up).ToMapGridP3(); } }
         public virtual bool Unscaled { get { return false; } }
         public virtual bool Slowed { get; protected set; }
         public virtual bool CanMove {

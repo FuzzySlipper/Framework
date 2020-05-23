@@ -38,7 +38,7 @@ namespace PixelComrades {
             if (template.Entity.IsDead() || template.Tr == null) {
                 return;
             }
-            var position = template.Tr.position.ToCellGridP3ZeroY();
+            var position = template.Tr.position.ToMapGridP3ZeroY();
             ref var gridPos = ref template.PositionComponent.GetReference();
             gridPos.Position = position;
             var cell = GetCell(position);

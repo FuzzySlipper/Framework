@@ -364,10 +364,7 @@ namespace PixelComrades {
         }
 
         public static float GetMoveSpeed(this Entity entity) {
-            if (entity.HasComponent<MoveSpeed>()) {
-                return entity.Get<MoveSpeed>().Speed;
-            }
-            return 1;
+            return entity.Get<MoveSpeed>()?.Speed ?? 1;
         }
 
         public static float Distance(this Entity entity, Transform other) {
