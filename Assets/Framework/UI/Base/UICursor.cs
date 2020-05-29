@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using PixelComrades;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class UICursor : MonoSingleton<UICursor> {
     
@@ -46,7 +47,7 @@ public class UICursor : MonoSingleton<UICursor> {
             return;
         }
         if (_focused) {
-            transform.position = Input.mousePosition;
+            transform.position = Mouse.current.position.ReadValue();
         }
         //if (UITooltip.Active) {
         //    SetCursor(_useCursor);

@@ -17,7 +17,7 @@ namespace PixelComrades {
                 var time = TimeManager.Time;
                 var timeUnscaled = TimeManager.TimeUnscaled;
                 foreach (SpriteAnimationComponent value in _arraySpriteAnimation) {
-                    if (value.Renderer == null || !value.Active) {
+                    if (value.Renderer == null || !value.Active || value.Animation == null) {
                         continue;
                     }
                     value.Billboard.Apply(value.Renderer.transform, true, ref value.LastAngleHeight);

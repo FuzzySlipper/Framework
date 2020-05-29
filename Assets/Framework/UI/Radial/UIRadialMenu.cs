@@ -14,11 +14,7 @@ namespace PixelComrades {
         [Range(0.0f, 1.0f)] [Tooltip("Maximum size the element can be sized to as a percentage of the menu size")] [SerializeField] private float _elementMaxSize = 0.1f;
         [Tooltip("Does all of the layers have element snapping")] [SerializeField] private bool _elementSnapping;
         [Range(0.0f, 1.0f)] [Tooltip("Joystick axis deadzone")] [SerializeField] private float _inputDeadzone = 0.2f;
-        [Tooltip("Horizontal axis of a joystick used for the radial menu")] [SerializeField] private string _inputHorizontal;
-        [Tooltip("Cancel button of a joystick used for the radial menu")] [SerializeField] private string _inputJoystickCancel;
-        [Tooltip("Confirm button of a joystick used for the radial menu")] [SerializeField] private string _inputJoystickConfirm;
         [Tooltip("How far outside of the radial ring will input be recognised (0.1f is a good value)")] [SerializeField] private float _inputLeeway;
-        [Tooltip("Virtical axis of a joystick used for the radial menu")] [SerializeField] private string _inputVertical;
         [Tooltip("Should this radial menu react to joystick input")] [SerializeField] private bool _joystickInputEnabled;
         [Tooltip("Should this radial menu react to mouse input")] [SerializeField] private bool _mouseInputEnabled;
         [Range(0.0f, 1.0f)] [Tooltip("Radius of the circle that the elements are on as a percentage of the panel size")] [SerializeField] private float _panelOffset = 0.85f;
@@ -260,40 +256,40 @@ namespace PixelComrades {
                 if (DetermineTargetAngle(ControlMethod.Mouse)) {
                     _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Mouse);
                 }
-                if (!_clickTimer.IsActive && Input.GetMouseButtonUp(0)) {
+                if (!_clickTimer.IsActive && PlayerInputSystem.GetMouseButtonDown(0)) {
                     _clickTimer.StartTimer();
                     _currentLayer.Confirm();
                 }
-                if (!_clickTimer.IsActive && Input.GetMouseButtonUp(1)) {
+                if (!_clickTimer.IsActive && PlayerInputSystem.GetMouseButtonDown(1)) {
                     _clickTimer.StartTimer();
                     _currentLayer.Cancel();
                 }
             }
-            else if (!_clickTimer.IsActive && (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))) {
+            else if (!_clickTimer.IsActive && (PlayerInputSystem.GetMouseButtonDown(0) || PlayerInputSystem.GetMouseButtonDown(1))) {
                 _clickTimer.StartTimer();
                 _currentLayer.Skip();
             }
         }
 
         private void ControllerInput() {
-            if (!_joystickInputEnabled|| Input.GetJoystickNames().Length <= 0 || _currentControl != ControlMethod.None) {
+            if (!_joystickInputEnabled|| _currentControl != ControlMethod.None) {
                 return;
             }
             if (_state == State.Open) {
                 if (DetermineTargetAngle(ControlMethod.Joystick)) {
                     _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Joystick);
                 }
-                if (Input.GetButtonDown(_inputJoystickConfirm)) {
+                if (PlayerInputSystem.GetMouseButtonDown(0)) {
                     _currentControl = ControlMethod.Joystick;
                     _currentLayer.Confirm();
                 }
 
-                if (Input.GetButtonDown(_inputJoystickCancel)) {
+                if (PlayerInputSystem.GetMouseButtonDown(1)) {
                     _currentControl = ControlMethod.Joystick;
                     _currentLayer.Cancel();
                 }
             }
-            else if (Input.GetButtonDown(_inputJoystickConfirm) || Input.GetButtonDown(_inputJoystickCancel)) {
+            else if (PlayerInputSystem.GetMouseButtonDown(0) || PlayerInputSystem.GetMouseButtonDown(1)) {
                 _currentLayer.Skip();
             }
         }
@@ -337,7 +333,7 @@ namespace PixelComrades {
                 return;
             }
             //Save the mouse position to the observer variable
-            _oldMousePosition = Input.mousePosition;
+            _oldMousePosition = PlayerInputSystem.CursorPosition;
             //get the normalised form of the touch coordinates
             var uiDir = uiCoord.normalized;
             //Work out the clockwise angle from up to the UIDir
@@ -380,18 +376,20 @@ namespace PixelComrades {
             switch (method) {
                 default:
                 case ControlMethod.Mouse:
-                    if (_oldMousePosition == (Vector2) Input.mousePosition) {
+                    if (_oldMousePosition == (Vector2) PlayerInputSystem.CursorPosition) {
                         return false;
                     }
-                    _oldMousePosition = Input.mousePosition;
-                    input = ((Vector2) Input.mousePosition - (Vector2) PanelTransform.position).normalized;
+                    _oldMousePosition = PlayerInputSystem.CursorPosition;
+                    input = ((Vector2) PlayerInputSystem.CursorPosition - (Vector2) PanelTransform.position).normalized;
                     break;
                 case ControlMethod.Joystick:
-                    if ((Mathf.Abs(Input.GetAxis(_inputHorizontal)) < _inputDeadzone) && (Mathf.Abs(Input.GetAxis(_inputVertical)) < _inputDeadzone)) {
+                    var horiz = PlayerInputSystem.LookInput.x;
+                    var vert = PlayerInputSystem.LookInput.y;
+                    if ((Mathf.Abs(horiz) < _inputDeadzone) && (Mathf.Abs(vert) < _inputDeadzone)) {
                         return false;
                     }
                     _currentControl = ControlMethod.Joystick;
-                    input = new Vector2(Input.GetAxis(_inputHorizontal), Input.GetAxis(_inputVertical)).normalized;
+                    input = new Vector2(horiz, vert).normalized;
                     break;
             }
             //work out the clockwise angle from up to the target direction

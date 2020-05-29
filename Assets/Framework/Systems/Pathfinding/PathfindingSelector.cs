@@ -33,7 +33,7 @@ namespace PixelComrades {
             if (_onlyOnInput && !Input.GetMouseButtonDown(0)) {
                 return;
             }
-            _mouseRay = _cam != null ? _cam.ScreenPointToRay(Input.mousePosition) : WorldControlMonitor.Cam.ScreenPointToRay(Input.mousePosition);
+            _mouseRay = _cam != null ? _cam.ScreenPointToRay(PlayerInputSystem.CursorPosition) : WorldControlMonitor.Cam.ScreenPointToRay(PlayerInputSystem.CursorPosition);
             var cnt = Physics.RaycastNonAlloc(_mouseRay, _hits, 1200, LayerMasks.Floor);
             _hits.SortByDistanceAsc(cnt);
             if (cnt <= 0) {

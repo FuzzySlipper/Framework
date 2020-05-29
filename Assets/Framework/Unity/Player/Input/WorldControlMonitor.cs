@@ -124,7 +124,7 @@ namespace PixelComrades {
             //    return;
             //}
             _foundControl = false;
-            //_eventData.position = Input.mousePosition;
+            //_eventData.position = PlayerInputSystem.CursorPosition;
             //EventSystem.current.RaycastAll(_eventData, _result);
             if (PlayerInputSystem.IsCursorOverUI) {
                 SetCurrentNull();
@@ -135,7 +135,7 @@ namespace PixelComrades {
                 //}
                 return;
             }
-            _mouseRay = Cam.ScreenPointToRay(Input.mousePosition);
+            _mouseRay = Cam.ScreenPointToRay(PlayerInputSystem.CursorPosition);
             Entity currentActor = null;
             var cnt = Physics.RaycastNonAlloc(_mouseRay, _hits, _currentEnemyRayDistance, _worldControlsMask);
             _hits.SortByDistanceAsc(cnt);

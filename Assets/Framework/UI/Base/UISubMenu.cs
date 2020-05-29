@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace PixelComrades {
@@ -36,7 +37,8 @@ namespace PixelComrades {
             if (!Active) {
                 return;
             }
-            if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) {
+            bool isDown = Mouse.current.leftButton.isPressed || Mouse.current.rightButton.isPressed;
+            if (isDown) {
                 TimeManager.StartUnscaled(CheckForOrphan(_currentId));
             }
         }

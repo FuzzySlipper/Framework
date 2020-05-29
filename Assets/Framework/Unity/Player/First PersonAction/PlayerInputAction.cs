@@ -154,7 +154,7 @@
 //        //    }));
 //        //}
 //        //if (menuActions.Count > 0) {
-//        //    UIRadialMenu.Open("Switch", menuActions, Input.mousePosition);
+//        //    UIRadialMenu.Open("Switch", menuActions, PlayerInputSystem.CursorPosition);
 //        //}
 //    }
 
@@ -170,7 +170,7 @@
 //        //    }));
 //        //}
 //        //if (menuActions.Count > 0) {
-//        //    UIRadialMenu.Open("Switch", menuActions, Input.mousePosition);
+//        //    UIRadialMenu.Open("Switch", menuActions, PlayerInputSystem.CursorPosition);
 //        //}
 //    }
     

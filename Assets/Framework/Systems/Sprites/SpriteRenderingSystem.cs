@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Rewired;
 using UnityEngine.Rendering;
 
 namespace PixelComrades {

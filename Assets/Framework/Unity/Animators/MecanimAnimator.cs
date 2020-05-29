@@ -52,11 +52,14 @@ namespace PixelComrades {
             PlayFrame(normalized);
         }
 
-        public void OnPoolSpawned() {
+        public override void OnPoolSpawned() {
+            base.OnPoolSpawned();
             _triggered = false;
         }
 
-        public void OnPoolDespawned() {
+        public override void OnPoolDespawned() {
+            base.OnPoolDespawned(); 
+            
         }
     }
 }

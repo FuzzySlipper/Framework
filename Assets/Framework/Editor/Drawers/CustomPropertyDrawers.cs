@@ -208,6 +208,26 @@ namespace PixelComrades {
         // }
     }
 
+    [CustomPropertyDrawer(typeof(GenericKeyedValue), true)]
+    public class GenericValueDrawer : PropertyDrawer {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            label = EditorGUI.BeginProperty(position, label, property);
+            Rect contentPosition = EditorGUI.PrefixLabel(position, label);
+            // EditorGUI.indentLevel = 0;
+            EditorGUIUtility.labelWidth *= 0.35f;
+            contentPosition.width *= 0.5f;
+            SerializedProperty key = property.FindPropertyRelative("Key");
+            SerializedProperty value = property.FindPropertyRelative("Value");
+            EditorGUI.PropertyField(contentPosition, key);
+            contentPosition.x += contentPosition.width * 1.05f;
+            contentPosition.width *= 0.95f;
+            EditorGUI.PropertyField(contentPosition, value);
+            EditorGUI.EndProperty();
+            EditorGUIUtility.labelWidth = 0;
+        }
+    }
+
     [CustomPropertyDrawer(typeof(NormalizedFloatRange))]
     public class NormalizedFloatRangeDrawer : PropertyDrawer {
         private const float MinPercent = 0;

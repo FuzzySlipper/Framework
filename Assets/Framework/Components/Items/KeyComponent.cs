@@ -5,10 +5,10 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-	public struct Key : IComponent {
+	public struct KeyComponent : IComponent {
         public string KeyId { get; }
 
-        public Key(string keyId) : this() {
+        public KeyComponent(string keyId) : this() {
             KeyId = keyId;
         }
 
@@ -20,7 +20,7 @@ namespace PixelComrades {
             return hole.UnlockKey(KeyId);
         }
 
-        public Key(SerializationInfo info, StreamingContext context) {
+        public KeyComponent(SerializationInfo info, StreamingContext context) {
             KeyId = info.GetValue(nameof(KeyId), "");
         }
 

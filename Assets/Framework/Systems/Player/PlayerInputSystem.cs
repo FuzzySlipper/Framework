@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     [AutoRegister, Priority(Priority.Highest)]
@@ -35,6 +36,20 @@ namespace PixelComrades {
         public static Ray GetLookTargetRay { get { return LocalInput.GetLookTargetRay; } }
         public static Vector2 LookInput { get { return LocalInput?.LookInput ?? Vector2.zero; } }
         public static Vector2 MoveInput { get { return LocalInput?.MoveInput ?? Vector2.zero; } }
+        public static Vector2 CursorPosition { get { return Mouse.current.position.ReadValue(); } }
+
+        public static bool GetMouseButtonDown(int button) {
+            if (button == 0) {
+                return Mouse.current.leftButton.isPressed;
+            }
+            if (button == 1) {
+                return Mouse.current.rightButton.isPressed;
+            }
+            if (button == 2) {
+                return Mouse.current.middleButton.isPressed;
+            }
+            return false;
+        }
 
         public static void Assign(PlayerInputComponent component) {
             _local.Set(component);
@@ -80,6 +95,10 @@ namespace PixelComrades {
             return LocalInput.GetButtonDown(button);
         }
 
+        public static bool GetKeyDown(Key button) {
+            return LocalInput.GetKeyDown(button);
+        }
+
         public static float GetAxis(string button) {
             return LocalInput.GetAxis(button);
         }
@@ -107,17 +126,17 @@ namespace PixelComrades {
             if (!Game.Debug) {
                 return;
             }
-            if ((Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftControl)) && Input.GetKeyDown(KeyCode.F)) {
+            if (LocalInput.GetButtonDown(PlayerControls.ToggleFps)){
                 UIFrameCounter.main.Toggle();
             }
-            if (Input.GetKeyDown(KeyCode.O)) {
+            if (LocalInput.GetKeyDown(Key.O)) {
                 EcsDebug.ScreenShot();
             }
-            if (Input.GetKeyDown(KeyCode.L)) {
+            if (LocalInput.GetKeyDown(Key.L)) {
                 Cursor.lockState = Game.CursorUnlocked ? CursorLockMode.None : CursorLockMode.Locked;
                 UICursor.main.SetCursor(UICursor.CrossHair);
             }
-            if (Input.GetKeyDown(KeyCode.Tilde) || Input.GetKeyDown(KeyCode.BackQuote)) {
+            if (LocalInput.GetKeyDown(Key.Backquote)) {
                 //SourceConsole.UI.ConsolePanelController.Singleton.Toggle();
                 Console.Toggle();
             }

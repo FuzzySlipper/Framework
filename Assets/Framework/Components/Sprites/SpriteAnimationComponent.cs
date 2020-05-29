@@ -50,6 +50,9 @@ namespace PixelComrades {
         }
 
         public void UpdateFrame(float comparisonTime) {
+            if (Animation == null) {
+                return;
+            }
             NextUpdateTime = Animation.FrameTime * CurrentFrame.Length + comparisonTime;
             Renderer.sprite = Animation.GetSprite(CurrentFrameIndex);
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class RtsCamera : MonoBehaviour, IPoolEvents, ISimpleCam {
@@ -34,13 +35,8 @@ namespace PixelComrades {
         [SerializeField] private float _tiltSpeed = 50f;
         [SerializeField] private float _zoomSpeed = 700f;
         [SerializeField] private float _fastMoveSpeed = 300f;
-        [SerializeField] private KeyCode _fastMoveKeyCode1 = KeyCode.LeftShift;
-        [SerializeField] private string _zoomInputAxis = "Mouse ScrollWheel";
-        [SerializeField] private string _rotateInputAxis = "Mouse X";
-        [SerializeField] private string _tiltInputAxis = "Mouse Y";
-        [SerializeField] private string _horizontalInputAxis = "Horizontal";
-        [SerializeField] private string _verticalInputAxis = "Vertical";
-        [SerializeField] private KeyCode _breakFollowKey = KeyCode.Escape;
+        [SerializeField] private Key _fastMoveKeyCode1 = Key.LeftShift;
+        [SerializeField] private Key _breakFollowKey = Key.Escape;
         [SerializeField] private Transform _followTarget;
         [SerializeField] private bool _limitPos = true;
         [SerializeField] private Collider _cameraLimitSpace = null;
@@ -362,7 +358,7 @@ namespace PixelComrades {
             }
             else if (_moveCamera) {
                 float speed = _moveSpeed;
-                if (Input.GetKey(_fastMoveKeyCode1)) {
+                if (PlayerInputSystem.GetKeyDown(_fastMoveKeyCode1)) {
                     speed = _fastMoveSpeed;
                 }
                 float h = move.x;
@@ -378,33 +374,33 @@ namespace PixelComrades {
         }
 
         public void UpdateInput() {
-            if (Input.GetKey(_breakFollowKey)) {
+            if (PlayerInputSystem.GetKeyDown(_breakFollowKey)) {
                 EndFollow();
             }
-            float scroll = Input.GetAxisRaw(_zoomInputAxis);
+            float scroll = Mouse.current.scroll.ReadValue().y;
 
             _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
-            if (Input.GetMouseButton(_mouseOrbitButton)) {
-                float tilt = Input.GetAxisRaw(_tiltInputAxis);
+            if (PlayerInputSystem.GetMouseButtonDown(_mouseOrbitButton)) {
+                float tilt = PlayerInputSystem.LookInput.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
 
-                float rot = Input.GetAxisRaw(_rotateInputAxis);
+                float rot = PlayerInputSystem.LookInput.x;
                 _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
             }
             if (!_moveCamera) {
                 return;
             }
             float speed = _moveSpeed;
-            if (Input.GetKey(_fastMoveKeyCode1)) {
+            if (PlayerInputSystem.GetKeyDown(_fastMoveKeyCode1)) {
                 speed = _fastMoveSpeed;
             }
 
-            float h = Input.GetAxisRaw(_horizontalInputAxis);
+            float h = PlayerInputSystem.MoveInput.x;
             if (Mathf.Abs(h) > 0.001f) {
                 AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
             }
 
-            float v = Input.GetAxisRaw(_verticalInputAxis);
+            float v = PlayerInputSystem.MoveInput.y;
             if (Mathf.Abs(v) > 0.001f) {
                 AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
             }
