@@ -33,11 +33,11 @@ namespace PixelComrades {
                 AstarP3Pathfinder.SetAxis(2);
                 _pathfindingGrid = new SimpleThreadSafeGrid();
                 _pathfindingSource = _pathfindingGrid;
-                _nonThreadedPathfinder = new AstarP3Pathfinder();
                 //_nonThreadedPathfinder = new AstarP3Pathfinder();
                 return;
             }
 #endif
+            _nonThreadedPathfinder = new AstarP3Pathfinder();
             _pathfindingSource = source;
             _pathfindingGrid = grid;
             if (Game.GameActive && _useThreading) {

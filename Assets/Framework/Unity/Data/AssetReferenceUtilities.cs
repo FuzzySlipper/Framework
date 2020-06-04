@@ -50,7 +50,7 @@ namespace PixelComrades {
 
     [System.Serializable]
     public abstract class AssetReferenceEntry {
-        public AssetReference AssetReference = new AssetReference();
+        public AssetReference AssetReference;
         public string Path;
         public abstract System.Type Type { get; }
         public abstract UnityEngine.Object Asset { get; }
@@ -132,29 +132,6 @@ namespace PixelComrades {
             _isLoaded = false;
         }
     }
-//
-//     [System.Serializable]
-//     public abstract class SubAssetReferenceEntry : AssetReferenceEntry {
-//         public string SubAssetName;
-//     }
-//
-//     [System.Serializable]
-//     public class SubAssetReferenceEntry<T> : SubAssetReferenceEntry where T : UnityEngine.Object {
-//         public override Type Type { get { return typeof(T); } }
-// #if UNITY_EDITOR
-//         public override UnityEngine.Object Asset { get { return AssetReference.editorAsset; } }
-// #else
-//         public override UnityEngine.Object Asset { get { return AssetReference.Asset; } }
-//
-// #endif
-//         public AsyncOperationHandle<T> LoadAssetAsync() {
-//             return AssetReference.LoadAssetAsync<T>();
-//         }
-//
-//         public void ReleaseAsset() {
-//             AssetReference.ReleaseAsset();
-//         }
-//     }
 
     [System.Serializable]
     public class GameObjectReference : AssetReferenceEntry<GameObject> {}
@@ -168,22 +145,6 @@ namespace PixelComrades {
     public class TextureAssetReference : AssetReferenceEntry<Texture2D> {}
     [System.Serializable]
     public class ActionFxReference : AssetReferenceEntry<ActionFx> {}
-    [System.Serializable]
-    public class SpriteAnimationFrameReference : AssetReferenceEntry<Sprite> {
-        public string SpriteAnimationName;
-        public int Frame;
-    }
     [Serializable]
-    public class SpriteAnimationReference : AssetReferenceEntry<SpriteAnimation> {
-        
-        public bool ValidateAsset(UnityEngine.Object obj) {
-            if (obj is SpriteAnimation) {
-                return true;
-            }
-            if (obj is SpriteAnimationSet) {
-                return true;
-            }
-            return false;
-        }
-    }
+    public class SpriteAnimationReference : AssetReferenceEntry<SpriteAnimation> { }
 }

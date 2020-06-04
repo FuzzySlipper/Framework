@@ -27,7 +27,7 @@ namespace PixelComrades {
 
         private void RunUpdate(ref CollisionCheckForwardTemplate template) {
             var tr = template.Tr;
-            if (tr == null) {
+            if (tr == null || !template.Forward.Active) {
                 template.Forward.LastPos = null;
                 return;
             }

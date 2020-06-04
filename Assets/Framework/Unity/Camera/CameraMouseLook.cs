@@ -70,8 +70,8 @@ namespace PixelComrades {
                 return;
             }
             Quaternion currentRotation = _pivotTr.localRotation;
-            var yaw = Input.GetAxis("Mouse X") * LateralSensitivity;
-            var pitch = Input.GetAxis("Mouse Y") * VerticalSensitivity;
+            var yaw = PlayerInputSystem.LookInput.x * LateralSensitivity;
+            var pitch = PlayerInputSystem.LookInput.y * VerticalSensitivity;
 
             _characterTargetRotation *= Quaternion.Euler(0.0f, yaw, 0.0f);
             _cameraTargetRotation *= Quaternion.Euler(-pitch, 0.0f, 0.0f);

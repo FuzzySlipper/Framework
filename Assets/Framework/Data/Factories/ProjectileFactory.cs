@@ -91,6 +91,7 @@ namespace PixelComrades {
             if (config.Type == ProjectileType.SpriteAnimation) {
                 config.Animation.LoadAsset();
             }
+            entity.Get<CollisionCheckForward>().Active = false;
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);
         }
@@ -245,6 +246,7 @@ namespace PixelComrades {
                 if (spawn.Rigidbody != null) {
                     template.Rb.SetRb(spawn.Rigidbody);
                 }
+                template.CollisionCheckForward.Active = true;
                 _entity.Tags.Add(EntityTags.Moving);
                 template.Rendering.Set(spawn);
                 UnityToEntityBridge.RegisterToEntity(NewPrefab.Transform.gameObject, _entity);

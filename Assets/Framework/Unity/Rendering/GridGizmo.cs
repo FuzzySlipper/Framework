@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class GridGizmo : MonoBehaviour {
-
+#if UNITY_EDITOR
         [SerializeField] private Color _gridColor = Color.grey;
         [SerializeField] private bool _active = false;
         [SerializeField] private int _maxGridSize = 25;
@@ -12,7 +12,6 @@ namespace PixelComrades {
         [SerializeField] private float _height = 0;
         [SerializeField] private Vector3 _offset = Vector3.zero;
 
-#if UNITY_EDITOR
         private void DrawSceneGrid() {
             UnityEditor.Handles.color = _gridColor;
             var max = (_maxGridSize + 1) * _gridSize;

@@ -9,10 +9,8 @@ namespace PixelComrades {
         private Sprite _sprite;
         public Texture2D Normal;
         public Texture2D Emissive;
-        public bool Flip = false;
         public readonly MaterialPropertyBlock MatBlock;
-        public Vector4 Uv { get; private set; }
-        public bool IsDirty { get; private set; }
+        public bool IsDirty { get; protected set; }
         public Sprite Sprite {
             get { return _sprite; }
             set {
@@ -24,10 +22,13 @@ namespace PixelComrades {
         public SpriteData() {
             MatBlock = new MaterialPropertyBlock();
         }
+    }
 
-        public void SetUv(Vector4 uv) {
-            Uv = uv;
-            IsDirty = false;
+    public class RendererSprite : SpriteData {
+        public readonly SpriteRenderer Renderer;
+
+        public RendererSprite(SpriteRenderer renderer) {
+            Renderer = renderer;
         }
     }
 
@@ -35,9 +36,7 @@ namespace PixelComrades {
     public sealed class SpriteSimpleRendererComponent : IComponent, ISpriteRendererComponent {
         private CachedTransform _spriteTr;
         
-        public SpriteData[] Sprites = new SpriteData[0];
-        public Mesh Quad;
-        public Material Mat;
+        public RendererSprite[] Sprites = new RendererSprite[0];
         public Quaternion Rotation { get { return _spriteTr.Tr.rotation; } }
         public Vector3 Position { get { return _spriteTr.Tr.position; }}
         public Vector3 Scale { get { return _spriteTr.Tr.localScale; } }
@@ -65,14 +64,14 @@ namespace PixelComrades {
                 Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), framePos.x), size.y * framePos.y, 0.2f);
         }
 
-        public void SetSprite(
-            Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx,
+        public void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx,
             bool flip) {
             var data = Sprites[instanceIdx];
             data.Sprite = sprite;
             data.Emissive = emissive;
             data.Normal = normal;
-            data.Flip = flip;
+            data.Renderer.sprite = sprite;
+            data.Renderer.flipX = flip;
         }
 
         public Quaternion GetRotation() {
@@ -81,11 +80,11 @@ namespace PixelComrades {
 
         public void Flip(bool isFlipped) { }
 
-        public SpriteSimpleRendererComponent(Transform spriteTr, int cnt) {
+        public SpriteSimpleRendererComponent(Transform spriteTr, SpriteRenderer[] renderers) {
             _spriteTr = new CachedTransform(spriteTr);
-            Sprites = new SpriteData[cnt];
+            Sprites = new RendererSprite[renderers.Length];
             for (int i = 0; i < Sprites.Length; i++) {
-                Sprites[i] = new SpriteData();
+                Sprites[i] = new RendererSprite(renderers[i]);
             }
         }
 
@@ -102,41 +101,80 @@ namespace PixelComrades {
             _spriteTr = null;
         }
     }
- 
-    [System.Serializable]
-    public sealed class SpriteInstancedRendererComponent : IComponent {
-        private CachedTransform _spriteTr;
-        private Vector3 _position = Vector3.zero;
+
+    public class InstancedSprite : SpriteData {
         
-        public SpriteData[] Sprites = new SpriteData[0];
-        public Quaternion Rotation {
-            get { return _spriteTr != null ? _spriteTr.Tr.rotation : Quaternion.identity; }
+        public Vector4 Uv { get; private set; }
+        public bool IsFlipped = false;
+
+        public void SetUv(Vector4 uv) {
+            Uv = uv;
+            IsDirty = false;
         }
-        public Vector3 Position {
-            get {
-                if (_spriteTr != null && _spriteTr.Tr != null) {
-                    return _spriteTr.Tr.TransformPoint(_position);
-                }
-                return _position;
-            }
-        }
+      
+    }
+    
+    [System.Serializable]
+    public sealed class SpriteInstancedRendererComponent : IComponent, ISpriteRendererComponent {
+        private CachedTransform _spriteTr;
+        public Mesh Quad;
+        public Material Mat;
+        public InstancedSprite[] Sprites = new InstancedSprite[0];
+        public Quaternion Rotation { get { return _spriteTr.Tr.rotation; } }
+        public Vector3 Position { get { return _spriteTr.Tr.position; }}
         public Vector3 Scale { get { return _spriteTr.Tr.localScale; } }
 
         public Vector3 GetEventPosition(AnimationFrame frame, Sprite sprite) {
-            var size = new Vector2(sprite.rect.width / sprite.pixelsPerUnit,
+            var size = new Vector2(
+                sprite.rect.width / sprite.pixelsPerUnit,
                 sprite.rect.height / sprite.pixelsPerUnit);
             return _spriteTr.Tr.TransformPoint(
                 Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), frame.EventPosition.x), size.y * frame.EventPosition.y, 0);
         }
 
-        public SpriteInstancedRendererComponent(Transform spriteTr) {
-            _spriteTr = new CachedTransform(spriteTr);
+        public Vector3 GetEventPosition(Vector2 framePos, int instancedIndex) {
+            if (instancedIndex >= Sprites.Length || instancedIndex < 0) {
+                return _spriteTr.Tr.position;
+            }
+            var sprite = Sprites[instancedIndex].Sprite;
+            if (sprite == null) {
+                return _spriteTr.Tr.position;
+            }
+            var size = new Vector2(
+                sprite.rect.width / sprite.pixelsPerUnit,
+                sprite.rect.height / sprite.pixelsPerUnit);
+            return _spriteTr.Tr.TransformPoint(
+                Mathf.Lerp(-(size.x * 0.5f), (size.x * 0.5f), framePos.x), size.y * framePos.y, 0.2f);
         }
+
         
+        public void SetSprite(Sprite sprite, Texture2D normal, Texture2D emissive, SavedSpriteCollider spriteCollider, int instanceIdx,
+            bool flip) {
+            var data = Sprites[instanceIdx];
+            data.Sprite = sprite;
+            data.Emissive = emissive;
+            data.Normal = normal;
+            data.IsFlipped = flip;
+        }
+
+        public Quaternion GetRotation() {
+            return Rotation;
+        }
+
+        public void Flip(bool isFlipped) { }
+
+        public SpriteInstancedRendererComponent(Transform spriteTr, int cnt) {
+            _spriteTr = new CachedTransform(spriteTr);
+            Sprites = new InstancedSprite[cnt];
+            for (int i = 0; i < Sprites.Length; i++) {
+                Sprites[i] = new InstancedSprite();
+            }
+        }
+
         public SpriteInstancedRendererComponent(SerializationInfo info, StreamingContext context) {
             _spriteTr = info.GetValue(nameof(_spriteTr), _spriteTr);
         }
-                
+
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
             info.AddValue(nameof(_spriteTr), _spriteTr);
         }
@@ -146,4 +184,5 @@ namespace PixelComrades {
             _spriteTr = null;
         }
     }
+ 
 }

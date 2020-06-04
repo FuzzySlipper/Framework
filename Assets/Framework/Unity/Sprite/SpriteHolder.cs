@@ -15,6 +15,7 @@ namespace PixelComrades {
         [SerializeField] private List<Collider> _ignoreColliders = new List<Collider>();
         [SerializeField] private MeshRenderer _meshRenderer = null;
         [SerializeField] private MeshFilter _meshFilter = null;
+        [SerializeField] private SpriteRenderer _spriteRenderer = null;
         [SerializeField] private bool _isVisible = false;
         
         public BillboardMode Billboard { get => _billboard; }
@@ -28,13 +29,26 @@ namespace PixelComrades {
         public bool Backwards { get => _backwards; }
         public List<Collider> IgnoreColliders { get => _ignoreColliders; }
         public bool IsVisible { get => _isVisible; }
+        public SpriteRenderer SpriteRenderer { get => _spriteRenderer; }
+        private RenderingVisibilityComponent _renderingComponent;
 
+        public void SetComponent(RenderingVisibilityComponent component) {
+            _renderingComponent = component;
+            _renderingComponent.IsVisible = _isVisible;
+        }
+        
         private void OnBecameVisible() {
             _isVisible = true;
+            if (_renderingComponent != null) {
+                _renderingComponent.IsVisible = true;
+            }
         }
 
         private void OnBecameInvisible() {
             _isVisible = false;
+            if (_renderingComponent != null) {
+                _renderingComponent.IsVisible = false;
+            }
         }
 
         public void OnPoolSpawned() {
@@ -43,6 +57,7 @@ namespace PixelComrades {
 
         public void OnPoolDespawned() {
             _isVisible = false;
+            _renderingComponent = null;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class GridCamera : MonoSingleton<GridCamera> {
@@ -30,13 +31,13 @@ namespace PixelComrades {
 
         private bool ShouldCancelRotation {
             get {
-                return Input.GetMouseButtonUp(1);
+                return !Mouse.current.rightButton.isPressed;
             }
         }
 
         private bool ShouldStartMouseLook {
             get {
-                return Input.GetMouseButtonDown(1) && !PlayerInputSystem.IsCursorOverUI && UICenterTarget.CurrentCharacter == null;
+                return Mouse.current.rightButton.wasPressedThisFrame && !PlayerInputSystem.IsCursorOverUI && UICenterTarget.CurrentCharacter == null;
             }
         }
 

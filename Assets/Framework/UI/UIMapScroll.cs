@@ -3,6 +3,7 @@ using System.Collections;
 using PixelComrades;
 using PixelComrades.DungeonCrawler;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class UIMapScroll : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, 
@@ -39,7 +40,7 @@ namespace PixelComrades {
             if (!_isActive) {
                 return;
             }
-            MapCamera.UpdateInput(new Vector2(eventData.delta.x * (_reverseX ? -1 : 1), eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed, 0, Input.GetMouseButton(1));
+            MapCamera.UpdateInput(new Vector2(eventData.delta.x * (_reverseX ? -1 : 1), eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed, 0, Mouse.current.leftButton.wasPressedThisFrame);
             //Cam.transform.position+= new Vector3(eventData.delta.x * (_reverseX ? -1 : 1), 0, eventData.delta.y * (_reverseY ? -1 : 1)) * _moveSpeed;
         }
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class TestPerformance : MonoBehaviour {
@@ -31,7 +32,7 @@ namespace PixelComrades {
         void Update() {
             if (!_recordingTest) {
                 for (int i = 0; i < _testObjects.Length+1; i++) {
-                    if (Input.GetKeyDown(i.ToString())) {
+                    if (Keyboard.current[PlayerControls.NumericKeys[i]].wasPressedThisFrame) {
                         var index = i - 1;
                         if (_testObjects.HasIndex(index)) {
                             StartTest(index);

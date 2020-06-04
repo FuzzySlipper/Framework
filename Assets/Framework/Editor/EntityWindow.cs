@@ -34,18 +34,24 @@ public class EntityWindow : OdinEditorWindow {
         foreach (Entity e in entities) {
             _activeEntities.Add(e);
         }
+        if (_activeEntities.Count == 0) {
+            return;
+        }
         //_entityTable = GUITable.Create<Entity>(_activeEntities, "Entities");
         _entityTable = GUITable.Create(EnumHelper.GetLength<Rows>(), entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels, true);
     }
 
     protected override void OnGUI() {
         base.OnGUI();
-        var width = position.width /2;
-        EditorGUILayout.BeginHorizontal();
-        _scrollPositionEntities = EditorGUILayout.BeginScrollView(_scrollPositionEntities, GUILayout.Width(width));
         if (_entityTable == null) {
             CreateEntitiesTable();
         }
+        if (_entityTable == null) {
+            return;
+        }
+        var width = position.width /2;
+        EditorGUILayout.BeginHorizontal();
+        _scrollPositionEntities = EditorGUILayout.BeginScrollView(_scrollPositionEntities, GUILayout.Width(width));
         _entityTable.DrawTable();
         EditorGUILayout.EndScrollView();
         _scrollPositionComponents = EditorGUILayout.BeginScrollView(_scrollPositionComponents, GUILayout.Width(width));
