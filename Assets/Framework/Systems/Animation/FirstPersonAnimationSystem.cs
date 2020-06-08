@@ -10,7 +10,6 @@ namespace PixelComrades {
         private TemplateList<FirstPersonAnimationTemplate> _animTemplates;
         
         public FirstPersonAnimationSystem(){
-            TemplateFilter<FirstPersonAnimationTemplate>.Setup();
             _animTemplates = EntityController.GetTemplateList<FirstPersonAnimationTemplate>();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
                 typeof(WeaponModelComponent),

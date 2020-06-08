@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class CommandSystem : SystemBase, IMainSystemUpdate {
+    [AutoRegister]
+    public class CommandSystem : SystemBase<CommandSystem>, IMainSystemUpdate {
 
         private BufferedList<Command> _commands = new BufferedList<Command>();
         private ManagedArray<Command>.RefDelegate _del;

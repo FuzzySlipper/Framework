@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
-    public class MoverSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent> {
+    [AutoRegister]
+    public class MoverSystem : SystemBase<MoverSystem>, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent> {
         private const float ReachedDestination = 0.1f;
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
@@ -20,16 +21,12 @@ namespace PixelComrades {
         private ManagedArray<ArcMoverTemplate>.RefDelegate _arcDel;
 
         public MoverSystem() {
-            TemplateFilter<ForwardMoverTemplate>.Setup();
             _forwardMovers = EntityController.GetTemplateList<ForwardMoverTemplate>();
             _forwardDel = HandleForwardMovement;
-            TemplateFilter<RotateToTemplate>.Setup();
             _rotators = EntityController.GetTemplateList<RotateToTemplate>();
             _rotateDel = HandleRotation;
-            TemplateFilter<SimpleMoverTemplate>.Setup();
             _simpleMovers = EntityController.GetTemplateList<SimpleMoverTemplate>();
             _simpleDel = HandleMoveSimple;
-            TemplateFilter<ArcMoverTemplate>.Setup();
             _arcMovers = EntityController.GetTemplateList<ArcMoverTemplate>();
             _arcDel = HandleArcMovement;
         }

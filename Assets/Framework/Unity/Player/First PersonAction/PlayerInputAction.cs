@@ -9,7 +9,7 @@
 //    protected override void GameplayInput() {
 //        base.GameplayInput();
 //        if (Cursor.lockState == CursorLockMode.None && Game.Paused) {
-//            Player.Controller.MoveInput = Vector2.zero;
+//            PlayerControllerSystem.Current.MoveInput = Vector2.zero;
 //            FirstPersonCamera.LookInput = Vector2.zero;
 //        }
 //        else {
@@ -23,8 +23,8 @@
 //    }
 
 //    private void CheckPausing() {
-//        if (Player.Controller.Velocity.sqrMagnitude > 0.05f || 
-//            Player.Controller.MoveInput.sqrMagnitude > 0.05f) {
+//        if (PlayerControllerSystem.Current.Velocity.sqrMagnitude > 0.05f || 
+//            PlayerControllerSystem.Current.MoveInput.sqrMagnitude > 0.05f) {
 //                Game.Paused = false;
 //        }
 //        else if (!Player.Actor.CanMove) {
@@ -44,20 +44,20 @@
 //    }
 
 //    private void GetMoveInput() {
-//        Player.Controller.MoveInput = MoveInput;
+//        PlayerControllerSystem.Current.MoveInput = MoveInput;
 //        if (InputSystem.GetButtonDown(ActionControls.Jump)) {
-//            Player.Controller.TryJump();
+//            PlayerControllerSystem.Current.TryJump();
 //        }
 //        else if (InputSystem.GetButton(ActionControls.Jump)) {
-//            Player.Controller.TryClimb();
+//            PlayerControllerSystem.Current.TryClimb();
 //        }
 //        if (InputSystem.GetButtonDown(ActionControls.Dodge)) {
-//            Player.Controller.Dodge();
+//            PlayerControllerSystem.Current.Dodge();
 //        }
 //        if (InputSystem.GetButtonDown(ActionControls.ZTarget)) {
 //            UICenterTarget.ToggleActorLock();
 //        }
-//        Player.Controller.InputRun = InputSystem.GetButton(ActionControls.FastMove);
+//        PlayerControllerSystem.Current.InputRun = InputSystem.GetButton(ActionControls.FastMove);
 //    }
 
 //    protected override void ActionInput() {

@@ -11,8 +11,6 @@ namespace PixelComrades {
         private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
         
         public ActionSystem() {
-            TemplateFilter<ActionUsingTemplate>.Setup();
-            TemplateFilter<ActionTemplate>.Setup();
         }
 
         public void HandleGlobal(ActionEvent arg) {

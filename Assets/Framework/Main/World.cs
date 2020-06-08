@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Sirenix.Utilities;
 
 namespace PixelComrades {
@@ -43,24 +44,28 @@ namespace PixelComrades {
             if (Instance == null) {
                 return;
             }
-            TemplateFilter<VisibleTemplate>.Setup();
-            TemplateFilter<CharacterTemplate>.Setup();
-            TemplateFilter<CollidableTemplate>.Setup();
-            TemplateFilter<ProjectileFactory.ProjectileTemplate>.Setup();
-            Get<CommandSystem>();
-            Get<CollisionCheckSystem>();
-            Get<DespawnEntitySystem>();
-            Get<DistanceSystem>();
-            Get<FactionSystem>();
-            Get<ItemSceneSystem>();
-            Get<ModifierSystem>();
-            Get<MoverSystem>();
-            Get<PhysicsMoverSystem>();
-            Get<CharacterRectSystem>();
-            Get<SensorSystem>();
-            Get<EntityUIPoolSystem>();
-
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            SetupFilters(assemblies);
+            SetupSystems(assemblies);
+        }
+
+        private static void SetupFilters(Assembly[] assemblies) {
+            for (int a = 0; a < assemblies.Length; a++) {
+                var types = assemblies[a].GetTypes();
+                for (int t = 0; t < types.Length; t++) {
+                    var type = types[t];
+                    if (!type.IsAbstract && typeof(BaseTemplate).IsAssignableFrom(type)) {
+                        var instance = (BaseTemplate) Activator.CreateInstance(type);
+                        var generic = typeof(TemplateFilter<>).MakeGenericType(type);
+                        var filter = (TemplateFilter) Activator.CreateInstance(generic);
+                        filter.SetTypes(instance.GetTypes());
+                        EntityController.RegisterTemplateFilter(filter, type);
+                    }
+                }
+            }
+        }
+
+        private static void SetupSystems(Assembly[] assemblies) {
             for (int a = 0; a < assemblies.Length; a++) {
                 var types = assemblies[a].GetTypes();
                 for (int t = 0; t < types.Length; t++) {

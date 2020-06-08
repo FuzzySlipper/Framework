@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class PathfindingSystem : SystemBase, IMainSystemUpdate {
+    public class PathfindingSystem : SystemBase<PathfindingSystem>, IMainSystemUpdate {
 
         private GameOptions.CachedInt _playerWalkableRadius = new GameOptions.CachedInt("PathfindPlayerWalkableRadius");
         private GameOptions.CachedInt _playerOccupyRadius = new GameOptions.CachedInt("PathfindPlayerOccupiedRadius");

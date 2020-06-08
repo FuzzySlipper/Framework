@@ -13,7 +13,7 @@ namespace PixelComrades {
         public void Trigger(ActionEvent ae, string eventName) {
             var template = ae.Origin;
             template.Entity.Post(new ChangePositionEvent(template.Entity, FindPosition(template.Tr.position, template.Tr.forward, Distance)));
-            //Player.Controller.Teleport(FindPosition(msg.Owner.Tr.position, msg.Owner.Tr.forward, current.Distance));
+            //PlayerControllerSystem.Current.Teleport(FindPosition(msg.Owner.Tr.position, msg.Owner.Tr.forward, current.Distance));
         }
 
         private Vector3 FindPosition(Vector3 start, Vector3 dir, float distance) {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PixelComrades {
     [AutoRegister]
-    public class ModifierSystem : SystemBase, IMainSystemUpdate, IRuleEventRun<TryApplyEntityTag>, IRuleEventRun<TryApplyMod>,
+    public class ModifierSystem : SystemBase<ModifierSystem>, IMainSystemUpdate, IRuleEventRun<TryApplyEntityTag>, IRuleEventRun<TryApplyMod>,
     IRuleEventStart<TryApplyEntityTag> {
         
         public ModifierSystem() {

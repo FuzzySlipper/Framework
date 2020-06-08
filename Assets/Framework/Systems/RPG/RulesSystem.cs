@@ -15,7 +15,6 @@ namespace PixelComrades {
         private CircularBuffer<IRuleEvent> _eventLog = new CircularBuffer<IRuleEvent>(10, true);
         
         public RulesSystem() {
-            RegisterRuleTemplates();
         }
 
         [Command("printRuleEventLog")]
@@ -137,18 +136,6 @@ namespace PixelComrades {
                     endHandler.RuleEventEnded(ref context);
                 }
             }
-        }
-
-        private void RegisterRuleTemplates() {
-            TemplateFilter<ApplyModifierRuleTemplate>.Setup();
-            TemplateFilter<ApplyTagRuleTemplate>.Setup();
-            TemplateFilter<BlockDamageRuleTemplate>.Setup();
-            TemplateFilter<ConvertVitalRuleTemplate>.Setup();
-            TemplateFilter<DamageRuleTemplate>.Setup();
-            TemplateFilter<HealRuleTemplate>.Setup();
-            TemplateFilter<InstantKillRuleTemplate>.Setup();
-            TemplateFilter<RaiseDeadRuleTemplate>.Setup();
-            
         }
 
         public static float CalculateTotal(BaseStat stat, float percent) {

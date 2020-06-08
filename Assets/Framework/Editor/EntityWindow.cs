@@ -39,6 +39,7 @@ public class EntityWindow : OdinEditorWindow {
         }
         //_entityTable = GUITable.Create<Entity>(_activeEntities, "Entities");
         _entityTable = GUITable.Create(EnumHelper.GetLength<Rows>(), entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels, true);
+        _entityTable.ReCalculateSizes();
     }
 
     protected override void OnGUI() {

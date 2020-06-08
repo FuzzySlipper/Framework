@@ -3,61 +3,64 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public abstract class PlayerController : MonoBehaviour, ISystemUpdate {
-        
-        [SerializeField] private Transform _actorPivot = null;
+    public abstract class PlayerController {
 
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
         private bool _isMoving = false;
-
-        public Entity Entity { get; protected set; }
+        private Point3 _gridPosition;
+        
+        public Entity MainEntity { get; protected set; }
         public ValueHolder<bool> MoveEnabledHolder { get { return _moveEnabled; } }
         public Transform Tr { get; private set; }
         public bool IsMoving { get { return _isMoving; } set { _isMoving = value; } }
-        public Transform ActorPivot { get { return _actorPivot; } }
-        public virtual Point3 GridPosition { get { return (Tr.position + Vector3.up).ToMapGridP3(); } }
-        public virtual bool Unscaled { get { return false; } }
-        public virtual bool Slowed { get; protected set; }
+        public bool Active { get; protected set; }
+        public virtual Point3 GridPosition { get { return _gridPosition; } }
         public virtual bool CanMove {
             get {
                 return _moveEnabled.Value;
             }
         }
 
-        protected virtual void Awake() {
-            SetupControllerDefaults();
-            SetupGenericControllerEntity();
+        public PlayerController(PlayerControllerConfig config) {
+            Tr = config.MainTr;
         }
 
-        protected void SetupGenericControllerEntity() {
-            SetupControllerEntity(Entity.New("PlayerController"));
-            Entity.Add(new LabelComponent("PlayerController"));
-        }
-
-        protected void SetupControllerDefaults() {
-            Player.Tr = transform;
-            Tr = transform;
+        public virtual void Enable() {
             MessageKit.addObserver(Messages.LoadingFinished, EnablePlayer);
         }
 
-        protected virtual void SetupControllerEntity(Entity entity) {
-            Entity = entity;
-            entity.Add(new TransformComponent(Tr));
-            Player.MainEntity = entity;
-        }
-
-        public virtual void OnSystemUpdate(float dt) {
-            if (!Game.GameActive) {
-                return;
-            }
+        public virtual void Disable() {
+            MessageKit.removeObserver(Messages.LoadingFinished, EnablePlayer);
         }
 
         public virtual void NewGame() {
-            Player.DefaultCurrencyHolder.ChangeValue(100);
-            MessageKit.post(Messages.PlayerNewGame);
+            _gridPosition = Point3.max;
         }
 
-        public virtual void SetVitalMax() {}
+        public virtual void SetActive(bool active) {
+            Active = active;
+            Tr.gameObject.SetActive(active);
+        }
+
+        public virtual void SystemUpdate(float dt) {
+            if (_gridPosition != (Tr.position + Vector3.up).ToMapGridP3()) {
+                UpdateCell();
+            }
+        }
+
+        protected virtual void UpdateCell() {
+            if (!Game.GameActive) {
+                return;
+            }
+            var position = Tr.position;
+            _gridPosition = position.ToMapGridP3();
+            MainEntity.Add(new GridPosition(_gridPosition));
+            PlayerGameStats.MetersWalked += Game.MapCellSize;
+            World.Get<PathfindingSystem>().UpdatePlayerPosition(position);
+            MessageKit.post(Messages.PlayerReachedDestination);
+        }
+
+        public abstract bool TryOpenDoor(Door door);
 
         public virtual void Teleport(Vector3 location, Quaternion rotation) {
             Tr.rotation = rotation;
@@ -88,18 +91,11 @@ namespace PixelComrades {
         }
 
         protected virtual void OnDeath() {
-            MessageKit.post(Messages.PlayerDead);
-            Game.SetGameActive(false);
+            
         }
 
         private void EnablePlayer() {
             _moveEnabled.Clear();
-            //if (GameOptions.MouseLook) {
-            //    TimeManager.PauseFor(0.5f, true, () => {
-            //        Cursor.lockState = CursorLockMode.Locked;
-            //    });
-            //}
         }
-
     }
 }

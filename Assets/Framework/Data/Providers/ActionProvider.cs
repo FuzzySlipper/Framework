@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades.DungeonCrawler;
+using PixelComrades;
 
 namespace PixelComrades {
     

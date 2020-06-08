@@ -9,7 +9,6 @@ namespace PixelComrades {
         private ManagedArray<PlayerRaycastTargetTemplate>.RefDelegate _del;
 
         public PlayerRaycastTargetSystem() {
-            TemplateFilter<PlayerRaycastTargetTemplate>.Setup();
             _list = EntityController.GetTemplateList<PlayerRaycastTargetTemplate>();
             _del = Update;
         }

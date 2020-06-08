@@ -8,4 +8,18 @@ namespace PixelComrades {
             World.RemoveSystem(this);
         }
     }
+
+    public abstract class SystemBase<T> : SystemBase where T : SystemBase {
+        
+        private static T _main;
+
+        public static T Get {
+            get {
+                if (_main == null) {
+                    _main = World.Get<T>();
+                }
+                return _main;
+            }
+        }
+    }
 }

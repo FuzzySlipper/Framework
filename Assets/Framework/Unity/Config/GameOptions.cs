@@ -61,7 +61,7 @@ namespace PixelComrades {
         private void FillDictionary<T>(T[] array, Dictionary<string, T> dict) where T : GenericKeyedValue {
             dict.Clear();
             for (int i = 0; i < array.Length; i++) {
-                if (array[i] == null) {
+                if (array[i] == null || string.IsNullOrEmpty(array[i].Key)) {
                     continue;
                 }
                 dict.AddOrUpdate(array[i].Key, array[i]);

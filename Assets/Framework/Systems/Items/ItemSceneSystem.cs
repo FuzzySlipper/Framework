@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class ItemSceneSystem : SystemBase {
+    [AutoRegister]
+    public class ItemSceneSystem : SystemBase<ItemSceneSystem> {
 
         public void Drop(Vector3 pos) {
 

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [Priority(Priority.Normal)]
+    [AutoRegister, Priority(Priority.Normal)]
     public class SpriteAnimationSystem : SystemBase, IMainSystemUpdate {
 
         private ComponentArray<SpriteAnimationComponent> _arraySpriteAnimation;

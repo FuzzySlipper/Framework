@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using Sirenix.Utilities;
 
 namespace PixelComrades {
-    [Priority(Priority.Higher)]
-    public class CollisionCheckSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<SphereCastEvent> {
+    [AutoRegister,Priority(Priority.Higher)]
+    public class CollisionCheckSystem : SystemBase<CollisionCheckSystem>, IMainSystemUpdate, IReceiveGlobal<SphereCastEvent> {
 
         private static RaycastHit[] _rayHits = new RaycastHit[25];
         private static Collider[] _colliders = new Collider[25];
@@ -16,7 +16,6 @@ namespace PixelComrades {
         
 
         public CollisionCheckSystem() {
-            TemplateFilter<CollisionCheckForwardTemplate>.Setup();
             _list = EntityController.GetTemplateList<CollisionCheckForwardTemplate>();
             _del = RunUpdate;
         }

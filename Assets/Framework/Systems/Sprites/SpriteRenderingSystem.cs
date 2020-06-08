@@ -25,7 +25,6 @@ namespace PixelComrades {
         // private List<Texture2D> _textureList = new List<Texture2D>();
 
         public SpriteRenderingSystem() {
-            TemplateFilter<SpriteRendererTemplate>.Setup();
             _rendererList = EntityController.GetTemplateList<SpriteRendererTemplate>();
             _rendererDel = RunUpdate;
 

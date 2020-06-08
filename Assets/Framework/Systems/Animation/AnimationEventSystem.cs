@@ -9,7 +9,6 @@ namespace PixelComrades {
         private Dictionary<string, List<IReceive<AnimationEventTriggered>>> _eventReceivers = new Dictionary<string, List<IReceive<AnimationEventTriggered>>>();
 
         public AnimationEventSystem() {
-            TemplateFilter<AnimationEventTemplate>.Setup();
         }
 
         public void Register(string eventName, IReceive<AnimationEventTriggered> receiver) {

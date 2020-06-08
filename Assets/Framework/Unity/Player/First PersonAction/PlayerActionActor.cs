@@ -34,7 +34,7 @@
 //        _animator = GetComponent<MecanimAnimator>();
 //        _throwCharge = new TweenFloat(0, 1, _throwChargeTime, EasingTypes.QuarticOut, true);
 //        _throwFinish = new TweenV3(Vector3.zero, Vector3.one, ThrowTime, EasingTypes.ElasticOut);
-//        Player.Controller = _controller;
+//        PlayerControllerSystem.Current = _controller;
 //    }
 
 //    private void CheckNewItem(Entity item) {

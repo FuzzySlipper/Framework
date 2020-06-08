@@ -47,13 +47,13 @@ namespace PixelComrades {
         [Command("godMode")]
         public static void GodMode() {
             bool added = false;
-            for (int i = 0; i < Player.Entities.Length; i++) {
-                if (Player.Entities[i].HasComponent<BlockDamageFlat>()) {
-                    Player.Entities[i].Remove<BlockDamageFlat>();
+            for (int i = 0; i < PlayerPartySystem.Party.Length; i++) {
+                if (PlayerPartySystem.Party[i].Entity.HasComponent<BlockDamageFlat>()) {
+                    PlayerPartySystem.Party[i].Entity.Remove<BlockDamageFlat>();
                 }
                 else {
                     added = true;
-                    Player.Entities[i].Add(new BlockDamageFlat());
+                    PlayerPartySystem.Party[i].Entity.Add(new BlockDamageFlat());
                 }
             }
             Console.Log(added ? "Enabled god mode" : "Disabled god mode");

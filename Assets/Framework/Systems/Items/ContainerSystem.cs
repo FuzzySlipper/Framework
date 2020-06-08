@@ -9,7 +9,6 @@ namespace PixelComrades {
         private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
 
         public ContainerSystem() {
-            TemplateFilter<ContainerItemTemplate>.Setup();
         }
 
         public bool TryAdd(IEntityContainer holder, Entity item) {

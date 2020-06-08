@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades.DungeonCrawler;
+using PixelComrades;
 
 namespace PixelComrades {
     [AutoRegister]
@@ -10,7 +10,6 @@ namespace PixelComrades {
 
         
         public EquipmentSystem() {
-            TemplateFilter<EquipmentTemplate>.Setup();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(Equipment)
             }));
