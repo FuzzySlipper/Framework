@@ -53,7 +53,7 @@ namespace PixelComrades {
         }
 
         public void RuleEventRun(ref InstantKillEvent context) {
-            context.Target.Post(new DeathEvent(context.Origin, context.Target, context.ImpactEvent, 100));
+            context.Target.Post(new DeathEvent(context.Origin, context.Target, context.ImpactEvent.HitPoint, 100));
             context.Target.Post(new CombatStatusUpdate(context.Target, "Lethal Hit!", GameLogSystem.DeathColor));
         }
     }

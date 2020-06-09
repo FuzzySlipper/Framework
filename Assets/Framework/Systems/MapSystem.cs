@@ -39,7 +39,7 @@ namespace PixelComrades {
             }
             var position = template.Tr.position.ToMapGridP3ZeroY();
             ref var gridPos = ref template.PositionComponent.GetReference();
-            gridPos.Position = position;
+            gridPos.Value = position;
             var cell = GetCell(position);
             if (cell == null) {
                 return;

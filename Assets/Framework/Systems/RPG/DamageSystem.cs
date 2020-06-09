@@ -38,12 +38,13 @@ namespace PixelComrades {
         public void RuleEventRun(ref TakeDamageEvent msg) {
             _eventLog.Add(msg);
             if (msg.Target.IsDead) {
+                msg.Clear();
                 return;
             }
             var target = msg.Target;
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var dmgMsg, out var dmgHoverMsg);
-            if (msg.Impact.Hit == CollisionResult.CriticalHit) {
+            if (msg.Hit.Result == CollisionResult.CriticalHit) {
                 dmgMsg.Append("<b>");
                 dmgHoverMsg.Append("<b>");
             }
@@ -121,13 +122,13 @@ namespace PixelComrades {
                 dmgMsg.Append(damageAmount.ToString("F1"));
                 dmgMsg.Append(" damage ");
                 if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stats.Health) {
-                    target.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Impact, damageAmount - previousValue));
+                    target.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Hit.Point, damageAmount - previousValue));
                 }
             }
             if (totalDmg > 0) {
                 target.Entity.Post(new CombatStatusUpdate(target.Entity, totalDmg.ToString("F1"), Color.red));
-                msg.Impact.Origin.Post(new CausedDamageEvent(totalDmg, msg));
-                msg.Impact.Target.Post(new ReceivedDamageEvent(totalDmg, msg));
+                msg.Origin.Post(new CausedDamageEvent(totalDmg, msg));
+                msg.Target.Post(new ReceivedDamageEvent(totalDmg, msg));
             }
             logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
             msg.Clear();

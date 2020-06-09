@@ -7,9 +7,11 @@ namespace PixelComrades {
 
         private CachedComponent<HealImpact> _heal = new CachedComponent<HealImpact>();
 
-        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _heal, EntityStats
-        };
+        public override List<CachedComponent> GatherComponents
+            => new List<CachedComponent>() {
+                _heal, EntityStats
+            };
+
 
         public override System.Type[] GetTypes() {
             return new System.Type[] {
@@ -29,7 +31,7 @@ namespace PixelComrades {
             logMsg.Append(power.ToString("F0"));
             hoverMsg.Append(RulesSystem.LastQueryString);
             logSystem.PostCurrentStrings(GameLogSystem.DamageColor);
-            World.Get<RulesSystem>().Post(new HealingEvent(power, context.Origin, target, _heal.Value.TargetVital));
+            World.Get<RulesSystem>().Post(new HealingEvent(context.Action, power, context.Origin, target, _heal.Value.TargetVital));
         }
     }
 }

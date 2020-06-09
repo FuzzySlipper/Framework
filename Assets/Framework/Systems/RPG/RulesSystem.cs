@@ -76,7 +76,7 @@ namespace PixelComrades {
             list.Remove(handler);
         }
 
-        public void Post<T>(T context) where T : struct, IRuleEvent {
+        public T Post<T>(T context) where T : struct, IRuleEvent {
             _eventLog.Add(context);
             var list = _listPool.New();
             _globalHandlers.TryGetValue(typeof(T), out var globalList);
@@ -86,15 +86,18 @@ namespace PixelComrades {
             if (context.Origin.RuleEvents != null) {
                 list.AddRange(context.Origin.RuleEvents.Handlers);
             }
-            if (context.Origin.CurrentAction != null  &&
-                context.Origin.CurrentAction.RuleEvents != null) {
-                list.AddRange(context.Origin.CurrentAction.RuleEvents.Handlers);
+            if (context.Target != context.Origin && context.Target.RuleEvents != null) {
+                list.AddRange(context.Target.RuleEvents.Handlers);
+            }
+            if (context.Action != null  &&
+                context.Action.RuleEvents != null) {
+                list.AddRange(context.Action.RuleEvents.Handlers);
             }
             for (int i = 0; i < list.Count; i++) {
                 if (list[i] is IRuleEventStart<T> startHandler) {
                     if (!startHandler.CanRuleEventStart(ref context)) {
                         _listPool.Store(list);
-                        return;
+                        return context;
                     }
                 }
             }
@@ -109,6 +112,7 @@ namespace PixelComrades {
                 }
             }
             _listPool.Store(list);
+            return context;
         }
 
         private bool TryStart<T>(List<IRuleEventHandler> list, ref T context) where T : IRuleEvent {
@@ -136,6 +140,59 @@ namespace PixelComrades {
                     endHandler.RuleEventEnded(ref context);
                 }
             }
+        }
+
+        public static int CalculateD20Roll(BaseStat stat, int numDice, int level = -1) {
+            LastQueryString.Clear();
+            var roll = CalculateD20Roll(numDice);
+            var bonus = CalculateStatsWithLog(stat, level);
+            LastQueryString.Append(" = ");
+            var result = roll + bonus;
+            LastQueryString.Append(result.ToString("F0"));
+            LastQueryString.AppendNewLine();
+            return result;
+        }
+
+        public static int CalculateD20RollNoLog(int roll, BaseStat stat, int level = -1) {
+            return roll + CalculateStatsNoLog(stat, level);
+        }
+
+        public static int CalculateStatsNoLog(BaseStat stat, int level = -1) {
+            var statBonus = stat.D20ModifierValue;
+            int levelBonus = 0;
+            if (level > 0) {
+                levelBonus = HalfFloorBonus(level);
+            }
+            return statBonus + levelBonus;
+        }
+
+        public static int CalculateStatsWithLog(BaseStat stat, int level = -1) {
+            var statBonus = stat.D20ModifierValue;
+            int levelBonus = 0;
+            LastQueryString.Append(" + ");
+            LastQueryString.Append(stat.Label);
+            LastQueryString.Append("  ");
+            LastQueryString.Append(statBonus.ToString("F0"));
+            if (level > 0) {
+                LastQueryString.Append(" + ");
+                levelBonus = HalfFloorBonus(level);
+                LastQueryString.Append(levelBonus.ToString("F0"));
+                LastQueryString.Append(" level");
+            }
+            LastQueryString.AppendNewLine();
+            return statBonus + levelBonus;
+        }
+
+        public static int CalculateD20Roll(int numDice) {
+            LastQueryString.Append("Rolled ");
+            int roll = 0;
+            for (int i = 0; i < numDice; i++) {
+                var diceRoll = Game.Random.Next(1, 21);
+                LastQueryString.AppendBold(diceRoll.ToString());
+                roll += diceRoll;
+            }
+            LastQueryString.AppendNewLine();
+            return roll;
         }
 
         public static float CalculateTotal(BaseStat stat, float percent) {
@@ -192,6 +249,30 @@ namespace PixelComrades {
 
         public static int TotalPrice(InventoryItem item) {
             return item.Price * item.Count;
+        }
+
+        public static int HalfFloorBonus(int value) {
+            if (value == 0) {
+                return 0;
+            }
+            return (int) Math.Floor(value / 2f);
+        }
+
+        public static int RollDice(int sides, int numDice) {
+            int roll = 0;
+            for (int i = 0; i < numDice; i++) {
+                var diceRoll = Game.Random.Next(1, sides + 1);
+                roll += diceRoll;
+            }
+            return roll;
+        }
+
+        public static int GetMaxDice(int sides, int numDice) {
+            int roll = 0;
+            for (int i = 0; i < numDice; i++) {
+                roll += sides;
+            }
+            return roll;
         }
 
         public static bool CheckVisible(CharacterTemplate npc) {

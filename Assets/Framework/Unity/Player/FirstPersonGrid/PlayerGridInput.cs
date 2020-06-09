@@ -146,8 +146,8 @@ namespace PixelComrades {
                 if (attack == null) {
                     actor.Entity.Post(new StatusUpdate(actor.Entity,"No Default Attack", Color.yellow));
                 }
-                else if (!attack.Get.TryStart(UICenterTarget.CurrentCharacter.Entity)) {
-                    actor.Entity.Post(new StatusUpdate(actor.Entity, attack.Get.EntityOwner.Find<StatusUpdateComponent>().Status, Color.yellow));
+                else if (!attack.Get.TryStart(UICenterTarget.CurrentCharacter)) {
+                    actor.Entity.Post(new StatusUpdate(actor.Entity, actor.Entity.Find<StatusUpdateComponent>().Status, Color.yellow));
                 }
             }
             if (WorldControlMonitor.Use()) {

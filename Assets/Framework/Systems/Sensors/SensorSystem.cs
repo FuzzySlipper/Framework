@@ -99,7 +99,7 @@ namespace PixelComrades {
         private void RunUpdate(ref SensorDetectingTemplate template) {
             var sensor = template.Sensor;
             sensor.DetectedCells.Clear();
-            var start = template.Position.Position;
+            var start = template.Position.Value;
             sensor.LastDetectedCenter = start;
             var fwd = template.Tr.ForwardDirection2D();
             var ls = World.Get<LineOfSightSystem>();

@@ -202,10 +202,37 @@ namespace PixelComrades {
             // contentPosition.y += contentPosition.height;
             EditorGUI.EndProperty();
         }
-        //
-        // public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-        //     return base.GetPropertyHeight(property, label) * 2f + 5f;
-        // }
+    }
+
+    [CustomPropertyDrawer(typeof(DiceValue))]
+    public class DiceValueDrawer : PropertyDrawer {
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            label = EditorGUI.BeginProperty(position, label, property);
+            Rect contentPosition = EditorGUI.PrefixLabel(position, label);
+            EditorGUI.indentLevel = 0;
+            contentPosition.width *= 0.2f;
+            
+            SerializedProperty diceRolls = property.FindPropertyRelative("DiceRolls");
+            SerializedProperty diceSides = property.FindPropertyRelative("DiceSides");
+            SerializedProperty bonus = property.FindPropertyRelative("Bonus");
+            
+            diceRolls.intValue = EditorGUI.IntField(contentPosition, diceRolls.intValue);
+            
+            contentPosition.x += contentPosition.width;
+            EditorGUI.LabelField(contentPosition, "d");
+            
+            contentPosition.x += contentPosition.width;
+            diceSides.intValue = EditorGUI.IntField(contentPosition, diceSides.intValue);
+
+            contentPosition.x += contentPosition.width;
+            EditorGUI.LabelField(contentPosition, "+");
+            
+            contentPosition.x += contentPosition.width;
+            bonus.intValue = EditorGUI.IntField(contentPosition, bonus.intValue);
+            
+            EditorGUI.EndProperty();
+        }
     }
 
     [CustomPropertyDrawer(typeof(GenericKeyedValue), true)]

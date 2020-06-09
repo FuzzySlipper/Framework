@@ -7,9 +7,10 @@ namespace PixelComrades {
 
         private CachedComponent<RaiseDeadImpact> _component = new CachedComponent<RaiseDeadImpact>();
 
-        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _component, EntityStats
-        };
+        public override List<CachedComponent> GatherComponents
+            => new List<CachedComponent>() {
+                _component, EntityStats
+            };
 
 
         public override System.Type[] GetTypes() {
@@ -19,7 +20,7 @@ namespace PixelComrades {
         }
 
         public void RuleEventEnded(ref ImpactEvent context) {
-            context.Target.Post(new RaiseDeadEvent(context.Origin, context.Target));
+            context.Target.Post(new RaiseDeadEvent(context.Action, context.Origin, context.Target));
         }
     }
 }

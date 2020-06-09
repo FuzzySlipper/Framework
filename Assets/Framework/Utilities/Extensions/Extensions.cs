@@ -2402,7 +2402,7 @@ namespace PixelComrades {
         public static void SortByDistanceAsc(this List<Entity> list, Point3 center) {
             for (int write = 0; write < list.Count; write++) {
                 for (int sort = 0; sort < list.Count - 1; sort++) {
-                    if (list[sort].Get<GridPosition>().Position.SqrDistance(center) > list[sort + 1].Get<GridPosition>().Position.SqrDistance(center)) {
+                    if (list[sort].Get<GridPosition>().Value.SqrDistance(center) > list[sort + 1].Get<GridPosition>().Value.SqrDistance(center)) {
                         var lesser = list[sort + 1];
                         list[sort + 1] = list[sort];
                         list[sort] = lesser;

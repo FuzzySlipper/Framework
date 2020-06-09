@@ -51,7 +51,16 @@ namespace PixelComrades {
         public void SetChild(Transform other) {
             other.SetParent(Value);
         }
-        
+
+        public Quaternion GetLookAtRotation(Vector3 origin, bool ignoreElevation = false) {
+            var targetPos = position;
+            if (ignoreElevation) {
+                targetPos.y = origin.y;
+            }
+            Vector3 relativePos = targetPos - origin;
+            return Quaternion.LookRotation(relativePos);
+        }
+
         /// <summary>
         /// Set transform position, use only in TransformSystem
         /// </summary>
