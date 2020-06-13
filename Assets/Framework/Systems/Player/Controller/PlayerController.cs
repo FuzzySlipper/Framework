@@ -8,7 +8,8 @@ namespace PixelComrades {
         private ValueHolder<bool> _moveEnabled = new ValueHolder<bool>(true);
         private bool _isMoving = false;
         private Point3 _gridPosition;
-        
+
+        protected PlayerControllerConfig Config;
         public Entity MainEntity { get; protected set; }
         public ValueHolder<bool> MoveEnabledHolder { get { return _moveEnabled; } }
         public Transform Tr { get; private set; }
@@ -22,6 +23,7 @@ namespace PixelComrades {
         }
 
         public PlayerController(PlayerControllerConfig config) {
+            Config = config;
             Tr = config.MainTr;
         }
 
@@ -43,6 +45,9 @@ namespace PixelComrades {
         }
 
         public virtual void SystemUpdate(float dt) {
+            if (!Active) {
+                return;
+            }
             if (_gridPosition != (Tr.position + Vector3.up).ToMapGridP3()) {
                 UpdateCell();
             }
@@ -60,13 +65,14 @@ namespace PixelComrades {
             MessageKit.post(Messages.PlayerReachedDestination);
         }
 
-        public abstract bool TryOpenDoor(Door door);
+        public virtual bool TryOpenDoor(Door door) {
+            return false;
+        }
 
         public virtual void Teleport(Vector3 location, Quaternion rotation) {
+            Teleport(location);
             Tr.rotation = rotation;
-            Tr.position = FindFloorPoint(location);
             MessageKit<float>.post(Messages.PlayerViewRotated, rotation.eulerAngles.y);
-            MessageKit.post(Messages.PlayerTeleported);
         }
 
         public virtual void Teleport(Vector3 location) {

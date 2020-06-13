@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace PixelComrades {
     public class TurnBasedCharacterTemplate : CharacterTemplate {
-        private CachedComponent<BlockCellLocation> _location = new CachedComponent<BlockCellLocation>();
+        private CachedComponent<CellLocation> _location = new CachedComponent<CellLocation>();
         private CachedComponent<TurnBasedComponent> _turnBased = new CachedComponent<TurnBasedComponent>();
         private CachedComponent<CombatPathfinderComponent> _pathfinder = new CachedComponent<CombatPathfinderComponent>();
 
 
         public CombatPathfinderComponent Pathfinder { get => _pathfinder; }
         public TurnBasedComponent TurnBased { get => _turnBased; }
-        public BlockCellLocation Location { get => _location; }
+        public CellLocation Location { get => _location; }
 
         public override List<CachedComponent> GatherComponents {
             get {

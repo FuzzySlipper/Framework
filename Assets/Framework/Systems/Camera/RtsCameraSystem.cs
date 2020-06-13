@@ -1,52 +1,12 @@
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
-    public class RtsCamera : MonoBehaviour, IPoolEvents, ISimpleCam {
-
-        [SerializeField] private float _lookAtHeightOffset = 1;// Y coordinate of camera target.   Only used if TerrainHeightViaPhysics and GetTerrainHeight are not set.
-        [SerializeField] private FloatRange _tiltRange = new FloatRange(-360, 360);
-        [SerializeField] private FloatRange _distanceRange = new FloatRange(50, 500);
-        [SerializeField] private bool _smoothing = false; // Should the camera "slide" between positions and targets?
-        [SerializeField] private float _moveDampening = 0.75f; // How "smooth" should the camera moves be?  Note: Smaller numbers are smoother
-        [SerializeField] private float _rotationDampening = 0.75f; // How "smooth" should the camera rotations be?  Note: Smaller numbers are smoother
-        [SerializeField] private float _tiltDampening = 0.75f; // How "smooth" should the camera tilts be?  Note: Smaller numbers are smoother
-        [SerializeField] private float _zoomDampening = 0.75f; // How "smooth" should the camera zooms be?  Note: Smaller numbers are smoother
-        [Header("Visibility")]
-        [SerializeField] private bool _useVisibilityCheck = false;
-        [SerializeField] private bool _showDebugCameraTarget = false; // If set, "small green sphere" will be shown indicating camera target position (even when Following)
-        [SerializeField] private float _cameraRadius = 1f;
-        [SerializeField] private bool _targetVisbilityViaPhysics = false; // If set, camera will raycast from target out in order to avoid objects being between target and camera
-        [SerializeField] private LayerMask _targetVisibilityIgnoreLayerMask = 0; // Layer mask to ignore when raycasting to determine camera visbility
-        [SerializeField] private bool _terrainHeightViaPhysics = false; // If set, camera will automatically raycast against terrain (using TerrainPhysicsLayerMask) to determine height 
-        [SerializeField] private LayerMask _terrainPhysicsLayerMask = 0; // Layer mask indicating which layers the camera should ray cast against for height detection
-        [Header("Follow")]
-        [SerializeField] private bool _followBehind = false; // If set, keyboard and mouse rotation will be disabled when Following a target
-        [SerializeField] private float _followRotationOffset = 0; // Offset (degrees from zero) when forcing follow behind target
-        [Header("Input")]
-        [SerializeField] private bool _moveCamera = true;
-        [SerializeField] private int _mouseOrbitButton = 1;
-        [SerializeField] private float _orthoMulti = 0.75f;
-        [SerializeField] private float _moveSpeed = 50;
-        [SerializeField] private float _rotateSpeed = 50f;
-        [SerializeField] private float _tiltSpeed = 50f;
-        [SerializeField] private float _zoomSpeed = 700f;
-        [SerializeField] private float _fastMoveSpeed = 300f;
-        [SerializeField] private KeyCode _fastMoveKeyCode1 = KeyCode.LeftShift;
-        [SerializeField] private string _zoomInputAxis = "Mouse ScrollWheel";
-        [SerializeField] private string _rotateInputAxis = "Mouse X";
-        [SerializeField] private string _tiltInputAxis = "Mouse Y";
-        [SerializeField] private string _horizontalInputAxis = "Horizontal";
-        [SerializeField] private string _verticalInputAxis = "Vertical";
-        [SerializeField] private KeyCode _breakFollowKey = KeyCode.Escape;
-        [SerializeField] private Transform _followTarget;
-        [SerializeField] private bool _limitPos = true;
-        [SerializeField] private Collider _cameraLimitSpace = null;
-        [SerializeField] private bool _autoInput = false;
-        [SerializeField] private float _distance = 0;
-
+    [AutoRegister]
+    public sealed class RtsCameraSystem : SystemWithSingleton<RtsCameraSystem, RtsCameraComponent>, IMainSystemUpdate, IMainLateUpdate {
+        
         private Vector3 _lookAt;
         private float _rotation;
         private float _currDistance; // actual distance
@@ -60,55 +20,61 @@ namespace PixelComrades {
         private Vector3 _moveVector;
         private GameObject _target;
         private MeshRenderer _targetRenderer;
-        private Camera _camera;
         private float _defaultRotateTilt;
-
-        public Transform CameraTarget { get { return _target.transform; } }
-        public bool IsFollowing { get { return FollowTarget != null; } }
-        public Transform FollowTarget { get { return _followTarget; } }
-        public float LookAtHeightOffset { get => _lookAtHeightOffset; set => _lookAtHeightOffset = value; }
-        public float PanUpDownAxis { get => _lookAtHeightOffset; set => _lookAtHeightOffset += value; }
+        private float _distance = 0;
+        private float _rotateSpeed;
+        private float _tiltSpeed;
+        private float _lookAtHeightOffset;
+        private bool _followBehind;
         
-        void Awake() {
-            _camera = GetComponentInChildren<Camera>();
-        }
-
-        void Start() {
-            _defaultRotateTilt = Mathf.Max(_rotateSpeed, _tiltSpeed);
-            _currTilt = transform.rotation.eulerAngles.x;
-            _currRotation = transform.rotation.eulerAngles.y;
-            _distance = _distanceRange.Clamp(_distance);
-            _lookAt = transform.position;
-            _initialDistance = _currDistance = _distance;
-            _initialRotation = _rotation = _currRotation;
-            _initialTilt = _tilt = _currTilt;
-            // set our current values to the desired values so that we don't "slide in"
-            CreateTarget();
-        }
-
-        public void OnPoolSpawned() {
+        private RtsCameraConfig Config { get { return Current.Config; } }
+        private Camera Cam { get { return Current.Cam; } }
+        public Transform CameraTarget { get { return _target.transform; } }
+        public Transform FollowTarget { get { return Current.FollowTr; } }
+        
+        public RtsCameraSystem() {
             MessageKit<Transform>.addObserver(Messages.CameraFocusChanged, Follow);
         }
 
-        public void OnPoolDespawned() {
-            MessageKit<Transform>.removeObserver(Messages.CameraFocusChanged, Follow);
+        protected override void SetCurrent(RtsCameraComponent current) {
+            base.SetCurrent(current);
+            if (current == null) {
+                return;
+            }
+            _defaultRotateTilt = Mathf.Max(Config.RotateSpeed, Config.TiltSpeed);
+            _currTilt = current.Tr.rotation.eulerAngles.x;
+            _currRotation = current.Tr.rotation.eulerAngles.y;
+            _distance = current.Config.DistanceRange.Clamp(_distance);
+            _lookAt = current.Tr.position;
+            _initialDistance = _currDistance = _distance;
+            _initialRotation = _rotation = _currRotation;
+            _initialTilt = _tilt = _currTilt;
+            
+            UpdateConfig();
+            CreateTarget();
         }
 
-        protected void Update() {
-            //if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) {
-            //    return;
-            //}
-            if (_autoInput) {
+        public void UpdateConfig() {
+            _rotateSpeed = Config.RotateSpeed;
+            _lookAtHeightOffset = Config.LookAtHeightOffset;
+            _followBehind = Config.FollowBehind;
+        }
+
+        public void OnSystemUpdate(float dt, float unscaledDt) {
+            if (Current == null || !Current.Active) {
+                return;
+            }
+            if (Config.AutoInput) {
                 UpdateInput();
             }
-            if (_lastDebugCamera != _showDebugCameraTarget) {
+            if (_lastDebugCamera != Config.ShowDebugCameraTarget) {
                 if (_targetRenderer != null) {
-                    _targetRenderer.enabled = _showDebugCameraTarget;
-                    _lastDebugCamera = _showDebugCameraTarget;
+                    _targetRenderer.enabled = Config.ShowDebugCameraTarget;
+                    _lastDebugCamera = Config.ShowDebugCameraTarget;
                 }
             }
         }
-
+        
         public void ResetPosition() {
             ResetToInitialValues(true, true);
         }
@@ -116,11 +82,11 @@ namespace PixelComrades {
         public void SetCameraMode(string mode) {
             switch (mode) {
                 case "Overhead":
-                    _camera.orthographic = true;
+                    Cam.orthographic = true;
                     _rotateSpeed = _tiltSpeed = 0;
                     break;
                 default:
-                    _camera.orthographic = false;
+                    Cam.orthographic = false;
                     _rotateSpeed = _tiltSpeed = _defaultRotateTilt;
                     break;
             }
@@ -130,9 +96,12 @@ namespace PixelComrades {
             UpdateInput();
         }
 
-        protected void LateUpdate() {
-            if (IsFollowing) {
-                _lookAt = _followTarget.position;
+        public void OnSystemLateUpdate(float dt, float unscaledDt) {
+            if (Current == null || !Current.Active) {
+                return;
+            }
+            if (Current.FollowTr != null) {
+                _lookAt = Current.FollowTr.position;
             }
             else {
                 _moveVector.y = 0;
@@ -140,19 +109,19 @@ namespace PixelComrades {
                 _lookAt.y = GetHeightAt(_lookAt.x, _lookAt.z);
             }
             _lookAt.y += _lookAtHeightOffset;
-            if (_limitPos && !_cameraLimitSpace.bounds.Contains(_lookAt)) {
-                _lookAt = _cameraLimitSpace.ClosestPointOnBounds(_lookAt);
+            if (Config.LimitPos && !Current.CameraLimitSpace.bounds.Contains(_lookAt)) {
+                _lookAt = Current.CameraLimitSpace.ClosestPointOnBounds(_lookAt);
             }
-            _tilt = _tiltRange.Clamp(_tilt);
-            _distance = _distanceRange.Clamp(_distance);
+            _tilt = Config.TiltRange.Clamp(_tilt);
+            _distance = Config.DistanceRange.Clamp(_distance);
             //LookAt = new Vector3(Mathf.Clamp(LookAt.x, MinBounds.x, MaxBounds.x),
             //    Mathf.Clamp(LookAt.y, MinBounds.y, MaxBounds.y), Mathf.Clamp(LookAt.z, MinBounds.z, MaxBounds.z));
             
-            if (_smoothing) {
-                _currRotation = Mathf.LerpAngle(_currRotation, _rotation, TimeManager.DeltaUnscaled * _rotationDampening);
-                _currDistance = Mathf.Lerp(_currDistance, _distance, TimeManager.DeltaUnscaled * _zoomDampening);
-                _currTilt = Mathf.LerpAngle(_currTilt, _tilt, TimeManager.DeltaUnscaled * _tiltDampening);
-                _target.transform.position = Vector3.Lerp(_target.transform.position, _lookAt, TimeManager.DeltaUnscaled * _moveDampening);
+            if (Config.Smoothing) {
+                _currRotation = Mathf.LerpAngle(_currRotation, _rotation, TimeManager.DeltaUnscaled * Config.RotationDampening);
+                _currDistance = Mathf.Lerp(_currDistance, _distance, TimeManager.DeltaUnscaled * Config.ZoomDampening);
+                _currTilt = Mathf.LerpAngle(_currTilt, _tilt, TimeManager.DeltaUnscaled * Config.TiltDampening);
+                _target.transform.position = Vector3.Lerp(_target.transform.position, _lookAt, TimeManager.DeltaUnscaled * Config.MoveDampening);
             }
             else {
                 _currRotation = _rotation;
@@ -163,13 +132,13 @@ namespace PixelComrades {
 
             _moveVector = Vector3.zero;
             // if we're following AND forcing behind, override the rotation to point to target (with offset)
-            if (IsFollowing && _followBehind) {
+            if (Current.FollowTr != null && _followBehind) {
                 ForceFollowBehind();
             }
 
             // optionally, we'll check to make sure the target is visible
             // Note: we only do this when following so that we don't "jar" when moving manually
-            if (IsFollowing && _targetVisbilityViaPhysics && DistanceToTargetIsLessThan(1f)) {
+            if (Current.FollowTr != null && Config.TargetVisbilityViaPhysics && DistanceToTargetIsLessThan(1f)) {
                 EnsureTargetIsVisible();
             }
             // recalculate the actual position of the camera based on the above
@@ -231,11 +200,11 @@ namespace PixelComrades {
         /// <param name="followTarget">Transform which the camera should follow</param>
         /// <param name="snap">If true, camera will "snap" to the position, else will "slide"</param>
         public void Follow(Transform followTarget, bool snap) {
-            _followTarget = followTarget;
+            Current.FollowTr = followTarget;
 
-            if (_followTarget != null) {
+            if (Current.FollowTr != null) {
                 if (snap) {
-                    _lookAt = _followTarget.position;
+                    _lookAt = Current.FollowTr.position;
                 }
             }
         }
@@ -270,9 +239,9 @@ namespace PixelComrades {
             //
             // priority 2:  use physics ray casting to get height at point
             //
-            if (_terrainHeightViaPhysics) {
+            if (Config.TerrainHeightViaPhysics) {
                 RaycastHit hitInfo;
-                if (Physics.Raycast(new Vector3(x, transform.position.y, z), new Vector3(0, -1, 0), out hitInfo, 350f, _terrainPhysicsLayerMask)) {
+                if (Physics.Raycast(new Vector3(x, Current.Tr.position.y, z), new Vector3(0, -1, 0), out hitInfo, 350f, Config.TerrainPhysicsLayerMask)) {
                     return hitInfo.point.y;
                 }
                 return 0; // no hit!
@@ -282,21 +251,21 @@ namespace PixelComrades {
 
         private void UpdateCamera() {
             Quaternion rotation = Quaternion.Euler(_currTilt, _currRotation, 0);
-            var v = new Vector3(0.0f, 0.0f, -_currDistance * (_camera.orthographic ? _orthoMulti : 1 ));
+            var v = new Vector3(0.0f, 0.0f, -_currDistance * (Cam.orthographic ? Config.OrthoMulti : 1 ));
             Vector3 position = rotation * v + _target.transform.position;
 
-            if (_camera.orthographic) {
-                _camera.orthographicSize = _currDistance * _orthoMulti;
+            if (Cam.orthographic) {
+                Cam.orthographicSize = _currDistance * Config.OrthoMulti;
             }
-            if (_useVisibilityCheck) {
+            if (Config.UseVisibilityCheck) {
                 float y = GetHeightAt(position.x, position.z) + 1;
                 if (y > position.y) {
                     position.y = y;
                 }                
             }
             // update position and rotation of camera
-            transform.rotation = rotation;
-            transform.position = position;
+            Current.Tr.rotation = rotation;
+            Current.Tr.position = position;
         }
 
         private void CreateTarget() {
@@ -317,11 +286,11 @@ namespace PixelComrades {
         }
 
         private bool DistanceToTargetIsLessThan(float sqrDistance) {
-            if (!IsFollowing) {
+            if (Current.FollowTr == null) {
                 return true; // our distance is technically zero
             }
             Vector3 p1 = _target.transform.position;
-            Vector3 p2 = _followTarget.position;
+            Vector3 p2 = FollowTarget.position;
             p1.y = p2.y = 0; // ignore height offset
             Vector3 v = p1 - p2;
             float vd = v.sqrMagnitude; // use sqr for performance
@@ -330,13 +299,13 @@ namespace PixelComrades {
         }
 
         private void EnsureTargetIsVisible() {
-            Vector3 direction = (transform.position - _target.transform.position);
+            Vector3 direction = (Current.Tr.position - _target.transform.position);
             direction.Normalize();
             float distance = _distance;
             RaycastHit hitInfo;
             //if (Physics.Raycast(_target.transform.position, direction, out hitInfo, distance, ~TargetVisibilityIgnoreLayerMask))
-            if (Physics.SphereCast(_target.transform.position, _cameraRadius, direction, out hitInfo, distance,
-                ~_targetVisibilityIgnoreLayerMask)) {
+            if (Physics.SphereCast(_target.transform.position, Config.CameraRadius, direction, out hitInfo, distance,
+                ~ Config.TargetVisibilityIgnoreLayerMask)) {
                 if (hitInfo.transform != _target) // don't collide with outself!
                 {
                     _currDistance = hitInfo.distance - 0.1f;
@@ -345,14 +314,14 @@ namespace PixelComrades {
         }
 
         private void ForceFollowBehind() {
-            Vector3 v = _followTarget.transform.forward * -1;
+            Vector3 v = FollowTarget.transform.forward * -1;
             float angle = Vector3.Angle(Vector3.forward, v);
             float sign = (Vector3.Dot(v, Vector3.right) > 0.0f) ? 1.0f : -1.0f;
-            _currRotation = _rotation = 180f + (sign * angle) + _followRotationOffset;
+            _currRotation = _rotation = 180f + (sign * angle) + Config.FollowRotationOffset;
         }
 
         public void UpdateInput(Vector2 move, float scroll, bool rotate) {
-            _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
+            _distance -= scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled;
             if (rotate) {
                 float tilt = move.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
@@ -360,10 +329,10 @@ namespace PixelComrades {
                 float rot = move.x;
                 _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
             }
-            else if (_moveCamera) {
-                float speed = _moveSpeed;
-                if (Input.GetKey(_fastMoveKeyCode1)) {
-                    speed = _fastMoveSpeed;
+            else if (Config.MoveCamera) {
+                float speed = Config.MoveSpeed;
+                if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode1)) {
+                    speed = Config.FastMoveSpeed;
                 }
                 float h = move.x;
                 if (Mathf.Abs(h) > 0.001f) {
@@ -378,38 +347,36 @@ namespace PixelComrades {
         }
 
         public void UpdateInput() {
-            if (Input.GetKey(_breakFollowKey)) {
+            if (PlayerInputSystem.GetKeyDown(Config.BreakFollowKey)) {
                 EndFollow();
             }
-            float scroll = Input.GetAxisRaw(_zoomInputAxis);
+            float scroll = Mouse.current.scroll.ReadValue().y;
 
-            _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
-            if (Input.GetMouseButton(_mouseOrbitButton)) {
-                float tilt = Input.GetAxisRaw(_tiltInputAxis);
+            _distance -= scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled;
+            if (PlayerInputSystem.GetMouseButtonDown(Config.MouseOrbitButton)) {
+                float tilt = PlayerInputSystem.LookInput.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
 
-                float rot = Input.GetAxisRaw(_rotateInputAxis);
+                float rot = PlayerInputSystem.LookInput.x;
                 _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
             }
-            if (!_moveCamera) {
+            if (!Config.MoveCamera) {
                 return;
             }
-            float speed = _moveSpeed;
-            if (Input.GetKey(_fastMoveKeyCode1)) {
-                speed = _fastMoveSpeed;
+            float speed = Config.MoveSpeed;
+            if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode1)) {
+                speed = Config.FastMoveSpeed;
             }
 
-            float h = Input.GetAxisRaw(_horizontalInputAxis);
+            float h = PlayerInputSystem.MoveInput.x;
             if (Mathf.Abs(h) > 0.001f) {
                 AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
             }
 
-            float v = Input.GetAxisRaw(_verticalInputAxis);
+            float v = PlayerInputSystem.MoveInput.y;
             if (Mathf.Abs(v) > 0.001f) {
                 AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
             }
         }
-
-        
     }
 }

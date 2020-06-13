@@ -6,12 +6,12 @@ namespace PixelComrades {
     [AutoRegister]
     public sealed class NpcTurnBasedSystem : SystemBase {
         
-        List<CombatPathfinder.BlockCellNode> _moves = new List<CombatPathfinder.BlockCellNode>();
+        List<CombatPathfinder.LevelCellNode> _moves = new List<CombatPathfinder.LevelCellNode>();
         private List<ActionTemplate> _tempActionList = new List<ActionTemplate>();
         public NpcTurnBasedSystem(){}
 
         public void TurnStart(TurnBasedCharacterTemplate character) {
-            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(CombatArenaMap.Current.Cells, character);
+            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(Game.CombatMap.Cells, character);
             character.Pathfinder.MoveSpeed = World.Get<RulesSystem>().Post(new GatherMoveSpeedEvent(character, 0)).Total;
             //character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed);
             var targetList = character.Faction == (int) Factions.PlayerAllies ? CombatArenaSystem.Enemies : CombatArenaSystem.Friendlies;
@@ -28,7 +28,7 @@ namespace PixelComrades {
                 }
                 _moves.Clear();
                 for (int d = 0; d < DirectionsExtensions.DiagonalLength; d++) {
-                    var cell = CombatArenaMap.Current.Get(target.Position + ((DirectionsEight) d).ToPoint3());
+                    var cell = Game.CombatMap.Get(target.Position + ((DirectionsEight) d).ToPoint3());
                     if (cell == null) {
                         continue;
                     }
@@ -98,7 +98,7 @@ namespace PixelComrades {
             character.Pathfinder.Value = null;
         }
 
-        private void SortByDistanceAsc(List<CombatPathfinder.BlockCellNode> list) {
+        private void SortByDistanceAsc(List<CombatPathfinder.LevelCellNode> list) {
             for (int write = 0; write < list.Count; write++) {
                 for (int sort = 0; sort < list.Count - 1; sort++) {
                     if (list[sort].StartCost > list[sort + 1].StartCost) {

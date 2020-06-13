@@ -7,29 +7,23 @@ using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class PlayerGridInput : UnityInputHandler {
-        #if AStarPathfinding
-        private NNConstraint _constraint;
-        #endif
 
-        public PlayerGridInput(PlayerInput input) : base(input) {
-            #if AStarPathfinding
-            _constraint = NNConstraint.None;
-            _constraint.constrainWalkability = true;
-            _constraint.walkable = true;
-            #endif
+        private PlayerGridController _controller;
+        private static float _moveCheck = 0.1f;
+
+        public PlayerGridInput(PlayerInput input, PlayerGridController controller) : base(input) {
+            _controller = controller;
         }
 
         public void DebugPlayerMove() {
             Debug.LogFormat("PlayerMoveEnabled {0}", PlayerControllerSystem.Current.MoveEnabledHolder.Debug());
         }
 
-
         public void HealAll() {
             for (int i = 0; i < PlayerPartySystem.Party.Length; i++) {
                 PlayerPartySystem.Party[i].Stats.SetMax();
             }
         }
-
 
         protected override void MenuInput() {
             base.MenuInput();
@@ -38,41 +32,39 @@ namespace PixelComrades {
             }
         }
 
-
         protected override void GameplayInput() {
-            var gridMover = PlayerControllerSystem.Current as PlayerGridController;
-            if (!Game.GameActive || gridMover == null || !PlayerControllerSystem.Current.CanMove) {
+            if (!Game.GameActive || _controller == null || !PlayerControllerSystem.Current.CanMove) {
                 return;
             }
-            LookInput = new Vector2(GetAxisRaw(PlayerControls.LookX), GetAxisRaw(PlayerControls.LookY));
+            SetMoveLook();
             // if (GetButtonDown(PlayerControls.RotateLeft)) {
-            //      gridMover.RotateActorTo(Directions.Left);
+            //       gridMover.RotateActorTo(Directions.Left);
             // }
             // if (GetButtonDown(PlayerControls.RotateRight)) {
-            //     gridMover.RotateActorTo(Directions.Right);
+            //      gridMover.RotateActorTo(Directions.Right);
             // }
-            // LevelCell targetCell = null;
-            // if (GetButton(PlayerControls.MoveRight)) {
-            //     targetCell = GetLevelCell(gridMover.GridPosition + gridMover.ActorPivot.right.toPoint3());
+            LevelCell targetCell = null;
+            if (MoveInput.x > _moveCheck) {
+                targetCell = GetLevelCell(_controller.GridPosition + _controller.Tr.right.toPoint3());
+            }
+            else if (MoveInput.x < -_moveCheck) {
+                targetCell = GetLevelCell(_controller.GridPosition - _controller.Tr.right.toPoint3());
+            }
+            else if (MoveInput.y > _moveCheck) {
+                targetCell = GetLevelCell(_controller.GridPosition + _controller.Tr.forward.toPoint3());
+            }
+            else if (MoveInput.y < -_moveCheck) {
+                targetCell = GetLevelCell(_controller.GridPosition - _controller.Tr.forward.toPoint3());
+            }
+            else if (!IsCursorOverUI && Mouse.current.rightButton.isPressed) {
+                targetCell = GetLevelCell(_controller.GridPosition + _controller.Tr.forward.toPoint3());
+            }
+            // if (GetKeyDown(GridControls.LookDown)) {
+            //     GridCamera.main.LookDown();
             // }
-            // else if (GetButton(PlayerControls.MoveLeft)) {
-            //     targetCell = GetLevelCell(gridMover.GridPosition - gridMover.ActorPivot.right.toPoint3());
-            // }
-            // else if (GetButton(PlayerControls.MoveForward)) {
-            //     targetCell = GetLevelCell(gridMover.GridPosition + gridMover.ActorPivot.forward.toPoint3());
-            // }
-            // else if (!IsCursorOverUI && Input.GetMouseButtonDown(2)) {
-            //     targetCell = GetLevelCell(gridMover.GridPosition + gridMover.ActorPivot.forward.toPoint3());
-            // }
-            // else if (GetButton(PlayerControls.MoveBack)) {
-            //     targetCell = GetLevelCell(gridMover.GridPosition - gridMover.ActorPivot.forward.toPoint3());
-            // }
-            //if (GetKeyDown(GridControls.LookDown)) {
-            //    GridCamera.main.LookDown();
-            //}
-            // if (targetCell != null) {
-            //     gridMover.TryMove(targetCell);
-            // }
+            if (targetCell != null) {
+                _controller.TryMove(targetCell);
+            }
         }
 
         private LevelCell GetLevelCell(Point3 position) {
@@ -108,12 +100,13 @@ namespace PixelComrades {
         }
 
         private void CheckLeftClick() {
-            if (Input.GetMouseButton(0) && UIDragDropHandler.Active && !UIDragDropHandler.IsUiDragging && !UIDragDropHandler.IsManualDragging) {
+            var button = Mouse.current.leftButton;
+            if (button.isPressed && UIDragDropHandler.Active && !UIDragDropHandler.IsUiDragging && !UIDragDropHandler.IsManualDragging) {
                 if (UIDragDropHandler.TimeActive > UIDragDropHandler.DragTime) {
                     UIDragDropHandler.IsManualDragging = true;
                 }
             }
-            if (Input.GetMouseButtonUp(0) && UIDragDropHandler.IsManualDragging) {
+            if (button.wasReleasedThisFrame && UIDragDropHandler.IsManualDragging) {
                 if (EventSystem.current.currentSelectedGameObject != null) {
                     var drop = EventSystem.current.currentSelectedGameObject.GetComponent<IEndDragHandler>();
                     if (drop != null) {
@@ -121,7 +114,7 @@ namespace PixelComrades {
                     }
                 }
             }
-            if (IsCursorOverUI || !Input.GetMouseButtonDown(0)) {
+            if (IsCursorOverUI || !button.wasPressedThisFrame) {
                 return;
             }
             if (UISubMenu.Default.Active) {
@@ -141,14 +134,14 @@ namespace PixelComrades {
                         }
                     }
                 }
-                var attack = actor.Entity.Get<DefaultCommand>();
+                // var attack = actor.Entity.Get<DefaultCommand>();
                 //actor.Entity.GetOrAdd<CommandTarget>().Target = UICenterTarget.CurrentVisible.Entity;
-                if (attack == null) {
-                    actor.Entity.Post(new StatusUpdate(actor.Entity,"No Default Attack", Color.yellow));
-                }
-                else if (!attack.Get.TryStart(UICenterTarget.CurrentCharacter)) {
-                    actor.Entity.Post(new StatusUpdate(actor.Entity, actor.Entity.Find<StatusUpdateComponent>().Status, Color.yellow));
-                }
+                // if (attack == null) {
+                //     actor.Entity.Post(new StatusUpdate(actor.Entity,"No Default Attack", Color.yellow));
+                // }
+                // else if (!attack.Get.TryStart(UICenterTarget.CurrentCharacter)) {
+                //     actor.Entity.Post(new StatusUpdate(actor.Entity, actor.Entity.Find<StatusUpdateComponent>().Status, Color.yellow));
+                // }
             }
             if (WorldControlMonitor.Use()) {
                 return;
@@ -156,7 +149,8 @@ namespace PixelComrades {
         }
 
         private void CheckRightClick() {
-            if (!Input.GetMouseButtonDown(1)) {
+            var button = Mouse.current.rightButton;
+            if (!button.wasPressedThisFrame) {
                 return;
             }
             if (!IsCursorOverUI && UISubMenu.Default.Active) {
@@ -168,52 +162,6 @@ namespace PixelComrades {
             else {
                 UIDragDropHandler.TryRightClick();
             }
-        }
-
-        private bool CheckRightClickIso() {
-            if (IsCursorOverUI || !Input.GetMouseButtonDown(1)) {
-                return false;
-            }
-            if (!IsCursorOverUI && UISubMenu.Default.Active) {
-                UISubMenu.Default.Disable();
-            }
-            if (UIRadialMenu.Active) {
-                return false;
-            }
-            if (UIDragDropHandler.TryRightClick()) {
-                return false;
-            }
-            return true;
-        }
-
-        private bool CheckLeftClickIso() {
-            if (Input.GetMouseButton(0) && UIDragDropHandler.Active && !UIDragDropHandler.IsUiDragging && !UIDragDropHandler.IsManualDragging) {
-                if (UIDragDropHandler.TimeActive > UIDragDropHandler.DragTime) {
-                    UIDragDropHandler.IsManualDragging = true;
-                }
-            }
-            if (Input.GetMouseButtonUp(0) && UIDragDropHandler.IsManualDragging) {
-                if (EventSystem.current.currentSelectedGameObject != null) {
-                    var drop = EventSystem.current.currentSelectedGameObject.GetComponent<IEndDragHandler>();
-                    if (drop != null) {
-                        drop.OnEndDrag(null);
-                    }
-                }
-            }
-            if (IsCursorOverUI || !Input.GetMouseButtonDown(0)) {
-                return false;
-            }
-            if (UISubMenu.Default.Active) {
-                UISubMenu.Default.Disable();
-            }
-            if (UIDragDropHandler.CurrentData != null && UIDropWorldPanel.Active) {
-                UIDropWorldPanel.main.TryThrow(UIDragDropHandler.CurrentData);
-                return false;
-            }
-            if (WorldControlMonitor.Use()) {
-                return false;
-            }
-            return true;
         }
 
         //private void CheckIsoClick(bool leftClick, bool rightClick) {
@@ -259,6 +207,4 @@ namespace PixelComrades {
         //    }
         //}
     }
-
-    
 }

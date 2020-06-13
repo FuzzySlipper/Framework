@@ -13,7 +13,7 @@ namespace PixelComrades {
         private TweenState _rotateState;
         private PlayerGridControllerConfig _config;
 
-        public override Point3 GridPosition { get { return _currentCell != null ? _currentCell.WorldPosition : (Tr.position + Vector3.up).ToMapGridP3(); } }
+        public override Point3 GridPosition { get { return _currentCell != null ? _currentCell.Position : (Tr.position + Vector3.up).ToMapGridP3(); } }
         public LevelCell Cell { get { return _currentCell != null ? _currentCell : World.Get<MapSystem>().GetCell(Tr.position
         .ToMapGridP3()) as LevelCell;
          } }
@@ -59,6 +59,22 @@ namespace PixelComrades {
         public override void NewGame() {
             base.NewGame();
             _lastCell = _currentCell = null;
+            MainEntity = Entity.New("GridController");
+            MainEntity.Add(new TransformComponent(Tr));
+            MainEntity.Add(new LabelComponent("PlayerController"));
+            if (_config.PlayerAudioSet != null) {
+                MainEntity.Add(new AudioClipSetData(_config.PlayerAudioSet));
+            }
+            // entity.Add(new ImpactRendererComponent(UIPlayerSlot.GetSlot(0)));
+            MainEntity.Add(new PlayerRaycastTargeting());
+            var input = MainEntity.Add(new PlayerInputComponent(new PlayerGridInput(LazySceneReferences.main.PlayerInput, this)));
+            PlayerInputSystem.Set(input);
+            var cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, PlayerCamera.Cam));
+            CameraSystem.Set(cam);
+            FirstPersonCameraSystem.Set(cam);
+            UnityToEntityBridge.RegisterToEntity(_config.gameObject, MainEntity);
+            PlayerPartySystem.Get.GenerateRandomParty();
+            MessageKit.post(Messages.PlayerCharactersChanged);
         }
 
         public override void SystemUpdate(float dt) {
@@ -74,13 +90,13 @@ namespace PixelComrades {
         }
 
         private int _diffDir = 0;
-        [SerializeField] private int _minFramesForDirChange = 15;
+        private int _minFramesForDirChange = 15;
 
         private void CheckRotation() {
             if (PlayerCamera.AltCam != null) {
                 return;
             }
-            var newDir = Player.Cam.transform.parent.localRotation.eulerAngles.EulerToDirectionEight(true);
+            var newDir = Player.Cam.transform.localRotation.eulerAngles.EulerToDirectionEight(true);
             var currDir = Tr.localRotation.eulerAngles.EulerToDirectionEight(true);
             if (currDir != newDir) {
                 _diffDir++;
@@ -204,7 +220,7 @@ namespace PixelComrades {
             if (cell == null || Cell == null || cell.IsOccupied()) {
                 return;
             }
-            var movePos = cell.WorldPosition;
+            var movePos = cell.Position;
             if (!Cell.CanReach(cell, false)) {
                 return;
             }
@@ -240,12 +256,12 @@ namespace PixelComrades {
             base.UpdateCell();
             _lastCell = _currentCell;
             _currentCell = World.Get<MapSystem>().GetCell(GridPosition) as LevelCell;
-            if (_lastCell != null) {
-                _lastCell.PlayerLeft();
-            }
-            if (_currentCell != null) {
-                _currentCell.PlayerEntered();
-            }
+            // if (_lastCell != null) {
+            //     _lastCell.PlayerLeft();
+            // }
+            // if (_currentCell != null) {
+            //     _currentCell.PlayerEntered();
+            // }
             PlayerGameStats.MetersWalked += Game.MapCellSize;
             World.Get<PathfindingSystem>().UpdatePlayerPosition(Tr.position);
         }

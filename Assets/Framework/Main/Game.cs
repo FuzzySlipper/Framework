@@ -23,6 +23,7 @@ namespace PixelComrades {
 
         public static IMapCamera MiniMap;
         public static IMapCamera LevelMap;
+        public static LevelCellMap CombatMap { get; set; }
         public static Camera SpriteCamera { get { return _spriteCamera != null ? _spriteCamera : Camera.main; } set { _spriteCamera = value; } }
         public static Random Random { get { return _random; } }
         public static Random LevelRandom { get { return _levelRandom; } }

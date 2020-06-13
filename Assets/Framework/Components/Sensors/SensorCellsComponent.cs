@@ -11,7 +11,7 @@ namespace PixelComrades {
         public int MaxVisionDistance { get; private set; }
         public int MaxTurnsNpcVisible = 12;
 
-        public BufferedList<BaseCell> Cells = new BufferedList<BaseCell>();
+        public BufferedList<LevelCell> Cells = new BufferedList<LevelCell>();
 
         public SensorCellsComponent(int maxHearDistance = 12, int maxVisionDistance = 5) {
             MaxHearDistance = maxHearDistance;
@@ -115,7 +115,7 @@ namespace PixelComrades {
             }
         }
 
-        public void UpdateCellMapVisible(BaseCell cell) {
+        public void UpdateCellMapVisible(LevelCell cell) {
             if (Cells.Contains(cell)) {
                 return;
             }

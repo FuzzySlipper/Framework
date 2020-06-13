@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     [Priority(Priority.Highest)]
-    public sealed class FirstPersonCameraSystem : SystemBase, IMainLateUpdate, IMainFixedUpdate {
+    public sealed class FirstPersonCameraSystem : SystemBase<FirstPersonCameraSystem>, IMainLateUpdate, IMainFixedUpdate {
 
         private GameOptions.CachedFloat _positionSpeed = new GameOptions.CachedFloat("CameraPositionSpeed");
         private GameOptions.CachedFloat _sensitivity = new GameOptions.CachedFloat("CameraSensitivity");
@@ -22,7 +22,7 @@ namespace PixelComrades {
         }
         
         public void OnSystemLateUpdate(float dt, float unscaledDt) {
-            if (_singleton == null) {
+            if (_singleton == null || !_singleton.Active) {
                 return;
             }
             _singleton.RotationX += PlayerInputSystem.LookInput.x * _sensitivity;
@@ -42,7 +42,7 @@ namespace PixelComrades {
         }
 
         public void OnFixedSystemUpdate(float dt) {
-            if (_singleton == null) {
+            if (_singleton == null || !_singleton.Active) {
                 return;
             }
             UpdateSprings();
@@ -67,8 +67,8 @@ namespace PixelComrades {
             _singleton.CamTr.position = _singleton.FollowTr.position;
         }
 
-        public void Set(PlayerCameraComponent component) {
-            _singleton = component;
+        public static void Set(PlayerCameraComponent component) {
+            Get._singleton = component;
         }
 
         public static Vector3 TransformPoint(Vector3 worldPosition, Quaternion rotation, Vector3 localPosition) {

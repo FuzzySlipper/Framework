@@ -8,19 +8,19 @@ namespace PixelComrades {
     public sealed class PlayerTurnBasedSystem : SystemBase<PlayerTurnBasedSystem> {
     
         private LineRenderer _pathLine;
-        private BlockCell _currentMovePnt;
+        private LevelCell _currentMovePnt;
 
-        private TurnBasedCharacterTemplate _current;
+        public static TurnBasedCharacterTemplate Current { get; private set; }
         
         public PlayerTurnBasedSystem() {
             _pathLine = LazyDb.Main.PlayerMovePath;
         }
 
         public void TurnStart(TurnBasedCharacterTemplate character) {
-            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(CombatArenaMap.Current.Cells, character);
+            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(Game.CombatMap.Cells, character);
             character.Pathfinder.MoveSpeed = World.Get<RulesSystem>().Post(new GatherMoveSpeedEvent(character, 0)).Total;
             SetupPathfindingSprites(character);
-            _current = character;
+            Current = character;
         }
 
         public void TurnContinue(TurnBasedCharacterTemplate character) {
@@ -31,24 +31,24 @@ namespace PixelComrades {
         }
 
         public void OnMoveClick(Vector3 hitPnt) {
-            var hitCell = CombatArenaMap.Current.Get(hitPnt.ToUnitGrid());
+            var hitCell = Game.CombatMap.Get(hitPnt);
             if (hitCell == _currentMovePnt) {
-                if (TryMoveTo(_current, hitCell)) {
+                if (TryMoveTo(Current, hitCell)) {
                     _pathLine.positionCount = 0;
                 }
                 return;
             }
             _currentMovePnt = hitCell;
-            int moveAp = _current.TurnBased.MoveActions + _current.TurnBased.StandardActions;
-            _current.Pathfinder.Value.SetCurrentPath(_current.Location, _currentMovePnt, moveAp, _current.Pathfinder.MoveSpeed);
-            _pathLine.positionCount = _current.Pathfinder.Value.CurrentPath.Count;
-            for (int i = 0; i < _current.Pathfinder.Value.CurrentPath.Count; i++) {
-                var cell = _current.Pathfinder.Value.CurrentPath[i];
+            int moveAp = Current.TurnBased.MoveActions + Current.TurnBased.StandardActions;
+            Current.Pathfinder.Value.SetCurrentPath(Current.Location, _currentMovePnt, moveAp, Current.Pathfinder.MoveSpeed);
+            _pathLine.positionCount = Current.Pathfinder.Value.CurrentPath.Count;
+            for (int i = 0; i < Current.Pathfinder.Value.CurrentPath.Count; i++) {
+                var cell = Current.Pathfinder.Value.CurrentPath[i];
                 _pathLine.SetPosition(i, cell.PositionV3);
             }
         }
 
-        private bool TryMoveTo(TurnBasedCharacterTemplate character, BlockCell pos) {
+        private bool TryMoveTo(TurnBasedCharacterTemplate character, LevelCell pos) {
             if (character.Pathfinder.Value.CurrentPath.Count <= 0) {
                 return false;
             }
@@ -65,7 +65,7 @@ namespace PixelComrades {
         public void TurnEnd(TurnBasedCharacterTemplate character) {
             CombatPathfinder.Store(character.Pathfinder.Value);
             character.Pathfinder.Value = null;
-            _current = null;
+            Current = null;
         }
 
         private void SetupPathfindingSprites(TurnBasedCharacterTemplate character) {

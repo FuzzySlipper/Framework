@@ -7,7 +7,7 @@ namespace PixelComrades {
     public interface IPathfindingGrid : IPathfindingSource {
         bool CanAgentEnter(int id, Point3 pos, bool finalDestination);
         void Exit(int id, Point3 pos);
-        void SetWalkable(BaseCell c);
+        void SetWalkable(LevelCell c);
         void ClearLocks();
         void SetStationaryAgent(Point3 pos, int id, bool status);
         void SetAgentCurrentPath(Point3 pos, int id, bool status);

@@ -96,7 +96,7 @@ namespace PixelComrades {
 
         private static List<Shadow> _shadows = new List<Shadow>();
 
-        public static void GetVisibleCells(Point3 start, int octant, int maxRowDistance, Action<BaseCell, float> del) {
+        public static void GetVisibleCells(Point3 start, int octant, int maxRowDistance, Action<LevelCell, float> del) {
             if (del == null) {
                 return;
             }

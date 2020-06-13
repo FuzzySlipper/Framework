@@ -6,13 +6,13 @@ using System.Runtime.Serialization;
 
 namespace PixelComrades {
     [System.Serializable]
-    public sealed class BlockCellLocation : IComponent, IDisposable {
+    public sealed class CellLocation : IComponent, IDisposable {
 
-        public BlockCell Cell;
+        public LevelCell Cell;
 
-        public BlockCellLocation() { }
+        public CellLocation() { }
 
-        public BlockCellLocation(SerializationInfo info, StreamingContext context) {
+        public CellLocation(SerializationInfo info, StreamingContext context) {
             //BuildingIndex = info.GetValue(nameof(BuildingIndex), BuildingIndex);
         }
 
@@ -21,12 +21,12 @@ namespace PixelComrades {
         }
 
         public void Dispose() {
-            if (Cell != null && Cell.Unit.Entity == this.GetEntity()) {
+            if (Cell != null && Cell.Unit == this.GetEntity()) {
                 Cell.Unit = null;
             }
         }
 
-        public static implicit operator BlockCell(BlockCellLocation reference) {
+        public static implicit operator LevelCell(CellLocation reference) {
             return reference?.Cell;
         }
     }

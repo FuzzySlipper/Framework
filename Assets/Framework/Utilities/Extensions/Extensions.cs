@@ -1722,6 +1722,21 @@ namespace PixelComrades {
             return DirectionsEight.Front;
         }
 
+        public static DirectionsEight ToDirectionEight(this CornerDirections dir) {
+            switch (dir) {
+                case CornerDirections.NorthWest:
+                    return DirectionsEight.FrontLeft;
+                case CornerDirections.NorthEast:
+                    return DirectionsEight.FrontRight;
+                case CornerDirections.SouthEast:
+                    return DirectionsEight.RearRight;
+                case CornerDirections.SouthWest:
+                    return DirectionsEight.RearLeft;
+                default:
+                    return DirectionsEight.Front;
+            }
+        }
+
         public static Directions ToCardinalDir(this DirectionsEight dir) {
             switch (dir) {
                 case DirectionsEight.Front:

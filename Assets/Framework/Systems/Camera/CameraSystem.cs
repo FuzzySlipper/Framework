@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class CameraSystem : SystemBase, IReceive<CollisionEvent>, IReceiveGlobal<CameraPositionForceEvent>,
+    public sealed class CameraSystem : SystemWithSingleton<CameraSystem, PlayerCameraComponent>, IReceive<CollisionEvent>, IReceiveGlobal<CameraPositionForceEvent>,
         IReceiveGlobal<CameraRotationForceEvent>, IReceiveGlobal<CameraZoomForceEvent>, IReceive<EntityJumped>, IReceive<EntityLanded> {
         
         private static Vector3 _topDirection = new Vector3(-1, 0, 0);
@@ -26,25 +26,24 @@ namespace PixelComrades {
         private GameOptions.CachedInt _pullStrength = new GameOptions.CachedInt("PullStrength");
 
         private Dictionary<string, SpringEventConfig> _eventDict = new Dictionary<string, SpringEventConfig>();
-        private PlayerCameraComponent _singleton;
 
-        public void Set(PlayerCameraComponent component) {
-            _singleton = component;
+        protected override void SetCurrent(PlayerCameraComponent current) {
+            base.SetCurrent(current); 
             InitSprings();
         }
 
         private void InitSprings() {
-            _singleton.FovSpring.Initialize(false);
-            _singleton.FovSpring.Reset();
-            _singleton.MoveSpring.Initialize(false);
-            _singleton.MoveSpring.Reset();
-            _singleton.RotationSpring.Initialize(true);
-            _singleton.RotationSpring.Reset();
+            Current.FovSpring.Initialize(false);
+            Current.FovSpring.Reset();
+            Current.MoveSpring.Initialize(false);
+            Current.MoveSpring.Reset();
+            Current.RotationSpring.Initialize(true);
+            Current.RotationSpring.Reset();
         }
         
         public void Handle(CollisionEvent arg) {
             var cameraShakeOnDamage = arg.Target.Get<CameraShakeOnDamage>();
-            if (cameraShakeOnDamage == null || _singleton == null) {
+            if (cameraShakeOnDamage == null || Current == null) {
                 return;
             }
             AddRotationForce(-arg.HitNormal * cameraShakeOnDamage.IntensityMulti);
@@ -63,15 +62,15 @@ namespace PixelComrades {
         }
 
         public void ZoomForce(float force, int frames = 4) {
-            _singleton.FovSpring.AddForce(new Vector3(0, 0, force), frames);
+            Current.FovSpring.AddForce(new Vector3(0, 0, force), frames);
         }
 
         public void AddForce(Vector3 force, int frames = 4) {
-            _singleton.MoveSpring.AddForce(force, frames);
+            Current.MoveSpring.AddForce(force, frames);
         }
 
         public void AddRotationForce(Vector3 force, int frames = 4) {
-            _singleton.RotationSpring.AddForce(force, frames);
+            Current.RotationSpring.AddForce(force, frames);
         }
         
         public void PlaySpringAnimation(string animationEvent) {

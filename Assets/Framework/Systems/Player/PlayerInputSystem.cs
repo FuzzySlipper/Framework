@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     [AutoRegister, Priority(Priority.Highest)]
-    public sealed class PlayerInputSystem : SystemBase, IMainSystemUpdate {
+    public sealed class PlayerInputSystem : SystemWithSingleton<PlayerInputSystem, PlayerInputComponent>, IMainSystemUpdate {
 
         private static bool _moveInputBlocked = false;
         public static bool MoveInputLocked { get { return _moveInputBlocked; } set { _moveInputBlocked = value; } }
@@ -26,12 +26,11 @@ namespace PixelComrades {
             MessageKit<bool>.addObserver(Messages.ApplicationFocus, ReceivedFocus);
         }
 
-        private static CachedComponent<PlayerInputComponent> _local = new CachedComponent<PlayerInputComponent>();
         private static event System.Action OnCancel;
         private static string _cancelTarget;
         private static RaycastHit[] _hits = new RaycastHit[10];
         
-        private static IPlayerInputHandler LocalInput { get { return _local.Value?.Handler; } }
+        private static IPlayerInputHandler LocalInput { get; set; }
         public static bool IsCursorOverUI { get { return LocalInput.IsCursorOverUI; } }
         public static Ray GetLookTargetRay { get { return LocalInput.GetLookTargetRay; } }
         public static Vector2 LookInput { get { return LocalInput?.LookInput ?? Vector2.zero; } }
@@ -49,10 +48,6 @@ namespace PixelComrades {
                 return Mouse.current.middleButton.isPressed;
             }
             return false;
-        }
-
-        public static void Assign(PlayerInputComponent component) {
-            _local.Set(component);
         }
 
         public static Vector3 GetMouseRaycastPosition(ActionConfig config) {
@@ -102,7 +97,12 @@ namespace PixelComrades {
         public static float GetAxis(string button) {
             return LocalInput.GetAxis(button);
         }
-        
+
+        protected override void SetCurrent(PlayerInputComponent current) {
+            base.SetCurrent(current);
+            LocalInput = current.Handler;
+        }
+
         public void OnSystemUpdate(float dt, float unscaledDt) {
             if (_allInputBlocked || LocalInput == null) {
                 return;

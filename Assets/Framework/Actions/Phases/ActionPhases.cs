@@ -67,7 +67,7 @@ namespace PixelComrades {
             for (int x = 0; x < _radius; x++) {
                 for (int z = 0; z < _radius; z++) {
                     var pos = center + new Point3(x, 0, z);
-                    var cell = CombatArenaMap.Current.Get(pos);
+                    var cell = Game.CombatMap.Get(pos);
                     if (cell.Unit == null) {
                         continue;
                     }
@@ -102,7 +102,7 @@ namespace PixelComrades {
             for (int i = 0; i < _radius; i++) {
                 var pos = center;
                 pos[_axisDirection] += i;
-                var cell = CombatArenaMap.Current.Get(pos);
+                var cell = Game.CombatMap.Get(pos);
                 if (cell.Unit == null) {
                     continue;
                 }
@@ -134,7 +134,7 @@ namespace PixelComrades {
             for (int x = 0; x < _radius; x++) {
                 for (int z = 0; z < _radius; z++) {
                     var pos = center + new Point3(x, 0, z);
-                    var cell = CombatArenaMap.Current.Get(pos);
+                    var cell = Game.CombatMap.Get(pos);
                     if (cell.Unit == null || cell.Unit == cmd.Owner) {
                         continue;
                     }

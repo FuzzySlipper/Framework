@@ -300,9 +300,9 @@ namespace PixelComrades {
             _threadLock.ExitWriteLock();
         }
 
-        public void SetWalkable(BaseCell c) {
+        public void SetWalkable(LevelCell c) {
             _threadLock.EnterWriteLock();
-            var p3 = new Point3(c.WorldPositionV3);
+            var p3 = new Point3(c.PositionV3);
             var size = Game.MapCellSize / 2;
             for (int x = -size; x <= size; x++) {
                 for (int z = -size; z <= size; z++) {

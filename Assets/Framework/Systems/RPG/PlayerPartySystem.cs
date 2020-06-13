@@ -17,11 +17,10 @@ namespace PixelComrades {
         private GameOptions.CachedInt _partySize = new GameOptions.CachedInt("PartySize");
 
         public PlayerPartySystem() {
-            MessageKit.addObserver(Messages.PlayerNewGame, ClearParty);
             Party = new PlayerCharacterTemplate[_partySize];
         }
 
-        private void ClearParty() {
+        public void ClearParty() {
             for (int i = 0; i < Party.Length; i++) {
                 if (Party[i] != null) {
                     Party[i].Entity.RemoveObserver(this);
@@ -31,9 +30,11 @@ namespace PixelComrades {
         }
 
         public void GenerateRandomParty() {
+            ClearParty();
+            Party = new PlayerCharacterTemplate[_partySize];
             HashSet<int> pickedPortraits = new HashSet<int>();
             for (int i = 0; i < Party.Length; i++) {
-                var data = PlayerFactory.GenerateRandomCharacter();
+                var data = PlayerFactory.GetTurnBasedRandom();
                 while (true) {
                     int index = SpriteDatabase.Portraits.RandomIndex();
                     if (pickedPortraits.Contains(index)) {
@@ -137,6 +138,9 @@ namespace PixelComrades {
 
         public bool IsDead() {
             for (int i = 0; i < Party.Length; i++) {
+                if (Party[i] == null) {
+                    continue;
+                }
                 if (Party[i].Entity != null && !Party[i].IsDead) {
                     return false;
                 }

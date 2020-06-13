@@ -22,4 +22,39 @@ namespace PixelComrades {
             }
         }
     }
+
+    public abstract class SystemWithSingleton<T, TV> : SystemBase<T> where T : SystemWithSingleton<T,TV> {
+        
+        protected static readonly List<TV> SingletonList = new List<TV>();
+        public static TV Current { get; protected set; }
+
+        public static void Set(TV component) {
+            if (component == null) {
+                return;
+            }
+            if (!SingletonList.Contains(component)) {
+                SingletonList.Add(component);
+            }
+            Get.SetCurrent(component);
+        }
+
+        public static void Remove(TV component) {
+            SingletonList.Remove(component);
+            if (Current.Equals(component)) {
+                Get.SetCurrent(SingletonList.LastElement());
+            }
+        }
+
+        public static void RemoveCurrent() {
+            if (Current == null) {
+                return;
+            }
+            SingletonList.Remove(Current);
+            Get.SetCurrent(SingletonList.LastElement());
+        }
+
+        protected virtual void SetCurrent(TV current) {
+            Current = current;
+        }
+    }
 }

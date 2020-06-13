@@ -1,27 +1,47 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
     [AutoRegister]
-    public sealed class PlayerControllerSystem : SystemBase<PlayerControllerSystem>, IMainSystemUpdate {
+    public sealed class PlayerControllerSystem : SystemWithSingleton<PlayerControllerSystem, PlayerController>, IMainSystemUpdate {
 
         private GameOptions.CachedInt _inventorySize = new GameOptions.CachedInt("InventorySize"); //55
+        private Dictionary<System.Type, PlayerController> _controllerDict = new Dictionary<Type, PlayerController>();
         
-        public static PlayerController Current { get; private set; }
         public static IFirstPersonController FirstPersonController { get; private set; }
 
-        public void SetController(PlayerController controller) {
+        protected override void SetCurrent(PlayerController current) {
             if (Current != null) {
                 Current.Disable();
             }
-            Current = controller;
-            Current.Enable();
-            Player.Tr = controller.Tr;
-            FirstPersonController = controller as IFirstPersonController;
-            Player.MainEntity = controller.MainEntity;
-            if (!controller.MainEntity.HasComponent<ItemInventory>()) {
+            base.SetCurrent(current);
+            if (!_controllerDict.ContainsKey(current.GetType())) {
+                _controllerDict.Add(current.GetType(), current);
+            }
+            current.Enable();
+            Player.Tr = current.Tr;
+            FirstPersonController = current as IFirstPersonController;
+            Player.MainEntity = current.MainEntity;
+            if (!current.MainEntity.HasComponent<ItemInventory>()) {
                 Player.MainInventory = Player.MainEntity.Add(new ItemInventory(_inventorySize));
+            }
+        }
+
+        public void AddToDict(PlayerController current) {
+            if (!_controllerDict.ContainsKey(current.GetType())) {
+                _controllerDict.Add(current.GetType(), current);
+            }
+        }
+
+        public T GetController<T>() where T : PlayerController {
+            return _controllerDict.TryGetValue(typeof(T), out var current) ? current as T: null;
+        }
+
+        public void SetController<T>() where T : PlayerController {
+            if (_controllerDict.TryGetValue(typeof(T), out var current)) {
+                Set(current);
             }
         }
 
@@ -30,13 +50,15 @@ namespace PixelComrades {
                 Player.MainInventory.Clear();
                 UIPlayerComponents.InventoryUI.SetInventory(Player.MainInventory, "Party Items");
             }
-            if (Current != null) {
-                Current.NewGame();
+            foreach (var controller in _controllerDict) {
+                controller.Value.NewGame();
             }
+            // for (int i = 0; i < SingletonList.Count; i++) {
+            //     SingletonList[i].NewGame();
+            // }
         }
 
         public void SetActive(bool status) {
-            PlayerCamera.Cam.gameObject.SetActive(status);
             Current.SetActive(status);
         }
 
