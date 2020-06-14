@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine.AddressableAssets;
@@ -66,6 +67,29 @@ namespace PixelComrades {
             else {
                 EditorGUI.PropertyField(position, property, label);
             }
+        }
+    }
+    
+    [CustomPropertyDrawer (typeof (DropdownListAttribute), true)]
+    public class StringInListDrawer : PropertyDrawer {
+        // Draw the property inside the given rect
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+            var stringInList = (DropdownListAttribute) attribute;
+            var list = stringInList.List;
+            if (list == null) {
+                return;
+            }
+            if (property.propertyType == SerializedPropertyType.String) {
+                int index = Mathf.Max(0, Array.IndexOf(list, property.stringValue));
+                index = EditorGUI.Popup(position, property.displayName, index, list);
+                property.stringValue = list[index];
+            }
+            else if (property.propertyType == SerializedPropertyType.Integer) {
+                property.intValue = EditorGUI.Popup(position, property.displayName, property.intValue, list);
+            }
+            // else {
+            //     base.OnGUI(position, property, label);
+            // }
         }
     }
 

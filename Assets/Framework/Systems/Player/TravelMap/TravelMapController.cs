@@ -64,9 +64,9 @@ namespace PixelComrades {
 
         public override void NewGame() {
             base.NewGame();
-            MainEntity = Entity.New("StrategyController");
+            MainEntity = Entity.New("TravelController");
             MainEntity.Add(new TransformComponent(Tr));
-            MainEntity.Add(new LabelComponent("StrategyController"));
+            MainEntity.Add(new LabelComponent("TravelController"));
             // entity.Add(new ImpactRendererComponent(UIPlayerSlot.GetSlot(0)));
             MainEntity.Add(new PlayerRaycastTargeting());
             _input = MainEntity.Add(new PlayerInputComponent(new TravelMapInput(LazySceneReferences.main.PlayerInput, this)));

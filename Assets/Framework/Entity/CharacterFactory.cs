@@ -48,6 +48,8 @@ namespace PixelComrades {
             entity.Add(new AbilitiesContainer());
             // entity.Add(new SteeringInput());
             entity.Add(new CombatPathfinderComponent());
+            entity.Add(new CellLocation());
+            entity.Add(new TurnBasedComponent());
 
             return entity;
         }

@@ -35,7 +35,7 @@ using System.Collections.Generic;
                 return;
             }
             if (Mouse.current.leftButton.isPressed) {
-                if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.ActorMovement)) {
+                if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.Actor)) {
                     var clickEntity = UnityToEntityBridge.GetEntity(hit1.collider);
                     if (clickEntity != null) {
                         OnActorClick(clickEntity.GetTemplate<TurnBasedCharacterTemplate>());

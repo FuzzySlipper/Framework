@@ -5,7 +5,9 @@ using PixelComrades;
 
 namespace PixelComrades {
     
-    public interface IActionConfig {
+    public interface IActionConfig { 
+        List<ActionPhases> Phases { get; }
+        List<ActionHandler> Handlers { get; }
         int Range { get; }
         FloatRange Power { get; }
         CollisionType Collision { get; }
@@ -14,7 +16,6 @@ namespace PixelComrades {
         ScriptedEventConfig[] ScriptedEvents { get; }
         float CritMulti { get; }
         TargetType Targeting { get; }
-        string AbilityType { get; }
         StateGraph ActionGraph { get; }
     }
 

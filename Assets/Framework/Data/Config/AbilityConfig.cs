@@ -18,7 +18,7 @@ namespace PixelComrades {
         public ActionSource Source;
         [Range(0, 50)]public float Cost;
         public GenericConfigEntry[] Config = new GenericConfigEntry[0];
-        
+
         [Header("IActionConfig")]
         [SerializeField, ValueDropdown("AbilityTypesList")] private string _abilityType = AbilityTypes.Attack;
         [SerializeField, ValueDropdown("AbilityTypesList")] private string _secondaryType = AbilityTypes.None;
@@ -37,7 +37,11 @@ namespace PixelComrades {
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
         [SerializeField] private bool _addEvents = true;
         [SerializeField] private ItemRarity _rarity = ItemRarity.Common;
+        [SerializeField] private List<ActionPhases> _phases = new List<ActionPhases>();
+        [SerializeField] private List<ActionHandler> _handlers = new List<ActionHandler>();
         
+        public List<ActionHandler> Handlers { get => _handlers; }
+        public List<ActionPhases> Phases { get => _phases; }
         public string ID { get { return name; } }
         public string ActionTrigger { get => _actionTrigger; }
         public int Range { get => _range; }

@@ -27,7 +27,8 @@ namespace PixelComrades {
         public int AmmoAmount = 100;
         public ReloadType ReloadType = ReloadType.Repair;
         [Range(0, 5)] public float ReloadSpeedMulti = 1;
-        
+        public List<ActionPhases> Phases { get; }
+        public List<ActionHandler> Handlers { get; }
         public int Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }

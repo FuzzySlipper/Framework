@@ -58,9 +58,12 @@ namespace PixelComrades {
                 LastEvent = new ActionEvent(Action, Owner, target, hitPos, rot, state);
                 Owner.Post(LastEvent);
             }
-            // if (action.Line.Type == eventName) {
-            //     action.Provider.OnUsage(LastEvent, this);
-            // }
+            for (int i = 0; i < Action.Config.Actions.Count; i++) {
+                var action = Action.Config.Actions[i];
+                if (action.TargetEvent == eventName) {
+                    action.OnUsage(LastEvent, this);
+                }
+            }
         }
 
         public void ProcessHit(HitData hitData, Quaternion rot) {

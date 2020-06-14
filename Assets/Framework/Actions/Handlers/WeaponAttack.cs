@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public sealed class WeaponMeleeAttack : ActionHandler {
+    public sealed class WeaponAttack : ActionHandler {
 
         private const string Label = "WeaponAttack";
 
