@@ -26,6 +26,8 @@ namespace PixelComrades {
         private CachedComponent<EntityLevelComponent> _level = new CachedComponent<EntityLevelComponent>();
         private CachedComponent<GenericDataComponent> _genericData = new CachedComponent<GenericDataComponent>();
         private CachedComponent<ActionSlots> _actionSlots = new CachedComponent<ActionSlots>();
+        private CachedComponent<ModifierListComponent> _modList = new CachedComponent<ModifierListComponent>();
+        public ModifierListComponent ModList { get => _modList; }
 
         public GenericDataComponent GenericData { get => _genericData; }
         public TransformComponent Tr { get => _tr.Value; }
@@ -56,7 +58,7 @@ namespace PixelComrades {
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
             _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, _level, 
-            _actionSlots
+            _actionSlots, _modList
         };
 
         public VitalStat GetVital(int vital) {

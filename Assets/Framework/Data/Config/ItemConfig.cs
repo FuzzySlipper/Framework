@@ -6,11 +6,14 @@ using Sirenix.OdinInspector;
 namespace PixelComrades {
     public class ItemConfig : ScriptableObject, ICustomPreview {
 
-        public string Name;
-        public SpriteReference Icon;
-        [TextArea]public string Description;
+        [SerializeField] private string _name = "";
+        [SerializeField] private string _description = "";
+        [SerializeField, TextArea] private SpriteReference _icon = new SpriteReference();
         public ItemRarity Rarity = ItemRarity.Common;
         public int Price;
+        public string Name { get => _name; }
+        public string Description { get => _description; }
+        public SpriteReference Icon { get => _icon; }
         public string ID { get { return name; } }
         public virtual string ItemType { get { return ItemTypes.Item; } }
         public UnityEngine.Object Preview { get { return AssetReferenceUtilities.LoadAsset(Icon); }}

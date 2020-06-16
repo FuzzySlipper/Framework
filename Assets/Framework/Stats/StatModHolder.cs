@@ -9,19 +9,30 @@ namespace PixelComrades {
         public abstract void Attach(BaseStat target);
         public abstract void Remove();
         public abstract void Restore();
+        public abstract string ModID { get; }
         public abstract string StatID { get;}
+        public abstract BaseStat TargetStat { get; }
     }
 
     [System.Serializable]
     public class BasicValueModHolder : StatModHolder {
+        
         [SerializeField] private string _id;
         [SerializeField] private CachedStat<BaseStat> _targetStat;
         [SerializeField] private float _amount;
-
+        
+        public override string ModID { get => _id; }
+        public override BaseStat TargetStat { get => _targetStat; }
         public override string StatID { get { return _targetStat != null ? _targetStat.Stat.ID : ""; } }
 
         public BasicValueModHolder(float amount) {
             _amount = amount;
+        }
+
+        public BasicValueModHolder(BaseStat stat, BaseStat.StatValueMod valueMod) {
+            _targetStat = new CachedStat<BaseStat>(stat);
+            _amount = valueMod.Value;
+            _id = valueMod.Id;
         }
 
         public override void Attach(BaseStat target) {
@@ -50,7 +61,8 @@ namespace PixelComrades {
         [SerializeField] private string _id;
         [SerializeField] private CachedStat<BaseStat> _targetStat;
         [SerializeField] private float _percent;
-
+        public override string ModID { get => _id; }
+        public override BaseStat TargetStat { get => _targetStat; }
         public override string StatID { get { return _targetStat != null ? _targetStat.Stat.ID : ""; } }
 
         public BasicPercentModHolder(float percent) {
@@ -85,7 +97,8 @@ namespace PixelComrades {
         [SerializeField] private CachedStat<BaseStat> _sourceStat;
         [SerializeField] private CachedStat<BaseStat> _targetStat;
         [SerializeField] private float _percent;
-
+        public override string ModID { get => _id; }
+        public override BaseStat TargetStat { get => _targetStat; }
         public override string StatID { get { return _sourceStat != null ? _sourceStat.Stat.ID : ""; } }
 
         public DerivedStatModHolder(BaseStat source, float percent) {

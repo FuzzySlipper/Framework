@@ -7,9 +7,10 @@ using Random = UnityEngine.Random;
 
 namespace PixelComrades {
 
-    public sealed class RulesSystem : SystemBase {
+    public sealed class RulesSystem : SystemBase<RulesSystem> {
         
         public static readonly FastString LastQueryString = new FastString();
+        
         private Dictionary<System.Type, List<IRuleEventHandler>> _globalHandlers = new Dictionary<System.Type, List<IRuleEventHandler>>();
         private GenericPool<List<IRuleEventHandler>> _listPool = new GenericPool<List<IRuleEventHandler>>(5, t => t.Clear());
         private CircularBuffer<IRuleEvent> _eventLog = new CircularBuffer<IRuleEvent>(10, true);
@@ -241,6 +242,18 @@ namespace PixelComrades {
                 LastQueryString.Append(result.ToString("F0"));
             }
             return result;
+        }
+
+        public static float CalculateDamageTotal(DiceStat damageStat, ActionCommand cmd, string bonusStatName) {
+            if (damageStat == null) {
+                return 0;
+            }
+            var total = cmd.HitResult.Result == CollisionResult.CriticalHit ? damageStat.GetMax() : damageStat.Value;
+            var bonusStat = cmd.Owner.Stats.Get<DiceStat>(bonusStatName);
+            if (bonusStat != null) {
+                total += bonusStat.D20ModifierValue;
+            }
+            return total;
         }
         
         public static float GetDefenseAmount(float damage, float stat) {

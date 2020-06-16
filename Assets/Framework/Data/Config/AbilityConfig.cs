@@ -9,17 +9,16 @@ namespace PixelComrades {
 
         private const float EffectTime = 3f;
         private const float EffectChance = 10f;
-
-        public string Name;
-        public string Description;
+        
         [Range(0, 10)]public int Level;
         [ValueDropdown("SkillSlotList")]public string Skill;
-        public SpriteReference Icon;
-        public ActionSource Source;
         [Range(0, 50)]public float Cost;
         public GenericConfigEntry[] Config = new GenericConfigEntry[0];
 
         [Header("IActionConfig")]
+        [SerializeField] private string _name = "";
+        [SerializeField] private string _description = "";
+        [SerializeField] private SpriteReference _icon = new SpriteReference();
         [SerializeField, ValueDropdown("AbilityTypesList")] private string _abilityType = AbilityTypes.Attack;
         [SerializeField, ValueDropdown("AbilityTypesList")] private string _secondaryType = AbilityTypes.None;
         [SerializeField, Range(0, 100)] private float _secondaryPower = EffectChance;
@@ -30,7 +29,7 @@ namespace PixelComrades {
         [SerializeField] private CollisionType _collision = CollisionType.Point;
         [SerializeField] private TargetType _targeting= TargetType.Enemy;
         [SerializeField] private ImpactRadiusTypes _radius = ImpactRadiusTypes.Single;
-        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Physical;
+        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Armor;
         [SerializeField] private ProjectileConfig _projectile= null;
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private StateGraph _actionGraph = null;
@@ -39,7 +38,9 @@ namespace PixelComrades {
         [SerializeField] private ItemRarity _rarity = ItemRarity.Common;
         [SerializeField] private List<ActionPhases> _phases = new List<ActionPhases>();
         [SerializeField] private List<ActionHandler> _handlers = new List<ActionHandler>();
-        
+        public string Name { get => _name; }
+        public string Description { get => _description; }
+        public SpriteReference Icon { get => _icon; }
         public List<ActionHandler> Handlers { get => _handlers; }
         public List<ActionPhases> Phases { get => _phases; }
         public string ID { get { return name; } }
@@ -56,7 +57,7 @@ namespace PixelComrades {
         public TargetType Targeting { get => _targeting; }
         public string AbilityType { get { return _abilityType; } }
         public StateGraph ActionGraph { get => _actionGraph; }
-        public UnityEngine.Object Preview { get { return AssetReferenceUtilities.LoadAsset(Icon); } }
+        public UnityEngine.Object Preview { get { return AssetReferenceUtilities.LoadAsset(_icon); } }
         public Object EditorObject { get { return this; } }
         public ItemRarity Rarity { get => _rarity; }
 

@@ -230,12 +230,16 @@ namespace PixelComrades {
 
     [CustomPropertyDrawer(typeof(DiceValue))]
     public class DiceValueDrawer : PropertyDrawer {
+        
+        private static GUIStyle _labelStyle = new GUIStyle() {
+            alignment = TextAnchor.MiddleCenter,
+        };
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             label = EditorGUI.BeginProperty(position, label, property);
             Rect contentPosition = EditorGUI.PrefixLabel(position, label);
             EditorGUI.indentLevel = 0;
-            contentPosition.width *= 0.2f;
+            contentPosition.width *= 0.25f;
             
             SerializedProperty diceRolls = property.FindPropertyRelative("DiceRolls");
             SerializedProperty diceSides = property.FindPropertyRelative("DiceSides");
@@ -244,13 +248,10 @@ namespace PixelComrades {
             diceRolls.intValue = EditorGUI.IntField(contentPosition, diceRolls.intValue);
             
             contentPosition.x += contentPosition.width;
-            EditorGUI.LabelField(contentPosition, "d");
-            
-            contentPosition.x += contentPosition.width;
-            diceSides.intValue = EditorGUI.IntField(contentPosition, diceSides.intValue);
+            diceSides.intValue = (int) (DiceSides) EditorGUI.EnumPopup(contentPosition, (DiceSides)  diceSides.intValue );
 
             contentPosition.x += contentPosition.width;
-            EditorGUI.LabelField(contentPosition, "+");
+            EditorGUI.LabelField(contentPosition, "+", _labelStyle);
             
             contentPosition.x += contentPosition.width;
             bonus.intValue = EditorGUI.IntField(contentPosition, bonus.intValue);

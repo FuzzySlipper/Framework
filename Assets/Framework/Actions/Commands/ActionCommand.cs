@@ -89,21 +89,21 @@ namespace PixelComrades {
             }
         }
 
-        public void CheckHit(string targetDefense, string bonusAttackStat, CharacterTemplate target) {
+        public void CheckHit(string targetDefense, string bonusAttackStat, string toHitStat, CharacterTemplate target) {
             CollisionExtensions.GenerateHitLocDir(Owner.Tr, target.Tr, target.Collider, out var hitPoint, out var dir);
             var hitRot = Quaternion.LookRotation(dir);
             RunEvent(TargetEventTypes.Effect, target, hitPoint, hitRot);
             RunEvent(TargetEventTypes.Attack, target, hitPoint, hitRot);
             var attackRoll = new CheckHitEvent(Action, Owner, target, targetDefense);
-            var abilityStat = Action.Stats.Get(Stats.Attack);
-            if (abilityStat != null) {
-                attackRoll.AttackTotal += abilityStat.Value;
+            var attackStat = Action.Stats.Get(toHitStat);
+            if (attackStat != null) {
+                attackRoll.AttackTotal += attackStat.Value;
             }
             var bonusStat = Owner.Stats.Get(bonusAttackStat);
             if (bonusStat != null) {
                 attackRoll.AttackTotal += bonusStat.D20ModifierValue;
             }
-            var hit = new HitData(World.Get<RulesSystem>().Post(attackRoll).Result, target, hitPoint, dir);
+            var hit = new HitData(RulesSystem.Get.Post(attackRoll).Result, target, hitPoint, dir);
             ProcessHit(hit, hitRot);
         }
     }

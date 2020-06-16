@@ -6,10 +6,14 @@ using Sirenix.OdinInspector;
 namespace PixelComrades {
     public class CheckAreaHitPhase : ActionPhases {
 
-        [SerializeField, DropdownList(typeof(Defenses),"GetValues")] private string _targetDefense;
-        [SerializeField, DropdownList(typeof(Attributes), "GetValues")] private string _bonusStat;
-        [SerializeField] private int _radius;
-        [SerializeField] private bool _checkRequirements;
+        [SerializeField, DropdownList(typeof(Defenses), "GetValues")]
+        private string _targetDefense = Defenses.Armor;
+        [SerializeField, DropdownList(typeof(Attributes), "GetValues")]
+        private string _bonusStat = Attributes.Insight;
+        [SerializeField, DropdownList(typeof(Stats), "GetValues")]
+        private string _toHitStat = Stats.ToHit;
+        [SerializeField] private int _radius = 1;
+        [SerializeField] private bool _checkRequirements = false;
 
         public override bool CanResolve(ActionCommand cmd) {
             var center = cmd.Owner.Target.GetPositionP3;
@@ -23,7 +27,7 @@ namespace PixelComrades {
                     if (_checkRequirements && !cmd.Action.Config.CanEffect(cmd.Action, cmd.Owner, cell.Unit)) {
                         continue;
                     }
-                    cmd.CheckHit(_targetDefense, _bonusStat, cell.Unit);
+                    cmd.CheckHit(_targetDefense, _bonusStat, _toHitStat, cell.Unit);
                 }
             }
             return true;

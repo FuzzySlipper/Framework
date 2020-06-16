@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
     public class UIModDisplayManager : MonoBehaviour, IReceive<ModifiersChanged> {
@@ -33,7 +34,7 @@ namespace PixelComrades {
         private void CheckMods() {
             ClearList();
             _mods.Clear();
-            World.Get<ModifierSystem>().FillModList(_mods, _actor.Entity.Id);
+            _mods.AddRange(_actor.ModList.Mods);
             for (int i = _mods.Count - 1; i >= 0; i--) {
                 if (_active.Count >= _modLimit) {
                     break;

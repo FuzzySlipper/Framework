@@ -11,13 +11,14 @@ namespace PixelComrades {
         [ValueDropdown("SkillSlotList")] public string Skill;
 
         [Header("IActionConfig")]
+        
         [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
         [SerializeField] private CollisionType _collision = CollisionType.Point;
         [SerializeField] private TargetType _targeting = TargetType.Enemy;
         [SerializeField] private ImpactRadiusTypes _radius = ImpactRadiusTypes.Single;
-        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Physical;
+        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Armor;
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
         [SerializeField] private StateGraph _actionGraph = null;

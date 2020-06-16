@@ -13,7 +13,8 @@ namespace PixelComrades {
         [SerializeField] private Image _cooldownImage = null;
 
         private Color _defaultColor;
-        private ModEntry? _watchedMod;
+        private ModEntry _watchedMod;
+        private TimedModEntry _timedMod;
         private ScaledTimer _timer = new ScaledTimer(0.2f);
         public bool Unscaled { get { return false; } }
 
@@ -34,21 +35,27 @@ namespace PixelComrades {
 
         public void OnPoolDespawned() {
             _watchedMod = null;
+            _timedMod = null;
         }
 
         public void Assign(ModEntry mod) {
             _watchedMod = mod;
             if (_watchedMod != null) {
+                _timedMod = _watchedMod as TimedModEntry;
                 _iconImage.overrideSprite = mod.Icon != null ? mod.Icon : _defaultIcon;
                 UpdateCoolDown();
+            }
+            else {
+                _timedMod = null;
             }
         }
 
         public void UpdateCoolDown() {
-            if (_watchedMod == null) {
+            if (_timedMod == null) {
+                _cooldownImage.fillAmount = 0;
                 return;
             }
-            _cooldownImage.fillAmount = _watchedMod.Value.PercentLeft;
+            _cooldownImage.fillAmount = _timedMod.PercentLeft;
         }
 
         public void HoverStatus(bool active) {
@@ -67,8 +74,8 @@ namespace PixelComrades {
                 return;
             }
             if (eventData.button == PointerEventData.InputButton.Right) {
-                if (_watchedMod.Value.Target.HasComponent<PlayerComponent>()) {
-                    World.Get<ModifierSystem>().RemoveStatMod(_watchedMod.Value.Id);
+                if (_watchedMod.Target.IsPlayer()) {
+                    World.Get<ModifierSystem>().Remove(_watchedMod);
                 }
             }
         }
@@ -77,7 +84,7 @@ namespace PixelComrades {
             if (_watchedMod == null) {
                 return;
             }
-            UITooltip.main.ShowToolTip(_hoverGraphic, _watchedMod.Value.Icon, _watchedMod.Value.Label, _watchedMod.Value.Description);
+            UITooltip.main.ShowToolTip(_hoverGraphic, _watchedMod.Icon, _watchedMod.Label, _watchedMod.Description);
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
@@ -96,7 +103,7 @@ namespace PixelComrades {
 #if UNITY_EDITOR
         void OnDrawGizmosSelected() {
             if (_watchedMod != null) {
-                UnityEditor.Handles.Label(transform.position, _watchedMod.Value.Description);
+                UnityEditor.Handles.Label(transform.position, _watchedMod.Description);
             }
         }
 #endif

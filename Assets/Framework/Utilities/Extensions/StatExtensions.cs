@@ -52,12 +52,12 @@ namespace PixelComrades {
             for (int i = 0; i < Attributes.Count; i++) {
                 sb.AppendNewLine(statsContainer.Get(Attributes.GetID(i)).ToString());
             }
-            var atkStats = GameData.Enums[Stats.AttackStats];
-            if (atkStats != null) {
-                for (int i = 0; i < atkStats.Length; i++) {
-                    sb.AppendNewLine(statsContainer.Get(atkStats.IDs[i]).ToString());
-                }
-            }
+            // var atkStats = GameData.Enums[Stats.AttackStats];
+            // if (atkStats != null) {
+            //     for (int i = 0; i < atkStats.Length; i++) {
+            //         sb.AppendNewLine(statsContainer.Get(atkStats.IDs[i]).ToString());
+            //     }
+            // }
             for (int i = 0; i < Defenses.Count; i++) {
                 sb.AppendNewLine(statsContainer.Get(Defenses.GetID(i)).ToString());
             }

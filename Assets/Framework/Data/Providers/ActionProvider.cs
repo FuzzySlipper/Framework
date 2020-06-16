@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades;
+using Sirenix.Utilities;
 
 namespace PixelComrades {
     
-    public interface IActionConfig { 
+    public interface IActionConfig {
+        string Name { get; }
+        string Description { get; }
+        SpriteReference Icon { get; }
         List<ActionPhases> Phases { get; }
         List<ActionHandler> Handlers { get; }
         int Range { get; }
@@ -24,6 +27,11 @@ namespace PixelComrades {
             var stats = entity.Get<StatsContainer>();
             stats.Add(new BaseStat(entity, Stats.CriticalMulti, data.CritMulti));
             stats.Add(new RangeStat(entity, Stats.Power, Stats.Power, data.Power.Min, data.Power.Max));
+            action.Phases.AddRange(data.Phases);
+            action.Actions.AddRange(data.Handlers);
+            for (int i = 0; i < action.Actions.Count; i++) {
+                action.Actions[i].SetupEntity(entity);
+            }
             var targeting = data.Targeting;
             if (targeting == TargetType.Self || targeting == TargetType.Friendly) {
                 action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent());

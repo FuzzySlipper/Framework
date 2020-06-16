@@ -3693,41 +3693,6 @@ namespace PixelComrades {
         }
     }
 
-    public static class ActionTypeExtensions {
-        public static string GetPowerFromSource(this ActionSource source) {
-            switch (source) {
-                case ActionSource.Melee:
-                    return Stats.BonusPowerMelee;
-                case ActionSource.Ranged:
-                    return Stats.BonusPowerRanged;
-                default:
-                    return Stats.BonusPowerMagic;
-            }
-        }
-
-        public static string GetToHitFromSource(this ActionSource source) {
-            switch (source) {
-                case ActionSource.Melee:
-                    return Stats.BonusToHitMelee;
-                case ActionSource.Ranged:
-                    return Stats.BonusToHitRanged;
-                default:
-                    return Stats.BonusToHitMagic;
-            }
-        }
-
-        public static string GetCritFromSource(this ActionSource source) {
-            switch (source) {
-                case ActionSource.Melee:
-                    return Stats.BonusCritMelee;
-                case ActionSource.Ranged:
-                    return Stats.BonusCritRanged;
-                default:
-                    return Stats.BonusCritMagic;
-            }
-        }
-    }
-
 
 #if UNITY_EDITOR
     public static class SceneExtensions {

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     [System.Serializable]
-    public class DiceValue {
+    public struct DiceValue {
         public int DiceRolls;
-        public int DiceSides;
+        public DiceSides DiceSides;
         public int Bonus;
 
         public override string ToString() {

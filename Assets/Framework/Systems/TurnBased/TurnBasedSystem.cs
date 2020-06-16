@@ -69,7 +69,7 @@ namespace PixelComrades {
         private void SetupUnitTurn(ref TurnBasedCharacterTemplate template) {
             if (template.TurnBased.InitiativeRoll < 0) {
                 template.TurnBased.InitiativeRoll = RulesSystem.CalculateD20Roll(1);
-                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Dexterity), (int) template.Stats.GetValue(Stats.Level));
+                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Agility), (int) template.Stats.GetValue(Stats.Level));
                 var resultEvent = World.Get<RulesSystem>().Post(new RollInitiativeEvent(template, template.TurnBased.InitiativeRoll, template.TurnBased.InitiativeStatBonus));
                 template.TurnBased.InitiativeStatBonus = resultEvent.Bonus;
                 var logSystem = World.Get<GameLogSystem>();
@@ -82,7 +82,7 @@ namespace PixelComrades {
                 logSystem.PostCurrentStrings(GameLogSystem.NormalColor);
             }
             else {
-                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Dexterity), (int) template.Stats.GetValue(Stats.Level));
+                template.TurnBased.InitiativeStatBonus = RulesSystem.CalculateStatsWithLog(template.Stats.Get(Stats.Agility), (int) template.Stats.GetValue(Stats.Level));
                 var resultEvent = World.Get<RulesSystem>().Post(new RollInitiativeEvent(template, template.TurnBased.InitiativeRoll, template.TurnBased.InitiativeStatBonus));
                 template.TurnBased.InitiativeStatBonus = resultEvent.Bonus;
             }

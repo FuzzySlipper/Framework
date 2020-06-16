@@ -125,7 +125,7 @@ namespace PixelComrades {
                         var types = assemblies[a].GetTypes();
                         for (int t = 0; t < types.Length; t++) {
                             var type = types[t];
-                            if (type.IsSubclassOf(typeof(ActionPhases))) {
+                            if (!type.IsAbstract && type.IsSubclassOf(typeof(ActionPhases))) {
                                 _phaseTypes.Add(type);
                             }
                         }
@@ -147,7 +147,7 @@ namespace PixelComrades {
                         var types = assemblies[a].GetTypes();
                         for (int t = 0; t < types.Length; t++) {
                             var type = types[t];
-                            if (type.IsSubclassOf(typeof(ActionHandler))) {
+                            if (!type.IsAbstract && type.IsSubclassOf(typeof(ActionHandler))) {
                                 _handlerTypes.Add(type);
                             }
                         }

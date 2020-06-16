@@ -24,6 +24,13 @@ namespace PixelComrades {
                 context.Origin.Level.Value : -1);
             context.AttackTotal += bonus;
             RulesSystem.LastQueryString.AppendNewLine();
+            if (_component.Value.Uses > 0) {
+                _component.Value.Uses--;
+                if (_component.Value.Uses <= 0) {
+                    Entity.Remove(_component.Value);
+                    _component.Clear();
+                }
+            }
         }
     }
 
@@ -31,8 +38,9 @@ namespace PixelComrades {
 
         public string Stat;
         public bool AddLevel;
+        public int Uses;
 
-        public AttackBonusComponent(string stat, bool addLevel = true) {
+        public AttackBonusComponent(string stat, int uses = -1,bool addLevel = true) {
             Stat = stat;
             AddLevel = addLevel;
         }
