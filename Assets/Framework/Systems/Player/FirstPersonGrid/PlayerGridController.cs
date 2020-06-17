@@ -73,7 +73,13 @@ namespace PixelComrades {
             CameraSystem.Set(cam);
             FirstPersonCameraSystem.Set(cam);
             UnityToEntityBridge.RegisterToEntity(_config.gameObject, MainEntity);
-            PlayerPartySystem.Get.GenerateRandomParty();
+            PlayerPartySystem.Get.GenerateRandomTurnBasedParty();
+            for (int i = 0; i < PlayerPartySystem.Get.Length; i++) {
+                var unarmed = AbilityFactory.BuildAbility(LazyDb.Main.UnarmedTest);
+                var player = PlayerPartySystem.Get[i];
+                player.ActionSlots.EquipToEmpty(unarmed);
+                player.ReadyActions.EquipToEmpty(unarmed.GetTemplate<ActionTemplate>());
+            }
             MessageKit.post(Messages.PlayerCharactersChanged);
         }
 

@@ -7,8 +7,8 @@ namespace PixelComrades {
     public class ItemConfig : ScriptableObject, ICustomPreview {
 
         [SerializeField] private string _name = "";
-        [SerializeField] private string _description = "";
-        [SerializeField, TextArea] private SpriteReference _icon = new SpriteReference();
+        [SerializeField, TextArea] private string _description = "";
+        [SerializeField] private SpriteReference _icon = new SpriteReference();
         public ItemRarity Rarity = ItemRarity.Common;
         public int Price;
         public string Name { get => _name; }

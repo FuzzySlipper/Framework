@@ -65,6 +65,10 @@ namespace PixelComrades {
             return BuildEntity(id, ignoreCost);
         }
 
+        public static Entity Get(AbilityConfig config) {
+            return BuildAbility(config);
+        }
+
         public static AbilityConfig GetConfig(string id) {
             if (_abilities.Count == 0) {
                 Init();

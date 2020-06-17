@@ -9,6 +9,7 @@ namespace PixelComrades {
         [SerializeField] private float _lookAtHeightOffset = 1;// Y coordinate of camera target.   Only used if TerrainHeightViaPhysics and GetTerrainHeight are not set.
         [SerializeField] private FloatRange _tiltRange = new FloatRange(-360, 360);
         [SerializeField] private FloatRange _distanceRange = new FloatRange(50, 500);
+        [SerializeField] private float _startingDistance = 100;
         [SerializeField] private bool _smoothing = false; // Should the camera "slide" between positions and targets?
         [SerializeField] private float _moveDampening = 0.75f; // How "smooth" should the camera moves be?  Note: Smaller numbers are smoother
         [SerializeField] private float _rotationDampening = 0.75f; // How "smooth" should the camera rotations be?  Note: Smaller numbers are smoother
@@ -39,6 +40,7 @@ namespace PixelComrades {
         [SerializeField] private bool _limitPos = true;
         [SerializeField] private bool _autoInput = false;
         
+        public float StartingDistance { get => _startingDistance; }
         public float LookAtHeightOffset { get => _lookAtHeightOffset; }
         public FloatRange TiltRange { get => _tiltRange; }
         public FloatRange DistanceRange { get => _distanceRange; }

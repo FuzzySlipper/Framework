@@ -22,14 +22,16 @@ namespace PixelComrades {
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
         [SerializeField] private StateGraph _actionGraph = null;
+        [SerializeField] private List<ActionPhases> _phases = new List<ActionPhases>();
+        [SerializeField] private List<ActionHandler> _handlers = new List<ActionHandler>();
         
         [Header("Ammo")] 
         public AmmoConfig Ammo;
         public int AmmoAmount = 100;
         public ReloadType ReloadType = ReloadType.Repair;
         [Range(0, 5)] public float ReloadSpeedMulti = 1;
-        public List<ActionPhases> Phases { get; }
-        public List<ActionHandler> Handlers { get; }
+        public List<ActionHandler> Handlers { get => _handlers; }
+        public List<ActionPhases> Phases { get => _phases; }
         public int Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
@@ -39,7 +41,6 @@ namespace PixelComrades {
         public ScriptedEventConfig[] ScriptedEvents { get => _scriptedEvents; }
         public float CritMulti { get => _critMulti; }
         public TargetType Targeting { get => _targeting; }
-        public string AbilityType { get { return "Attack"; } }
         public StateGraph ActionGraph { get => _actionGraph; }
 
         private ValueDropdownList<string> DamageTypeList() {

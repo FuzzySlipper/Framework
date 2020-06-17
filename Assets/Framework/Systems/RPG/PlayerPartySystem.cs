@@ -29,7 +29,7 @@ namespace PixelComrades {
             }
         }
 
-        public void GenerateRandomParty() {
+        public void GenerateRandomTurnBasedParty() {
             ClearParty();
             Party = new PlayerCharacterTemplate[_partySize];
             HashSet<int> pickedPortraits = new HashSet<int>();

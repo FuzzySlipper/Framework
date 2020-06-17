@@ -79,7 +79,10 @@ namespace PixelComrades {
             SerializedProperty listProperty = serializedObject.FindProperty(soName);
             EditorGUI.indentLevel++;
             var labelStyle = new GUIStyle("ToolbarButton");
-            for (int l = 0; l < listProperty.arraySize; l++) {
+            for (int l = 0; l < labels.Count; l++) {
+                if (listProperty.arraySize <= l) {
+                    break;
+                }
                 EditorGUILayout.Space();
                 SerializedProperty entryProperty = listProperty.GetArrayElementAtIndex(l);
                 EditorGUILayout.BeginHorizontal();

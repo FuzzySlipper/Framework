@@ -93,6 +93,9 @@ namespace PixelComrades {
         }
 
         public void LoadAsset() {
+            if (!AssetReference.RuntimeKeyIsValid()) {
+                return;
+            }
             AssetReference.LoadAssetAsync<T>().Completed += CompleteLoad;
         }
 

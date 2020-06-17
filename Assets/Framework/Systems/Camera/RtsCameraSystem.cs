@@ -44,7 +44,7 @@ namespace PixelComrades {
             _defaultRotateTilt = Mathf.Max(Config.RotateSpeed, Config.TiltSpeed);
             _currTilt = current.Tr.rotation.eulerAngles.x;
             _currRotation = current.Tr.rotation.eulerAngles.y;
-            _distance = current.Config.DistanceRange.Clamp(_distance);
+            _distance = current.Config.DistanceRange.Clamp(Config.StartingDistance);
             _lookAt = current.Tr.position;
             _initialDistance = _currDistance = _distance;
             _initialRotation = _rotation = _currRotation;

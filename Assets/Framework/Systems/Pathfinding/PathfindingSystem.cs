@@ -45,6 +45,24 @@ namespace PixelComrades {
             }
         }
 
+        public void SetSource(IPathfindingGrid grid) {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                AstarP3Pathfinder.SetAxis(2);
+                _pathfindingGrid = new SimpleThreadSafeGrid();
+                _pathfindingSource = _pathfindingGrid;
+                //_nonThreadedPathfinder = new AstarP3Pathfinder();
+                return;
+            }
+#endif
+            _nonThreadedPathfinder = new AstarP3Pathfinder();
+            _pathfindingSource = grid;
+            _pathfindingGrid = grid;
+            if (Game.GameActive && _useThreading) {
+                StartThreads();
+            }
+        }
+
         public override void Dispose() {
             base.Dispose();
             if (_threads != null) {

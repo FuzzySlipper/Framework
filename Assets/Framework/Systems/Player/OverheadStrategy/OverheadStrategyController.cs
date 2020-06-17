@@ -11,6 +11,9 @@ namespace PixelComrades {
         private OverheadStrategyConfig _config;
         private PlayerCameraComponent _cam;
         
+        public RtsCameraComponent RtsCamera { get => _rtsCamera; }
+        public PlayerCameraComponent Cam { get => _cam; }
+
         public OverheadStrategyController(PlayerControllerConfig config) : base(config) {
             _config = (OverheadStrategyConfig) config;
             _camConfig = _config.RtsCameraConfig;
@@ -53,7 +56,7 @@ namespace PixelComrades {
             // entity.Add(new ImpactRendererComponent(UIPlayerSlot.GetSlot(0)));
             MainEntity.Add(new PlayerRaycastTargeting());
             _input = MainEntity.Add(new PlayerInputComponent(new OverheadStrategyInput(LazySceneReferences.main.PlayerInput)));
-            _cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, null));
+            _cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, _config.Cam));
             _rtsCamera = MainEntity.Add(new RtsCameraComponent(_config.Cam, _camConfig));
             _rtsCamera.Active = false;
             UnityToEntityBridge.RegisterToEntity(Tr.gameObject, MainEntity);

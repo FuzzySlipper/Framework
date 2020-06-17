@@ -30,13 +30,10 @@ namespace PixelComrades {
 
         public static void SetupDefenseStats(StatsContainer stats) {
             var owner = stats.GetEntity();
-            var defend = owner.Add(new DefendDamageWithStats());
             for (int i = 0; i < Defenses.Count; i++) {
-                var typeDef = new BaseStat(owner, string.Format("{0} Defense", Defenses.GetNameAt(i)), Defenses.GetID(i), 0);
+                var typeDef = new BaseStat(owner, Defenses.GetNameAt(i), Defenses.GetID(i), 0);
                 stats.Add(typeDef);
-                defend.AddStat(Defenses.GetID(i), typeDef.ID, typeDef);
             }
-            stats.Add(new BaseStat(owner, Stats.Evasion, 0));
         }
 
         public static BaseStat[] GetBasicCommandStats(StatsContainer stats) {
