@@ -54,7 +54,7 @@ namespace PixelComrades {
                         return;
                     }
                 }
-                var screenPnt = Player.Cam.ScreenToViewportPoint(Mouse.current.position.ReadValue());
+                var screenPnt = CameraSystem.Cam.ScreenToViewportPoint(Mouse.current.position.ReadValue());
                 if (screenPnt.y < _maxPlaceScreenY) {
                     var inventoryItem = item.Get<InventoryItem>();
                     if (inventoryItem != null && inventoryItem.Inventory.Remove(item)) {
@@ -70,7 +70,7 @@ namespace PixelComrades {
             }
             UIDragDropHandler.Take();
             var mousePos = Mouse.current.position.ReadValue();
-            var pos = Player.Cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 20));
+            var pos = CameraSystem.Cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 20));
             World.Get<ItemSceneSystem>().Throw(pos);
         }
 

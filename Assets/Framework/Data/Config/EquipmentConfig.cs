@@ -29,16 +29,16 @@ namespace PixelComrades {
                 if (attributeBonus == 0) {
                     continue;
                 }
-                equipment.StatsToEquip.Add(Attributes.GetID(i));
-                stats.Add(new BaseStat(entity, Attributes.GetNameAt(i), Attributes.GetID(i), AttributeBonuses[i]));
+                equipment.StatsToEquip.Add(Attributes.GetValue(i));
+                stats.Add(new BaseStat(entity, Attributes.GetNameAt(i), Attributes.GetValue(i), AttributeBonuses[i]));
             }
             for (int i = 0; i < DefenseBonuses.Length; i++) {
                 var defBonus = DefenseBonuses[i];
                 if (defBonus == 0) {
                     continue;
                 }
-                equipment.StatsToEquip.Add(Defenses.GetID(i));
-                stats.Add(new BaseStat(entity, Defenses.GetNameAt(i), Defenses.GetID(i), DefenseBonuses[i]));
+                equipment.StatsToEquip.Add(Defenses.GetValue(i));
+                stats.Add(new BaseStat(entity, Defenses.GetNameAt(i), Defenses.GetValue(i), DefenseBonuses[i]));
             }
         }
     }

@@ -9,7 +9,9 @@ namespace PixelComrades {
         [SerializeField] private float _envOffset = 1.75f;
         [SerializeField] private AudioClipSet _playerAudioSet = null;
         [SerializeField] private Transform _lookPivot = null;
-
+        [SerializeField] private Camera _cam = null;
+        
+        public Camera Cam { get => _cam; }
         public ActionMoveConfig MoveConfig { get => _moveConfig; }
         public float EnvOffset { get => _envOffset; }
         public AudioClipSet PlayerAudioSet { get => _playerAudioSet; }

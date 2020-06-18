@@ -9,7 +9,7 @@ namespace PixelComrades {
 
         private GameOptions.CachedInt _inventorySize = new GameOptions.CachedInt("InventorySize"); //55
         private Dictionary<System.Type, PlayerController> _controllerDict = new Dictionary<Type, PlayerController>();
-        
+        private bool _active = false;
         public static IFirstPersonController FirstPersonController { get; private set; }
 
         protected override void SetCurrent(PlayerController current) {
@@ -26,6 +26,9 @@ namespace PixelComrades {
             Player.MainEntity = current.MainEntity;
             if (!current.MainEntity.HasComponent<ItemInventory>()) {
                 Player.MainInventory = Player.MainEntity.Add(new ItemInventory(_inventorySize));
+            }
+            if (current.Active != _active) {
+                current.SetActive(_active);
             }
         }
 
@@ -59,6 +62,7 @@ namespace PixelComrades {
         }
 
         public void SetActive(bool status) {
+            _active = status;
             Current.SetActive(status);
         }
 

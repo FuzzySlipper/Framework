@@ -22,7 +22,7 @@ namespace PixelComrades {
             entity.Add(new AnimationEventComponent());
             entity.Add(new GenericDataComponent());
             entity.Add(new ModifierListComponent());
-            entity.Add(new EntityLevelComponent(1));
+            // entity.Add(new EntityLevelComponent(1));
             entity.Add(new AbilitiesContainer());
             var equip = entity.Add(new EquipmentSlots());
             EquipmentSlotExtensions.GatherDefaultSlots(equip);
@@ -46,7 +46,7 @@ namespace PixelComrades {
             var stats = entity.Get<StatsContainer>();
             stats.Add(combatPower);
             for (int i = 0; i < Attributes.Count; i++) {
-                stats.Get(Attributes.GetID(i)).AddDerivedStat(1, combatPower);
+                stats.Get(Attributes.GetValue(i)).AddDerivedStat(1, combatPower);
             }
         }
 

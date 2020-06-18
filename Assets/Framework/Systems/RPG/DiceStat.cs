@@ -16,6 +16,11 @@ namespace PixelComrades {
             DiceSides = (int) diceValue.DiceSides;
         }
 
+        public DiceStat(int entity, string label, string id, DiceValue diceValue) : base(entity, label, id, diceValue.Bonus) {
+            DiceRolls = diceValue.DiceRolls;
+            DiceSides = (int) diceValue.DiceSides;
+        }
+
         public DiceStat(int entity, string label, float baseValue, int diceRolls, int diceSides) : base(entity, label, baseValue) {
             DiceRolls = diceRolls;
             DiceSides = diceSides;

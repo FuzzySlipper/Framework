@@ -31,6 +31,7 @@ namespace PixelComrades {
             CameraSystem.Set(_cam);
             _cam.Cam.enabled = true;
             UIMap.main.SetMinimapStatus(false);
+            RtsCameraSystem.Get.JumpTo(PlayerPartySystem.Get[0].Tr.position, true);
         }
 
         public override void Disable() {

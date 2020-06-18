@@ -23,8 +23,12 @@ namespace PixelComrades {
 
         public static IMapCamera MiniMap;
         public static IMapCamera LevelMap;
+        private static float _currentDate = 1205.01f;
+
+
+        public static float CurrentDate { get { return _currentDate; } }
+        public static bool InCombat { get; set; }
         public static LevelCellMap CombatMap { get; set; }
-        public static Camera SpriteCamera { get { return _spriteCamera != null ? _spriteCamera : Camera.main; } set { _spriteCamera = value; } }
         public static Random Random { get { return _random; } }
         public static Random LevelRandom { get { return _levelRandom; } }
         public static int Seed { get; private set; }
@@ -36,7 +40,16 @@ namespace PixelComrades {
         public static bool IsEditor { get; set; }
         public static bool Debug { get { return GameOptions.DebugMode; } }
         public static string DefaultCurrencyId { get { return "Default"; } }
-
+        public static Transform SpriteCameraTr { get; private set; }
+        public static Camera SpriteCamera { 
+            get { return _spriteCamera != null ? _spriteCamera : Camera.main; }
+            set {
+                _spriteCamera = value;
+                if (_spriteCamera != null) {
+                    SpriteCameraTr = _spriteCamera.transform;
+                }
+            } 
+        }
         public static void SetGameActive(bool status) {
             GameActive = status;
             if (status) {

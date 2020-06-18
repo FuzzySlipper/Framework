@@ -30,6 +30,7 @@ namespace PixelComrades {
         }
     }
 
+    [AutoRegister]
     public class TurnBasedSystem : SystemBase<TurnBasedSystem> {
 
         private static TurnBasedState _turnState = TurnBasedState.Inactive;
@@ -44,7 +45,6 @@ namespace PixelComrades {
         private ManagedArray<TurnBasedCharacterTemplate>.RefDelegate _setupUnitTurns;
 
         public TurnBasedSystem() {
-            TemplateFilter<TurnBasedCharacterTemplate>.Setup();
             _turnTemplates = EntityController.GetTemplateList<TurnBasedCharacterTemplate>();
             _findCurrentFastest = FindCurrent;
             _setupUnitTurns = SetupUnitTurn;
@@ -130,6 +130,7 @@ namespace PixelComrades {
         }
 
         public void StartTurns() {
+            UIPlayerComponents.UpperRightText.text = _turnState.ToString() + " start";
             TurnNumber = 0;
             SetupNewTurn();
         }
@@ -155,11 +156,13 @@ namespace PixelComrades {
 
         private void RunTurn() {
             if (_current.IsPlayer()) {
+                _turnState = TurnBasedState.WaitingOnInput;
                 World.Get<PlayerTurnBasedSystem>().TurnContinue(_current);
             }
             else {
                 World.Get<NpcTurnBasedSystem>().TurnContinue(_current);
             }
+            UIPlayerComponents.UpperRightText.text = _turnState.ToString() + " " + TurnNumber + " " + _current.Entity.DebugId;
         }
     }
 }

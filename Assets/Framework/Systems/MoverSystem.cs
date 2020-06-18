@@ -5,7 +5,8 @@ using System.Collections.Generic;
 namespace PixelComrades {
 
     [AutoRegister]
-    public class MoverSystem : SystemBase<MoverSystem>, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent> {
+    public class MoverSystem : SystemBase<MoverSystem>, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent>,
+        IReceiveGlobal<StartArcMoveEvent> {
         private const float ReachedDestination = 0.1f;
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
@@ -165,6 +166,19 @@ namespace PixelComrades {
                 moveEvent.Origin.Add(target);
             }
             target.SetMoveTarget(moveEvent.GetPosition);
+        }
+
+        public void HandleGlobal(StartArcMoveEvent moveEvent) {
+            if (moveEvent.Origin == null) {
+                return;
+            }
+            moveEvent.Origin.Tags.Add(EntityTags.Moving);
+            var target = moveEvent.Origin.Get<MoveTarget>();
+            if (target == null) {
+                target = new MoveTarget();
+                moveEvent.Origin.Add(target);
+            }
+            target.SetMoveTarget(moveEvent.GetPosition);
             CalculateFlight(moveEvent.Origin.Get<ArcMover>(), moveEvent.GetPosition, moveEvent.Origin.Get<MoveSpeed>());
         }
 
@@ -198,6 +212,26 @@ namespace PixelComrades {
         }
 
         public StartMoveEvent(Entity origin, VisibleTemplate follow) {
+            MoveTarget = follow.position;
+            Follow = follow.Tr;
+            Origin = origin;
+        }
+    }
+
+    public struct StartArcMoveEvent : IEntityMessage {
+        public Vector3 MoveTarget;
+        public TransformComponent Follow;
+        public Entity Origin;
+
+        public Vector3 GetPosition => Follow != null ? Follow.position : MoveTarget;
+
+        public StartArcMoveEvent(Entity origin, Vector3 moveTarget, TransformComponent follow) {
+            MoveTarget = moveTarget;
+            Follow = follow;
+            Origin = origin;
+        }
+
+        public StartArcMoveEvent(Entity origin, VisibleTemplate follow) {
             MoveTarget = follow.position;
             Follow = follow.Tr;
             Origin = origin;

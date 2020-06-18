@@ -16,7 +16,7 @@ namespace PixelComrades {
             _controls.Enable();
         }
 
-        public Ray GetLookTargetRay { get { return Player.Cam.ScreenPointToRay(Mouse.current.position.ReadValue()); } }
+        public Ray GetLookTargetRay { get { return CameraSystem.Cam.ScreenPointToRay(Mouse.current.position.ReadValue()); } }
         public Vector2 LookInput { get; set; }
         public Vector2 MoveInput { get; set; }
 

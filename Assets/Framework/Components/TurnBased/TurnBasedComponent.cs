@@ -19,6 +19,10 @@ namespace PixelComrades {
         public int ActionPoints { get { return MinorActions + MoveActions + StandardActions; } }
         public float Speed { get { return InitiativeRoll + InitiativeStatBonus; } }
 
+        public void Clear() {
+            StandardActions = MinorActions = MoveActions = 0;
+        }
+        
         public TurnBasedComponent() {
         }
 

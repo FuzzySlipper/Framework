@@ -12,6 +12,7 @@ namespace PixelComrades {
         public bool Active = true;
         public Transform FollowTr;
         public Collider CameraLimitSpace;
+        public Transform CamTargetMarker;
         public Transform Tr { get; private set; }
         public RtsCameraComponent(Camera cam, RtsCameraConfig config) {
             Cam = cam;

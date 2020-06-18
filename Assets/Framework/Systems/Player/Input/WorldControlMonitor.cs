@@ -46,7 +46,7 @@ namespace PixelComrades {
         public static System.Action AlternativeUse;
         public static IWorldControl Current { get { return _main != null ? _main._current : null; } }
         public static GameObject CurrentGameObject { get { return _main != null ? _main._currentGameObject : null; } }
-        public static Camera Cam { get { return _main != null && _main._cam != null ? _main._cam : Player.Cam; } }
+        public static Camera Cam { get { return _main != null && _main._cam != null ? _main._cam : CameraSystem.Cam; } }
 
         public static void SetCamera(Camera cam) {
             if (_main == null) {

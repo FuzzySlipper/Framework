@@ -73,7 +73,8 @@ namespace PixelComrades {
                 while (_floating._moveTween.Active) {
                     _floating._text.color = Color.Lerp(_floating._defaultColor, _floating._endColor, _floating._colorTween.Get());
                     tr.position = _floating._moveTween.Get();
-                    tr.LookAt(tr.position + Player.Cam.transform.rotation * Vector3.forward,PlayerCamera.Tr.rotation * Vector3.up);
+                    var camTrRotation = CameraSystem.CamTr.rotation;
+                    tr.LookAt(tr.position + camTrRotation * Vector3.forward,camTrRotation * Vector3.up);
                     //_text.fontSize = Vector3.Distance(transform.position, Player.Cam.transform.position) * 0.35f;
                     if (!_timeoutTimer.IsActive) {
                         break;

@@ -56,8 +56,8 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, UIRoot.Misc.Get().transform);
-            start = RectTransformUtility.WorldToScreenPoint(Player.Cam, start);
-            var end = RectTransformUtility.WorldToScreenPoint(Player.Cam, start + new Vector3(0, 1, 0));
+            start = RectTransformUtility.WorldToScreenPoint(CameraSystem.Cam, start);
+            var end = RectTransformUtility.WorldToScreenPoint(CameraSystem.Cam, start + new Vector3(0, 1, 0));
             FloatingTextHolder.Start(Orientation.Center, text, 2f, start, end, UIRoot.Misc.Get().transform, color);
 
         }

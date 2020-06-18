@@ -8,7 +8,6 @@ namespace PixelComrades {
         private static Transform _tr;
         private static PlayerSaveData _playerSaveData = new PlayerSaveData();
 
-        public static Camera Cam { get { return PlayerCamera.Cam; } }
         public static Camera MinimapCamera { get;set; }
         
         private static FloatValueCollection _currencies = new FloatValueCollection();
@@ -34,7 +33,7 @@ namespace PixelComrades {
                     if (PlayerPartySystem.Party[i] == null) {
                         continue;
                     }
-                    level = MathEx.Max(PlayerPartySystem.Party[i].Get<EntityLevelComponent>().Value, level);
+                    level = MathEx.Max( (int)PlayerPartySystem.Party[i].Stats.Get(Stats.Level).Value, level);
                 }
                 return level;
             }

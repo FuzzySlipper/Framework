@@ -12,17 +12,24 @@ namespace PixelComrades {
         public static void SetupBasicCharacterStats(StatsContainer stats) {
             var owner = stats.GetEntity();
             for (int i = 0; i < Attributes.Count; i++) {
-                stats.Add(new BaseStat(owner, Attributes.GetNameAt(i), Attributes.GetID(i), Attributes.GetAssociatedValue(i)));
+                stats.Add(new BaseStat(owner, Attributes.GetNameAt(i), Attributes.GetValue(i), 10));
             }
             for (int i = 0; i < Skills.Count; i++) {
-                stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetID(i), 0));
+                stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetValue(i), 0));
             }
+            stats.Add(new BaseStat(owner, "Level", Stats.Level, 1));
+            stats.Add(new BaseStat(owner, "Move Speed", Stats.MoveSpeed, 6));
+            stats.Add(new BaseStat(owner, "Reach", Stats.Reach, 1));
+            var weightStat = stats.Add(new BaseStat(owner, "Weight", Stats.Weight, 1));
+            stats.Get<BaseStat>(Attributes.Strength).AddDerivedStat(10, weightStat);
+            stats.Add(new DiceStat(owner, "Unarmed Damage", Stats.UnarmedAttackDamage, new DiceValue(1, DiceSides.D4)));
+            stats.Add(new BaseStat(owner, "Unarmed Attack", Stats.UnarmedAttackAccuracy, 0));
         }
 
         public static void SetupVitalStats(StatsContainer stats) {
             var owner = stats.GetEntity();
             for (int i = 0; i < Vitals.Count; i++) {
-                var vital = new VitalStat(owner, Vitals.GetNameAt(i), Vitals.GetID(i), Vitals.GetStartingValue(i), Vitals.GetRecoveryValue(i));
+                var vital = new VitalStat(owner, Vitals.GetNameAt(i), Vitals.GetValue(i), Vitals.GetStartingValue(i), Vitals.GetRecoveryValue(i));
                 stats.Add(vital);
             }
             stats.SetMax();
@@ -31,7 +38,7 @@ namespace PixelComrades {
         public static void SetupDefenseStats(StatsContainer stats) {
             var owner = stats.GetEntity();
             for (int i = 0; i < Defenses.Count; i++) {
-                var typeDef = new BaseStat(owner, Defenses.GetNameAt(i), Defenses.GetID(i), 0);
+                var typeDef = new BaseStat(owner, Defenses.GetNameAt(i), Defenses.GetValue(i), 0);
                 stats.Add(typeDef);
             }
         }
@@ -47,7 +54,7 @@ namespace PixelComrades {
 
         public static void GetCharacterStatValues(this StatsContainer statsContainer, ref StringBuilder sb) {
             for (int i = 0; i < Attributes.Count; i++) {
-                sb.AppendNewLine(statsContainer.Get(Attributes.GetID(i)).ToString());
+                sb.AppendNewLine(statsContainer.Get(Attributes.GetValue(i)).ToString());
             }
             // var atkStats = GameData.Enums[Stats.AttackStats];
             // if (atkStats != null) {
@@ -56,7 +63,7 @@ namespace PixelComrades {
             //     }
             // }
             for (int i = 0; i < Defenses.Count; i++) {
-                sb.AppendNewLine(statsContainer.Get(Defenses.GetID(i)).ToString());
+                sb.AppendNewLine(statsContainer.Get(Defenses.GetValue(i)).ToString());
             }
         }
 

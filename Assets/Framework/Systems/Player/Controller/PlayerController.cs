@@ -45,7 +45,7 @@ namespace PixelComrades {
         }
 
         public virtual void SystemUpdate(float dt) {
-            if (!Active) {
+            if (!Active || !Game.GameActive) {
                 return;
             }
             if (_gridPosition != (Tr.position + Vector3.up).ToMapGridP3()) {

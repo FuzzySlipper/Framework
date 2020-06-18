@@ -12,11 +12,23 @@ using System.Collections.Generic;
         private List<MenuAction> _menuActions = new List<MenuAction>();
 
         protected override void GameplayInput() {
+            base.GameplayInput();
             if (!Game.InCombat) {
-                base.GameplayInput();
                 return;
             }
-            if (PlayerTurnBasedSystem.Current == null || PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction)) {
+            if (PlayerTurnBasedSystem.Current == null) {
+                if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.Actor)) {
+                    var hitEntity = UnityToEntityBridge.GetEntity(hit1.collider);
+                    if (hitEntity != null) {
+                        var template = hitEntity.GetTemplate<TurnBasedCharacterTemplate>();
+                        if (template != null) {
+                            UICenterTarget.SetText(string.Format("{0} {1}/{2}", template.GetName(), template.TurnBased.ActionPoints, 3));
+                        }
+                    }
+                }
+                return;
+            }
+            if (PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction)) {
                 return;
             }
             if (Mouse.current.rightButton.isPressed) {
@@ -27,8 +39,8 @@ using System.Collections.Generic;
         }
 
         protected override void ActionInput() {
+            base.ActionInput();
             if (!Game.InCombat) {
-                base.ActionInput();
                 return;
             }
             if (PlayerTurnBasedSystem.Current == null || PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction)) {
@@ -77,7 +89,7 @@ using System.Collections.Generic;
                     return true;
                 }
                 ));
-            UISubMenu.Default.EnableMenu(Player.Cam.WorldToViewportPoint(target.Tr.position), _menuActions);
+            UISubMenu.Default.EnableMenu(CameraSystem.Cam.WorldToViewportPoint(target.Tr.position), _menuActions);
         }
 
         private bool CheckRightClickIso() {

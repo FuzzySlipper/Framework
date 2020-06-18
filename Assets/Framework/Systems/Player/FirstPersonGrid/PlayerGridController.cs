@@ -69,7 +69,7 @@ namespace PixelComrades {
             MainEntity.Add(new PlayerRaycastTargeting());
             var input = MainEntity.Add(new PlayerInputComponent(new PlayerGridInput(LazySceneReferences.main.PlayerInput, this)));
             PlayerInputSystem.Set(input);
-            var cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, PlayerCamera.Cam));
+            var cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, _config.Cam));
             CameraSystem.Set(cam);
             FirstPersonCameraSystem.Set(cam);
             UnityToEntityBridge.RegisterToEntity(_config.gameObject, MainEntity);
@@ -99,10 +99,7 @@ namespace PixelComrades {
         private int _minFramesForDirChange = 15;
 
         private void CheckRotation() {
-            if (PlayerCamera.AltCam != null) {
-                return;
-            }
-            var newDir = Player.Cam.transform.localRotation.eulerAngles.EulerToDirectionEight(true);
+            var newDir = CameraSystem.CamTr.localRotation.eulerAngles.EulerToDirectionEight(true);
             var currDir = Tr.localRotation.eulerAngles.EulerToDirectionEight(true);
             if (currDir != newDir) {
                 _diffDir++;

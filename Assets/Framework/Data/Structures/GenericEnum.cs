@@ -51,7 +51,7 @@ namespace PixelComrades {
             parseIndex++;
             for (int i = 0; i < Count; i++) {
                 if (strVal == GetNameAt(i) || strVal == GetID(i)) {
-                    return GetValueAt(i);
+                    return GetValue(i);
                 }
             }
             return _static.Parse(strVal, defValue);
@@ -268,7 +268,12 @@ namespace PixelComrades {
             }
             throw new IndexOutOfRangeException(string.Format("Index must be between 0 and {0}", Count - 1));
         }
-
+        /// <summary>
+        /// This returns TypeName.Value, stats will always use just Value
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
         public static string GetID(int index) {
             if (index >= 0 && index < Count) {
                 return _ids[index];
@@ -294,7 +299,7 @@ namespace PixelComrades {
             return _names[_index];
         }
 
-        public static U GetValueAt(int index) {
+        public static U GetValue(int index) {
             if (index >= 0 && index < Count) {
                 return _values[index];
             }

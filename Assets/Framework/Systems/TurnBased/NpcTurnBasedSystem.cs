@@ -13,7 +13,9 @@ namespace PixelComrades {
         public void TurnStart(TurnBasedCharacterTemplate character) {
             character.Pathfinder.Value = CombatPathfinder.GetPathfinder(Game.CombatMap.Cells, character);
             character.Pathfinder.MoveSpeed = World.Get<RulesSystem>().Post(new GatherMoveSpeedEvent(character, 0)).Total;
-            //character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed);
+            character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed);
+            PathfindingDisplaySystem.Get.SetupPathfindingSprites(character);
+
             var targetList = character.Faction == (int) Factions.PlayerAllies ? CombatArenaSystem.Enemies : CombatArenaSystem.Friendlies;
             SortByDistanceAsc(targetList, character.Location.Cell.Position);
             var attackRange = character.GetDefaultAttackRange()*2;
@@ -41,14 +43,14 @@ namespace PixelComrades {
                 SortByDistanceAsc(_moves);
                 for (int m = 0; m < _moves.Count; m++) {
                     character.Pathfinder.Value.SetCurrentPath(character.Location, _moves[i].Value, 2, character.Pathfinder.MoveSpeed);
-                    if (character.Pathfinder.Value.CurrentPath.Count <= 0) {
+                    if (character.Pathfinder.Value.CurrentPath.Count <= 1) {
                         continue;
                     }
                     var moveCmd = CommandSystem.GetCommand<MoveCommand>(character);
                     moveCmd.CurrentPath = character.Pathfinder.Value.CurrentPath;
-                    moveCmd.MoveCost = character.Pathfinder.Value.CurrentPathCost;
                     if (moveCmd.TryStart(false)) {
                         character.Target.Target = target;
+                        PathfindingDisplaySystem.Get.SetCurrentPath(character);
                         return;
                     }
                     CommandSystem.Store(moveCmd);
@@ -77,6 +79,7 @@ namespace PixelComrades {
                 var actionCommand = CommandSystem.GetCommand<ActionCommand>(origin);
                 actionCommand.Action = action;
                 if (actionCommand.TryStart(false)) {
+                    PathfindingDisplaySystem.Get.ClearDisplay();
                     return;
                 }
                 CommandSystem.Store(actionCommand);
@@ -89,13 +92,15 @@ namespace PixelComrades {
                 SetupActionOnTarget(character, character.Target.TargetChar);
             }
             else {
-                CommandSystem.GetCommand<IdleCommand>(character).TryStart(false);
+                character.TurnBased.Clear();
+                TurnBasedSystem.Get.CommandComplete(character);
             }
         }
 
         public void TurnEnd(TurnBasedCharacterTemplate character) {
             CombatPathfinder.Store(character.Pathfinder.Value);
             character.Pathfinder.Value = null;
+            PathfindingDisplaySystem.Get.ClearDisplay();
         }
 
         private void SortByDistanceAsc(List<CombatPathfinder.LevelCellNode> list) {

@@ -10,9 +10,15 @@ namespace PixelComrades {
         public ActionEvent LastEvent;
         
         private int _phaseIndex;
-        
+        private CostActionPoint _actionCost;
+
         public override Sprite Icon { get { return null; } }
-        
+
+        public ActionCommand() {
+            _actionCost = new CostActionPoint(1, 0, 0, false);
+            Costs.Add(_actionCost);
+        }
+
         public override void Clear() {
             base.Clear();
             Action = null;

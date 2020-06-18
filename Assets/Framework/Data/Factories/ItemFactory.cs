@@ -148,14 +148,13 @@ namespace PixelComrades {
         public static Entity CreateItem(ItemConfig config, int level) {
             var entity = Entity.New(config.ID);
             entity.Add(new TypeId(config.ID));
-            entity.Add(new StatsContainer());
+            entity.Add(new StatsContainer()).Add(new BaseStat(entity, "Level", Stats.Level, level));
             if (config.Icon.IsLoaded) {
                 entity.Add(new IconComponent(config.Icon.LoadedAsset, ""));
             }
             else {
                 config.Icon.LoadAsset(handle => entity.Add(new IconComponent(handle, "")));
             }
-            entity.Add(new EntityLevelComponent(level));
             entity.Add(new TooltipComponent());
             entity.Add(new StatusUpdateComponent());
             config.AddComponents(entity);

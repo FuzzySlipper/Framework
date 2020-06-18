@@ -221,7 +221,7 @@ namespace PixelComrades {
         }
 
         public static int IdentifyEstimate(Entity item) {
-            return 100 * item.Get<EntityLevelComponent>().Value;
+            return 100 * (int) item.Get<StatsContainer>().Get(Stats.Level).Value;
         }
 
         public static CachedBool UseShaking = new CachedBool("UseShaking");
@@ -248,7 +248,7 @@ namespace PixelComrades {
                 }
                 else if (!value) {
                     Cursor.lockState = CursorLockMode.None;
-                    Player.Cam.transform.localRotation = Quaternion.identity;
+                    CameraSystem.CamTr.localRotation = Quaternion.identity;
                 }
             }
         }

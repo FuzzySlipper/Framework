@@ -23,7 +23,6 @@ namespace PixelComrades {
         private CachedComponent<CurrentAction> _currentAction = new CachedComponent<CurrentAction>();
         private CachedComponent<AnimationEventComponent> _animationEvent = new CachedComponent<AnimationEventComponent>();
         private CachedComponent<RuleEventListenerComponent> _ruleEvent = new CachedComponent<RuleEventListenerComponent>();
-        private CachedComponent<EntityLevelComponent> _level = new CachedComponent<EntityLevelComponent>();
         private CachedComponent<GenericDataComponent> _genericData = new CachedComponent<GenericDataComponent>();
         private CachedComponent<ActionSlots> _actionSlots = new CachedComponent<ActionSlots>();
         private CachedComponent<ModifierListComponent> _modList = new CachedComponent<ModifierListComponent>();
@@ -50,19 +49,18 @@ namespace PixelComrades {
         public CurrentAction CurrentActionComponent => _currentAction.Value;
         public AnimationEventComponent AnimationEvent => _animationEvent.Value;
         public RuleEventListenerComponent RuleEvents => _ruleEvent.Value;
-        public EntityLevelComponent Level => _level.Value;
         public ActionSlots ActionSlots { get => _actionSlots; }
 
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
-            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, _level, 
+            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, 
             _actionSlots, _modList
         };
 
         public VitalStat GetVital(int vital) {
-            return _stats.Value.GetVital(Vitals.GetID(vital));
+            return _stats.Value.GetVital(Vitals.GetValue(vital));
         }
 
         public override System.Type[] GetTypes() {

@@ -18,7 +18,6 @@ namespace PixelComrades {
         private float _initialTilt;
         private bool _lastDebugCamera;
         private Vector3 _moveVector;
-        private GameObject _target;
         private MeshRenderer _targetRenderer;
         private float _defaultRotateTilt;
         private float _distance = 0;
@@ -26,11 +25,12 @@ namespace PixelComrades {
         private float _tiltSpeed;
         private float _lookAtHeightOffset;
         private bool _followBehind;
+        private float _currentHeight;
         
         private RtsCameraConfig Config { get { return Current.Config; } }
         private Camera Cam { get { return Current.Cam; } }
-        public Transform CameraTarget { get { return _target.transform; } }
         public Transform FollowTarget { get { return Current.FollowTr; } }
+        public Transform CamTargetMarker { get { return Current.CamTargetMarker; } }
         
         public RtsCameraSystem() {
             MessageKit<Transform>.addObserver(Messages.CameraFocusChanged, Follow);
@@ -46,6 +46,7 @@ namespace PixelComrades {
             _currRotation = current.Tr.rotation.eulerAngles.y;
             _distance = current.Config.DistanceRange.Clamp(Config.StartingDistance);
             _lookAt = current.Tr.position;
+            _currentHeight = current.Tr.position.y;
             _initialDistance = _currDistance = _distance;
             _initialRotation = _rotation = _currRotation;
             _initialTilt = _tilt = _currTilt;
@@ -92,10 +93,6 @@ namespace PixelComrades {
             }
         }
 
-        public void MoverUpdate() {
-            UpdateInput();
-        }
-
         public void OnSystemLateUpdate(float dt, float unscaledDt) {
             if (Current == null || !Current.Active) {
                 return;
@@ -121,13 +118,13 @@ namespace PixelComrades {
                 _currRotation = Mathf.LerpAngle(_currRotation, _rotation, TimeManager.DeltaUnscaled * Config.RotationDampening);
                 _currDistance = Mathf.Lerp(_currDistance, _distance, TimeManager.DeltaUnscaled * Config.ZoomDampening);
                 _currTilt = Mathf.LerpAngle(_currTilt, _tilt, TimeManager.DeltaUnscaled * Config.TiltDampening);
-                _target.transform.position = Vector3.Lerp(_target.transform.position, _lookAt, TimeManager.DeltaUnscaled * Config.MoveDampening);
+                CamTargetMarker.position = Vector3.Lerp(CamTargetMarker.position, _lookAt, TimeManager.DeltaUnscaled * Config.MoveDampening);
             }
             else {
                 _currRotation = _rotation;
                 _currDistance = _distance;
                 _currTilt = _tilt;
-                _target.transform.position = _lookAt;
+                CamTargetMarker.position = _lookAt;
             }
 
             _moveVector = Vector3.zero;
@@ -162,7 +159,7 @@ namespace PixelComrades {
                 _currDistance = _distance;
                 _currRotation = _rotation;
                 _currTilt = _tilt;
-                _target.transform.position = _lookAt;
+                CamTargetMarker.position = _lookAt;
             }
         }
 
@@ -175,9 +172,9 @@ namespace PixelComrades {
             EndFollow();
 
             _lookAt = toPosition;
-
+            _currentHeight = _lookAt.y;
             if (snap) {
-                _target.transform.position = toPosition;
+                CamTargetMarker.position = toPosition;
             }
         }
 
@@ -205,6 +202,7 @@ namespace PixelComrades {
             if (Current.FollowTr != null) {
                 if (snap) {
                     _lookAt = Current.FollowTr.position;
+                    _currentHeight = _lookAt.y;
                 }
             }
         }
@@ -244,15 +242,15 @@ namespace PixelComrades {
                 if (Physics.Raycast(new Vector3(x, Current.Tr.position.y, z), new Vector3(0, -1, 0), out hitInfo, 350f, Config.TerrainPhysicsLayerMask)) {
                     return hitInfo.point.y;
                 }
-                return 0; // no hit!
+                return _currentHeight; // no hit!
             }
-            return 0;
+            return _currentHeight;
         }
 
         private void UpdateCamera() {
             Quaternion rotation = Quaternion.Euler(_currTilt, _currRotation, 0);
             var v = new Vector3(0.0f, 0.0f, -_currDistance * (Cam.orthographic ? Config.OrthoMulti : 1 ));
-            Vector3 position = rotation * v + _target.transform.position;
+            Vector3 position = rotation * v + CamTargetMarker.position;
 
             if (Cam.orthographic) {
                 Cam.orthographicSize = _currDistance * Config.OrthoMulti;
@@ -269,27 +267,30 @@ namespace PixelComrades {
         }
 
         private void CreateTarget() {
-            _target = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            _target.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            _target.GetComponent<Renderer>().material.color = Color.green;
+            if (Current.CamTargetMarker != null) {
+                return;
+            }
+            Current.CamTargetMarker = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
+            Current.CamTargetMarker.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            Current.CamTargetMarker.GetComponent<Renderer>().material.color = Color.green;
 
-            var targetCollider = _target.GetComponent<Collider>();
+            var targetCollider = Current.CamTargetMarker.GetComponent<Collider>();
             if (targetCollider != null) {
                 targetCollider.enabled = false;
             }
 
-            _targetRenderer = _target.GetComponent<MeshRenderer>();
+            _targetRenderer = Current.CamTargetMarker.GetComponent<MeshRenderer>();
             _targetRenderer.enabled = false;
 
-            _target.name = "CameraTarget";
-            _target.transform.position = _lookAt;
+            Current.CamTargetMarker.name = "CameraTarget " + Current.Cam.name;
+            Current.CamTargetMarker.transform.position = _lookAt;
         }
 
         private bool DistanceToTargetIsLessThan(float sqrDistance) {
             if (Current.FollowTr == null) {
                 return true; // our distance is technically zero
             }
-            Vector3 p1 = _target.transform.position;
+            Vector3 p1 = CamTargetMarker.position;
             Vector3 p2 = FollowTarget.position;
             p1.y = p2.y = 0; // ignore height offset
             Vector3 v = p1 - p2;
@@ -299,14 +300,15 @@ namespace PixelComrades {
         }
 
         private void EnsureTargetIsVisible() {
-            Vector3 direction = (Current.Tr.position - _target.transform.position);
+            Vector3 direction = (Current.Tr.position - CamTargetMarker.position);
             direction.Normalize();
             float distance = _distance;
             RaycastHit hitInfo;
             //if (Physics.Raycast(_target.transform.position, direction, out hitInfo, distance, ~TargetVisibilityIgnoreLayerMask))
-            if (Physics.SphereCast(_target.transform.position, Config.CameraRadius, direction, out hitInfo, distance,
+            if (Physics.SphereCast(
+                CamTargetMarker.position, Config.CameraRadius, direction, out hitInfo, distance,
                 ~ Config.TargetVisibilityIgnoreLayerMask)) {
-                if (hitInfo.transform != _target) // don't collide with outself!
+                if (hitInfo.transform != CamTargetMarker) // don't collide with outself!
                 {
                     _currDistance = hitInfo.distance - 0.1f;
                 }

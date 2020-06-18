@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using PixelComrades;
+using TMPro;
 
 public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
 
@@ -36,4 +37,7 @@ public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
     [SerializeField] private RectTransform _centerMessagePivot = null;
     [SerializeField] private RectTransform _leftMessagePivot = null;
     [SerializeField] private CanvasGroup[] _gameplayUI = new CanvasGroup[0];
+    [SerializeField] private TextMeshProUGUI _upperRightText = null;
+    
+    public static TextMeshProUGUI UpperRightText { get => main._upperRightText; }
 }

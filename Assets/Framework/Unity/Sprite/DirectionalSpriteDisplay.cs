@@ -28,27 +28,27 @@ namespace PixelComrades {
             switch (mode) {
                 case BillboardMode.ForceUp:
                 case BillboardMode.TrUp:
-                    lookPosition = position + Game.SpriteCamera.transform.rotation * Vector3.forward;
-                    //transform.LookAt(backwards ? lookPos : -lookPos, mode == BillboardMode.TrUp ? transform.up : Game.SpriteCamera.transform.rotation * Vector3.up);
+                    lookPosition = position + Game.SpriteCameraTr.rotation * Vector3.forward;
+                    //transform.LookAt(backwards ? lookPos : -lookPos, mode == BillboardMode.TrUp ? transform.up : Game.SpriteCameraTr.rotation * Vector3.up);
                     break;
                 case BillboardMode.CamFwd:
-                    transform.forward = backwards ? -Game.SpriteCamera.transform.forward : Game.SpriteCamera.transform.forward;
+                    transform.forward = backwards ? -Game.SpriteCameraTr.forward : Game.SpriteCameraTr.forward;
                     break;
                 case BillboardMode.NoYAxis:
-                    Vector3 viewDirection = new Vector3(Game.SpriteCamera.transform.forward.x, 0, Game.SpriteCamera.transform.forward.z);
+                    Vector3 viewDirection = new Vector3(Game.SpriteCameraTr.forward.x, 0, Game.SpriteCameraTr.forward.z);
                     transform.LookAt(position + (backwards ? viewDirection : -viewDirection));
                     break;
                 case BillboardMode.CamRot:
-                    transform.rotation = backwards ?  Quaternion.Inverse(Game.SpriteCamera.transform.rotation) : Game.SpriteCamera.transform.rotation;
+                    transform.rotation = backwards ?  Quaternion.Inverse(Game.SpriteCameraTr.rotation) : Game.SpriteCameraTr.rotation;
                     break;
                 case BillboardMode.FaceCam:
-                    lookPosition = Game.SpriteCamera.transform.position;
+                    lookPosition = Game.SpriteCameraTr.position;
                     lookPosition.y = position.y;
                     //transform.LookAt(position);
                     //transform.rotation = Quaternion.LookRotation(position - position);
                     break;
                 case BillboardMode.FaceCamYDiff:
-                    lookPosition = Game.SpriteCamera.transform.position;
+                    lookPosition = Game.SpriteCameraTr.position;
                     var yHeight = transform.parent.position.y;
                     var yDiff = Mathf.Abs(yHeight - lookPosition.y);
                     var targetY = yDiff < _yMinDiff ? yHeight : lookPosition.y;
@@ -69,7 +69,7 @@ namespace PixelComrades {
                             factor = -60f;
                             break;
                     }
-                    var rot = Quaternion.LookRotation(Game.SpriteCamera.transform.forward) * Quaternion.Euler(factor, 0, 0);
+                    var rot = Quaternion.LookRotation(Game.SpriteCameraTr.forward) * Quaternion.Euler(factor, 0, 0);
                     transform.rotation = backwards ? Quaternion.Inverse(rot) : rot;
                     break;
             }

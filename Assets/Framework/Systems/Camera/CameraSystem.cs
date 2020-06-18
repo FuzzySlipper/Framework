@@ -19,6 +19,10 @@ namespace PixelComrades {
             }));
             BuildEventDictionary();
         }
+        
+        public static Camera Cam { get => Current.Cam; }
+        public static Transform CamTr { get => Current.CamTr; }
+
 
         private GameOptions.CachedInt _shakeFrames = new GameOptions.CachedInt("ShakeFrames");
         private GameOptions.CachedInt _shakeStrength = new GameOptions.CachedInt("ShakeStrength");
@@ -28,7 +32,9 @@ namespace PixelComrades {
         private Dictionary<string, SpringEventConfig> _eventDict = new Dictionary<string, SpringEventConfig>();
 
         protected override void SetCurrent(PlayerCameraComponent current) {
-            base.SetCurrent(current); 
+            base.SetCurrent(current);
+            Game.SpriteCamera = current.Cam;
+            WorldControlMonitor.SetCamera(current.Cam);
             InitSprings();
         }
 
