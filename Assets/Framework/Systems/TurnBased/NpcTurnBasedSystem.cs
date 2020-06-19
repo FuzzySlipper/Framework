@@ -13,7 +13,7 @@ namespace PixelComrades {
         public void TurnStart(TurnBasedCharacterTemplate character) {
             character.Pathfinder.Value = CombatPathfinder.GetPathfinder(Game.CombatMap.Cells, character);
             character.Pathfinder.MoveSpeed = World.Get<RulesSystem>().Post(new GatherMoveSpeedEvent(character, 0)).Total;
-            character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed);
+            character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed*2);
             PathfindingDisplaySystem.Get.SetupPathfindingSprites(character);
 
             var targetList = character.Faction == (int) Factions.PlayerAllies ? CombatArenaSystem.Enemies : CombatArenaSystem.Friendlies;

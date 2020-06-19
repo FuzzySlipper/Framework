@@ -31,10 +31,16 @@ using System.Collections.Generic;
             if (PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction)) {
                 return;
             }
-            if (Mouse.current.rightButton.isPressed) {
-                if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.Floor)) {
-                    World.Get<PlayerTurnBasedSystem>().OnMoveClick(hit1.point);
+            if (Mouse.current.rightButton.wasPressedThisFrame) {
+                if (UISubMenu.Default.Active) {
+                    UISubMenu.Default.Disable();
                 }
+                else if (!IsCursorOverUI) {
+                    if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.Environment)) {
+                        World.Get<PlayerTurnBasedSystem>().OnMoveClick(hit1.point);
+                    }    
+                }
+                
             }
         }
 
@@ -43,10 +49,10 @@ using System.Collections.Generic;
             if (!Game.InCombat) {
                 return;
             }
-            if (PlayerTurnBasedSystem.Current == null || PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction)) {
+            if (PlayerTurnBasedSystem.Current == null || PlayerTurnBasedSystem.Current.Tags.Contain(EntityTags.PerformingAction) || IsCursorOverUI) {
                 return;
             }
-            if (Mouse.current.leftButton.isPressed) {
+            if (Mouse.current.leftButton.wasPressedThisFrame) {
                 if (Physics.Raycast(GetLookTargetRay, out var hit1, 5000, LayerMasks.Actor)) {
                     var clickEntity = UnityToEntityBridge.GetEntity(hit1.collider);
                     if (clickEntity != null) {
@@ -74,7 +80,7 @@ using System.Collections.Generic;
                 if (!action.Config.CanTarget(action, PlayerTurnBasedSystem.Current, target)) {
                     continue;
                 }
-                _menuActions.Add(MenuAction.GetAction(action.GetName(), () => {
+                _menuActions.Add(MenuAction.GetAction(action.Config.Source.Name, () => {
                     var cmd = CommandSystem.GetCommand<ActionCommand>(PlayerTurnBasedSystem.Current);
                     cmd.Action = action;
                     if (cmd.TryStart(target, true)) {
@@ -89,7 +95,7 @@ using System.Collections.Generic;
                     return true;
                 }
                 ));
-            UISubMenu.Default.EnableMenu(CameraSystem.Cam.WorldToViewportPoint(target.Tr.position), _menuActions);
+            UISubMenu.Default.EnableMenu( CameraSystem.Cam.WorldToScreenPoint(target.Tr.position), _menuActions);
         }
 
         private bool CheckRightClickIso() {

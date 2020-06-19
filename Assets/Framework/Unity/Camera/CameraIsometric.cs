@@ -53,6 +53,7 @@ namespace PixelComrades {
                 return;
             }
             float mw = Mouse.current.scroll.ReadValue().y;
+            var look = new Vector2();
             UpdatePosition(PlayerInputSystem.LookInput.x, PlayerInputSystem.LookInput.y, mw, Mouse.current.rightButton.isPressed);
         }
 

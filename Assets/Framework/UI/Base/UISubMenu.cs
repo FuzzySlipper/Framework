@@ -32,23 +32,23 @@ namespace PixelComrades {
                 Default = this;
             }
         }
-
-        void Update() {
-            if (!Active) {
-                return;
-            }
-            bool isDown = Mouse.current.leftButton.isPressed || Mouse.current.rightButton.isPressed;
-            if (isDown) {
-                TimeManager.StartUnscaled(CheckForOrphan(_currentId));
-            }
-        }
-
-        private IEnumerator CheckForOrphan(int checkId) {
-            yield return 0.1f;
-            if (Active && _currentId == checkId) {
-                Disable();
-            }
-        }
+        //
+        // void Update() {
+        //     if (!Active) {
+        //         return;
+        //     }
+        //     bool isDown = Mouse.current.leftButton.isPressed || Mouse.current.rightButton.isPressed;
+        //     if (isDown) {
+        //         TimeManager.StartUnscaled(CheckForOrphan(_currentId));
+        //     }
+        // }
+        //
+        // private IEnumerator CheckForOrphan(int checkId) {
+        //     yield return 0.1f;
+        //     if (Active && _currentId == checkId) {
+        //         Disable();
+        //     }
+        // }
 
         public void EnableMenu(Vector2 pos, List<MenuAction> request) {
             _menuActions = request;

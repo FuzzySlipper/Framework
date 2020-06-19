@@ -9,7 +9,8 @@ namespace PixelComrades {
         [SerializeField] private float _lookAtHeightOffset = 1;// Y coordinate of camera target.   Only used if TerrainHeightViaPhysics and GetTerrainHeight are not set.
         [SerializeField] private FloatRange _tiltRange = new FloatRange(-360, 360);
         [SerializeField] private FloatRange _distanceRange = new FloatRange(50, 500);
-        [SerializeField] private float _startingDistance = 100;
+        [SerializeField] private FloatRange _orthographicDistance = new FloatRange(1, 50);
+        [SerializeField, Range(0,1)] private float _startingDistance = 0.25f;
         [SerializeField] private bool _smoothing = false; // Should the camera "slide" between positions and targets?
         [SerializeField] private float _moveDampening = 0.75f; // How "smooth" should the camera moves be?  Note: Smaller numbers are smoother
         [SerializeField] private float _rotationDampening = 0.75f; // How "smooth" should the camera rotations be?  Note: Smaller numbers are smoother
@@ -29,17 +30,22 @@ namespace PixelComrades {
         [Header("Input")]
         [SerializeField] private bool _moveCamera = true;
         [SerializeField] private int _mouseOrbitButton = 1;
-        [SerializeField] private float _orthoMulti = 0.75f;
         [SerializeField] private float _moveSpeed = 50;
         [SerializeField] private float _rotateSpeed = 50f;
         [SerializeField] private float _tiltSpeed = 50f;
-        [SerializeField] private float _zoomSpeed = 700f;
+        [SerializeField] private float _zoomSpeed = 0.7f;
         [SerializeField] private float _fastMoveSpeed = 300f;
-        [SerializeField] private Key _fastMoveKeyCode1 = Key.LeftShift;
+        [SerializeField] private Key _fastMoveKeyCode = Key.LeftShift;
         [SerializeField] private Key _breakFollowKey = Key.Escape;
         [SerializeField] private bool _limitPos = true;
         [SerializeField] private bool _autoInput = false;
+        [SerializeField] private bool _allowScreenEdgeMove = true;
+        [SerializeField] private bool _screenEdgeMoveBreaksFollow = true;
+        [SerializeField] private int _screenEdgeBorderWidth = 4;
         
+        public bool AllowScreenEdgeMove { get => _allowScreenEdgeMove; }
+        public bool ScreenEdgeMoveBreaksFollow { get => _screenEdgeMoveBreaksFollow; }
+        public int ScreenEdgeBorderWidth { get => _screenEdgeBorderWidth; }
         public float StartingDistance { get => _startingDistance; }
         public float LookAtHeightOffset { get => _lookAtHeightOffset; }
         public FloatRange TiltRange { get => _tiltRange; }
@@ -60,13 +66,13 @@ namespace PixelComrades {
         public float FollowRotationOffset { get => _followRotationOffset; }
         public bool MoveCamera { get => _moveCamera; }
         public int MouseOrbitButton { get => _mouseOrbitButton; }
-        public float OrthoMulti { get => _orthoMulti; }
+        public FloatRange OrthoDistance { get => _orthographicDistance; }
         public float MoveSpeed { get => _moveSpeed; }
         public float RotateSpeed { get => _rotateSpeed; }
         public float TiltSpeed { get => _tiltSpeed; }
         public float ZoomSpeed { get => _zoomSpeed; }
         public float FastMoveSpeed { get => _fastMoveSpeed; }
-        public Key FastMoveKeyCode1 { get => _fastMoveKeyCode1; }
+        public Key FastMoveKeyCode { get => _fastMoveKeyCode; }
         public Key BreakFollowKey { get => _breakFollowKey; }
         public bool LimitPos { get => _limitPos; }
         public bool AutoInput { get => _autoInput; }

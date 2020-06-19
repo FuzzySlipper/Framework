@@ -79,6 +79,22 @@ namespace PixelComrades {
             }
         }
 
+        [Command("checkCommands")]
+        public static void CheckCommands() {
+            Get._commands.Run(
+                c => {
+                    Console.Log(string.Format("{0} Time Active {1} Status {2}", c.Owner.Entity.DebugId, c.TimeActive, c.GetStatus()));
+                });
+        }
+
+        [Command("clearCommands")]
+        public static void ClearCommands() {
+            Get._commands.Run(
+                c => {
+                    c.Cancel();
+                });
+        }
+
         public void OnSystemUpdate(float dt, float unscaledDt) {
             _commands.Run(_del);
         }

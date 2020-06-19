@@ -48,6 +48,8 @@ namespace PixelComrades {
             }
             CameraSystem.Set(_cam);
             _cam.Cam.enabled = true;
+            Game.PauseAndUnlockCursor("RiftSpace");
+            UIPlayerComponents.DisableGameplayUi("RiftSpace");
         }
 
         public override void Disable() {
@@ -60,6 +62,12 @@ namespace PixelComrades {
             }
             CameraSystem.Remove(_cam);
             _cam.Cam.enabled = false;
+            Game.RemovePauseAndLockCursor("RiftSpace");
+            UIPlayerComponents.RemoveDisableGameplayUi("RiftSpace");
+            if (_displayingText) {
+                UICenterTarget.Clear();
+                _displayingText = false;
+            }
         }
 
         public override void NewGame() {
@@ -86,18 +94,6 @@ namespace PixelComrades {
             _config.Cam.enabled = active;
             for (int i = 0; i < _config.TileGridRenderers.Length; i++) {
                 _config.TileGridRenderers[i].enabled = active;
-            }
-            if (active) {
-                Game.PauseAndUnlockCursor("RiftSpace");
-                UIPlayerComponents.DisableGameplayUi("RiftSpace");
-            }
-            else {
-                Game.RemovePauseAndLockCursor("RiftSpace");
-                UIPlayerComponents.RemoveDisableGameplayUi("RiftSpace");
-                if (_displayingText) {
-                    UICenterTarget.Clear();
-                    _displayingText = false;
-                }
             }
             for (int i = 0; i < _config.ActiveObjects.Length; i++) {
                 _config.ActiveObjects[i].SetActive(active);

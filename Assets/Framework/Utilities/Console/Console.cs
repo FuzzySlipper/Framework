@@ -417,6 +417,7 @@ namespace PixelComrades {
             }
         }
 
+        [Command("exit")]
         public static void Toggle() {
             Instance._input = "";
             Open = !Open;
@@ -434,7 +435,7 @@ namespace PixelComrades {
             PlayerInputSystem.AllInputBlocked = false;
         }
 
-        private void OnGUI() {
+       private void OnGUI() {
             ShowFPS();
             if (Event.current.type == EventType.KeyDown) {
                 if (IsConsoleKey(Event.current.keyCode)) {
@@ -446,7 +447,6 @@ namespace PixelComrades {
                     return;
                 }
             }
-            //dont show the console if it shouldnt be open
             if (!Open) {
                 return;
             }
@@ -457,7 +457,6 @@ namespace PixelComrades {
                 Scroll += scrollDirection;
                 UpdateText();
             }
-
             //history scrolling
             if (Event.current.type == EventType.KeyDown) {
                 if (Event.current.keyCode == KeyCode.UpArrow) {

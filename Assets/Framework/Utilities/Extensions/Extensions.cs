@@ -2511,6 +2511,18 @@ namespace PixelComrades {
             return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
         }
 
+        public static float DistanceChebDouble(this Vector3Int a, Vector3Int b) {
+            float dx = System.Math.Abs(b.x - a.x);
+            float dz = System.Math.Abs(b.z - a.z);
+            return MoveDouble * (dx + dz) + (MoveDouble2 - 2 * MoveDouble) * System.Math.Min(dx, dz);
+        }
+
+        public static float DistanceCheb(this Vector3Int a, Vector3Int b) {
+            float dx = System.Math.Abs(b.x - a.x);
+            float dz = System.Math.Abs(b.z - a.z);
+            return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
+        }
+
 
         public static Point3 Reverse(this Point3 pos) {
             Point3 newPos = Point3.zero;

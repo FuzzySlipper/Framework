@@ -40,6 +40,7 @@ namespace PixelComrades {
             }
             _phaseIndex = 0;
             var origin = Owner.Tr.position;
+            Owner.Target.Set(target);
             RunEvent(TargetEventTypes.Start, target, origin, target.Tr.GetLookAtRotation(origin));
             return true;
         }
@@ -93,6 +94,10 @@ namespace PixelComrades {
                 }
                 _phaseIndex++;
             }
+        }
+
+        public override string GetStatus() {
+            return string.Format("Action {0} Phase {1} of {2} Result {3}", Action.Entity.DebugId, _phaseIndex, Action.Config.Phases.Count, CollisionResult.GetValue(HitResult.Result));
         }
 
         public void CheckHit(string targetDefense, string bonusAttackStat, string toHitStat, CharacterTemplate target) {

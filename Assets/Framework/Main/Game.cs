@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 using Random = System.Random;
 
 namespace PixelComrades {
-    public static partial class Game {
+    public static class Game {
 
         public static float Version { get; set; }
         public static string Title { get; set; }

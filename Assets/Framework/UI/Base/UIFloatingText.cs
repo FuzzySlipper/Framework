@@ -108,6 +108,7 @@ namespace PixelComrades {
             color, Sprite icon = null) {
                 var txtHolder = _pool.New();
                 txtHolder.Setup(LazyDb.Main.UIFloatingText[(int) type], text, duration, start, end, parent, color, icon);
+                ItemPool.Spawn(txtHolder);
             }
 
             private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color color, Sprite icon) {

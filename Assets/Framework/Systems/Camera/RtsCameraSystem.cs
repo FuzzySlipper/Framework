@@ -20,7 +20,7 @@ namespace PixelComrades {
         private Vector3 _moveVector;
         private MeshRenderer _targetRenderer;
         private float _defaultRotateTilt;
-        private float _distance = 0;
+        private float _distance;
         private float _rotateSpeed;
         private float _tiltSpeed;
         private float _lookAtHeightOffset;
@@ -31,9 +31,12 @@ namespace PixelComrades {
         private Camera Cam { get { return Current.Cam; } }
         public Transform FollowTarget { get { return Current.FollowTr; } }
         public Transform CamTargetMarker { get { return Current.CamTargetMarker; } }
-        
+        public bool IsFollowing { get { return FollowTarget != null; } }
+        public bool RunTestInput { get; set; }
+
         public RtsCameraSystem() {
             MessageKit<Transform>.addObserver(Messages.CameraFocusChanged, Follow);
+            RunTestInput = false;
         }
 
         protected override void SetCurrent(RtsCameraComponent current) {
@@ -44,10 +47,10 @@ namespace PixelComrades {
             _defaultRotateTilt = Mathf.Max(Config.RotateSpeed, Config.TiltSpeed);
             _currTilt = current.Tr.rotation.eulerAngles.x;
             _currRotation = current.Tr.rotation.eulerAngles.y;
-            _distance = current.Config.DistanceRange.Clamp(Config.StartingDistance);
+            _distance = _initialDistance = Config.StartingDistance;
+            _currDistance = Config.DistanceRange.Lerp(_distance);
             _lookAt = current.Tr.position;
             _currentHeight = current.Tr.position.y;
-            _initialDistance = _currDistance = _distance;
             _initialRotation = _rotation = _currRotation;
             _initialTilt = _tilt = _currTilt;
             
@@ -66,7 +69,12 @@ namespace PixelComrades {
                 return;
             }
             if (Config.AutoInput) {
-                UpdateInput();
+                if (RunTestInput) {
+                    TestInputUpdate();   
+                }
+                else {
+                    UpdateInput();
+                }
             }
             if (_lastDebugCamera != Config.ShowDebugCameraTarget) {
                 if (_targetRenderer != null) {
@@ -110,19 +118,18 @@ namespace PixelComrades {
                 _lookAt = Current.CameraLimitSpace.ClosestPointOnBounds(_lookAt);
             }
             _tilt = Config.TiltRange.Clamp(_tilt);
-            _distance = Config.DistanceRange.Clamp(_distance);
             //LookAt = new Vector3(Mathf.Clamp(LookAt.x, MinBounds.x, MaxBounds.x),
             //    Mathf.Clamp(LookAt.y, MinBounds.y, MaxBounds.y), Mathf.Clamp(LookAt.z, MinBounds.z, MaxBounds.z));
             
             if (Config.Smoothing) {
                 _currRotation = Mathf.LerpAngle(_currRotation, _rotation, TimeManager.DeltaUnscaled * Config.RotationDampening);
-                _currDistance = Mathf.Lerp(_currDistance, _distance, TimeManager.DeltaUnscaled * Config.ZoomDampening);
+                _currDistance = Mathf.Lerp(_currDistance, Config.DistanceRange.Lerp(_distance), TimeManager.DeltaUnscaled * Config.ZoomDampening);
                 _currTilt = Mathf.LerpAngle(_currTilt, _tilt, TimeManager.DeltaUnscaled * Config.TiltDampening);
                 CamTargetMarker.position = Vector3.Lerp(CamTargetMarker.position, _lookAt, TimeManager.DeltaUnscaled * Config.MoveDampening);
             }
             else {
                 _currRotation = _rotation;
-                _currDistance = _distance;
+                _currDistance = Config.DistanceRange.Lerp(_distance);
                 _currTilt = _tilt;
                 CamTargetMarker.position = _lookAt;
             }
@@ -156,7 +163,7 @@ namespace PixelComrades {
             _tilt = _initialTilt;
 
             if (snap) {
-                _currDistance = _distance;
+                _currDistance = Config.DistanceRange.Lerp(_distance);
                 _currRotation = _rotation;
                 _currTilt = _tilt;
                 CamTargetMarker.position = _lookAt;
@@ -249,11 +256,11 @@ namespace PixelComrades {
 
         private void UpdateCamera() {
             Quaternion rotation = Quaternion.Euler(_currTilt, _currRotation, 0);
-            var v = new Vector3(0.0f, 0.0f, -_currDistance * (Cam.orthographic ? Config.OrthoMulti : 1 ));
+            var v = new Vector3(0.0f, 0.0f, -_currDistance);
             Vector3 position = rotation * v + CamTargetMarker.position;
 
             if (Cam.orthographic) {
-                Cam.orthographicSize = _currDistance * Config.OrthoMulti;
+                Cam.orthographicSize = Config.OrthoDistance.Lerp(_distance);
             }
             if (Config.UseVisibilityCheck) {
                 float y = GetHeightAt(position.x, position.z) + 1;
@@ -302,7 +309,7 @@ namespace PixelComrades {
         private void EnsureTargetIsVisible() {
             Vector3 direction = (Current.Tr.position - CamTargetMarker.position);
             direction.Normalize();
-            float distance = _distance;
+            float distance = Config.DistanceRange.Lerp(_distance);
             RaycastHit hitInfo;
             //if (Physics.Raycast(_target.transform.position, direction, out hitInfo, distance, ~TargetVisibilityIgnoreLayerMask))
             if (Physics.SphereCast(
@@ -323,7 +330,7 @@ namespace PixelComrades {
         }
 
         public void UpdateInput(Vector2 move, float scroll, bool rotate) {
-            _distance -= scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled;
+            _distance -= Mathf.Clamp01(scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled);
             if (rotate) {
                 float tilt = move.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
@@ -333,7 +340,7 @@ namespace PixelComrades {
             }
             else if (Config.MoveCamera) {
                 float speed = Config.MoveSpeed;
-                if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode1)) {
+                if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode)) {
                     speed = Config.FastMoveSpeed;
                 }
                 float h = move.x;
@@ -353,8 +360,7 @@ namespace PixelComrades {
                 EndFollow();
             }
             float scroll = Mouse.current.scroll.ReadValue().y;
-
-            _distance -= scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled;
+            _distance = Mathf.Clamp01(_distance - (scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled));
             if (PlayerInputSystem.GetMouseButtonDown(Config.MouseOrbitButton)) {
                 float tilt = PlayerInputSystem.LookInput.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
@@ -366,7 +372,7 @@ namespace PixelComrades {
                 return;
             }
             float speed = Config.MoveSpeed;
-            if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode1)) {
+            if (PlayerInputSystem.GetKeyDown(Config.FastMoveKeyCode)) {
                 speed = Config.FastMoveSpeed;
             }
 
@@ -379,6 +385,102 @@ namespace PixelComrades {
             if (Mathf.Abs(v) > 0.001f) {
                 AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
             }
+        }
+
+        private void TestInputUpdate() {
+            if (GetKey(Config.BreakFollowKey)) {
+                EndFollow();
+            }
+            var mousePos = Mouse.current.position.ReadValue();
+            if (GetMouseButton(0)) {
+                var ray = Cam.ScreenPointToRay(mousePos);
+                if (Physics.Raycast(ray, out var hitInfo, 5000f, LayerMasks.Actor)) {
+                    Follow(hitInfo.transform);
+                }
+            }
+            float scroll = Mouse.current.scroll.ReadValue().y;
+            _distance -= scroll * Config.ZoomSpeed * TimeManager.DeltaUnscaled;
+            _distance = Mathf.Clamp01(_distance);
+            var mouseMovement = Mouse.current.delta.ReadValue();
+            if (GetMouseButton(Config.MouseOrbitButton)) {
+                float tilt = mouseMovement.y;
+                _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
+
+                float rot = mouseMovement.x;
+                _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
+            }
+            if (!Config.MoveCamera) {
+                return;
+            }
+            float speed = Config.MoveSpeed;
+            if (GetKey(Config.FastMoveKeyCode)) {
+                speed = Config.FastMoveSpeed;
+            }
+
+            float h = 0;
+            if (GetKey(Key.D)) {
+                h = 1;
+            }
+            else if (GetKey(Key.A)) {
+                h = -1;
+            }
+            float v = 0;
+            if (GetKey(Key.W)) {
+                v = 1;
+            }
+            else if (GetKey(Key.S)) {
+                v = -1;
+            }
+            
+            if (Config.AllowScreenEdgeMove && (!IsFollowing || Config.ScreenEdgeMoveBreaksFollow)) {
+                var hasMovement = false;
+
+                if (mousePos.y > (Screen.height - Config.ScreenEdgeBorderWidth)) {
+                    hasMovement = true;
+                    AddToPosition(0, 0, speed * TimeManager.DeltaUnscaled);
+                }
+                else if (mousePos.y < Config.ScreenEdgeBorderWidth) {
+                    hasMovement = true;
+                    AddToPosition(0, 0, -1 * speed * TimeManager.DeltaUnscaled);
+                }
+
+                if (mousePos.x > (Screen.width - Config.ScreenEdgeBorderWidth)) {
+                    hasMovement = true;
+                    AddToPosition(speed * TimeManager.DeltaUnscaled, 0, 0);
+                }
+                else if (mousePos.x < Config.ScreenEdgeBorderWidth) {
+                    hasMovement = true;
+                    AddToPosition(-1 * speed * TimeManager.DeltaUnscaled, 0, 0);
+                }
+
+                if (hasMovement && IsFollowing && Config.ScreenEdgeMoveBreaksFollow) {
+                    EndFollow();
+                }
+            }
+            
+            if (Mathf.Abs(h) > 0.001f) {
+                AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
+            }
+            if (Mathf.Abs(v) > 0.001f) {
+                AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
+            }
+        }
+
+        public static bool GetMouseButton(int button) {
+            if (button == 0) {
+                return Mouse.current.leftButton.isPressed;
+            }
+            if (button == 1) {
+                return Mouse.current.rightButton.isPressed;
+            }
+            if (button == 2) {
+                return Mouse.current.middleButton.isPressed;
+            }
+            return false;
+        }
+
+        private bool GetKey(Key key) {
+            return Keyboard.current[key].wasPressedThisFrame;
         }
     }
 }

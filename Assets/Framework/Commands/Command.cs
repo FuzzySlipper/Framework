@@ -105,6 +105,10 @@ namespace PixelComrades {
                 Costs.AddRange(costs);
             }
         }
+
+        public virtual string GetStatus() {
+            return Owner != null ? "Running" : "Pooled";
+        }
     }
 
     public struct StartedCommand : IEntityMessage {

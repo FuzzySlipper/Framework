@@ -46,6 +46,7 @@ namespace PixelComrades {
             public static void Start(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
                 var txtHolder = _pool.New();
                 txtHolder.Setup(prefab, text, duration, start, end, color);
+                ItemPool.Spawn(txtHolder);
             }
 
             private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {

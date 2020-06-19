@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.Utilities;
@@ -32,10 +33,10 @@ namespace PixelComrades {
             for (int i = 0; i < action.Actions.Count; i++) {
                 action.Actions[i].SetupEntity(entity);
             }
-            var targeting = data.Targeting;
-            if (targeting == TargetType.Self || targeting == TargetType.Friendly) {
-                action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent());
-            }
+            action.Requirements.Add(new ActionTargetTypeRequirement(data.Targeting));
+            // if (targeting == TargetType.Self || targeting == TargetType.Friendly) {
+            //     action.AddEvent(AnimationEvents.Default, new EventGenerateCollisionEvent());
+            // }
             var radius = data.Radius;
             if (radius != ImpactRadiusTypes.Single) {
                 entity.Add(new ImpactRadius(radius, true));

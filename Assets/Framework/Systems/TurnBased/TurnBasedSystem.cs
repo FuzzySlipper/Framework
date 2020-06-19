@@ -93,30 +93,38 @@ namespace PixelComrades {
         }
 
         public void CommandComplete(TurnBasedCharacterTemplate template) {
-            if (template == null || template.TurnBased.ActionPoints == 0) {
-                if (_current != null) {
-                    _current.Entity.Post(new EndTurnEvent(_current.Entity));
-                    if (_current.IsPlayer()) {
-                        World.Get<PlayerTurnBasedSystem>().TurnEnd(_current);
-                    }
-                    else {
-                        World.Get<NpcTurnBasedSystem>().TurnEnd(_current);
-                    }
-                }
+            if (template == null || template.TurnBased.ActionPoints <= 0) {
+                RemoveCurrent();
                 _turnTemplates.Run(_findCurrentFastest);
-                if (_current == null) {
-                    NewTurn();
-                }
             }
             else {
                 if (_current != template) {
+                    RemoveCurrent();
                     _current = template;
-                    StartTurn();
                 }
                 else {
                     RunTurn();
                 }
             }
+            if (_current == null) {
+                NewTurn();
+            }
+            else {
+                StartTurn();
+            }
+        }
+
+        private void RemoveCurrent() {
+            if (_current != null) {
+                _current.Entity.Post(new EndTurnEvent(_current.Entity));
+                if (_current.IsPlayer()) {
+                    World.Get<PlayerTurnBasedSystem>().TurnEnd(_current);
+                }
+                else {
+                    World.Get<NpcTurnBasedSystem>().TurnEnd(_current);
+                }
+            }
+            _current = null;
         }
 
         private void StartTurn() {

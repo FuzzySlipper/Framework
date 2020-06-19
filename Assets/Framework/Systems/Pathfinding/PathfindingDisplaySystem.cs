@@ -18,6 +18,9 @@ namespace PixelComrades {
             for (int i = 0; i < character.Pathfinder.Value.ReachableNodes.Count; i++) {
                 var node = character.Pathfinder.Value.ReachableNodes[i];
                 var color = node.StartCost <= character.Pathfinder.MoveSpeed ? LazyDb.Main.MovementAp1Color : LazyDb.Main.MovementAp2Color;
+                if (node.Value.Unit == character) {
+                    color = LazyDb.Main.MovementSelected;
+                }
                 var pos = _pathfindTileMap.WorldToCell(node.Value.PositionV3);
                 _pathfindTileMap.SetTile(pos, LazyDb.Main.PathfindCell);
                 _pathfindTileMap.SetTileFlags(pos, TileFlags.None);
