@@ -8,5 +8,6 @@ namespace PixelComrades {
 
         public string Text { get { return _text; } }
         public string Label { get { return string.IsNullOrEmpty(_label) ? name : _label; } }
+        public string ID { get { return name; } }
     }
 }

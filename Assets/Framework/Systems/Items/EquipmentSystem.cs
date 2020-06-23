@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using PixelComrades;
 
 namespace PixelComrades {
     [AutoRegister]
@@ -9,7 +10,6 @@ namespace PixelComrades {
 
         
         public EquipmentSystem() {
-            TemplateFilter<EquipmentTemplate>.Setup();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(Equipment)
             }));
@@ -88,6 +88,9 @@ namespace PixelComrades {
                 holder.LastEquipStatus = "Owner inventory rejected old item";
                 return false;
             }
+            if (!isSwap && holder.TargetSlot == EquipmentSlotTypes.MainHand) {
+                SetCharacterWeaponType(holder.Owner.GetTemplate<CharacterTemplate>(), WeaponTypes.Unarmed);
+            }
             return true;
         }
 
@@ -111,6 +114,9 @@ namespace PixelComrades {
             if (!isSwap) {
                 owner.Post(new EquipmentChanged(holder, null));
                 holder.OnItemChanged?.Invoke(null);
+            }
+            if (!isSwap && holder.TargetSlot == EquipmentSlotTypes.MainHand) {
+                SetCharacterWeaponType(holder.Owner.GetTemplate<CharacterTemplate>(), WeaponTypes.Unarmed);
             }
         }
 
@@ -141,27 +147,25 @@ namespace PixelComrades {
             //var ownerStats = SlotOwner.GetEntity().Stats;
             //var skillComponent = Item.Get<SkillRequirement>();
             //var skill = skillComponent != null ? skillComponent.Skill : GameData.Skills.GetID(0);
-            //if (TargetSlot == EquipmentSlotType.MainHand) {
-            //    bool ranged = Item.Tags.Contain(EntityTags.RangedWeapon);
-            //    var charSkill = ownerStats.Get(skill);
-            //    if (charSkill != null) {
-            //        _currentStats.Add(new DerivedStatModHolder(charSkill, Item.Stats.Get(Stats.ToHit), RpgSettings.SkillStandardToHitBonus));
-            //    }
-            //    _currentStats.Add(new DerivedStatModHolder(ownerStats.Get(ranged ? Stats.BonusPowerRanged : Stats.BonusPowerMelee), Item.Stats.Get(Stats.Power), 1));
-            //    _currentStats.Add(new DerivedStatModHolder(ownerStats.Get(ranged ? Stats.BonusToHitRanged : Stats.BonusToHitMelee), Item.Stats.Get(Stats.ToHit), 1));
-            //    _currentStats.Add(new DerivedStatModHolder(ownerStats.Get(ranged ? Stats.BonusCritRanged : Stats.BonusCritMelee), Item.Stats.Get(Stats.CriticalHit), 1));
-            //}
             ClearStats(template.Equipment);
-            var itemStats = template.Equipment.GetEntity().Get<StatsContainer>();
+            var itemStats = template.Stats;
             if (template.Equipment.Mods == null || template.Equipment.Mods.Length != template.Equipment.StatsToEquip.Count) {
                 template.Equipment.Mods = new StatModHolder[template.Equipment.StatsToEquip.Count];
                 for (int i = 0; i < template.Equipment.Mods.Length; i++) {
                     template.Equipment.Mods[i] = new DerivedStatModHolder(itemStats.Get(template.Equipment.StatsToEquip[i]), 1);
                 }
             }
-            var slotStats = holder.Owner.Get<StatsContainer>();
+            var character = holder.Owner.GetTemplate<CharacterTemplate>();
+            if (holder.TargetSlot == EquipmentSlotTypes.MainHand) {
+                var weapon = template.Get<WeaponComponent>();
+                if (weapon != null) {
+                    SetCharacterWeaponType(character, weapon.WeaponType);
+                }
+                character.Stats.Get<PassThroughStat>(Stat.AttackAccuracy).SetStat(itemStats.Get(Stat.AttackAccuracy));
+                character.Stats.Get<PassThroughStat>(Stat.AttackDamage).SetStat(itemStats.Get(Stat.AttackDamage));
+            }
             for (int i = 0; i < template.Equipment.Mods.Length; i++) {
-                template.Equipment.Mods[i].Attach(slotStats.Get(template.Equipment.Mods[i].StatID));
+                template.Equipment.Mods[i].Attach(character.Stats.Get(template.Equipment.Mods[i].StatID));
             }
         }
         public void HandleGlobal(SaveGameLoaded arg) {
@@ -187,7 +191,7 @@ namespace PixelComrades {
             for (int i = 0; i < equipment.StatsToEquip.Count; i++) {
                 FastString.Instance.AppendNewLine(stats.Get(equipment.StatsToEquip[i]).ToLabelString());
             }
-            FastString.Instance.AppendBoldLabelNewLine("Equipment Slot", GameData.EquipmentSlotTypes.GetNameAt(equipment.EquipmentSlotType));
+            FastString.Instance.AppendBoldLabelNewLine("Equipment Slot", equipment.EquipmentSlotType);
             arg.Data.Text += FastString.Instance.ToString();
         }
 
@@ -215,8 +219,30 @@ namespace PixelComrades {
             }
         }
 
-        
-
+        private void SetCharacterWeaponType(CharacterTemplate character, string weaponType) {
+            switch (weaponType) {
+                case WeaponTypes.Melee:
+                    character.GenericData.SetData(GenericDataTypes.WeaponType, WeaponTypes.Melee);
+                    character.GenericData.SetData(GenericDataTypes.AttackDamageBonusStat, GenericDataTypes.MeleeDamageStat);
+                    character.GenericData.SetData(GenericDataTypes.AttackAccuracyBonusStat, GenericDataTypes.MeleeAccuracyStat);
+                    
+                    break;
+                case WeaponTypes.Ranged:
+                    character.GenericData.SetData(GenericDataTypes.WeaponType, WeaponTypes.Ranged);
+                    character.GenericData.SetData(GenericDataTypes.AttackDamageBonusStat, GenericDataTypes.RangedDamageStat);
+                    character.GenericData.SetData(GenericDataTypes.AttackAccuracyBonusStat, GenericDataTypes.RangedAccuracyStat);
+                    
+                    break;
+                default:
+                case WeaponTypes.Unarmed:
+                    character.GenericData.SetData(GenericDataTypes.WeaponType, WeaponTypes.Unarmed);
+                    character.GenericData.SetData(GenericDataTypes.AttackDamageBonusStat, GenericDataTypes.UnarmedDamageStat);
+                    character.GenericData.SetData(GenericDataTypes.AttackAccuracyBonusStat, GenericDataTypes.UnarmedAccuracyStat);
+                    character.Stats.Get<PassThroughStat>(Stat.AttackAccuracy).SetStat(character.Stats.Get(Stat.UnarmedAttackAccuracy));
+                    character.Stats.Get<PassThroughStat>(Stat.AttackDamage).SetStat(character.Stats.Get(Stat.UnarmedAttackDamage));
+                    break;
+            }
+        }
     }
 
     public class EquipmentTemplate : BaseTemplate {
@@ -224,12 +250,14 @@ namespace PixelComrades {
         private CachedComponent<InventoryItem> _item = new CachedComponent<InventoryItem>();
         private CachedComponent<Equipment> _equip = new CachedComponent<Equipment>();
         private CachedComponent<SkillRequirement> _skillRequirement = new CachedComponent<SkillRequirement>();
-        
+        private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
+
+        public StatsContainer Stats { get => _stats.Value; }
         public Equipment Equipment { get => _equip.Value; }
         public InventoryItem Item { get => _item.Value; }
         public SkillRequirement SkillRequirement { get => _skillRequirement.Value; }
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _equip, _item, _skillRequirement
+            _equip, _item, _skillRequirement, _stats
         };
 
         public override System.Type[] GetTypes() {

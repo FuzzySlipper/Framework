@@ -16,17 +16,11 @@ namespace PixelComrades {
 
         public event System.Action OnWindowClosed;
         public static List<UIBasicMenu> OpenMenus = new List<UIBasicMenu>();
-
         protected float TransitionLength { get { return _transitionLength; } }
         protected CanvasGroup CanvasGroup{get { return _canvasgroup; }}
-        public virtual bool Active { get {
-                return _status;
-                //if (_canvasgroup == null) {
-                //    return gameObject.activeInHierarchy;
-                //}
-                //return _canvasgroup.alpha > 0 && gameObject.activeInHierarchy;
-            }
-        }
+        public virtual bool Active { get { return _status; } }
+        
+        public virtual string GetTitleText() { return null; }
 
         protected virtual void OnStatusChanged(bool status) {
             if (!status && OnWindowClosed != null) {

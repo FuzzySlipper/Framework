@@ -26,7 +26,11 @@ namespace PixelComrades {
 
     [System.Serializable]
     public class AbilityHolder {
+<<<<<<< HEAD
         [Range(0, 100)] public int Chance;
+=======
+        [Range(0,100)] public int Chance;
+>>>>>>> FirstPersonAction
         public AbilityConfig Ability;
         public AdvancedTargeting Targeting;
     }

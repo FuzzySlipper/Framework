@@ -37,7 +37,8 @@ namespace PixelComrades {
             _task = TimeManager.StartTask(PlayAnimation(), _unscaled, Finish);
         }
 
-        public void OnPoolSpawned() {
+        public override void OnPoolSpawned() {
+            base.OnPoolSpawned();
             if (!string.IsNullOrEmpty(_shaderKeyword)) {
                 for (int i = 0; i < _renderers.Length; i++) {
                     _renderers[i].material.EnableKeyword(_shaderKeyword);
@@ -45,7 +46,8 @@ namespace PixelComrades {
             }
         }
 
-        public void OnPoolDespawned() {
+        public override void OnPoolDespawned() {
+            base.OnPoolDespawned(); 
             if (_matBlocks != null) {
                 for (int i = 0; i < _matBlocks.Length; i++) {
                     _matBlocks[i].SetFloat(_shaderFeature, _originValues[i]);

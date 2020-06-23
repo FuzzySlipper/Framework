@@ -1,3 +1,17 @@
+<<<<<<< HEAD
 ﻿fileFormatVersion: 2
 guid: 57c243353fb746f9af72e52f6fdcd824
 timeCreated: 1583279658
+=======
+fileFormatVersion: 2
+guid: 7017bf2b4b3e8cc449128feabb53dda0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+>>>>>>> FirstPersonAction

@@ -20,6 +20,7 @@ namespace PixelComrades {
         private CachedComponent<AnimationGraphComponent> _animGraph = new CachedComponent<AnimationGraphComponent>();
         private CachedComponent<AnimationEventComponent> _animationEvent = new CachedComponent<AnimationEventComponent>();
         private CachedComponent<RuleEventListenerComponent> _ruleEvent = new CachedComponent<RuleEventListenerComponent>();
+<<<<<<< HEAD
         private CachedComponent<ActionSlots> _actionSlots = new CachedComponent<ActionSlots>();
         private CachedComponent<GenericDataComponent> _data = new CachedComponent<GenericDataComponent>();
         private CachedComponent<EntityLevelComponent> _level = new CachedComponent<EntityLevelComponent>();
@@ -28,6 +29,16 @@ namespace PixelComrades {
         public EntityLevelComponent LevelComponent { get => _level.Value; }
         public GenericDataComponent GenericData { get => _data.Value; }
         public ActionSlots ActionSlots { get => _actionSlots; }
+=======
+        private CachedComponent<GenericDataComponent> _genericData = new CachedComponent<GenericDataComponent>();
+        private CachedComponent<ActionSlots> _actionSlots = new CachedComponent<ActionSlots>();
+        private CachedComponent<ModifierListComponent> _modList = new CachedComponent<ModifierListComponent>();
+        private CachedComponent<IconComponent> _icon = new CachedComponent<IconComponent>();
+        public IconComponent Icon { get => _icon; }
+        public ModifierListComponent ModList { get => _modList; }
+
+        public GenericDataComponent GenericData { get => _genericData; }
+>>>>>>> FirstPersonAction
         public TransformComponent Tr { get => _tr.Value; }
         public Collider Collider { get => _collider.Value.Collider; }
         public StatsContainer Stats => _stats.Value;
@@ -39,19 +50,51 @@ namespace PixelComrades {
         public GridPosition Position => _position.Value;
         public LabelComponent Label => _label.Value;
         public CommandTarget Target => _target.Value;
+<<<<<<< HEAD
         public EntityTagsComponent Tags => Entity.Tags;
+=======
+        public TagsComponent Tags => Entity.Tags;
+        public SteeringInput Steering => _steering.Value;
+        public AnimationGraphComponent AnimGraphComponent => _animGraph.Value;
+>>>>>>> FirstPersonAction
         public RuntimeStateGraph AnimGraph => _animGraph.Value.Value;
         public AnimationEventComponent AnimationEvent => _animationEvent.Value;
         public RuleEventListenerComponent RuleEvents => _ruleEvent.Value;
+        public ActionSlots ActionSlots { get => _actionSlots; }
+
         public bool IsDead => Entity.Tags.Contain(EntityTags.IsDead);
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+<<<<<<< HEAD
             _label, _status, _position, _faction, _slots, _target, _statDefend, _damageAbsorb,
             _collider, _stats, _tr, _animGraph, _animationEvent, _ruleEvent, _actionSlots, _data,_level
+=======
+            _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
+            _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, 
+            _actionSlots, _modList, _icon
+>>>>>>> FirstPersonAction
         };
 
         public VitalStat GetVital(int vital) {
-            return _stats.Value.GetVital(GameData.Vitals.GetID(vital));
+            return _stats.Value.GetVital(Vitals.GetValue(vital));
+        }
+
+        public string GetAttackAccuracyStatBonusName() {
+            var dataName = GenericData.GetString(GenericDataTypes.AttackAccuracyBonusStat);
+            return GenericData.GetString(dataName);
+        }
+
+        public string GetAttackDamageBonusStatName() {
+            var dataName = GenericData.GetString(GenericDataTypes.AttackDamageBonusStat);
+            return GenericData.GetString(dataName);
+        }
+
+        public BaseStat GetAttackAccuracyBonusStat() {
+            return Stats.Get(GetAttackAccuracyStatBonusName());
+        }
+
+        public BaseStat GetAttackDamageBonusStat() {
+            return Stats.Get(GetAttackDamageBonusStatName());
         }
 
         public override System.Type[] GetTypes() {

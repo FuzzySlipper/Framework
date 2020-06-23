@@ -9,7 +9,7 @@ namespace PixelComrades {
         private const int GrazeMax = 50;
         private const int Critical = 100;
 
-        public static int Calculate(Entity origin, Entity target) {
+        public static CollisionResult Calculate(Entity origin, Entity target) {
             var originStats = origin.Get<StatsContainer>();
             var targetStats = target.Get<StatsContainer>();
             if (origin == null || target == null || target == origin) {
@@ -18,12 +18,17 @@ namespace PixelComrades {
             if (target.Get<FactionComponent>().Value == origin.Get<FactionComponent>().Value) {
                 return CollisionResult.Hit;
             }
+<<<<<<< HEAD
             var defendTotal = targetStats.GetValue(Stats.Evasion);
             var attackTotal = originStats.GetValue(Stats.Attack);
+=======
+            var defendTotal = targetStats.GetValue(Stat.Evasion);
+            var attackTotal = 0;//originStats.GetValue(Stats.ToHit);
+>>>>>>> FirstPersonAction
             //var finalAttack = Mathf.Clamp((attackTotal - defendTotal), 5, 100) + Game.Random.Next(1, 100);
             var finalAttack = Game.Random.Next(1, 100) + (attackTotal - defendTotal);
             var result = CollisionResult.Miss;
-            if (finalAttack >= Critical - originStats.GetValue(Stats.CriticalHit)) {
+            if (finalAttack >= Critical - originStats.GetValue(Stat.CriticalHit)) {
                 result = CollisionResult.CriticalHit;
             }
             else if (finalAttack >= GrazeMax) {

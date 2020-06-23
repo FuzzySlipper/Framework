@@ -35,13 +35,22 @@ public static class LayerMasks  {
     private static LayerMask _environment = _environmentOnly | _ceiling | _wall | _floor;
     private static LayerMask _wallsEnvironment = _environmentOnly | _wall;
     private static LayerMask _defaultCollision = _default | _collision | _environment | _player | _enemy;
+    private static LayerMask _combatInput = _default | _actor | _environment | _player | _enemy;
     private static LayerMask _dropPanel = _default | _environment;
+<<<<<<< HEAD
     private static LayerMask _checkClick = _floor | _actor;
+=======
+    public static LayerMask CombatInput { get { return _combatInput; } }
+
+>>>>>>> FirstPersonAction
     public static LayerMask DefaultCollision { get { return _defaultCollision; } }
     public static LayerMask DropPanel { get { return _dropPanel; } }
     public static LayerMask Environment {get { return _environment; } }
     public static LayerMask WallsEnvironment { get { return _wallsEnvironment; } }
+<<<<<<< HEAD
     public static LayerMask CheckClick { get { return _checkClick; } }
+=======
+>>>>>>> FirstPersonAction
     public static LayerMask Actor {get { return _actor; } }
     public static LayerMask Map { get { return _map; } }
     public static LayerMask Floor { get { return _floor; } }

@@ -38,6 +38,7 @@ namespace PixelComrades {
             return !_enums.TryGetValue(splitName[0], out var splitEnum) ? null : splitEnum;
         }
     }
+<<<<<<< HEAD
 
     public static partial class EnumTypes {
         public const string Vitals = "Vitals";
@@ -164,4 +165,6 @@ namespace PixelComrades {
         SouthEast = 2,
         SouthWest = 3
     }
+=======
+>>>>>>> FirstPersonAction
 }

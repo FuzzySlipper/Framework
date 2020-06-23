@@ -15,6 +15,7 @@ namespace PixelComrades {
         private static Dictionary<string, DataEntry> _entriesByFullID = new Dictionary<string, DataEntry>();
 
         public static Enums Enums { get { return _enums; } }
+<<<<<<< HEAD
         public static FakeEnum Vitals { get { return _enums[StatTypes.Vitals]; } }
         public static FakeEnum Attributes { get { return _enums[StatTypes.Attributes]; } }
         public static FakeEnum DamageTypes { get { return _enums[StatTypes.DamageTypes]; } }
@@ -22,6 +23,8 @@ namespace PixelComrades {
         public static FakeEnum Skills { get { return _enums[StatTypes.Skills]; } }
         public static FakeEnum Classes { get { return _enums[StatTypes.Classes]; } }
 
+=======
+>>>>>>> FirstPersonAction
         
         private static System.Action _onInit;
 

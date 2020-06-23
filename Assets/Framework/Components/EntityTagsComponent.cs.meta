@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Framework/Components/EntityTagsComponent.cs.meta
 guid: 5677377be4faeca468bac457f17f45a8
+=======
+guid: c93402e90776aeb439e33186ca604769
+>>>>>>> FirstPersonAction:Assets/Framework/Actions/Events/EventRollForHit.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

@@ -55,9 +55,9 @@ namespace PixelComrades {
             _playerData = new SerializedPlayerData();
             //_riftLocation = RiftTown.Current != null ? RiftTown.Current.DisplayName : GlobalLevelController.CurrentConfig.Name;
             //_riftLevel = RiftTown.Current != null ? 0 : GlobalLevelController.CurrentIndex;
-            //_playerPosition = new SerializedTransform(Player.Controller.Tr);
-            //_encounterRate = Player.Controller.CurrentEncounterRate;
-            //_encounterSteps = Player.Controller.CurrentSteps;
+            //_playerPosition = new SerializedTransform(PlayerControllerSystem.Current.Tr);
+            //_encounterRate = PlayerControllerSystem.Current.CurrentEncounterRate;
+            //_encounterSteps = PlayerControllerSystem.Current.CurrentSteps;
             //if (GlobalLevelController.Root != null) {
             //    var receivers = GlobalLevelController.Root.gameObject.GetComponentsInChildren<ILevelLoadEvents>();
             //    if (receivers != null) {

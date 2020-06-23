@@ -1,3 +1,18 @@
+<<<<<<< HEAD
 ﻿fileFormatVersion: 2
 guid: 33c813cbaa2f4063834668aae83b3129
 timeCreated: 1583456103
+=======
+fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Framework/Data/Abilities.meta
+guid: 65ff5099f9a541b4b5789917a7f70c45
+=======
+guid: 13150faab0606544fbeff720d70a23e4
+>>>>>>> FirstPersonAction:Assets/Framework/Events/RuleEvents.meta
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+>>>>>>> FirstPersonAction

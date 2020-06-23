@@ -56,6 +56,7 @@ namespace PixelComrades {
                     Color.Lerp(
                         Color.red, colorStage.ColorComponent.BaseColor,
                         colorStage.Tween.Get()));
+                colorStage.Renderer.UpdateColor(colorStage.ColorComponent.CurrentColor);
             }
             if (colorStage.Tween.Active) {
                 return;

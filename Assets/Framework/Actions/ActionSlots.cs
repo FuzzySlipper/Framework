@@ -9,7 +9,17 @@ namespace PixelComrades {
 
         private GenericContainer<ActionSlot> _list = new GenericContainer<ActionSlot>();
         
+<<<<<<< HEAD
         public ActionSlots() { }
+=======
+        public ActionSlots(int amountPrimary, int amountSecondary, int amtHidden) {
+            AddSlot(ActionPivotTypes.Primary, amountPrimary);
+            AddSlot(ActionPivotTypes.Secondary, amountSecondary);
+            AddSlot(ActionPivotTypes.Hidden, amtHidden);
+        }
+        
+        public ActionSlots(){}
+>>>>>>> FirstPersonAction
 
         public ActionSlots(SerializationInfo info, StreamingContext context) {
             _list = info.GetValue(nameof(_list), _list);
@@ -31,6 +41,15 @@ namespace PixelComrades {
             _list.Add(slot);
         }
 
+<<<<<<< HEAD
+=======
+        public void AddSlot(string slotType, int cnt) {
+            for (int i = 0; i <= cnt; i++) {
+                _list.Add(new ActionSlot(this, slotType));
+            }
+        }
+
+>>>>>>> FirstPersonAction
         public int ContainerSystemAdd(Entity item) {
             if (EquipToEmpty(item)) {
                 for (int i = 0; i < _list.Count; i++) {
@@ -83,7 +102,11 @@ namespace PixelComrades {
 
         public bool EquipToHidden(Entity actionEntity) {
             for (int i = 0; i < _list.Count; i++) {
+<<<<<<< HEAD
                 if (_list[i].Type != PivotTypes.Hidden ) {
+=======
+                if (_list[i].TargetSlot != ActionPivotTypes.Hidden ) {
+>>>>>>> FirstPersonAction
                     continue;
                 }
                 if (_list[i].Item == null && World.Get<EquipmentSystem>().TryEquip(_list[i], actionEntity)) {
@@ -108,9 +131,12 @@ namespace PixelComrades {
         public IEntityContainer Container { get { return _owner.Value; } }
         public BaseActionTemplate Action { get { return _action; } }
         public string LastEquipStatus { get; set; }
-        public string TargetSlot { get { return "Usable"; } }
+        public string TargetSlot { get; }
         public Transform EquipTr { get { return null; } }
+<<<<<<< HEAD
         public string Type { get; }
+=======
+>>>>>>> FirstPersonAction
         public Entity Item {
             get {
                 return _cachedItem.Entity;
@@ -130,14 +156,21 @@ namespace PixelComrades {
 
         public ActionSlot(ActionSlots slotOwner, string type) {
             _owner = new CachedComponent<ActionSlots>(slotOwner);
+<<<<<<< HEAD
             Type = type;
+=======
+            TargetSlot = type;
+>>>>>>> FirstPersonAction
             CompatibleSlots = null;
             CurrentStats = null;
             RequiredTypes = new[] {typeof(ActionConfig)};
         }
 
         public ActionSlot(SerializationInfo info, StreamingContext context) {
+<<<<<<< HEAD
             Type = info.GetValue(nameof(Type), Type);
+=======
+>>>>>>> FirstPersonAction
             _cachedItem = info.GetValue(nameof(_cachedItem), _cachedItem);
             _owner = info.GetValue(nameof(_owner), _owner);
             _action = info.GetValue(nameof(_action), _action);
@@ -148,7 +181,10 @@ namespace PixelComrades {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
+<<<<<<< HEAD
             info.AddValue(nameof(Type), Type);
+=======
+>>>>>>> FirstPersonAction
             info.AddValue(nameof(_cachedItem), _cachedItem);
             info.AddValue(nameof(_owner), _owner);
             info.AddValue(nameof(_action), _action);
@@ -157,8 +193,13 @@ namespace PixelComrades {
 
         public bool FinalCheck(Entity item, out string error) {
             var action = item.Get<ActionConfig>();
+<<<<<<< HEAD
             if (action.Type != Type) {
                 error = string.Format("Requires {0} Slot", Type);
+=======
+            if (action.TargetSlot != TargetSlot) {
+                error = string.Format("Requires {0} Slot", TargetSlot);
+>>>>>>> FirstPersonAction
                 return false;
             }
             error = null;

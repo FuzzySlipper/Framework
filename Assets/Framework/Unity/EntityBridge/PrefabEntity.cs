@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     [DisallowMultipleComponent] [IgnoreFileSerialization]
@@ -40,6 +41,14 @@ namespace PixelComrades {
                 }
                 return _transform;
             }
+        }
+
+        [Button]
+        public void SetGuid() {
+            _guid = System.Guid.NewGuid().ToString();
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(gameObject);
+#endif
         }
 
         public void SetStatic() {

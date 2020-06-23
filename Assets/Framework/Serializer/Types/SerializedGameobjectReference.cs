@@ -5,7 +5,10 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
+<<<<<<< HEAD
 
+=======
+>>>>>>> FirstPersonAction
 #endif
 
 namespace PixelComrades {
@@ -32,7 +35,11 @@ namespace PixelComrades {
             info.AddValue(nameof(_db), _db.ToString());
             info.AddValue(nameof(_name), _name);
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> FirstPersonAction
         protected PrefabEntity GetWorldEntity() {
             var db = ScriptableDatabases.GetDatabase(_db);
             var entity = db.GetObject<PrefabEntity>(_name);
@@ -43,4 +50,8 @@ namespace PixelComrades {
             return go != null ? ItemPool.Spawn(go) : null;
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> FirstPersonAction

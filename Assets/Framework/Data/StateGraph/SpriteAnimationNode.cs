@@ -11,7 +11,7 @@ namespace PixelComrades {
         public bool ForceReverse = false;
         public int InstancedIndex = -1;
         
-        protected override Vector2 GetNodeSize { get { return new Vector2(DefaultNodeSize.x, DefaultNodeSize.y * 1.25f); } }
+        protected override Vector2 GetNodeSize { get { return new Vector2(DefaultNodeSize.x, DefaultNodeSize.y * 1.75f); } }
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
             UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
@@ -147,6 +147,7 @@ namespace PixelComrades {
                 if (!frame.HasEvent) {
                     return;
                 }
+<<<<<<< HEAD
                 // var pos = _renderer.GetEventPosition(frame.EventPosition, _animNode.InstancedIndex);
                 // var rot = _renderer.GetRotation();
                 if (frame.HasEvent) {
@@ -156,6 +157,12 @@ namespace PixelComrades {
                             frame.Event == AnimationFrame.EventType.Default ?
                                 AnimationEvents.Default :
                                 frame.EventName));
+=======
+                var pos = _renderer.GetEventPosition(frame.EventPosition, _animNode.InstancedIndex);
+                var rot = _renderer.GetRotation();
+                for (int i = 0; i < frame.Events.Length; i++) {
+                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(frame.Events[i], pos, rot )));
+>>>>>>> FirstPersonAction
                 }
             }
 

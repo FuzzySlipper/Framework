@@ -50,12 +50,12 @@ namespace PixelComrades {
             RectTr.localPosition = (Vector2) Algorithms.GetCatmullRomPosition(t, _points[0], _points[1], _points[2], _points[3]);
         }
 
-        public void AssignParent(UIRadialMenu menu, int index, MenuAction menuAction) {
+        public void AssignParent(UIRadialMenu menu, int index, MenuAction genericMenuAction) {
             //_parentRm = menu;
             //_assignedIndex = index;
-            _label = menuAction.Description;
-            if (menuAction.Icon != null) {
-                _icon.overrideSprite = menuAction.Icon;
+            _label = genericMenuAction.Description;
+            if (genericMenuAction.Icon != null) {
+                _icon.overrideSprite = genericMenuAction.Icon;
                 _textLabel.gameObject.SetActive(false);
                 _icon.gameObject.SetActive(true);
             }

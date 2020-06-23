@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class CameraOverhead : MonoBehaviour {
@@ -26,10 +27,10 @@ namespace PixelComrades {
 
         void Update() {
             if (_autoUpdate) {
-                var input = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
-                input[_axis] = Input.GetAxis("Vertical");
+                var input = new Vector3(PlayerInputSystem.LookInput.x, 0, 0);
+                input[_axis] = PlayerInputSystem.LookInput.y;
                 UpdateDrag(input);
-                Zoom(Input.GetAxis("Mouse ScrollWheel"));
+                Zoom(Mouse.current.scroll.ReadValue().y);
             }
         }
 

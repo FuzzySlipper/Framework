@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿using System;
+=======
+using System;
+>>>>>>> FirstPersonAction
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -79,7 +83,14 @@ namespace PixelComrades {
             SerializedProperty listProperty = serializedObject.FindProperty(soName);
             EditorGUI.indentLevel++;
             var labelStyle = new GUIStyle("ToolbarButton");
+<<<<<<< HEAD
             for (int l = 0; l < listProperty.arraySize; l++) {
+=======
+            for (int l = 0; l < labels.Count; l++) {
+                if (listProperty.arraySize <= l) {
+                    break;
+                }
+>>>>>>> FirstPersonAction
                 EditorGUILayout.Space();
                 SerializedProperty entryProperty = listProperty.GetArrayElementAtIndex(l);
                 EditorGUILayout.BeginHorizontal();

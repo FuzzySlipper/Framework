@@ -18,7 +18,7 @@ namespace PixelComrades {
         }
 
         public string ToDescription() {
-            return string.Format("{0:F0} {1}", Amount, GameData.DamageTypes.GetNameAt(DamageType));
+            return string.Format("{0:F0} {1}", Amount, DamageType);
         }
     }
     
@@ -69,7 +69,11 @@ namespace PixelComrades {
             Hit = impact.Hit;
         }
 
+<<<<<<< HEAD
         public PrepareDamageEvent(CharacterTemplate origin, CharacterTemplate target, BaseActionTemplate action, HitData hit) {
+=======
+        public PrepareDamageEvent(CharacterTemplate origin, CharacterTemplate target, ActionTemplate action, HitData hit) {
+>>>>>>> FirstPersonAction
             Entries = GenericPools.New<List<DamageEntry>>(); 
             Origin = origin;
             Target = target;
@@ -111,7 +115,11 @@ namespace PixelComrades {
         public BaseActionTemplate Action { get; }
         public string TargetVital { get; }
 
+<<<<<<< HEAD
         public HealingEvent(BaseActionTemplate action, float amount, CharacterTemplate origin, CharacterTemplate target, string targetVital) {
+=======
+        public HealingEvent(ActionTemplate action, float amount, CharacterTemplate origin, CharacterTemplate target, string targetVital) {
+>>>>>>> FirstPersonAction
             Action = action;
             Amount = amount;
             Origin = origin;
@@ -139,7 +147,11 @@ namespace PixelComrades {
         public CharacterTemplate Target { get; }
         public BaseActionTemplate Action { get; }
 
+<<<<<<< HEAD
         public RaiseDeadEvent(BaseActionTemplate action, CharacterTemplate source, CharacterTemplate target) {
+=======
+        public RaiseDeadEvent(ActionTemplate action, CharacterTemplate source, CharacterTemplate target) {
+>>>>>>> FirstPersonAction
             Action = action;
             Origin = source;
             Target = target;

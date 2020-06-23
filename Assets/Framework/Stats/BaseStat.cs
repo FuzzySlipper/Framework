@@ -53,6 +53,11 @@ namespace PixelComrades {
         public float ModTotal { get { return _modTotal; } }
         public float MaxBaseValue { get => _maxBaseValue; }
         public virtual float Value { get { return _baseValue + _modTotal; } }
+<<<<<<< HEAD
+=======
+        public int IntValue { get { return (int) Value; } }
+        protected float BaseClassValue { get { return _baseValue + _modTotal; }}
+>>>>>>> FirstPersonAction
         public int D20ModifierValue {
             get {
                 return (int) Math.Floor((Value - 10f) / 2f);

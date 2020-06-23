@@ -51,7 +51,11 @@ namespace PixelComrades {
             parseIndex++;
             for (int i = 0; i < Count; i++) {
                 if (strVal == GetNameAt(i) || strVal == GetID(i)) {
+<<<<<<< HEAD
                     return GetValueAt(i);
+=======
+                    return GetValue(i);
+>>>>>>> FirstPersonAction
                 }
             }
             return _static.Parse(strVal, defValue);
@@ -96,6 +100,7 @@ namespace PixelComrades {
         public static bool AllowInstanceExceptions { get { return _allowInstanceExceptions; } set { _allowInstanceExceptions = value; } }
         public static Type UnderlyingType { get { return typeof(U); } }
         public static int Count { get { return _names.Count; } }
+        public static int Length { get { return _names.Count; } }
         public int Index {
             get { return _index; }
             set {
@@ -236,8 +241,8 @@ namespace PixelComrades {
             return _values;
         }
 
-        public static int IndexOf(string name) {
-            return _names.IndexOf(name);
+        public static int IndexOf(string id) {
+            return _ids.IndexOf(id);
         }
 
         public static bool IsDefinedIndex(int index) {
@@ -267,7 +272,16 @@ namespace PixelComrades {
             }
             throw new IndexOutOfRangeException(string.Format("Index must be between 0 and {0}", Count - 1));
         }
+<<<<<<< HEAD
 
+=======
+        /// <summary>
+        /// This returns TypeName.Value, stats will always use just Value
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+>>>>>>> FirstPersonAction
         public static string GetID(int index) {
             if (index >= 0 && index < Count) {
                 return _ids[index];
@@ -293,7 +307,7 @@ namespace PixelComrades {
             return _names[_index];
         }
 
-        public static U GetValueAt(int index) {
+        public static U GetValue(int index) {
             if (index >= 0 && index < Count) {
                 return _values[index];
             }

@@ -25,7 +25,11 @@ namespace PixelComrades {
             del(currCell);
             for (int i = 1; i < maxRowDistance; i++) {
                 var pos = checkStart + (increment * i);
+<<<<<<< HEAD
                 if (currCell.BlocksVision(currCell.WorldPosition.GetTravelDirTo(pos).ToDirectionEight())) {
+=======
+                if (currCell.BlocksVision(currCell.Position.GetTravelDirTo(pos).ToDirectionEight())) {
+>>>>>>> FirstPersonAction
                     continue;
                 }
                 currCell = ms.GetCell(pos);
@@ -57,7 +61,11 @@ namespace PixelComrades {
             }
             for (int i = 1; i < maxRowDistance; i++) {
                 var pos = checkStart + (increment * i);
+<<<<<<< HEAD
                 if (currCell.BlocksVision(currCell.WorldPosition.GetTravelDirTo(pos).ToDirectionEight())) {
+=======
+                if (currCell.BlocksVision(currCell.Position.GetTravelDirTo(pos).ToDirectionEight())) {
+>>>>>>> FirstPersonAction
                     continue;
                 }
                 currCell = ms.GetCell(pos);

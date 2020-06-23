@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class CameraIsometric : MonoBehaviour {
@@ -19,7 +20,6 @@ namespace PixelComrades {
         [SerializeField] private float _fadeAlpha = 0.3f;
         [SerializeField] private float _minCameraAngle = 0.0f;
         [SerializeField] private float _maxCameraAngle = 90.0f;
-        [SerializeField] private int _mouseRotateButton = 1;
         [SerializeField] private bool _autoUpdate = true;
 
         private float _camY = 0.0f;
@@ -52,10 +52,8 @@ namespace PixelComrades {
             if (_target == null || !_autoUpdate) {
                 return;
             }
-            float mw = Input.GetAxis("Mouse ScrollWheel");
-            float h = Input.GetAxis("Mouse X"); // The horizontal movement of the mouse.						
-            float v = Input.GetAxis("Mouse Y"); // The vertical movement of the mouse.
-            UpdatePosition(h, v, mw, Input.GetMouseButton(_mouseRotateButton));
+            float mw = Mouse.current.scroll.ReadValue().y;
+            UpdatePosition(PlayerInputSystem.LookInput.x, PlayerInputSystem.LookInput.y, mw, Mouse.current.rightButton.isPressed);
         }
 
         public void UpdatePosition(float horizontal, float forward, float mw, bool doRotate) {

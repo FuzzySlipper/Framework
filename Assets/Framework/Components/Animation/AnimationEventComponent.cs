@@ -7,7 +7,7 @@ namespace PixelComrades {
     [System.Serializable]
     public sealed class AnimationEventComponent : IComponent {
         
-        public string CurrentAnimationEvent;
+        public AnimationEvent CurrentAnimationEvent;
         public Vector3 Position;
         public Quaternion Rotation;
         

@@ -10,7 +10,6 @@ namespace PixelComrades {
     public class MuscleController : MonoBehaviour {
 
         [SerializeField] private Avatar _avatar = null;
-        [SerializeField] private bool _disabled = false;
         [SerializeField] private bool _isMain = false;
 
         public float LeftHand;
@@ -78,6 +77,8 @@ namespace PixelComrades {
         }
 
 #if UNITY_EDITOR
+        [SerializeField] private bool _disabled = false;
+
         void OnDrawGizmos() {
             if (Application.isPlaying || _disabled) {
                 return;

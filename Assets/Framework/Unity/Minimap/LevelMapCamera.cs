@@ -11,8 +11,6 @@ namespace PixelComrades {
         [SerializeField] private Camera _camera = null;
         [SerializeField] private RtsCamera _input = null;
 
-        public Camera MapCamera { get { return _camera; } }
-
         public void UpdateInput(Vector2 move, float scroll, bool rotateDown) {
             _input.UpdateInput(move, scroll, rotateDown);
         }

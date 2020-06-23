@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -50,7 +50,7 @@ namespace PixelComrades {
         }
 
         public List<SpellData> GetSkillList(string skill) {
-            return GetSkillList(GameData.Skills.GetIndex(skill));
+            return GetSkillList(Skills.IndexOf(skill));
         }
 
         public int GetCount(int skill) {

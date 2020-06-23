@@ -32,7 +32,7 @@ namespace PixelComrades {
         }
 
         public bool TryInteract(Entity item) {
-            return UnlockKey(item.Get<Key>().KeyId);
+            return UnlockKey(item.Get<KeyComponent>().KeyId);
         }
 
         public KeyHole(SerializationInfo info, StreamingContext context) {

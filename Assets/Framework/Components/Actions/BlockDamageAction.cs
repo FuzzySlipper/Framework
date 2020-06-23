@@ -7,13 +7,13 @@ namespace PixelComrades {
     [System.Serializable]
     public sealed class BlockDamageAction : IComponent {
 
-        public string ModelData;
+        public GameObject ModelData;
         public string TargetVital;
         public float Cost;
         public string Skill;
         public string ChargeInput;
 
-        public BlockDamageAction(string modelData, string targetVital, float cost, string skill, string chargeInput) {
+        public BlockDamageAction(GameObject modelData, string targetVital, float cost, string skill, string chargeInput) {
             ModelData = modelData;
             TargetVital = targetVital;
             Cost = cost;

@@ -305,9 +305,9 @@ namespace PixelComrades {
                     isAttacking = false;
                 }
                 else {
-                    var actionEntity = action.Entity;
+                    var owner = node.Graph.Entity.GetTemplate<CharacterTemplate>();
                     for (int i = 0; i < action.Config.Costs.Count; i++) {
-                        if (!action.Config.Costs[i].CanAct(node.Graph.Entity, actionEntity)) {
+                        if (!action.Config.Costs[i].CanAct(action,  owner)) {
                             isAttacking = false;
                             break;
                         }

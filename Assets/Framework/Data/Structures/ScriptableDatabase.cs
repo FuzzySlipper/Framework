@@ -10,7 +10,13 @@ using UnityEditor;
 #endif
 
 namespace PixelComrades {
+<<<<<<< HEAD
     [InitializeOnLoad]
+=======
+#if UNITY_EDITOR
+    [InitializeOnLoad]
+#endif
+>>>>>>> FirstPersonAction
     public static class ScriptableDatabases {
         
         private static Dictionary<System.Type, ScriptableDatabase> _databases = new Dictionary<Type, ScriptableDatabase>();
@@ -73,10 +79,21 @@ namespace PixelComrades {
         public abstract Type DbType { get; }
         public abstract IEnumerable<UnityEngine.Object> AllObjects { get; }
         public abstract T GetObject<T>(string id) where T : Object;
+<<<<<<< HEAD
         public abstract string GetId<T>(T obj) where T : Object;
         public abstract void AddObject(UnityEngine.Object obj);
         public abstract void CleanObjectList();
 
+=======
+        public abstract void AddObject(UnityEngine.Object obj);
+        public abstract void CleanObjectList();
+
+        public virtual string GetId<T>(T obj) where T : Object {
+            return obj != null ? obj.name : "";
+;        }
+
+
+>>>>>>> FirstPersonAction
 #if UNITY_EDITOR
         public virtual System.Object GetEditorWindow() {
             return null;
@@ -103,6 +120,19 @@ namespace PixelComrades {
         }
     }
 
+<<<<<<< HEAD
+=======
+    public abstract class SimpleScriptableDatabase<TV> : ScriptableDatabase<TV> where TV : ScriptableDatabase<TV> {
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return null; } }
+        public override void AddObject(Object obj) { }
+        public override Type DbType { get { return null; } }
+        public override void CleanObjectList() { }
+        public override T GetObject<T>(string id) {
+            return null;
+        }
+    }
+
+>>>>>>> FirstPersonAction
     public interface ICustomPreview {
         UnityEngine.Object Preview { get; }
         UnityEngine.Object EditorObject { get; }

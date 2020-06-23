@@ -10,13 +10,21 @@ namespace PixelComrades {
                 return;
             }
             //if (UIDragDropHandler.CurrentData.Durability.CurrentPercent > 0.99f) {
+<<<<<<< HEAD
             //    UIFloatingText.Spawn("Doesn't need repairs", transform as RectTransform, Color.green, UIFloatingText.Orientation.Center);
+=======
+            //    UIFloatingText.Spawn("Doesn't need repairs", transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+>>>>>>> FirstPersonAction
             //    UIDragDropHandler.Return();
             //    return;
             //}
             //var price = RpgSystem.RepairEstimate(UIDragDropHandler.CurrentData);
             //if (Player.Currency.Value < price) {
+<<<<<<< HEAD
             //    UIFloatingText.Spawn(string.Format("Repair Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orientation.Center);
+=======
+            //    UIFloatingText.Spawn(string.Format("Repair Cost: {0} Not enough {1}", price, GameLabels.Currency), transform as RectTransform, Color.green, UIFloatingText.Orietation.Center);
+>>>>>>> FirstPersonAction
             //    UIDragDropHandler.Return();
             //    return;
             //}

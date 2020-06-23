@@ -14,10 +14,10 @@ namespace PixelComrades {
             //for (int i = 0; i < _currentActors.Length; i++) {
             //    var actor = _playerData.GetActor(_currentActors[i]);
             //    if (actor == null) {
-            //        Player.Controller.Party[i].ChangeCharacter(SavedActorData.Random());
+            //        PlayerControllerSystem.Current.Party[i].ChangeCharacter(SavedActorData.Random());
             //        continue;
             //    }
-            //    Player.Controller.Party[i].ChangeCharacter(actor);
+            //    PlayerControllerSystem.Current.Party[i].ChangeCharacter(actor);
             //}
             //Player.MainInventory.DespawnContents();
             //for (int i = 0; i < _inventoryItems.Count; i++) {
@@ -38,9 +38,9 @@ namespace PixelComrades {
 
         private void UpdateCurrentData() {
             //_playerData = Player.Data;
-            //_currentActors = new string[Player.Controller.Party.Length];
-            //for (int i = 0; i < Player.Controller.Party.Length; i++) {
-            //    _currentActors[i] = Player.Controller.Party[i].Id;
+            //_currentActors = new string[PlayerControllerSystem.Current.Party.Length];
+            //for (int i = 0; i < PlayerControllerSystem.Current.Party.Length; i++) {
+            //    _currentActors[i] = PlayerControllerSystem.Current.Party[i].Id;
             //}
             //_inventoryItems.Clear();
             //for (int i = 0; i < Player.MainInventory.ActiveItems.Count; i++) {

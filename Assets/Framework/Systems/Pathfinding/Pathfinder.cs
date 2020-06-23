@@ -51,7 +51,13 @@ namespace PixelComrades {
 
 
             public virtual void Clear() {
+<<<<<<< HEAD
                 Queue = null;
+=======
+#if UNITY_EDITOR
+                Queue = null;
+#endif
+>>>>>>> FirstPersonAction
                 StartCost = float.MaxValue;
                 EndCost = float.MaxValue;
                 Parent = null;
@@ -110,7 +116,11 @@ namespace PixelComrades {
                         continue;
                     }
                     var neighbor = Get(neighborPos) ?? CreateNode(neighborPos);
+<<<<<<< HEAD
                     if (neighbor == null) {
+=======
+                    if (neighbor == null || !CheckWalkable(centerNode.Value, neighborPos)) {
+>>>>>>> FirstPersonAction
                         if (neighborPos.Equals(End)) {
                             if (IgnoreEndWalkable) {
                                 return centerNode;

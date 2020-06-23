@@ -47,7 +47,22 @@ namespace PixelComrades {
                     continue;
                 }
                 _abilities.AddOrUpdate(ability.ID, ability);
+<<<<<<< HEAD
+=======
             }
+        }
+
+        public static Entity GetRandom(ItemRarity maxRarity = ItemRarity.Legendary) {
+            AbilityConfig targetConfig = null;
+            WhileLoopLimiter.ResetInstance();
+            while (WhileLoopLimiter.InstanceAdvance()) {
+                targetConfig = Main._allAbilities.RandomElement();
+                if (targetConfig.Rarity.IsLesserOrEqual(maxRarity)) {
+                    break;
+                }
+>>>>>>> FirstPersonAction
+            }
+            return targetConfig != null ? BuildAbility(targetConfig) : null;
         }
 
         public static Entity GetRandom() {
@@ -56,6 +71,10 @@ namespace PixelComrades {
 
         public static Entity Get(string id, bool ignoreCost = false) {
             return BuildEntity(id, ignoreCost);
+        }
+
+        public static Entity Get(AbilityConfig config) {
+            return BuildAbility(config);
         }
 
         public static AbilityConfig GetConfig(string id) {
@@ -99,7 +118,11 @@ namespace PixelComrades {
                         entity.Add(new IconComponent(handle, ""));
                     });
             }
+<<<<<<< HEAD
             entity.Add(new InventoryItem(1, 0,  ItemRarity.Special));
+=======
+            entity.Add(new InventoryItem(1, 0, config.Rarity));
+>>>>>>> FirstPersonAction
             entity.Add(new StatusUpdateComponent());
             config.AddComponents(entity);
             // entity.Add(new DataDescriptionComponent(config.DataDescription));
@@ -289,9 +312,13 @@ public class SimpleDataLine {
         public SimpleDataLine Line { get; }
         public IActionProvider Provider { get; }
 
+<<<<<<< HEAD
         public ActionProviderEntry(SimpleDataLine line, IActionProvider provider) {
             Line = line;
             Provider = provider;
         }
     }
+=======
+    
+>>>>>>> FirstPersonAction
 }

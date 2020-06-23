@@ -8,7 +8,10 @@ namespace PixelComrades {
     public sealed class PlayerLevelComponent : IComponent {
 
         public int SkillPoints;
+<<<<<<< HEAD
         public int AttributePoints;
+=======
+>>>>>>> FirstPersonAction
         public ExperienceStat Xp = new ExperienceStat();
         public PlayerLevelComponent(){}
         

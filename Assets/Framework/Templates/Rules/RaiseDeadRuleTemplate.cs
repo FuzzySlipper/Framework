@@ -7,9 +7,10 @@ namespace PixelComrades {
 
         private CachedComponent<RaiseDeadImpact> _component = new CachedComponent<RaiseDeadImpact>();
 
-        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _component, EntityStats
-        };
+        public override List<CachedComponent> GatherComponents
+            => new List<CachedComponent>() {
+                _component, EntityStats
+            };
 
 
         public override System.Type[] GetTypes() {

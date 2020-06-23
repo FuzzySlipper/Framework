@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class RtsCamera : MonoBehaviour, IPoolEvents, ISimpleCam {
@@ -34,18 +35,16 @@ namespace PixelComrades {
         [SerializeField] private float _tiltSpeed = 50f;
         [SerializeField] private float _zoomSpeed = 700f;
         [SerializeField] private float _fastMoveSpeed = 300f;
-        [SerializeField] private KeyCode _fastMoveKeyCode1 = KeyCode.LeftShift;
-        [SerializeField] private string _zoomInputAxis = "Mouse ScrollWheel";
-        [SerializeField] private string _rotateInputAxis = "Mouse X";
-        [SerializeField] private string _tiltInputAxis = "Mouse Y";
-        [SerializeField] private string _horizontalInputAxis = "Horizontal";
-        [SerializeField] private string _verticalInputAxis = "Vertical";
-        [SerializeField] private KeyCode _breakFollowKey = KeyCode.Escape;
+        [SerializeField] private Key _fastMoveKeyCode1 = Key.LeftShift;
+        [SerializeField] private Key _breakFollowKey = Key.Escape;
         [SerializeField] private Transform _followTarget;
         [SerializeField] private bool _limitPos = true;
         [SerializeField] private Collider _cameraLimitSpace = null;
         [SerializeField] private bool _autoInput = false;
         [SerializeField] private float _distance = 0;
+        [SerializeField] private bool _allowScreenEdgeMove = true;
+        [SerializeField] private bool _screenEdgeMoveBreaksFollow = true;
+        [SerializeField] private int _screenEdgeBorderWidth = 4;
 
         private Vector3 _lookAt;
         private float _rotation;
@@ -362,7 +361,7 @@ namespace PixelComrades {
             }
             else if (_moveCamera) {
                 float speed = _moveSpeed;
-                if (Input.GetKey(_fastMoveKeyCode1)) {
+                if (GetKey(_fastMoveKeyCode1)) {
                     speed = _fastMoveSpeed;
                 }
                 float h = move.x;
@@ -378,38 +377,97 @@ namespace PixelComrades {
         }
 
         public void UpdateInput() {
-            if (Input.GetKey(_breakFollowKey)) {
+            if (GetKey(_breakFollowKey)) {
                 EndFollow();
             }
-            float scroll = Input.GetAxisRaw(_zoomInputAxis);
-
+            var mousePos = Mouse.current.position.ReadValue();
+            if (GetMouseButton(0)) {
+                var ray = _camera.ScreenPointToRay(mousePos);
+                if (Physics.Raycast(ray, out var hitInfo, 5000f, LayerMasks.Actor)) {
+                    Follow(hitInfo.transform);
+                }
+            }
+            float scroll = Mouse.current.scroll.ReadValue().y;
             _distance -= scroll * _zoomSpeed * TimeManager.DeltaUnscaled;
-            if (Input.GetMouseButton(_mouseOrbitButton)) {
-                float tilt = Input.GetAxisRaw(_tiltInputAxis);
+            var mouseMovement = Mouse.current.delta.ReadValue();
+            if (GetMouseButton(_mouseOrbitButton)) {
+                float tilt = mouseMovement.y;
                 _tilt -= tilt * _tiltSpeed * TimeManager.DeltaUnscaled;
 
-                float rot = Input.GetAxisRaw(_rotateInputAxis);
+                float rot = mouseMovement.x;
                 _rotation += rot * _rotateSpeed * TimeManager.DeltaUnscaled;
             }
             if (!_moveCamera) {
                 return;
             }
             float speed = _moveSpeed;
-            if (Input.GetKey(_fastMoveKeyCode1)) {
+            if (GetKey(_fastMoveKeyCode1)) {
                 speed = _fastMoveSpeed;
             }
 
-            float h = Input.GetAxisRaw(_horizontalInputAxis);
+            float h = 0;
+            if (GetKey(Key.D)) {
+                h = 1;
+            }
+            else if (GetKey(Key.A)) {
+                h = -1;
+            }
+            float v = 0;
+            if (GetKey(Key.W)) {
+                v = 1;
+            }
+            else if (GetKey(Key.S)) {
+                v = -1;
+            }
+            
+            if (_allowScreenEdgeMove && (!IsFollowing || _screenEdgeMoveBreaksFollow)) {
+                var hasMovement = false;
+
+                if (mousePos.y > (Screen.height - _screenEdgeBorderWidth)) {
+                    hasMovement = true;
+                    AddToPosition(0, 0, speed * TimeManager.DeltaUnscaled);
+                }
+                else if (mousePos.y < _screenEdgeBorderWidth) {
+                    hasMovement = true;
+                    AddToPosition(0, 0, -1 * speed * TimeManager.DeltaUnscaled);
+                }
+
+                if (mousePos.x > (Screen.width - _screenEdgeBorderWidth)) {
+                    hasMovement = true;
+                    AddToPosition(speed * TimeManager.DeltaUnscaled, 0, 0);
+                }
+                else if (mousePos.x < _screenEdgeBorderWidth) {
+                    hasMovement = true;
+                    AddToPosition(-1 * speed * TimeManager.DeltaUnscaled, 0, 0);
+                }
+
+                if (hasMovement && IsFollowing && _screenEdgeMoveBreaksFollow) {
+                    EndFollow();
+                }
+            }
+            
             if (Mathf.Abs(h) > 0.001f) {
                 AddToPosition(h * speed * TimeManager.DeltaUnscaled, 0, 0);
             }
-
-            float v = Input.GetAxisRaw(_verticalInputAxis);
             if (Mathf.Abs(v) > 0.001f) {
                 AddToPosition(0, 0, v * speed * TimeManager.DeltaUnscaled);
             }
         }
+        public static bool GetMouseButton(int button) {
+            if (button == 0) {
+                return Mouse.current.leftButton.isPressed;
+            }
+            if (button == 1) {
+                return Mouse.current.rightButton.isPressed;
+            }
+            if (button == 2) {
+                return Mouse.current.middleButton.isPressed;
+            }
+            return false;
+        }
 
-        
+        private bool GetKey(Key key) {
+            return Keyboard.current[key].wasPressedThisFrame;
+        }
     }
 }

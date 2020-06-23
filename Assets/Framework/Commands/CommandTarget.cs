@@ -41,9 +41,15 @@ namespace PixelComrades {
                     return TargetChar.Position;
                 }
                 if (_explicitPosition != null) {
+<<<<<<< HEAD
                     return _explicitPosition.Value.ToCellGridP3();
                 }
                 return (Target?.GetPosition() ?? this.GetEntity().GetPosition()).ToCellGridP3();
+=======
+                    return _explicitPosition.Value.ToMapGridP3();
+                }
+                return (Target?.GetPosition() ?? this.GetEntity().GetPosition()).ToMapGridP3();
+>>>>>>> FirstPersonAction
             }
         }
         public bool Valid { get { return _explicitPosition != null || _target != null; } }

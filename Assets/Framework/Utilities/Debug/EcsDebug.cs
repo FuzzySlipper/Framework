@@ -47,13 +47,13 @@ namespace PixelComrades {
         [Command("godMode")]
         public static void GodMode() {
             bool added = false;
-            for (int i = 0; i < Player.Entities.Length; i++) {
-                if (Player.Entities[i].HasComponent<BlockDamageFlat>()) {
-                    Player.Entities[i].Remove<BlockDamageFlat>();
+            for (int i = 0; i < PlayerPartySystem.Party.Length; i++) {
+                if (PlayerPartySystem.Party[i].Entity.HasComponent<BlockDamageFlat>()) {
+                    PlayerPartySystem.Party[i].Entity.Remove<BlockDamageFlat>();
                 }
                 else {
                     added = true;
-                    Player.Entities[i].Add(new BlockDamageFlat());
+                    PlayerPartySystem.Party[i].Entity.Add(new BlockDamageFlat());
                 }
             }
             Console.Log(added ? "Enabled god mode" : "Disabled god mode");
@@ -66,7 +66,11 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
+<<<<<<< HEAD
             // World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Energy"));
+=======
+            World.Get<RulesSystem>().Post(new HealingEvent(null,amount, null, null, "Vitals.Energy"));
+>>>>>>> FirstPersonAction
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Energy").ToLabelString());
         }
         
@@ -78,7 +82,11 @@ namespace PixelComrades {
                 Console.Log("No Entity " + entityId);
                 return;
             }
+<<<<<<< HEAD
             //World.Get<RulesSystem>().Post(new HealingEvent(amount, null, null, "Vitals.Health"));
+=======
+            World.Get<RulesSystem>().Post(new HealingEvent(null, amount, null, null, "Vitals.Health"));
+>>>>>>> FirstPersonAction
             Console.Log(entity.Get<StatsContainer>().GetVital("Vitals.Health").ToLabelString());
         }
 

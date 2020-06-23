@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Framework/Data/Abilities/TurnUndeadProvider.cs.meta
 guid: 6f0fc6a7f0158474ba696ab6aabb1230
+=======
+guid: 6dbf1c67bfba2cb4788ea769c25ab1ee
+>>>>>>> FirstPersonAction:Assets/Framework/Systems/RPG/DiceStat.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

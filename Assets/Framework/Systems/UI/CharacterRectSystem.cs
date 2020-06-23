@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class CharacterRectSystem : SystemBase {
+    [AutoRegister]
+    public class CharacterRectSystem : SystemBase<CharacterRectSystem> {
         private Dictionary<int, ICharacterRect> _entityRect = new Dictionary<int, ICharacterRect>();
         public Dictionary<int, ICharacterRect> EntityRect { get => _entityRect; }
 

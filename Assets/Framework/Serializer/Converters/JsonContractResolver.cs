@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Sirenix.OdinInspector;
 
 namespace PixelComrades {
     public class JsonContractResolver : DefaultContractResolver {
@@ -69,6 +70,9 @@ namespace PixelComrades {
                 typeof(Vector4).IsAssignableFrom(type) ||
                 typeof(Quaternion).IsAssignableFrom(type)) {
                 return GetConverter<JsonVectorConverter>();
+            }
+            if (typeof(ScriptableObject).IsAssignableFrom(type)) {
+                return GetConverter<JsonScriptableObjectConverter>();
             }
             //if (typeof(Material).IsAssignableFrom(type)) {
             //    return GetConverter<JsonMaterialConverter>();

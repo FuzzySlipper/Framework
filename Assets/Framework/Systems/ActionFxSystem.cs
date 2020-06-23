@@ -63,6 +63,7 @@ namespace PixelComrades {
             for (int i = 0; i < count; i++) {
                 var spawnPos = position + Random.insideUnitSphere * (spawnComponent.Radius * 0.5f);
                 spawnPos.y = position.y;
+<<<<<<< HEAD
                 ItemPool.Spawn(
                     spawnComponent.Prefab,
                     spawn => {
@@ -84,6 +85,27 @@ namespace PixelComrades {
                             }
                         }
                     });
+=======
+                ItemPool.Spawn(spawnComponent.Prefab, spawn => {
+                    spawn.Transform.position = Vector3.Lerp(spawnPos, spawnPos + Vector3.up, Random.value);
+                    var rb = spawn.GetComponent<FakePhysicsObject>();
+                    if (rb == null) {
+                        return;
+                    }
+                    WhileLoopLimiter.ResetInstance();
+                    while (WhileLoopLimiter.InstanceAdvance()) {
+                        var throwPos = spawnPos + (Random.insideUnitSphere * spawnComponent.Radius);
+                        throwPos.y = position.y;
+                        if (!Physics.Linecast(spawn.transform.position, throwPos, LayerMasks.Environment)) {
+                            if (Physics.Raycast(throwPos, Vector3.down, out var hit, 5f, LayerMasks.Floor)) {
+                                throwPos = hit.point;
+                            }
+                            rb.Throw(throwPos);
+                            break;
+                        }
+                    }
+                });
+>>>>>>> FirstPersonAction
             }
         }
     }

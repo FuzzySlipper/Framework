@@ -56,8 +56,13 @@ namespace PixelComrades {
                 return;
             }
             _msgChecker.Add(text, UIRoot.Misc.Get().transform);
+<<<<<<< HEAD
             start = RectTransformUtility.WorldToScreenPoint(Player.Cam, start);
             var end = RectTransformUtility.WorldToScreenPoint(Player.Cam, start + new Vector3(0, 1, 0));
+=======
+            start = RectTransformUtility.WorldToScreenPoint(CameraSystem.Cam, start);
+            var end = RectTransformUtility.WorldToScreenPoint(CameraSystem.Cam, start + new Vector3(0, 1, 0));
+>>>>>>> FirstPersonAction
             FloatingTextHolder.Start(Orientation.Center, text, 2f, start, end, UIRoot.Misc.Get().transform, color);
 
         }
@@ -108,6 +113,10 @@ namespace PixelComrades {
             color, Sprite icon = null) {
                 var txtHolder = _pool.New();
                 txtHolder.Setup(LazyDb.Main.UIFloatingText[(int) type], text, duration, start, end, parent, color, icon);
+<<<<<<< HEAD
+=======
+                ItemPool.Spawn(txtHolder);
+>>>>>>> FirstPersonAction
             }
 
             private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Transform parent, Color color, Sprite icon) {

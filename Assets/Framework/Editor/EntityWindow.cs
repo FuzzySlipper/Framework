@@ -28,24 +28,31 @@ public class EntityWindow : OdinEditorWindow {
 
     //[HorizontalGroup]
     //[Button(ButtonSizes.Large)]
-    private void ShowEntities() {
+    private void CreateEntitiesTable() {
         var entities = EntityController.EntitiesArray;
         _activeEntities.Clear();
         foreach (Entity e in entities) {
             _activeEntities.Add(e);
         }
+        if (_activeEntities.Count == 0) {
+            return;
+        }
         //_entityTable = GUITable.Create<Entity>(_activeEntities, "Entities");
-        _entityTable = GUITable.Create(_rows.Length, entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels, true);
+        _entityTable = GUITable.Create(EnumHelper.GetLength<Rows>(), entities.Max, DrawElement, "Entity Fields", ColumnLabels, "Entities", RowLabels, true);
+        _entityTable.ReCalculateSizes();
     }
 
     protected override void OnGUI() {
         base.OnGUI();
+        if (_entityTable == null) {
+            CreateEntitiesTable();
+        }
+        if (_entityTable == null) {
+            return;
+        }
         var width = position.width /2;
         EditorGUILayout.BeginHorizontal();
         _scrollPositionEntities = EditorGUILayout.BeginScrollView(_scrollPositionEntities, GUILayout.Width(width));
-        if (_entityTable == null) {
-            ShowEntities();
-        }
         _entityTable.DrawTable();
         EditorGUILayout.EndScrollView();
         _scrollPositionComponents = EditorGUILayout.BeginScrollView(_scrollPositionComponents, GUILayout.Width(width));
@@ -119,10 +126,6 @@ public class EntityWindow : OdinEditorWindow {
         EditorGUILayout.EndVertical();
     }
 
-    private static string[] _rows = new[] {
-        "ID", "Parent", "Tr", "Components", "Stats Count"
-    };
-
     private void RowLabels(Rect arg1, int arg2) {
         if (GUI.Button(arg1, string.Format("{0} {1}:", arg2, _activeEntities.HasIndex(arg2) ? _activeEntities[arg2].Name : "Null"))) {
             if (_activeEntities.HasIndex(arg2)) {
@@ -133,7 +136,7 @@ public class EntityWindow : OdinEditorWindow {
     }
 
     private void ColumnLabels(Rect arg1, int arg2) {
-        GUI.Label(arg1, _rows[arg2]);
+        GUI.Label(arg1, ((Rows)arg2).ToString());
     }
 
     private void DrawElement(Rect arg1, int arg2, int arg3) {
@@ -142,25 +145,42 @@ public class EntityWindow : OdinEditorWindow {
             GUI.Label(arg1, "Null");
             return;
         }
-        switch (arg2) {
-            case 0:
+        var row = (Rows) arg2;
+        switch (row) {
+            case Rows.ID:
                 GUI.Label(arg1, entity.Id.ToString());
                 break;
-            case 1:
+            case Rows.Parent:
                 GUI.Label(arg1, entity.ParentId.ToString());
                 break;
-            case 2:
+            case Rows.Tr:
                 var tr = entity.Get<TransformComponent>();
                 GUI.Label(arg1, tr?.gameObject != null ? tr.gameObject.name : "No Tr");
                 break;
-            case 3:
+            case Rows.Components:
                 GUI.Label(arg1, entity.ComponentCount.ToString());
                 break;
-            case 4:
+            case Rows.StatsCount:
                 var stats = entity.Get<StatsContainer>();
                 GUI.Label(arg1, stats != null? stats.Count.ToString() : "No Stats");
                 break;
+            case Rows.Factory:
+                GUI.Label(arg1, entity.Factory?.ToString() ?? "None");
+                break;
+            case Rows.Pooled:
+                GUI.Label(arg1, entity.Pooled.ToString());
+                break;
         }
+    }
+
+    private enum Rows {
+        ID,
+        Parent,
+        Tr,
+        Pooled,
+        Factory,
+        Components,
+        StatsCount
     }
 
 }

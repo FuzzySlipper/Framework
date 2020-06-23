@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public class StaticTextDatabase : ScriptableSingleton<StaticTextDatabase> {
+    public class StaticTextDatabase : ScriptableDatabase<StaticTextDatabase> {
 
         public string CustomSearchPath = "GameData\\Text\\";
 
@@ -17,6 +17,32 @@ namespace PixelComrades {
         private Dictionary<string, StaticTextHolder> _labelDict = new Dictionary<string, StaticTextHolder>();
         private Dictionary<string, StaticTextHolder> _nameDict = new Dictionary<string, StaticTextHolder>();
         private Dictionary<string, MarkovHolder> _markovDict = new Dictionary<string, MarkovHolder>();
+        public override IEnumerable<UnityEngine.Object> AllObjects { get { return _text; } }
+        public override System.Type DbType { get { return typeof(StaticTextHolder); } }
+
+        public override void CleanObjectList() {
+            for (int i = _text.Count - 1; i >= 0; i--) {
+                if (_text[i] == null) {
+                    _text.RemoveAt(i);
+                }
+            }
+        }
+        
+        public override void AddObject(Object obj) {
+            var item = obj as StaticTextHolder;
+            if (item == null || _text.Contains(item)) {
+                return;
+            }
+            _text.Add(item);
+        }
+        
+        public override T GetObject<T>(string id) {
+            return NameDict.TryGetValue(id, out var config) ? config as T : null;
+        }
+
+        public override string GetId<T>(T obj) {
+            return obj is StaticTextHolder config ? config.ID : "";
+        }
 
         public List<StaticTextHolder> AllText { get { return _text; } }
         public Dictionary<string, StaticTextHolder> LabelDict {
@@ -40,7 +66,7 @@ namespace PixelComrades {
                         if (_nameDict.ContainsKey(_text[i].name)) {
                             continue;
                         }
-                        _nameDict.Add(_text[i].name, _text[i]);
+                        _nameDict.Add(_text[i].ID, _text[i]);
                     }
                 }
                 return _nameDict;

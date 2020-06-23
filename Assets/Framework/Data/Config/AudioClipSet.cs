@@ -41,7 +41,11 @@ namespace PixelComrades {
                 clip.LoadedAudio = null;
             }
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> FirstPersonAction
         public void PlayAudio(int signal, Vector3 position) {
             if (_dict.Count == 0) {
                 for (int i = 0; i < Clips.Count; i++) {

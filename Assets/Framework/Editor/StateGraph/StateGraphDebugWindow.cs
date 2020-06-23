@@ -121,7 +121,12 @@ namespace PixelComrades {
             var sideRect = new Rect(position.width - Border, 0, Border - 10, position.height);
             _scrollPosition1 = GUI.BeginScrollView(sideRect, _scrollPosition1, new Rect(0, 0, Border, MaxRectSize));
             EditorGUILayout.LabelField("IsActive " + graph.IsActive);
-            EditorGUILayout.LabelField("Current " + graph.Current != null ? graph.Current.Node.name : "null");
+            if (graph.Current != null) {
+                EditorGUILayout.LabelField(graph.Current.Node.name);
+            }
+            else {
+                EditorGUILayout.LabelField("null");
+            }
             EditorGUILayout.LabelField(" ");
             EditorGUILayout.LabelField("-Variables-");
             foreach (var valueVariable in graph.Variables) {

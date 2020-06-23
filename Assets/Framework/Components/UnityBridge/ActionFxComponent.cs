@@ -17,6 +17,10 @@ namespace PixelComrades {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
+<<<<<<< HEAD
+=======
+            // info.AddValue(nameof(Value), ItemPool.GetAssetLocation(Value));
+>>>>>>> FirstPersonAction
         }
         
         public void ChangeFx(ActionFx fx) {

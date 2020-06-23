@@ -15,33 +15,14 @@ namespace PixelComrades {
         private float _maxTrain = 0;
         private int _maxRank = 0;
         private int _currentRank = 0;
-        private DataEntry _data;
 
-        public SkillStat(int owner, DataEntry data, string label, string id, float baseValue) : base(owner, label, id, baseValue) {
-            _data = data;
-            SkillDescription = data.GetValue<string>(DatabaseFields.Description);
-            var list = data.Get<DataList>("Ranks");
-            if (list == null) {
-                RankDescription = "Error no ranks list";
-                return;
-            }
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            for (int i = 0; i < list.Count; i++) {
-                var line = list[i];
-                sb.AppendNewLine("<b>");
-                sb.Append(line.TryGetValue("Rank", "None"));
-                sb.AppendNewLine("</b> ");
-                sb.AppendNewLine(line.GetValue<string>(DatabaseFields.Description));
-            }
-            RankDescription = sb.ToString();
-        }
+        public SkillStat(int owner, string label, string id, float baseValue) : base(owner, label, id, baseValue) { }
 
         public virtual int Category { get { return 0; } }
         public int MaxRank { get { return _maxRank; } }
         public int CurrentRank {  get { return _currentRank; } }
         public bool CanIncreaseRank { get { return (int) _currentRank < (int) _maxRank && BaseValue >= _increaseRank - 1; } }
         public bool CanBuyTraining { get { return BaseValue < _maxTrain; } }
-        public string SkillDescription { get; private set; }
         public string RankDescription { get; private set; }
         
 

@@ -217,6 +217,15 @@ namespace PixelComrades {
             }
         }
 
+        public static void EncloseMeshVerts(Transform tr, Mesh mesh, ref List<Vector3> allVerts, ref List<int> allTri) {
+            var verts = mesh.vertices;
+            var bounds = new Bounds(tr.position, Vector3.one);
+            for (int i = 0; i < verts.Length; i++) {
+                bounds.Encapsulate(tr.TransformPoint(verts[i]));
+            }
+            BuildBox(bounds.GetAllPoints(), ref allVerts, ref allTri);
+        }
+
         private static Vector3 _quadNormal = -Vector3.forward;
         private static Vector4 _flatTangent = new Vector4(1f, 0f, 0f, -1f);
         

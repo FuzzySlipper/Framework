@@ -33,7 +33,7 @@ namespace PixelComrades {
                 var origin = originTr != null ? originTr.position : arg.HitPoint + (arg.HitNormal * 2);
                 dir = (arg.HitPoint - origin).normalized;
             }
-            var power = arg.Source.Get<StatsContainer>()?.GetValue(Stats.Power) ?? 1;
+            var power = arg.Source.Get<StatsContainer>()?.GetValue(Stat.Power) ?? 1;
             power *= _damageToPhysics;
             arg.Target.Post(new PhysicsInputMessage(arg.Target.Entity, dir * Mathf.Clamp(power, 1, _maxPhysicsDamage)));
         }   

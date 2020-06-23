@@ -4,8 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class PoseAnimationClip : SequenceObject {
+#if UNITY_EDITOR
 
         private static string _defaultName = "DefaultPose";
+#endif
 
         public AnimationCurve Curve;
         public MusclePose StartPose;

@@ -91,7 +91,7 @@ namespace PixelComrades {
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
                 if (!_originalNode.Loop) {
-                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, _originalNode.EventName));
+                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent( AnimationEvent.Type.Message, _originalNode.EventName)));
                 }
             }
 
@@ -103,7 +103,7 @@ namespace PixelComrades {
                     return true;
                 }
                 if (_loopCondition.IsTrue(this)) {
-                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, _originalNode.EventName));
+                    Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(AnimationEvent.Type.Message, _originalNode.EventName)));
                     return false;
                 }
                 return true;

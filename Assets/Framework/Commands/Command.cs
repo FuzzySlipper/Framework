@@ -2,8 +2,11 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+<<<<<<< HEAD
 using PixelComrades;
 using PixelComrades.DungeonCrawler;
+=======
+>>>>>>> FirstPersonAction
 
 namespace PixelComrades {
 
@@ -27,6 +30,10 @@ namespace PixelComrades {
         }
 
         public virtual void Cancel() {
+<<<<<<< HEAD
+=======
+            Owner.TurnBased.CurrentCommand = null;
+>>>>>>> FirstPersonAction
             Owner.Tags.Remove(EntityTags.PerformingAction);
             CommandLog.CommandCompleted(this);
         }
@@ -36,7 +43,11 @@ namespace PixelComrades {
                 return false;
             }
             for (int i = 0; i < Costs.Count; i++) {
+<<<<<<< HEAD
                 if (!Costs[i].CanAct(Owner, null)) {
+=======
+                if (!Costs[i].CanAct(null, Owner)) {
+>>>>>>> FirstPersonAction
                     return false;
                 }
             }
@@ -44,6 +55,10 @@ namespace PixelComrades {
         }
 
         public virtual void Complete() {
+<<<<<<< HEAD
+=======
+            Owner.TurnBased.CurrentCommand = null;
+>>>>>>> FirstPersonAction
             Owner.Tags.RemoveWithRoot(EntityTags.PerformingAction);
             Post(EntitySignals.CommandComplete);
             ProcessCost();
@@ -55,11 +70,16 @@ namespace PixelComrades {
 
         public virtual void ProcessCost() {
             for (int i = 0; i < Costs.Count; i++) {
+<<<<<<< HEAD
                 Costs[i].ProcessCost(Owner, null);
+=======
+                Costs[i].ProcessCost(null, Owner);
+>>>>>>> FirstPersonAction
             }
         }
 
         public virtual void StartCommand() {
+            Owner.TurnBased.CurrentCommand = this;
             TimeStart = TimeManager.TimeUnscaled;
             CommandLog.CommandActive(this);
             Owner.Tags.AddWithRoot(EntityTags.PerformingAction);
@@ -106,6 +126,10 @@ namespace PixelComrades {
             if (costs != null) {
                 Costs.AddRange(costs);
             }
+        }
+
+        public virtual string GetStatus() {
+            return Owner != null ? "Running" : "Pooled";
         }
     }
 

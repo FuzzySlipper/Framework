@@ -27,16 +27,16 @@ namespace PixelComrades {
             //    Player.SelectedActor.Entity.Get<DefaultCommand>( d =>d.Get.TryStart());
             //});
             //_actionDictionary.Add("forward", () => {
-            //    Player.Controller.TryMove(Point3.forward);
+            //    PlayerControllerSystem.Current.TryMove(Point3.forward);
             //});
             //_actionDictionary.Add("back", () => {
-            //    Player.Controller.TryMove(Point3.back);
+            //    PlayerControllerSystem.Current.TryMove(Point3.back);
             //});
             //_actionDictionary.Add("right", () => {
-            //    Player.Controller.TryMove(Point3.right);
+            //    PlayerControllerSystem.Current.TryMove(Point3.right);
             //});
             //_actionDictionary.Add("left", () => {
-            //    Player.Controller.TryMove(Point3.left);
+            //    PlayerControllerSystem.Current.TryMove(Point3.left);
             //});
         }
 

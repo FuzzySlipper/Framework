@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Coffee.UIExtensions;
 using UnityEngine.UI;
 
 namespace PixelComrades {
@@ -13,7 +14,7 @@ namespace PixelComrades {
         [SerializeField] private Color _painColor = Color.red;
         [SerializeField] private CanvasGroup _canvasGroup = null;
         [SerializeField] private RenderTexture _renderTexture = null;
-        [SerializeField] private Material _rtMaterial = null;
+        [SerializeField] private UIDissolve _dissolve = null;
 
         private Task _fadeTask;
 
@@ -52,16 +53,15 @@ namespace PixelComrades {
             _fadeTask = TimeManager.StartUnscaled(FadeOneStep(time, color, endStatus), Clear);
         }
 
-        public void TransitionPlayerCamera(float totalTime, float extraPause) {
+        public void TransitionCamera(Camera cam, float totalTime, float extraPause) {
             _image.color = Color.white;
-            _image.material = _rtMaterial;
             _image.texture = _renderTexture;
-            Player.Cam.targetTexture = _renderTexture;
-            Player.Cam.Render();
-            Player.Cam.targetTexture = null;
+            cam.targetTexture = _renderTexture;
+            cam.Render();
+            cam.targetTexture = null;
             _canvasGroup.alpha = 1;
             _image.enabled = true;
-            _rtMaterial.SetFloat("_Cutoff", 0);
+            _dissolve.effectFactor = 0;
             TimeManager.StartUnscaled(TransitionRenderTexture(totalTime, extraPause));
         }
 
@@ -78,7 +78,7 @@ namespace PixelComrades {
             yield return extraPause;
             _normalFade.Restart(0, 1, totalTime);
             while (_normalFade.Active) {
-                _rtMaterial.SetFloat("_Cutoff", _normalFade.Get());
+                _dissolve.effectFactor = _normalFade.Get();
                 yield return null;
             }
             _image.enabled = false;

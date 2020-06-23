@@ -12,7 +12,11 @@ namespace PixelComrades {
             if (collision.transform.CompareTag(StringConst.TagPlayer)) {
                 var entity = UnityToEntityBridge.GetEntity(collision.collider).GetTemplate<CharacterTemplate>();
                 if (entity != null) {
+<<<<<<< HEAD
                     World.Get<RulesSystem>().Post(new HealingEvent(null, _amount, entity, entity, _vital));
+=======
+                    World.Get<RulesSystem>().Post(new HealingEvent(null,_amount, entity, entity, _vital));
+>>>>>>> FirstPersonAction
                     ItemPool.Despawn(gameObject);
                 }
             }

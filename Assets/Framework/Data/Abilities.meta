@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Framework/Data/Abilities.meta
 guid: 65ff5099f9a541b4b5789917a7f70c45
+=======
+guid: 13150faab0606544fbeff720d70a23e4
+>>>>>>> FirstPersonAction:Assets/Framework/Events/RuleEvents.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

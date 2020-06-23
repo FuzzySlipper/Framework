@@ -23,6 +23,7 @@ namespace PixelComrades {
             if (_matSource == null) {
                 _matSource = GetComponent<Renderer>();
             }
+<<<<<<< HEAD
             ItemPool.Spawn(
                 LazyDb.Main.ParticleUIHolder,
                 entity => {
@@ -42,6 +43,20 @@ namespace PixelComrades {
                     altParticle.Play(_animationUi, _matSource != null ? _matSource.sharedMaterial : null);
                     ItemPool.Despawn(gameObject);
                 });
+=======
+            ItemPool.Spawn(LazyDb.Main.ParticleUIHolder, entity => {
+                var altParticle = entity.GetComponent<UIAnimation>();
+                if (altParticle == null) {
+                    Debug.LogErrorFormat("{0} tried to convert to UI animation for {1} targeting {2} at state {3} spawn {4}", name, state.State, focus.Get<LabelComponent>(), state, 
+                        entity.name);
+                    ItemPool.Despawn(entity);
+                    return;
+                }
+                altParticle.transform.SetParent(rect.RectTr);
+                altParticle.Play(_animationUi, _matSource != null ? _matSource.sharedMaterial : null);
+                ItemPool.Despawn(gameObject);
+            });
+>>>>>>> FirstPersonAction
         }
     }
 }
