@@ -21,7 +21,7 @@ namespace PixelComrades {
 
         public void RuleEventEnded(ref ImpactEvent context) {
             var target = _heal.Value.HealSelf ? context.Origin : context.Target;
-            var power = RulesSystem.CalculateImpactTotal(EntityStats, PixelComrades.Stats.Power, _heal.Value.NormalizedPercent);
+            var power = RulesSystem.CalculateImpactTotal(EntityStats, PixelComrades.Stat.Power, _heal.Value.NormalizedPercent);
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
             logMsg.Append(context.Origin.GetName());

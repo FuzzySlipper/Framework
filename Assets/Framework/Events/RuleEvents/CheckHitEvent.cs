@@ -10,7 +10,7 @@ namespace PixelComrades {
         public string TargetDefense { get; }
         public float DefenseTotal;
         public float AttackTotal;
-        public int Result;
+        public CollisionResult Result;
 
         public CheckHitEvent(ActionTemplate action, CharacterTemplate origin, CharacterTemplate target, string targetDefense) {
             Action = action;

@@ -70,13 +70,13 @@ namespace PixelComrades {
                 }
             }
             for (int i = idx; i < Party.Length; i++) {
-                if (Party[i].Stats.GetVital(Stats.Recovery).IsMax) {
+                if (Party[i].Stats.GetVital(Stat.Recovery).IsMax) {
                     Player.SelectedActor = Party[i];
                     return;
                 }
             }
             for (int i = 0; i < Party.Length; i++) {
-                if (Party[i].Stats.GetVital(Stats.Recovery).IsMax) {
+                if (Party[i].Stats.GetVital(Stat.Recovery).IsMax) {
                     Player.SelectedActor = Party[i];
                     return;
                 }

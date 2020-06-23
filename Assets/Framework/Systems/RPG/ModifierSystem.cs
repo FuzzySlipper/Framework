@@ -109,7 +109,7 @@ namespace PixelComrades {
             if (stat.HasMod(context.ID)) {
                 Remove(context.ID);
             }
-            var power = RulesSystem.CalculateImpactTotal(stats, Stats.Power, context.NormalizedPercent);
+            var power = RulesSystem.CalculateImpactTotal(stats, Stat.Power, context.NormalizedPercent);
             var mod = new BaseStat.StatValueMod(power, context.ID);
             stat.AddValueMod(mod);
             _fastString.Clear();
@@ -165,7 +165,7 @@ namespace PixelComrades {
             Id = id;
             Owner = ae.Origin;
             Target = ae.Target;
-            Icon = ae.Action.Config.Source.Icon.LoadedAsset;
+            Icon = ae.Action.Icon.Sprite;
         }
 
         protected ModEntry(string label, ActionConfig config, string id, CharacterTemplate owner, CharacterTemplate target) {

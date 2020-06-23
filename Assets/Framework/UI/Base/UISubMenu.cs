@@ -66,9 +66,7 @@ namespace PixelComrades {
                 OnMenuDisabled();
             }
             if (_menuActions != null) {
-                for (int i = 0; i < _menuActions.Count; i++) {
-                    MenuAction.Store(_menuActions[i]);
-                }
+                MenuAction.Store(_menuActions);
             }
             if (_items != null) {
                 for (int i = 0; i < _items.Length; i++) {
@@ -112,14 +110,12 @@ namespace PixelComrades {
         }
 
         private void ListItemSelected(int index) {
-            if (_menuActions == null || index >= _menuActions.Count || _menuActions[index].Del == null) {
+            if (_menuActions == null || index >= _menuActions.Count) {
                 Disable();
                 return;
             }
-            if (!_menuActions[index].Del()) {
-                if (_menuActions[index].OnFail != null) {
-                    _menuActions[index].OnFail(_items[index].transform as RectTransform);
-                }
+            if (!_menuActions[index].TryUse()) {
+                _menuActions[index].OnFail(_items[index].transform as RectTransform);
             }
             Disable();
         }

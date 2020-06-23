@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [System.Serializable]
     public class InstantActivatePhase : ActionPhases {
         
         public override bool CanResolve(ActionCommand cmd) {

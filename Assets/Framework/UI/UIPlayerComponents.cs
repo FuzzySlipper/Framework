@@ -38,6 +38,8 @@ public class UIPlayerComponents : MonoSingleton<UIPlayerComponents> {
     [SerializeField] private RectTransform _leftMessagePivot = null;
     [SerializeField] private CanvasGroup[] _gameplayUI = new CanvasGroup[0];
     [SerializeField] private TextMeshProUGUI _upperRightText = null;
+    [SerializeField] private UIGenericHotbar _hotbar = null;
     
+    public static UIGenericHotbar Hotbar { get => main._hotbar; }
     public static TextMeshProUGUI UpperRightText { get => main._upperRightText; }
 }

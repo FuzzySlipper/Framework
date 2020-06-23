@@ -19,7 +19,7 @@ namespace PixelComrades {
             if (vital != null) {
                 vital.Current += context.Amount;
                 if (context.Amount > 0) {
-                    Color color = context.TargetVital == Stats.Health ? Color.green : Color.yellow;
+                    Color color = context.TargetVital == Stat.Health ? Color.green : Color.yellow;
                     context.Target.Post(new CombatStatusUpdate(context.Target, context.Amount.ToString("F1"), color));
                 }
             }

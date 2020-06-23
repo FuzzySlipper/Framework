@@ -2183,10 +2183,10 @@ namespace PixelComrades {
             return MathEx.WrapAround(((int) d - rotation), Length2D);
         }
 
-        public static int Length = 6;
-        public static int Length2D = 4;
-        public static int DiagonalLength = 8;
-        public static int DiagonalLength3D = 10;
+        public const int Length = 6;
+        public const int Length2D = 4;
+        public const int DiagonalLength = 8;
+        public const int DiagonalLength3D = 10;
 
         public static Vector3 ToEuler(this Directions d) {
             //return new Vector3(0, (int)d * 90, 0);

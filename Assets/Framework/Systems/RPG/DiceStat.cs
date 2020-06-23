@@ -30,7 +30,7 @@ namespace PixelComrades {
 
         public override float Value {
             get {
-                return MultiplyResult * (base.Value + RulesSystem.RollDice(DiceSides, DiceRolls));
+                return MultiplyResult * (BaseClassValue + RulesSystem.RollDice(DiceSides, DiceRolls));
             }
         }
 
@@ -39,11 +39,18 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-            return string.Format("{0}: {1}d{2}+{3:F0}", Label, DiceRolls, DiceSides, Value);
+            return string.Format("{0}: {1}d{2}+{3:F0}", Label, DiceRolls, DiceSides, BaseClassValue);
         }
 
         public override string ToLabelString() {
-            return Label.ToBoldLabel(string.Format("{0}d{1}+{2:F0}", DiceRolls, DiceSides, Value));
+            return Label.ToBoldLabel(string.Format("{0}d{1}+{2:F0}", DiceRolls, DiceSides, BaseClassValue));
+        }
+
+        public void Change(DiceStat stat) {
+            DiceRolls = stat.DiceRolls;
+            DiceSides = stat.DiceSides;
+            MultiplyResult = stat.MultiplyResult;
+            ChangeBase(stat.BaseValue);
         }
 
         private static Regex _whitespacePattern = new Regex(@"\s+");

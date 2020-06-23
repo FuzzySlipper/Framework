@@ -2,42 +2,44 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
-using UnityEngine.AddressableAssets;
 
 namespace PixelComrades {
     public class AbilityConfig : ScriptableObject, IActionConfig, ICustomPreview {
 
         private const float EffectTime = 3f;
         private const float EffectChance = 10f;
-        
+
         [Range(0, 10)]public int Level;
-        [ValueDropdown("SkillSlotList")]public string Skill;
+        [DropdownList(typeof(Skills), "GetValues")]public string Skill;
         [Range(0, 50)]public float Cost;
         public GenericConfigEntry[] Config = new GenericConfigEntry[0];
+        [SerializeField, DropdownList(typeof(AbilitySlotTypes), "GetValues")] private string _slotType = AbilitySlotTypes.Primary;
+        [SerializeField, DropdownList(typeof(ActionPointTypes), "GetValues")] private string _apCost = ActionPointTypes.Standard;
 
         [Header("IActionConfig")]
         [SerializeField] private string _name = "";
         [SerializeField] private string _description = "";
         [SerializeField] private SpriteReference _icon = new SpriteReference();
-        [SerializeField, ValueDropdown("AbilityTypesList")] private string _abilityType = AbilityTypes.Attack;
-        [SerializeField, ValueDropdown("AbilityTypesList")] private string _secondaryType = AbilityTypes.None;
+        [SerializeField, DropdownList(typeof(AbilityTypes), "GetValues")] private string _abilityType = AbilityTypes.Attack;
+        [SerializeField, DropdownList(typeof(AbilityTypes), "GetValues")] private string _secondaryType = AbilityTypes.None;
         [SerializeField, Range(0, 100)] private float _secondaryPower = EffectChance;
-        [SerializeField, ValueDropdown("GraphTriggersList")] private string _actionTrigger = GraphTriggers.UseAbility;
+        [SerializeField, DropdownList(typeof(GraphTriggers), "GetValues")] private string _actionTrigger = GraphTriggers.UseAbility;
+        [SerializeField, DropdownList(typeof(Stat), "GetValues")] private string _toHitStat = Stat.AttackAccuracy;
         [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
         [SerializeField] private CollisionType _collision = CollisionType.Point;
         [SerializeField] private TargetType _targeting= TargetType.Enemy;
         [SerializeField] private ImpactRadiusTypes _radius = ImpactRadiusTypes.Single;
-        [SerializeField, ValueDropdown("DamageTypeList")] private string _damageType = Defenses.Armor;
+        [SerializeField, DropdownList(typeof(Defenses), "GetValues")] private string _damageType = Defenses.Armor;
         [SerializeField] private ProjectileConfig _projectile= null;
         [SerializeField] private ActionFx _actionFx = null;
         [SerializeField] private StateGraph _actionGraph = null;
         [SerializeField] private ScriptedEventConfig[] _scriptedEvents = new ScriptedEventConfig[0];
         [SerializeField] private bool _addEvents = true;
         [SerializeField] private ItemRarity _rarity = ItemRarity.Common;
-        [SerializeField] private List<ActionPhases> _phases = new List<ActionPhases>();
-        [SerializeField] private List<ActionHandler> _handlers = new List<ActionHandler>();
+        [SerializeReference] private List<ActionPhases> _phases = new List<ActionPhases>();
+        [SerializeReference] private List<ActionHandler> _handlers = new List<ActionHandler>();
         public string Name { get => _name; }
         public string Description { get => _description; }
         public SpriteReference Icon { get => _icon; }
@@ -45,6 +47,7 @@ namespace PixelComrades {
         public List<ActionPhases> Phases { get => _phases; }
         public string ID { get { return name; } }
         public string ActionTrigger { get => _actionTrigger; }
+        public string ToHitStat { get => _toHitStat; }
         public int Range { get => _range; }
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
@@ -61,26 +64,11 @@ namespace PixelComrades {
         public Object EditorObject { get { return this; } }
         public ItemRarity Rarity { get => _rarity; }
 
-        private ValueDropdownList<string> AbilityTypesList() {
-            return AbilityTypes.GetDropdownList();
-        }
-
-        private ValueDropdownList<string> DamageTypeList() {
-            return Defenses.GetDropdownList();
-        }
-
-        private ValueDropdownList<string> SkillSlotList() {
-            return Skills.GetDropdownList();
-        }
-
-        private ValueDropdownList<string> GraphTriggersList() {
-            return GraphTriggers.GetDropdownList();
-        }
-        
         public void AddComponents(Entity entity) {
             var action = entity.Add(new ActionConfig(this));
             action.AnimationTrigger = ActionTrigger;
-            action.Primary = false;
+            action.TargetSlot = _slotType;
+            action.Costs.Add(new CostActionPoint(_apCost));
             bool generateCollision = false;
             if (_addEvents) {
                 switch (AbilityType) {
@@ -121,7 +109,7 @@ namespace PixelComrades {
             switch (AbilityType) {
                 default:
                     if (Cost > 0) {
-                        action.Costs.Add(new CostVital(Stats.Energy, Cost, Skill));
+                        action.Costs.Add(new CostVital(Stat.Energy, Cost, Skill));
                     }
                     break;
                 case "Shield":
@@ -134,10 +122,10 @@ namespace PixelComrades {
         private void AddImpact(Entity entity, string type) {
             switch (type) {
                 case AbilityTypes.Attack:
-                    entity.Add(new DamageImpact(DamageType, Stats.Health, 1));
+                    entity.Add(new DamageImpact(DamageType, Stat.Health, 1));
                     break;
                 case AbilityTypes.Heal:
-                    entity.Add(new HealImpact(Stats.Health, 1, Targeting == TargetType.Self));
+                    entity.Add(new HealImpact(Stat.Health, 1, Targeting == TargetType.Self));
                     break;
                 // case AbilityTypes.Shield:
                 //     entity.Add(new BlockDamageAction(AdditionalModel, Stats.Energy, Cost, Skill, PlayerControls.UseSecondary));
@@ -172,5 +160,24 @@ namespace PixelComrades {
                     break;
             }
         }
+
+#if UNITY_EDITOR
+        [Button]
+        public void Save() {
+            string path = UnityEditor.EditorUtility.SaveFilePanel("Location", Application.streamingAssetsPath, name, "json");
+            if (path.Length > 0) {
+                FileUtility.SaveFile(path, UnityEditor.EditorJsonUtility.ToJson(this, true));
+            }
+        }
+
+        [Button]
+        private void Load() {
+            string path = UnityEditor.EditorUtility.OpenFilePanel("Location", Application.streamingAssetsPath, "json");
+            if (path.Length > 0) {
+                UnityEditor.EditorJsonUtility.FromJsonOverwrite(FileUtility.ReadFile(path), this);
+                // UnityEditor.EditorUtility.CopySerialized(converted.Value, this);
+            }
+        }
+#endif
     } 
 }

@@ -292,4 +292,17 @@ namespace PixelComrades {
             return Game.Random.CoinFlip();
         }
     }
+
+    public static class RulesSystemConstants {
+        public static void SetDefaultCharacterData(GenericDataComponent genericDataComponent) {
+            genericDataComponent.SetData(GenericDataTypes.MeleeDamageStat, Attributes.Strength);
+            genericDataComponent.SetData(GenericDataTypes.MeleeAccuracyStat, Attributes.Strength);
+            genericDataComponent.SetData(GenericDataTypes.UnarmedDamageStat, Attributes.Strength);
+            genericDataComponent.SetData(GenericDataTypes.UnarmedAccuracyStat, Attributes.Strength);
+            genericDataComponent.SetData(GenericDataTypes.RangedDamageStat, Attributes.Agility);
+            genericDataComponent.SetData(GenericDataTypes.RangedAccuracyStat, Attributes.Agility);
+            genericDataComponent.SetData(GenericDataTypes.AttackDamageBonusStat, GenericDataTypes.UnarmedDamageStat);
+            genericDataComponent.SetData(GenericDataTypes.AttackAccuracyBonusStat, GenericDataTypes.UnarmedAccuracyStat);
+        }
+    }
 }

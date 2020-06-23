@@ -36,7 +36,7 @@ namespace PixelComrades {
             Action = null;
             Origin = origin;
             Target = origin;
-            Base = origin.Stats.GetValue(Stats.MoveSpeed);
+            Base = origin.Stats.GetValue(Stat.MoveSpeed);
             Bonus = bonus;
         }
     }

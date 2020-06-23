@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public abstract class ActionHandler : ScriptableObject, IActionHandler {
+    [System.Serializable]
+    public abstract class ActionHandler : IActionHandler {
         
         [SerializeField, DropdownList(typeof(TargetEventTypes), "GetValues")] private string _targetEvent = "";
         

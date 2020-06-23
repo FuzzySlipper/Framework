@@ -19,7 +19,7 @@ namespace PixelComrades {
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
             var o = JObject.Load(reader);
 #if UNITY_EDITOR
-            if (objectType == typeof(Quaternion)) {
+            if (objectType == typeof(ScriptableObject)) {
                 var obj = UnityEditor.AssetDatabase.LoadMainAssetAtPath((string) o.GetValue(JsonPath));
                 if (obj == null) {
                     UnityEditor.AssetDatabase.LoadMainAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath((string) o.GetValue(GuidPath)));

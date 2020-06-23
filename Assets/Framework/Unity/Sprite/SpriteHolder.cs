@@ -17,6 +17,7 @@ namespace PixelComrades {
         [SerializeField] private MeshFilter _meshFilter = null;
         [SerializeField] private SpriteRenderer _spriteRenderer = null;
         [SerializeField] private bool _isVisible = false;
+        [SerializeField] private SpriteRenderer _facingSprite = null;
         
         public BillboardMode Billboard { get => _billboard; }
         public bool Unscaled { get => _unscaled; }
@@ -30,6 +31,8 @@ namespace PixelComrades {
         public List<Collider> IgnoreColliders { get => _ignoreColliders; }
         public bool IsVisible { get => _isVisible; }
         public SpriteRenderer SpriteRenderer { get => _spriteRenderer; }
+        public SpriteRenderer FacingSprite { get => _facingSprite; }
+        
         private RenderingVisibilityComponent _renderingComponent;
 
         public void SetComponent(RenderingVisibilityComponent component) {

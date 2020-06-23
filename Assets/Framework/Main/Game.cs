@@ -89,7 +89,7 @@ namespace PixelComrades {
             //if (!GameOptions.MouseLook) {
             //    return;
             //}
-            if (!_cursorUnlocked.Value) {
+            if (!_cursorUnlocked.Value && GameOptions.MouseLook) {
                 UICursor.main.SetCursor(UICursor.CrossHair);
                 Cursor.lockState = CursorLockMode.Locked;
             }

@@ -121,7 +121,7 @@ namespace PixelComrades {
                 dmgMsg.Append(" took ");
                 dmgMsg.Append(damageAmount.ToString("F1"));
                 dmgMsg.Append(" damage ");
-                if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stats.Health) {
+                if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stat.Health) {
                     target.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Hit.Point, damageAmount - previousValue));
                 }
             }

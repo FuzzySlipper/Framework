@@ -54,7 +54,7 @@ namespace PixelComrades {
             }
             if (ae.State == ActionState.Start) {
                 for (int i = 0; i < action.Config.Costs.Count; i++) {
-                    action.Config.Costs[i].ProcessCost(ae.Origin, action.Entity);
+                    action.Config.Costs[i].ProcessCost(ae.Action, ae.Origin);
                 }
             }
         }

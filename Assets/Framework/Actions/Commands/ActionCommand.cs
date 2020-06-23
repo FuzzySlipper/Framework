@@ -5,18 +5,17 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class ActionCommand : Command {
 
-        public ActionTemplate Action;
         public HitData HitResult;
         public ActionEvent LastEvent;
         
         private int _phaseIndex;
-        private CostActionPoint _actionCost;
-
+        // private CostActionPoint _actionCost;
+        public ActionTemplate Action { get; private set; }
         public override Sprite Icon { get { return null; } }
 
         public ActionCommand() {
-            _actionCost = new CostActionPoint(1, 0, 0, false);
-            Costs.Add(_actionCost);
+            // _actionCost = new CostActionPoint(1, 0, 0, false);
+            // Costs.Add(_actionCost);
         }
 
         public override void Clear() {
@@ -25,7 +24,7 @@ namespace PixelComrades {
         }
 
         public override bool CanStart() {
-            if (Action != null && !Action.CanAct(Owner.Entity, null)) {
+            if (Action != null && !Action.CanAct(Action, Owner)) {
                 return false;
             }
             // if (Owner.Target.TargetChar == null) {
@@ -41,7 +40,20 @@ namespace PixelComrades {
             _phaseIndex = 0;
             var origin = Owner.Tr.position;
             Owner.Target.Set(target);
+            Owner.Tr.SetLookAt(target.Tr.position, true);
             RunEvent(TargetEventTypes.Start, target, origin, target.Tr.GetLookAtRotation(origin));
+            return true;
+        }
+
+        public bool TryStart(Vector3 target) {
+            if (!World.Get<CommandSystem>().TryAddCommand(this)) {
+                return false;
+            }
+            _phaseIndex = 0;
+            var origin = Owner.Tr.position;
+            Owner.Target.Set(target);
+            Owner.Tr.SetLookAt(target, true);
+            RunEvent(TargetEventTypes.Start, null, origin, Quaternion.LookRotation(target - Owner.Tr.position));
             return true;
         }
 
@@ -97,20 +109,42 @@ namespace PixelComrades {
         }
 
         public override string GetStatus() {
-            return string.Format("Action {0} Phase {1} of {2} Result {3}", Action.Entity.DebugId, _phaseIndex, Action.Config.Phases.Count, CollisionResult.GetValue(HitResult.Result));
+            return string.Format("Action {0} Phase {1} of {2} Result {3}", Action.Entity.DebugId, _phaseIndex, Action.Config.Phases.Count, HitResult.Result);
         }
 
-        public void CheckHit(string targetDefense, string bonusAttackStat, string toHitStat, CharacterTemplate target) {
+        public void CheckHit(string targetDefense, string bonusAttackStat, CharacterTemplate target) {
             CollisionExtensions.GenerateHitLocDir(Owner.Tr, target.Tr, target.Collider, out var hitPoint, out var dir);
             var hitRot = Quaternion.LookRotation(dir);
-            RunEvent(TargetEventTypes.Effect, target, hitPoint, hitRot);
             RunEvent(TargetEventTypes.Attack, target, hitPoint, hitRot);
             var attackRoll = new CheckHitEvent(Action, Owner, target, targetDefense);
-            var attackStat = Action.Stats.Get(toHitStat);
+            var attackStat = Action.Stats.Get(Action.Config.Source.ToHitStat);
             if (attackStat != null) {
                 attackRoll.AttackTotal += attackStat.Value;
             }
             var bonusStat = Owner.Stats.Get(bonusAttackStat);
+            if (bonusStat != null) {
+                attackRoll.AttackTotal += bonusStat.D20ModifierValue;
+            }
+            var hit = new HitData(RulesSystem.Get.Post(attackRoll).Result, target, hitPoint, dir);
+            ProcessHit(hit, hitRot);
+        }
+
+        public void SetAction(ActionTemplate actionTemplate) {
+            Action = actionTemplate;
+            Costs.Clear();
+            Costs.AddRange(actionTemplate.Config.Costs);
+        }
+
+        public void CheckBasicAttackHit(CharacterTemplate target, string targetDef) {
+            CollisionExtensions.GenerateHitLocDir(Owner.Tr, target.Tr, target.Collider, out var hitPoint, out var dir);
+            var hitRot = Quaternion.LookRotation(dir);
+            RunEvent(TargetEventTypes.Attack, target, hitPoint, hitRot);
+            var attackRoll = new CheckHitEvent(Action, Owner, target, targetDef);
+            var attackStat = Owner.Stats.Get(Stat.AttackAccuracy);
+            if (attackStat != null) {
+                attackRoll.AttackTotal += attackStat.Value;
+            }
+            var bonusStat = Owner.GetAttackAccuracyBonusStat();
             if (bonusStat != null) {
                 attackRoll.AttackTotal += bonusStat.D20ModifierValue;
             }

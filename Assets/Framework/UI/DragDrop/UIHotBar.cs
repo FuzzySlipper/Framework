@@ -42,33 +42,29 @@ namespace PixelComrades {
 
         [SerializeField] private Transform _grid = null;
         [SerializeField] private CanvasGroup _canvasgroup = null;
-        [SerializeField] private bool _startDisabled = false;
         [SerializeField] private int _size = 9;
         [SerializeField] private UIHotbarSlot _prefab = null;
 
         private UIHotbarSlot[] _slots;
-        private ItemInventory _playerInventory;
+        private ActionSlots _actionSlots;
 
         public bool Active { get; private set; }
 
         void Awake() {
-            SetupSlots();
-            if (_startDisabled) {
-                SetStatus(false, true);
-            }
             MessageKit.addObserver(Messages.PlayerNewGame, ClearHotbar);
+        }
+
+        public void Set(ActionSlots actionSlots) {
+            _actionSlots = actionSlots;
+            SetupSlots();
         }
 
         private void ClearHotbar() {
             for (int i = 0; i < _slots.Length; i++) {
                 _slots[i].Clear();
             }
-            if (_playerInventory != null) {
-                _playerInventory.Owner.RemoveObserver(this);
-            }
-            _playerInventory = Player.MainInventory;
-            if (_playerInventory != null) {
-                _playerInventory.Owner.AddObserver(this);
+            if (_actionSlots != null) {
+                _actionSlots.Owner.RemoveObserver(this);
             }
         }
 
@@ -84,6 +80,10 @@ namespace PixelComrades {
             _canvasgroup.interactable = status;
             _canvasgroup.blocksRaycasts = status;
             _canvasgroup.FadeTo(status ? 1 : 0, 0.5f, EasingTypes.SinusoidalInOut, true);
+        }
+
+        public void SetSlots(ActionSlots slots) {
+            
         }
 
         private void SetupSlots() {

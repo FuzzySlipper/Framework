@@ -148,7 +148,7 @@ namespace PixelComrades {
         public static Entity CreateItem(ItemConfig config, int level) {
             var entity = Entity.New(config.ID);
             entity.Add(new TypeId(config.ID));
-            entity.Add(new StatsContainer()).Add(new BaseStat(entity, "Level", Stats.Level, level));
+            entity.Add(new StatsContainer()).Add(new BaseStat(entity, "Level", Stat.Level, level));
             if (config.Icon.IsLoaded) {
                 entity.Add(new IconComponent(config.Icon.LoadedAsset, ""));
             }

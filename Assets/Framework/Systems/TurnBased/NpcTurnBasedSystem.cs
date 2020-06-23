@@ -11,7 +11,7 @@ namespace PixelComrades {
         public NpcTurnBasedSystem(){}
 
         public void TurnStart(TurnBasedCharacterTemplate character) {
-            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(Game.CombatMap.Cells, character);
+            character.Pathfinder.Value = CombatPathfinder.GetPathfinder(character);
             character.Pathfinder.MoveSpeed = World.Get<RulesSystem>().Post(new GatherMoveSpeedEvent(character, 0)).Total;
             character.Pathfinder.Value.FillReachable(character.Location.Cell, character.Pathfinder.MoveSpeed*2);
             PathfindingDisplaySystem.Get.SetupPathfindingSprites(character);
@@ -70,14 +70,14 @@ namespace PixelComrades {
             _tempActionList.Shuffle();
             for (int i = 0; i < _tempActionList.Count; i++) {
                 var action = _tempActionList[i];
-                if (!action.CanAct(origin.Entity, target)) {
+                if (!action.CanAct(action, origin)) {
                     continue;
                 }
                 if (!action.Config.CanTarget(action, origin, target)) {
                     continue;
                 }
                 var actionCommand = CommandSystem.GetCommand<ActionCommand>(origin);
-                actionCommand.Action = action;
+                actionCommand.SetAction(action);
                 if (actionCommand.TryStart(false)) {
                     PathfindingDisplaySystem.Get.ClearDisplay();
                     return;

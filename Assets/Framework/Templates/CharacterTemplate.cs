@@ -26,6 +26,8 @@ namespace PixelComrades {
         private CachedComponent<GenericDataComponent> _genericData = new CachedComponent<GenericDataComponent>();
         private CachedComponent<ActionSlots> _actionSlots = new CachedComponent<ActionSlots>();
         private CachedComponent<ModifierListComponent> _modList = new CachedComponent<ModifierListComponent>();
+        private CachedComponent<IconComponent> _icon = new CachedComponent<IconComponent>();
+        public IconComponent Icon { get => _icon; }
         public ModifierListComponent ModList { get => _modList; }
 
         public GenericDataComponent GenericData { get => _genericData; }
@@ -56,11 +58,29 @@ namespace PixelComrades {
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
             _label, _status, _position, _faction, _currentActions, _slots, _target, _statDefend, _damageAbsorb,
             _collider, _stats, _tr, _steering, _animGraph, _currentAction, _animationEvent, _ruleEvent, 
-            _actionSlots, _modList
+            _actionSlots, _modList, _icon
         };
 
         public VitalStat GetVital(int vital) {
             return _stats.Value.GetVital(Vitals.GetValue(vital));
+        }
+
+        public string GetAttackAccuracyStatBonusName() {
+            var dataName = GenericData.GetString(GenericDataTypes.AttackAccuracyBonusStat);
+            return GenericData.GetString(dataName);
+        }
+
+        public string GetAttackDamageBonusStatName() {
+            var dataName = GenericData.GetString(GenericDataTypes.AttackDamageBonusStat);
+            return GenericData.GetString(dataName);
+        }
+
+        public BaseStat GetAttackAccuracyBonusStat() {
+            return Stats.Get(GetAttackAccuracyStatBonusName());
+        }
+
+        public BaseStat GetAttackDamageBonusStat() {
+            return Stats.Get(GetAttackDamageBonusStatName());
         }
 
         public override System.Type[] GetTypes() {

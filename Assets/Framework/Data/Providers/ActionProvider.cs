@@ -14,6 +14,7 @@ namespace PixelComrades {
         List<ActionHandler> Handlers { get; }
         int Range { get; }
         FloatRange Power { get; }
+        string ToHitStat { get; }
         CollisionType Collision { get; }
         ImpactRadiusTypes Radius { get; }
         ActionFx ActionFx { get; }
@@ -26,8 +27,8 @@ namespace PixelComrades {
     public static class ActionProvider {
         public static void AddComponent(Entity entity, IActionConfig data, ActionConfig action) {
             var stats = entity.Get<StatsContainer>();
-            stats.Add(new BaseStat(entity, Stats.CriticalMulti, data.CritMulti));
-            stats.Add(new RangeStat(entity, Stats.Power, Stats.Power, data.Power.Min, data.Power.Max));
+            stats.Add(new BaseStat(entity, Stat.CriticalMulti, data.CritMulti));
+            stats.Add(new RangeStat(entity, Stat.Power, Stat.Power, data.Power.Min, data.Power.Max));
             action.Phases.AddRange(data.Phases);
             action.Actions.AddRange(data.Handlers);
             for (int i = 0; i < action.Actions.Count; i++) {

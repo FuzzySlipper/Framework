@@ -8,7 +8,9 @@ namespace PixelComrades {
         private CachedComponent<CellLocation> _location = new CachedComponent<CellLocation>();
         private CachedComponent<TurnBasedComponent> _turnBased = new CachedComponent<TurnBasedComponent>();
         private CachedComponent<CombatPathfinderComponent> _pathfinder = new CachedComponent<CombatPathfinderComponent>();
+        private CachedComponent<SelectionSpriteComponent> _selection = new CachedComponent<SelectionSpriteComponent>();
 
+        public SelectionSpriteComponent Selection { get => _selection; }
         public CombatPathfinderComponent Pathfinder { get => _pathfinder; }
         public TurnBasedComponent TurnBased { get => _turnBased; }
         public CellLocation Location { get => _location; }
@@ -16,9 +18,7 @@ namespace PixelComrades {
         public override List<CachedComponent> GatherComponents {
             get {
                 var list = base.GatherComponents;
-                list.Add(_location);
-                list.Add(_turnBased);
-                list.Add(_pathfinder);
+                list.AddRange(new CachedComponent[]{_location, _turnBased, _pathfinder, _selection});
                 return list;
             }
         }
@@ -31,7 +31,7 @@ namespace PixelComrades {
         }
 
         public float GetDefaultAttackRange() {
-            return 2;
+            return Stats.GetValue(Stat.AttackRange);
         }
     }
 }

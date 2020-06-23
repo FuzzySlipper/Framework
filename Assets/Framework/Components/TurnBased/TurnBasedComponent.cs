@@ -16,7 +16,10 @@ namespace PixelComrades {
         public int MinorActions;
         public int MoveActions;
 
+        public Command CurrentCommand;
+
         public int ActionPoints { get { return MinorActions + MoveActions + StandardActions; } }
+        public int TotalMoveActions { get { return MoveActions + StandardActions; } }
         public float Speed { get { return InitiativeRoll + InitiativeStatBonus; } }
 
         public void Clear() {

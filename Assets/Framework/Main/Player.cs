@@ -33,7 +33,7 @@ namespace PixelComrades {
                     if (PlayerPartySystem.Party[i] == null) {
                         continue;
                     }
-                    level = MathEx.Max( (int)PlayerPartySystem.Party[i].Stats.Get(Stats.Level).Value, level);
+                    level = MathEx.Max( (int)PlayerPartySystem.Party[i].Stats.Get(Stat.Level).Value, level);
                 }
                 return level;
             }

@@ -21,7 +21,7 @@ namespace PixelComrades {
             RulesSystem.LastQueryString.Append(context.Origin.GetName());
             RulesSystem.LastQueryString.Append(": ");
             var bonus = RulesSystem.CalculateStatsWithLog(context.Origin.Stats.Get(_component.Value.Stat), _component.Value.AddLevel ?
-                (int) context.Origin.Stats.GetValue(Stats.Level) : -1);
+                (int) context.Origin.Stats.GetValue(Stat.Level) : -1);
             context.AttackTotal += bonus;
             RulesSystem.LastQueryString.AppendNewLine();
             if (_component.Value.Uses > 0) {

@@ -8,6 +8,7 @@ namespace PixelComrades {
         private RtsCameraConfig _camConfig;
         private RtsCameraComponent _rtsCamera;
         private PlayerInputComponent _input;
+        private OverheadStrategyInput _strategyInput;
         private OverheadStrategyConfig _config;
         private PlayerCameraComponent _cam;
         
@@ -27,6 +28,7 @@ namespace PixelComrades {
             if (_rtsCamera != null) {
                 _rtsCamera.Active = true;
             }
+            UICursor.main.SetDefault();
             RtsCameraSystem.Set(_rtsCamera);
             CameraSystem.Set(_cam);
             _cam.Cam.enabled = true;
@@ -56,7 +58,8 @@ namespace PixelComrades {
             MainEntity.Add(new LabelComponent("StrategyController"));
             // entity.Add(new ImpactRendererComponent(UIPlayerSlot.GetSlot(0)));
             MainEntity.Add(new PlayerRaycastTargeting());
-            _input = MainEntity.Add(new PlayerInputComponent(new OverheadStrategyInput(LazySceneReferences.main.PlayerInput)));
+            _strategyInput = new OverheadStrategyInput(LazySceneReferences.main.PlayerInput);
+            _input = MainEntity.Add(new PlayerInputComponent(_strategyInput));
             _cam = MainEntity.Add(new PlayerCameraComponent(_config.LookPivot, _config.Cam));
             _rtsCamera = MainEntity.Add(new RtsCameraComponent(_config.Cam, _camConfig));
             _rtsCamera.Active = false;
@@ -65,6 +68,22 @@ namespace PixelComrades {
 
         public override void SetActive(bool active) {
             base.SetActive(active);
+        }
+
+        public void TurnStart() {
+            _strategyInput.TurnStarted();
+        }
+
+        public void TurnContinue() {
+            _strategyInput.TurnContinue();
+        }
+
+        public void TurnEnded() {
+            _strategyInput.TurnEnded();
+        }
+
+        public override void StartAction(ActionTemplate template) {
+            _strategyInput.UseAction(template);
         }
     }
 }

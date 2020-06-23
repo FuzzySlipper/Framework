@@ -13,7 +13,7 @@ namespace PixelComrades {
             };
 
         public void RuleEventRun(ref PrepareDamageEvent context) {
-            var power = RulesSystem.CalculateImpactTotal(EntityStats, Stats.Damage, _damageImpact.Value.NormalizedPercent);
+            var power = RulesSystem.CalculateImpactTotal(EntityStats, Stat.Damage, _damageImpact.Value.NormalizedPercent);
             context.Entries.Add(
                 new DamageEntry(
                     power,

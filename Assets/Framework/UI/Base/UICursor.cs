@@ -69,4 +69,12 @@ public class UICursor : MonoSingleton<UICursor> {
         _cursorSprite.sprite = newCursor;
         _cursorSprite.enabled = true;
     }
+
+    public void SetTarget() {
+        SetCursor(_crossHair);
+    }
+
+    public void SetDefault() {
+        SetCursor(_defaultCursor);
+    }
 }

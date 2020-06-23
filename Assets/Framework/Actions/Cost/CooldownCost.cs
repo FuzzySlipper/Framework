@@ -28,18 +28,19 @@ namespace PixelComrades {
             info.AddValue(nameof(_postUpdate), _postUpdate);
         }
 
-        public override void ProcessCost(Entity owner, Entity action) {
+        public override void ProcessCost(ActionTemplate action, CharacterTemplate owner) {
             _cooldown.Restart();
         }
 
-        public override bool CanAct(Entity owner, Entity action) {
+        public override bool CanAct(ActionTemplate action, CharacterTemplate owner) {
             if (!_cooldown.IsActive) {
                 return true;
             }
             if (_postUpdate) {
-                owner.PostAll(new StatusUpdate(owner,"Still Recovering", Color.yellow));
+                owner.Entity.PostAll(new StatusUpdate(owner, "Still Recovering", Color.yellow));
             }
             return false;
         }
+
     }
 }

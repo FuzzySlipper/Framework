@@ -221,7 +221,7 @@ namespace PixelComrades {
         }
 
         public static int IdentifyEstimate(Entity item) {
-            return 100 * (int) item.Get<StatsContainer>().Get(Stats.Level).Value;
+            return 100 * (int) item.Get<StatsContainer>().Get(Stat.Level).Value;
         }
 
         public static CachedBool UseShaking = new CachedBool("UseShaking");

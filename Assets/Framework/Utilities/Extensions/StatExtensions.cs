@@ -17,13 +17,21 @@ namespace PixelComrades {
             for (int i = 0; i < Skills.Count; i++) {
                 stats.Add(new BaseStat(owner, Skills.GetNameAt(i), Skills.GetValue(i), 0));
             }
-            stats.Add(new BaseStat(owner, "Level", Stats.Level, 1));
-            stats.Add(new BaseStat(owner, "Move Speed", Stats.MoveSpeed, 6));
-            stats.Add(new BaseStat(owner, "Reach", Stats.Reach, 1));
-            var weightStat = stats.Add(new BaseStat(owner, "Weight", Stats.Weight, 1));
+            stats.Add(new BaseStat(owner, "Level", Stat.Level, 1));
+            stats.Add(new BaseStat(owner, "Move Speed", Stat.MoveSpeed, 6));
+            stats.Add(new BaseStat(owner, "Reach", Stat.Reach, 1));
+            var weightStat = stats.Add(new BaseStat(owner, "Weight", Stat.Weight, 1));
             stats.Get<BaseStat>(Attributes.Strength).AddDerivedStat(10, weightStat);
-            stats.Add(new DiceStat(owner, "Unarmed Damage", Stats.UnarmedAttackDamage, new DiceValue(1, DiceSides.D4)));
-            stats.Add(new BaseStat(owner, "Unarmed Attack", Stats.UnarmedAttackAccuracy, 0));
+            stats.Add(new DiceStat(owner, "Unarmed Damage", Stat.UnarmedAttackDamage, new DiceValue(1, DiceSides.D4)));
+            stats.Add(new BaseStat(owner, "Unarmed Attack", Stat.UnarmedAttackAccuracy, 0));
+
+            var attackAcc = (PassThroughStat) stats.Add(new PassThroughStat(owner, "Attack Accuracy", Stat.AttackAccuracy, 0));
+            var attackRange = (PassThroughStat) stats.Add(new PassThroughStat(owner, "Attack Range", Stat.AttackRange, 0));
+            var attackDmg = (PassThroughStat) stats.Add(new PassThroughStat(owner, "Attack Damage", Stat.AttackDamage, 0));
+            
+            attackRange.SetStat(stats.Get(Stat.Reach));
+            attackAcc.SetStat(stats.Get(Stat.UnarmedAttackAccuracy));
+            attackDmg.SetStat(stats.Get(Stat.UnarmedAttackDamage));
         }
 
         public static void SetupVitalStats(StatsContainer stats) {
@@ -46,9 +54,9 @@ namespace PixelComrades {
         public static BaseStat[] GetBasicCommandStats(StatsContainer stats) {
             var owner = stats.GetEntity();
             BaseStat[] newStats = new BaseStat[3];
-            newStats[0] = new BaseStat(owner, Stats.Power, 0);
-            newStats[1] = new BaseStat(owner, Stats.CriticalHit, 0);
-            newStats[2] = new BaseStat(owner, Stats.CriticalMulti, GameOptions.Get(RpgSettings.DefaultCritMulti, 1f));
+            newStats[0] = new BaseStat(owner, Stat.Power, 0);
+            newStats[1] = new BaseStat(owner, Stat.CriticalHit, 0);
+            newStats[2] = new BaseStat(owner, Stat.CriticalMulti, GameOptions.Get(RpgSettings.DefaultCritMulti, 1f));
             return newStats;
         }
 

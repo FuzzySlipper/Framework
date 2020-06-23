@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-     public abstract class ActionPhases : ScriptableObject {
+    [System.Serializable]
+     public abstract class ActionPhases  {
         public abstract bool CanResolve(ActionCommand cmd);
     }
 }

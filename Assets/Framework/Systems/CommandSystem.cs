@@ -44,15 +44,15 @@ namespace PixelComrades {
             if (!cmd.CanStart()) {
                 return false;
             }
-            var otherCmd = GetCommand(cmd.Owner.Entity);
-            if (otherCmd != null) {
-                if (!otherCmd.CanBeReplacedBy(cmd)) {
-                    cmd.Owner.Post(new StatusUpdate(cmd.Owner,"Can't replace current command"));
-                    return false;
-                }
-                otherCmd.Cancel();
-                _commands.Remove(otherCmd);
-            }
+            // var otherCmd = GetCommand(cmd.Owner.Entity);
+            // if (otherCmd != null) {
+            //     if (!otherCmd.CanBeReplacedBy(cmd)) {
+            //         cmd.Owner.Post(new StatusUpdate(cmd.Owner,"Can't replace current command"));
+            //         return false;
+            //     }
+            //     otherCmd.Cancel();
+            //     _commands.Remove(otherCmd);
+            // }
             cmd.StartCommand();
 #if DEBUG
             DebugLog.Add(cmd.Owner.Entity.DebugId + " started command " + cmd.GetType());

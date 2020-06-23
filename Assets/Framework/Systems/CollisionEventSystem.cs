@@ -39,7 +39,7 @@ namespace PixelComrades {
             if (msg.Hit < 0) {
                 msg.Hit = CollisionResult.Hit;
                 for (int h = 0; h < _globalHandlers.Count; h++) {
-                    msg.Hit = MathEx.Min(_globalHandlers[h].CheckHit(msg), msg.Hit);
+                    msg.Hit = (CollisionResult) MathEx.Min((int) _globalHandlers[h].CheckHit(msg), (int) msg.Hit);
                 }
             }
             if (msg.Hit <= 0) {
@@ -97,18 +97,18 @@ namespace PixelComrades {
 
     public struct HitData {
         public CharacterTemplate Target { get; }
-        public int Result { get; }
+        public CollisionResult Result { get; }
         public Vector3 Point { get; }
         public Vector3 Normal { get; }
 
-        public HitData(int result, CharacterTemplate target, Vector3 point, Vector3 normal) {
+        public HitData(CollisionResult result, CharacterTemplate target, Vector3 point, Vector3 normal) {
             Result = result;
             Target = target;
             Point = point;
             Normal = normal;
         }
 
-        public static implicit operator int(HitData reference) {
+        public static implicit operator CollisionResult(HitData reference) {
             return reference.Result;
         }
     }
@@ -176,8 +176,8 @@ namespace PixelComrades {
         public CollidableTemplate Target { get; }
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
-        public int Hit;
-        public CollisionEvent(Entity source, CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, int hit = -1) {
+        public CollisionResult Hit;
+        public CollisionEvent(Entity source, CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, CollisionResult hit = CollisionResult.Miss) {
             Source = source;
             Origin = origin;
             Target = target;
@@ -188,20 +188,13 @@ namespace PixelComrades {
     }
 
     public interface ICollisionHandler {
-        int CheckHit(CollisionEvent collisionEvent);
+        CollisionResult CheckHit(CollisionEvent collisionEvent);
     }
 
-    public class CollisionResult : GenericEnum<CollisionResult, int> {
-        public static int Miss = 0;
-        public static int Graze = 5;
-        public static int Hit = 10;
-        public static int CriticalHit = 15;
-
-        public override int Parse(string value, int defaultValue) {
-            if (int.TryParse(value, out var val)) {
-                return val;
-            }
-            return TryValueOf(value, out val) ? val : defaultValue;
-        }
+    public enum CollisionResult{
+        Miss,
+        Graze,
+        Hit,
+        CriticalHit,
     }
 }

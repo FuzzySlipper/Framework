@@ -124,8 +124,8 @@ namespace PixelComrades {
             RemoveDisabledMove(MoveId);
             UpdateCell();
             for (int i = 0; i < PlayerPartySystem.Party.Length; i++) {
-                if (PlayerPartySystem.Party[i] != null && !PlayerPartySystem.Party[i].IsDead && !PlayerPartySystem.Party[i].Stats.GetVital(Stats.Recovery).IsMax) {
-                    var vital = PlayerPartySystem.Party[i].Entity.FindStat<VitalStat>(Stats.Recovery);
+                if (PlayerPartySystem.Party[i] != null && !PlayerPartySystem.Party[i].IsDead && !PlayerPartySystem.Party[i].Stats.GetVital(Stat.Recovery).IsMax) {
+                    var vital = PlayerPartySystem.Party[i].Entity.FindStat<VitalStat>(Stat.Recovery);
                     if (vital != null && vital.Current > 0) {
                         vital.Current = Mathf.Max(0, vital.Current * 0.5f);
                     }

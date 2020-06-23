@@ -29,7 +29,7 @@ namespace PixelComrades {
                 if (actionPivots != null) {
                     arg.Action.Entity.Add(
                         new SpawnPivotComponent(
-                            arg.Action.Config.Primary
+                            arg.Action.Config.TargetSlot == ActionPivotTypes.Primary
                                 ? actionPivots.PrimaryPivot
                                 : actionPivots
                                     .SecondaryPivot));

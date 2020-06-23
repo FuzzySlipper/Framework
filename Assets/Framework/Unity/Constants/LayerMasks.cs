@@ -35,7 +35,9 @@ public static class LayerMasks  {
     private static LayerMask _environment = _environmentOnly | _ceiling | _wall | _floor;
     private static LayerMask _wallsEnvironment = _environmentOnly | _wall;
     private static LayerMask _defaultCollision = _default | _collision | _environment | _player | _enemy;
+    private static LayerMask _combatInput = _default | _actor | _environment | _player | _enemy;
     private static LayerMask _dropPanel = _default | _environment;
+    public static LayerMask CombatInput { get { return _combatInput; } }
 
     public static LayerMask DefaultCollision { get { return _defaultCollision; } }
     public static LayerMask DropPanel { get { return _dropPanel; } }

@@ -11,7 +11,7 @@ namespace PixelComrades {
         [ValueDropdown("SkillSlotList")] public string Skill;
 
         [Header("IActionConfig")]
-        
+        [SerializeField, DropdownList(typeof(Stat), "GetValues")] private string _toHitStat = Stat.AttackAccuracy;
         [SerializeField] private int _range = 5;
         [SerializeField] private FloatRange _power = new FloatRange();
         [SerializeField] private float _critMulti = 1.5f;
@@ -36,6 +36,7 @@ namespace PixelComrades {
         public FloatRange Power { get => _power; }
         public CollisionType Collision { get => _collision; }
         public ImpactRadiusTypes Radius { get => _radius; }
+        public string ToHitStat { get => _toHitStat; }
         public string DamageType { get => _damageType; }
         public ActionFx ActionFx { get => _actionFx; }
         public ScriptedEventConfig[] ScriptedEvents { get => _scriptedEvents; }
@@ -58,16 +59,16 @@ namespace PixelComrades {
             //stats.AddRange(StatExtensions.GetBasicCommandStats(stats));
             entity.Add(new SkillRequirement(Skill, 0));
             var action = entity.Add(new ActionConfig(this));
-            action.Primary = true;
+            action.TargetSlot = "Weapon";
             action.Sprite = Idle;
             action.AnimationTrigger = GraphTriggers.Attack;
-            entity.Add(new DamageImpact(DamageType, Stats.Health, 1f));
+            entity.Add(new DamageImpact(DamageType, Stat.Health, 1f));
             ActionProvider.AddComponent(entity, this, action);
             //ActionProvider.AddCheckForCollision(action, this, true);
             AmmoComponent ammoComponent;
             switch (ReloadType) {
                 case ReloadType.Repair:
-                    ammoComponent = entity.Add(new AmmoComponent(Ammo, Skill, ReloadSpeedMulti, stats.Get(Stats.Power), 
+                    ammoComponent = entity.Add(new AmmoComponent(Ammo, Skill, ReloadSpeedMulti, stats.Get(Stat.Power), 
                     _brokenWeaponPercent));
                     var handlers = entity.GetOrAdd<RuleEventListenerComponent>();
                     handlers.Handlers.Add(World.Get<AmmoSystem>());

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
+    [System.Serializable]
     public sealed class StartAnimationTriggerPhase : ActionPhases {
         [SerializeField, DropdownList(typeof(GraphTriggers), "GetValues")] private string _animation = GraphTriggers.Attack;
 

@@ -4,17 +4,20 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public sealed class CostActionPoint : CommandCost {
-        
+
         public int StandardActions;
         public int MinorActions;
         public int MoveActions;
         public bool ClearAll;
+        
+        private bool _postStatusUpdates;
 
-        public CostActionPoint(int standardActions, int minorActions, int moveActions, bool clearAll = false) {
+        public CostActionPoint(int standardActions, int minorActions, int moveActions, bool clearAll = false, bool postStatusUpdates = false) {
             StandardActions = standardActions;
             MinorActions = minorActions;
             MoveActions = moveActions;
             ClearAll = clearAll;
+            _postStatusUpdates = postStatusUpdates;
         }
 
         public CostActionPoint(string type) {
@@ -33,7 +36,7 @@ namespace PixelComrades {
             }
         }
 
-        public override void ProcessCost(Entity owner, Entity action) {
+        public override void ProcessCost(ActionTemplate action, CharacterTemplate owner) {
             var component = owner.Get<TurnBasedComponent>();
             if (component == null) {
                 return;
@@ -47,25 +50,33 @@ namespace PixelComrades {
             component.MoveActions -= MoveActions;
         }
 
-        public override bool CanAct(Entity owner, Entity action) {
+        public override bool CanAct(ActionTemplate action, CharacterTemplate owner) {
             if (ClearAll) {
                 return true;
             }
             var component = owner.Get<TurnBasedComponent>();
             if (component == null) {
-                owner.PostAll(new StatusUpdate(owner, "No TB component", Color.yellow));
+                if (_postStatusUpdates) {
+                    owner.Post(new StatusUpdate(owner, "No TB component", Color.yellow));
+                }
                 return false;
             }
             if (StandardActions > 0 && component.StandardActions <= 0) {
-                owner.PostAll(new StatusUpdate(owner, "Not enough standard AP", Color.yellow));
+                if (_postStatusUpdates) {
+                    owner.Post(new StatusUpdate(owner, "Not enough standard AP", Color.yellow));
+                }
                 return false;
             }
             if (MinorActions > 0 && component.MinorActions <= 0) {
-                owner.PostAll(new StatusUpdate(owner, "Not enough minor AP", Color.yellow));
+                if (_postStatusUpdates) {
+                    owner.Post(new StatusUpdate(owner, "Not enough minor AP", Color.yellow));
+                }
                 return false;
             }
             if (MoveActions > 0 && component.MoveActions <= 0) {
-                owner.PostAll(new StatusUpdate(owner, "Not enough move AP", Color.yellow));
+                if (_postStatusUpdates) {
+                    owner.Post(new StatusUpdate(owner, "Not enough move AP", Color.yellow));
+                }
                 return false;
             }
             return true;

@@ -13,7 +13,9 @@ namespace PixelComrades {
         private CachedComponent<RuleEventListenerComponent> _ruleEvent = new CachedComponent<RuleEventListenerComponent>();
         private CachedComponent<StatsContainer> _stats = new CachedComponent<StatsContainer>();
         private CachedComponent<GenericDataComponent> _data = new CachedComponent<GenericDataComponent>();
+        private CachedComponent<IconComponent> _icon = new CachedComponent<IconComponent>();
 
+        public IconComponent Icon { get => _icon; }
         public ActionConfig Config { get => _config; }
         public TransformComponent Tr { get => _tr; }
         public AmmoComponent Ammo { get => _ammo; }
@@ -24,7 +26,7 @@ namespace PixelComrades {
         public GenericDataComponent Data { get => _data.Value; }
 
         public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
-            _config, _tr, _ammo, _spawnPivot, _fx, _ruleEvent, _data, _stats
+            _config, _tr, _ammo, _spawnPivot, _fx, _ruleEvent, _data, _stats, _icon
         };
 
         public override System.Type[] GetTypes() {
@@ -33,9 +35,9 @@ namespace PixelComrades {
             };
         }
 
-        public bool CanAct(Entity origin, Entity target) {
+        public bool CanAct(ActionTemplate action, CharacterTemplate owner) {
             for (int c = 0; c < Config.Costs.Count; c++) {
-                if (!Config.Costs[c].CanAct(origin, target)) {
+                if (!Config.Costs[c].CanAct(action, owner)) {
                     return false;
                 }
             }

@@ -37,7 +37,7 @@ namespace PixelComrades {
         }
 
         public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stats.AttackRange);
+            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stat.AttackRange);
         }
 
         public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
@@ -53,7 +53,7 @@ namespace PixelComrades {
         }
 
         public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stats.Reach);
+            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stat.Reach);
         }
 
         public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {

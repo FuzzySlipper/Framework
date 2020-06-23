@@ -96,6 +96,10 @@ namespace PixelComrades {
             _moveEnabled.RemoveValue(id);
         }
 
+        public virtual void StartAction(ActionTemplate template) {
+            
+        }
+
         protected virtual void OnDeath() {
             
         }

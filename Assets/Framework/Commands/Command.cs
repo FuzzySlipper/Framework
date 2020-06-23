@@ -25,6 +25,7 @@ namespace PixelComrades {
         }
 
         public virtual void Cancel() {
+            Owner.TurnBased.CurrentCommand = null;
             Owner.Tags.Remove(EntityTags.PerformingAction);
             CommandLog.CommandCompleted(this);
         }
@@ -34,7 +35,7 @@ namespace PixelComrades {
                 return false;
             }
             for (int i = 0; i < Costs.Count; i++) {
-                if (!Costs[i].CanAct(Owner, null)) {
+                if (!Costs[i].CanAct(null, Owner)) {
                     return false;
                 }
             }
@@ -42,6 +43,7 @@ namespace PixelComrades {
         }
 
         public virtual void Complete() {
+            Owner.TurnBased.CurrentCommand = null;
             Owner.Tags.RemoveWithRoot(EntityTags.PerformingAction);
             Post(EntitySignals.CommandComplete);
             ProcessCost();
@@ -53,11 +55,12 @@ namespace PixelComrades {
 
         public virtual void ProcessCost() {
             for (int i = 0; i < Costs.Count; i++) {
-                Costs[i].ProcessCost(Owner, null);
+                Costs[i].ProcessCost(null, Owner);
             }
         }
 
         public virtual void StartCommand() {
+            Owner.TurnBased.CurrentCommand = this;
             TimeStart = TimeManager.TimeUnscaled;
             CommandLog.CommandActive(this);
             Owner.Tags.AddWithRoot(EntityTags.PerformingAction);
