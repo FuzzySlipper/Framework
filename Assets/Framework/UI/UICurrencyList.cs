@@ -11,13 +11,13 @@ namespace PixelComrades {
         [SerializeField] private Transform _currencyPivot = null;
 
         public void OnCreate(PrefabEntity entity) {
-            var currencies = Currencies.GetIDs();
-            for (int i = 0; i < currencies.Count; i++) {
+            var currencies = GameData.Enums.GetFakeEnum(EnumTypes.Currencies);
+            for (int i = 0; i < currencies.Length; i++) {
                 var prefab = ItemPool.SpawnUIPrefab(_currencyPrefab, _currencyPivot);
                 prefab.GetComponentInChildren<Image>().overrideSprite = SpriteDatabase.CurrencyIcons.SafeAccess(i);
                 var text = prefab.GetComponentInChildren<TextMeshProUGUI>();
                 text.text = "";
-                var currency = Player.GetCurrency(currencies[i]);
+                var currency = Player.GetCurrency(currencies.GetShortID(i));
                 currency.OnResourceChanged += () => { text.text = currency.Value.ToString("F0"); };
             }
         }

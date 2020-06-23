@@ -11,7 +11,6 @@ namespace PixelComrades {
             _range = range;
         }
 
-<<<<<<< HEAD
         public string Description(BaseActionTemplate template, CharacterTemplate character) {
             return string.Format("Range: {0}", _range);
         }
@@ -21,17 +20,6 @@ namespace PixelComrades {
         }
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public string Description(ActionTemplate template, CharacterTemplate character) {
-            return string.Format("Range: {0}", _range);
-        }
-
-        public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Position.Value.DistanceCheb(target.Position.Value) <= _range;
-        }
-
-        public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             return true;
         }
     }
@@ -44,7 +32,6 @@ namespace PixelComrades {
             _isMelee = isMelee;
         }
 
-<<<<<<< HEAD
         public string Description(BaseActionTemplate template, CharacterTemplate character) {
             return string.Format("Range: {0} Weapon", _isMelee ? "Melee" : "Ranged");
         }
@@ -54,17 +41,6 @@ namespace PixelComrades {
         }
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public string Description(ActionTemplate template, CharacterTemplate character) {
-            return string.Format("Range: {0} Weapon", _isMelee ? "Melee" : "Ranged");
-        }
-
-        public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stat.AttackRange);
-        }
-
-        public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             return true;
         }
     }
@@ -72,7 +48,6 @@ namespace PixelComrades {
     public class ActionTouchRangeRequirement : IActionRequirement {
 
 
-<<<<<<< HEAD
         public string Description(BaseActionTemplate template, CharacterTemplate character) {
             return "Range: Touch";
         }
@@ -82,17 +57,6 @@ namespace PixelComrades {
         }
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public string Description(ActionTemplate template, CharacterTemplate character) {
-            return "Range: Touch";
-        }
-
-        public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character.Position.Value.DistanceCheb(target.Position.Value) <= character.Stats.GetValue(Stat.Reach);
-        }
-
-        public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             return true;
         }
     }
@@ -100,7 +64,6 @@ namespace PixelComrades {
     public class ActionSelfRangeRequirement : IActionRequirement {
 
 
-<<<<<<< HEAD
         public string Description(BaseActionTemplate template, CharacterTemplate character) {
             return "Range: Self";
         }
@@ -110,17 +73,6 @@ namespace PixelComrades {
         }
 
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public string Description(ActionTemplate template, CharacterTemplate character) {
-            return "Range: Self";
-        }
-
-        public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-            return character == target;
-        }
-
-        public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             return true;
         }
     }

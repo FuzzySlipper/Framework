@@ -19,13 +19,10 @@ namespace PixelComrades {
             Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
         }
 
-<<<<<<< HEAD
         public IconComponent(string dir, string icon) {
             Sprite = ItemPool.LoadAsset<Sprite>(IconLocation);
         }
 
-=======
->>>>>>> FirstPersonAction
         public IconComponent(){}
 
         public static implicit operator Sprite(IconComponent component) {

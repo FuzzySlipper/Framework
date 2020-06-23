@@ -11,12 +11,9 @@ namespace PixelComrades {
         private CircularBuffer<ActionEvent> _eventLog = new CircularBuffer<ActionEvent>(10, true);
         
         public ActionSystem() {
-<<<<<<< HEAD
             TemplateFilter<ActionUsingTemplate>.Setup();
             TemplateFilter<ActionTemplate>.Setup();
             TemplateFilter<BaseActionTemplate>.Setup();
-=======
->>>>>>> FirstPersonAction
         }
 
         public void HandleGlobal(ActionEvent arg) {
@@ -38,7 +35,7 @@ namespace PixelComrades {
             }
         }
 
-        public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, AnimationEvent animEvent) {
+        public void ProcessAnimationAction(AnimationEventTemplate aeTemplate, ActionTemplate action, string animEvent) {
             var character = aeTemplate.Entity.FindTemplate<CharacterTemplate>();
             var ae = new ActionEvent(action, character, character, aeTemplate.AnimEvent.Position,
                 aeTemplate.AnimEvent.Rotation, AnimationEvents.ToStateEvent(animEvent));
@@ -47,11 +44,10 @@ namespace PixelComrades {
                     aeTemplate.AnimEvent.Position, aeTemplate.AnimEvent.Rotation.GetPosition(aeTemplate.AnimEvent.Position, 2.5f),
                     Color.red, 5f);
             }
-            var eventName = animEvent.EventType.ToString();
-            var animationList = action.Config.GetEventHandler(eventName);
+            var animationList = action.Config.GetEventHandler(animEvent);
             if (animationList != null) {
                 for (int i = 0; i < animationList.Count; i++) {
-                    animationList[i].Trigger(ae, eventName);
+                    animationList[i].Trigger(ae, animEvent);
                 }
             }
             if (ae.State != ActionState.None) {
@@ -60,7 +56,7 @@ namespace PixelComrades {
             }
             if (ae.State == ActionState.Start) {
                 for (int i = 0; i < action.Config.Costs.Count; i++) {
-                    action.Config.Costs[i].ProcessCost(ae.Action, ae.Origin);
+                    action.Config.Costs[i].ProcessCost(ae.Origin, action.Entity);
                 }
             }
         }

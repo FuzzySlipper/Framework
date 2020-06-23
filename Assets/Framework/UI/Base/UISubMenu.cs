@@ -3,10 +3,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-<<<<<<< HEAD
-=======
-using UnityEngine.InputSystem;
->>>>>>> FirstPersonAction
 using UnityEngine.UI;
 
 namespace PixelComrades {
@@ -35,7 +31,6 @@ namespace PixelComrades {
                 Default = this;
             }
         }
-<<<<<<< HEAD
 
         void Update() {
             if (!Active) {
@@ -52,25 +47,6 @@ namespace PixelComrades {
                 Disable();
             }
         }
-=======
-        //
-        // void Update() {
-        //     if (!Active) {
-        //         return;
-        //     }
-        //     bool isDown = Mouse.current.leftButton.isPressed || Mouse.current.rightButton.isPressed;
-        //     if (isDown) {
-        //         TimeManager.StartUnscaled(CheckForOrphan(_currentId));
-        //     }
-        // }
-        //
-        // private IEnumerator CheckForOrphan(int checkId) {
-        //     yield return 0.1f;
-        //     if (Active && _currentId == checkId) {
-        //         Disable();
-        //     }
-        // }
->>>>>>> FirstPersonAction
 
         public void EnableMenu(Vector2 pos, List<MenuAction> request) {
             _menuActions = request;
@@ -88,13 +64,9 @@ namespace PixelComrades {
                 OnMenuDisabled();
             }
             if (_menuActions != null) {
-<<<<<<< HEAD
                 for (int i = 0; i < _menuActions.Count; i++) {
                     MenuAction.Store(_menuActions[i]);
                 }
-=======
-                MenuAction.Store(_menuActions);
->>>>>>> FirstPersonAction
             }
             if (_items != null) {
                 for (int i = 0; i < _items.Length; i++) {
@@ -138,7 +110,6 @@ namespace PixelComrades {
         }
 
         private void ListItemSelected(int index) {
-<<<<<<< HEAD
             if (_menuActions == null || index >= _menuActions.Count || _menuActions[index].Del == null) {
                 Disable();
                 return;
@@ -148,14 +119,6 @@ namespace PixelComrades {
                     _menuActions[index].OnFail(_items[index].transform as RectTransform);
                 }
                 return;
-=======
-            if (_menuActions == null || index >= _menuActions.Count) {
-                Disable();
-                return;
-            }
-            if (!_menuActions[index].TryUse()) {
-                _menuActions[index].OnFail(_items[index].transform as RectTransform);
->>>>>>> FirstPersonAction
             }
             Disable();
         }

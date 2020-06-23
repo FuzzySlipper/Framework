@@ -46,10 +46,6 @@ namespace PixelComrades {
             public static void Start(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
                 var txtHolder = _pool.New();
                 txtHolder.Setup(prefab, text, duration, start, end, color);
-<<<<<<< HEAD
-=======
-                ItemPool.Spawn(txtHolder);
->>>>>>> FirstPersonAction
             }
 
             private void Setup(GameObjectReference prefab, string text, float duration, Vector3 start, Vector3 end, Color? color) {
@@ -77,12 +73,7 @@ namespace PixelComrades {
                 while (_floating._moveTween.Active) {
                     _floating._text.color = Color.Lerp(_floating._defaultColor, _floating._endColor, _floating._colorTween.Get());
                     tr.position = _floating._moveTween.Get();
-<<<<<<< HEAD
                     tr.LookAt(tr.position + Player.Cam.transform.rotation * Vector3.forward,PlayerCamera.Tr.rotation * Vector3.up);
-=======
-                    var camTrRotation = CameraSystem.CamTr.rotation;
-                    tr.LookAt(tr.position + camTrRotation * Vector3.forward,camTrRotation * Vector3.up);
->>>>>>> FirstPersonAction
                     //_text.fontSize = Vector3.Distance(transform.position, Player.Cam.transform.position) * 0.35f;
                     if (!_timeoutTimer.IsActive) {
                         break;

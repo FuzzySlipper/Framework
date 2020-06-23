@@ -1,9 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
-using Object = UnityEngine.Object;
 
 namespace PixelComrades {
     public abstract class SpriteAnimation : ScriptableObject {
@@ -33,7 +31,9 @@ namespace PixelComrades {
             get {
                 int cnt = 0;
                 for (int i = 0; i < Frames.Length; i++) {
-                    cnt += Frames[i].Events.Length;
+                    if (Frames[i].Event != AnimationFrame.EventType.None) {
+                        cnt++;
+                    }
                 }
                 return cnt;
             }
@@ -112,57 +112,24 @@ namespace PixelComrades {
         }
     }
 
-    public struct AnimationEvent {
-        public readonly Type EventType;
-        public readonly Vector3 EventPosition;
-        public readonly Quaternion EventRotation;
-        public readonly string EventDataString;
-        public readonly UnityEngine.Object EventDataObject;
-
-        public enum Type {
-            None = 0,
-            Default = 1,
-            Message,
-            Camera,
-            Fx,
-            StateEnter,
-            StateExit,
-            Spawn,
-            RaycastCollisionCheck,
-        }
-
-        public AnimationEvent(Type type, string eventName) {
-            EventType = type;
-            EventDataString = eventName;
-            EventPosition = Vector3.zero;
-            EventRotation = Quaternion.identity;
-            EventDataString = null;
-            EventDataObject = null;
-        }
-
-        public AnimationEvent(AnimationFrame.Event frame, Vector3 pos, Quaternion rot) {
-            EventType = frame.Type;
-            EventPosition = pos;
-            EventRotation = rot;
-            EventDataString = frame.DataString;
-            EventDataObject = frame.DataObject;
-        }
-    }
-
 
     [System.Serializable]
     public class AnimationFrame {
         public float Length = 1;
 
+        public EventType Event = EventType.None;
+        public string EventName;
         public Vector2 EventPosition;
-        public Event[] Events = new Event[0];
-        public bool HasEvent { get { return Events.Length > 0; } }
+        public float EventDataFloat;
+        public string EventDataString;
+        public UnityEngine.Object EventDataObject;
 
-        [Serializable]
-        public class Event {
-            public AnimationEvent.Type Type = AnimationEvent.Type.None;
-            public string DataString;
-            public Object DataObject;
+        public bool HasEvent { get { return Event != EventType.None; } }
+
+        public enum EventType {
+            None = 0,
+            Default = 1,
+            Message,
         }
     }
 

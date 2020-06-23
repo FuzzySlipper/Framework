@@ -2,135 +2,61 @@ using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using PixelComrades;
 
+public class MenuAction {
+    private static GenericPool<MenuAction> _actionPool = new GenericPool<MenuAction>(15, action => {action.Clear();});
 
-namespace PixelComrades {
-
-    public abstract class MenuAction {
-        public abstract string Description { get; }
-        public abstract Sprite Icon { get; }
-        public abstract bool TryUse();
-        public abstract void OnFail(RectTransform pivot);
-
-        public static List<MenuAction> GetList() {
-            return ListPool<MenuAction>.Get();
-        }
-
-        public static void Store(List<MenuAction> list) {
-            for (int i = 0; i < list.Count; i++) {
-                if (list[i] is GenericMenuAction genericMenuAction) {
-                    GenericMenuAction.Store(genericMenuAction);
-                }
-                else if (list[i] is ActionTemplateMenuAction actionTemplateMenuAction) {
-                    ActionTemplateMenuAction.Store(actionTemplateMenuAction);
-                }
-            }
-            list.Clear();
-            ListPool<MenuAction>.Add(list);
-        }
+    public static MenuAction GetAction(string descr, Func<bool> del) {
+        var newAction = _actionPool.New();
+        newAction.Description = descr;
+        newAction.Del = del;
+        return newAction;
     }
 
-    public class GenericMenuAction : MenuAction {
-
-        private static GenericPool<GenericMenuAction> _menuActionPool = new GenericPool<GenericMenuAction>(15, action => { action.Clear(); });
-
-        public static GenericMenuAction GetAction(string descr, Func<bool> del) {
-            var newAction = _menuActionPool.New();
-            newAction._description = descr;
-            newAction.OnUseDel = del;
-            return newAction;
-        }
-
-        public static GenericMenuAction GetAction(string descr, Func<bool> del, Action<RectTransform> onFail) {
-            var newAction = _menuActionPool.New();
-            newAction._description = descr;
-            newAction.OnUseDel = del;
-            newAction.OnFailDel = onFail;
-            return newAction;
-        }
-
-        public static GenericMenuAction GetAction(string descr, Sprite icon, Func<bool> del) {
-            var newAction = _menuActionPool.New();
-            newAction._description = descr;
-            newAction._icon = icon;
-            newAction.OnUseDel = del;
-            return newAction;
-        }
-
-        public static void Store(GenericMenuAction t1) {
-            _menuActionPool.Store(t1);
-        }
-
-        private string _description;
-        private Sprite _icon;
-        public override string Description { get => _description; }
-        public override Sprite Icon { get => _icon; }
-
-        public override bool TryUse() {
-            if (OnUseDel != null) {
-                return OnUseDel();
-            }
-            return false;
-        }
-
-        public override void OnFail(RectTransform pivot) {
-            if (OnFailDel != null) {
-                OnFailDel(pivot);
-            }
-        }
-        
-        public Func<bool> OnUseDel;
-        public Action<RectTransform> OnFailDel;
-
-        public void Clear() {
-            _description = "";
-            OnUseDel = null;
-            OnFailDel = null;
-            _icon = null;
-        }
+    public static MenuAction GetAction(string descr, Func<bool> del, Action<RectTransform> onFail) {
+        var newAction = _actionPool.New();
+        newAction.Description = descr;
+        newAction.Del = del;
+        newAction.OnFail = onFail;
+        return newAction;
     }
 
-    public class ActionTemplateMenuAction : MenuAction {
-        private static GenericPool<ActionTemplateMenuAction> _menuActionPool = new GenericPool<ActionTemplateMenuAction>(15);
+    public static MenuAction GetAction(string descr, Sprite icon, Func<bool> del) {
+        var newAction = _actionPool.New();
+        newAction.Description = descr;
+        newAction.Icon = icon;
+        newAction.Del = del;
+        return newAction;
+    }
 
-        public static ActionTemplateMenuAction Get(ActionTemplate template, CharacterTemplate owner) {
-            var action = _menuActionPool.New();
-            action._owner = owner;
-            action._actionTemplate = template;
-            return action;
-        }
+    public static MenuAction GetAction(string descr, Sprite icon, Func<bool> del, Action<RectTransform> onFail) {
+        var newAction = _actionPool.New();
+        newAction.Description = descr;
+        newAction.Icon = icon;
+        newAction.Del = del;
+        newAction.OnFail = onFail;
+        return newAction;
+    }
 
-        public static void Store(ActionTemplateMenuAction menuAction) {
-            menuAction.Clear();
-            _menuActionPool.Store(menuAction);
+    public static void ClearActions(List<MenuAction> actions) {
+        for (int i = 0; i < actions.Count; i++) {
+            Store(actions[i]);
         }
-        
-        private ActionTemplate _actionTemplate;
-        private bool _postStatusUpdates = true;
-        private CharacterTemplate _owner;
-        public override string Description { get => _actionTemplate.Config.Source.Name; }
-        public override Sprite Icon { get => _actionTemplate.Icon.Sprite; }
+        actions.Clear();
+    }
 
-        private void Clear() {
-            _actionTemplate = null;
-            _owner = null;
-        }
+    public static void Store(MenuAction t1) {
+        _actionPool.Store(t1);
+    }
 
-        public override bool TryUse() {
-            if (!_actionTemplate.CanAct(_actionTemplate, _owner)) {
-                return false;
-            }
-            PlayerControllerSystem.Current.StartAction(_actionTemplate);
-            return true;
-        }
+    public string Description;
+    public Sprite Icon;
+    public Func<bool> Del;
+    public Action<RectTransform> OnFail;
 
-        public override void OnFail(RectTransform pivot) {
-            if (_postStatusUpdates) {
-                var statusUpdate = _owner.Get<StatusUpdateComponent>();
-                if (statusUpdate != null && !string.IsNullOrEmpty(statusUpdate.Status)) {
-                    UIFloatingText.Spawn(statusUpdate.Status, 2, pivot, Color.yellow);
-                }
-            }
-        }
+    public void Clear() {
+        Del = null;
+        Icon = null;
     }
 }

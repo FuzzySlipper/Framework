@@ -31,14 +31,15 @@ namespace PixelComrades {
         }
 
         private FloatValueHolder _experience = new FloatValueHolder();
-        private int _level;
-        private float _nextLevelXp = -1;
+        private int _level = 1;
+        private float _nextLevelXp;
         private float _lastLevelXp;
 
         private void CheckLevel() {
             if (_experience.Value <= _nextLevelXp) {
                 return;
             }
+
             _level++;
             SetNextXp();
             if (OnLevelUp != null) {

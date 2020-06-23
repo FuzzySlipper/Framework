@@ -23,7 +23,7 @@ namespace PixelComrades {
         public System.Action OnClose;
 
         private void Clear() {
-            MenuAction.Store(Actions);
+            MenuAction.ClearActions(Actions);
             ClearList();
             CancelDel = null;
             Description = "";
@@ -45,7 +45,7 @@ namespace PixelComrades {
         }
 
         public override void Confirm() {
-            if (Actions[SelectedIndex].TryUse()) {
+            if (Actions[SelectedIndex].Del()) {
                 Radial.StartCloseRadial();
             }
         }

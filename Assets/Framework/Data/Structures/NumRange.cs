@@ -124,15 +124,6 @@ namespace PixelComrades {
             return Mathf.Clamp(value, Min, Max);
         }
 
-        public void Expand(int value) {
-            if (Min > value) {
-                Min = value;
-            }
-            if (Max < value) {
-                Max = value;
-            }
-        }
-
         public int Lerp(float t) {
             return (int) Mathf.Lerp(Min, Max, t);
         }
@@ -245,55 +236,21 @@ namespace PixelComrades {
         public Vector3 Get(System.Random random) {
             return new Vector3(Range[0].Get(random), Range[1].Get(random), Range[2].Get(random));
         }
+
     }
-
-    [Serializable]
-    public class Point2Range : RangeBase {
-
-        public IntRange[] Range = new IntRange[2];
-        
-        public Point3 Min { get { return new Point3(Range[0].Min, 0, Range[1].Min); } }
-        public Point3 Max { get { return new Point3(Range[0].Max, 0, Range[1].Max); } }
-
-        public Point2Range(int xMin, int xMax, int zMin, int zMax) {
-            Range[0] = new IntRange(xMin, xMax);
-            Range[1] = new IntRange(zMin, zMax);
-        }
-
-        public Point2Range(int min, int max) {
-            Range[0] = new IntRange(min, max);
-            Range[1] = new IntRange(min, max);
-        }
-
-        public Point3 Get() {
-            return Get(Game.Random);
-        }
-
-        public Point3 Get(System.Random random) {
-            return new Point3(Range[0].Get(random), 0, Range[1].Get(random));
-        }
-
-        public bool InRange(Point3 pos) {
-            if (!Range[0].WithinRange(pos[0]) || !Range[1].WithinRange(pos[2])) {
-                return false;
-            }
-            return true;
-        }
-    }
-    [Serializable] 
-    public class Point3Range : RangeBase {
+    [Serializable] public class PointRange : RangeBase {
 
         public IntRange[] Range = new IntRange[3];
         public Point3 Min { get { return new Point3(Range[0].Min, Range[1].Min, Range[2].Min); } }
         public Point3 Max { get { return new Point3(Range[0].Max, Range[1].Max, Range[2].Max); } }
 
-        public Point3Range(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax) {
+        public PointRange(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax) {
             Range[0] = new IntRange(xMin, xMax);
             Range[1] = new IntRange(yMin, yMax);
             Range[2] = new IntRange(zMin, zMax);
         }
 
-        public Point3Range(int min, int max) {
+        public PointRange(int min, int max) {
             Range[0] = new IntRange(min, max);
             Range[1] = new IntRange(min, max);
             Range[2] = new IntRange(min, max);

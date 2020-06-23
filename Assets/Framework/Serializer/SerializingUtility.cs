@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using PixelComrades;
+using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
     public static class SerializingUtility {

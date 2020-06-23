@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [AutoRegister]
-    public class PhysicsMoverSystem : SystemBase<PhysicsMoverSystem>, IMainFixedUpdate, IReceiveGlobal<AddForceEvent> {
+    public class PhysicsMoverSystem : SystemBase, IMainFixedUpdate, IReceiveGlobal<AddForceEvent> {
 
         private const float ReachedDestination = 0.1f;
         

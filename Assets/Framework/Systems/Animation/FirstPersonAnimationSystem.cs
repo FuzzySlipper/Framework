@@ -10,6 +10,7 @@ namespace PixelComrades {
         private TemplateList<FirstPersonAnimationTemplate> _animTemplates;
         
         public FirstPersonAnimationSystem(){
+            TemplateFilter<FirstPersonAnimationTemplate>.Setup();
             _animTemplates = EntityController.GetTemplateList<FirstPersonAnimationTemplate>();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new [] {
                 typeof(WeaponModelComponent),
@@ -25,7 +26,6 @@ namespace PixelComrades {
                 arg.Action.Entity.Remove<SpawnPivotComponent>();
             }
             else {
-<<<<<<< HEAD
                 // var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
                 // if (actionPivots != null) {
                 //     arg.Action.Entity.Add(
@@ -35,34 +35,15 @@ namespace PixelComrades {
                 //                 : actionPivots
                 //                     .SecondaryPivot));
                 // }
-=======
-                var actionPivots = arg.Container.GetEntity().Get<ActionPivotsComponent>();
-                if (actionPivots != null) {
-                    arg.Action.Entity.Add(
-                        new SpawnPivotComponent(
-                            arg.Action.Config.TargetSlot == ActionPivotTypes.Primary
-                                ? actionPivots.PrimaryPivot
-                                : actionPivots
-                                    .SecondaryPivot));
-                }
->>>>>>> FirstPersonAction
             }
         }
 
         public void Handle(AnimationEventTriggered arg) {
-<<<<<<< HEAD
             // switch (arg.Event.EventType) {
             //     case AnimationEvent.Type.Camera:
             //         World.Get<CameraSystem>().PlaySpringAnimation(arg.Event.EventDataString);
             //         break;
             // } 
-=======
-            switch (arg.Event.EventType) {
-                case AnimationEvent.Type.Camera:
-                    World.Get<CameraSystem>().PlaySpringAnimation(arg.Event.EventDataString);
-                    break;
-            } 
->>>>>>> FirstPersonAction
         }
     }
 

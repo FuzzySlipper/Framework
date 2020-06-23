@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    public abstract class TargetAnimator : MonoBehaviour, IPoolEvents {
+    public abstract class TargetAnimator : MonoBehaviour {
 
         [SerializeField] private string _description = "";
         [SerializeField] private bool _autoStart = false;
@@ -21,8 +21,5 @@ namespace PixelComrades {
                 Play();
             }
         }
-
-        public virtual void OnPoolSpawned() { }
-        public virtual void OnPoolDespawned() { }
     }
 }

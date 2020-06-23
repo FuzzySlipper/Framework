@@ -16,9 +16,6 @@ namespace PixelComrades {
         public override Tweener Tween { get { return _tweener; } }
 
         public override void StartTween() {
-            if (IsInvalid) {
-                return;
-            }
             _index++;
             if (_index >= _targets.Length) {
                 _index = 0;

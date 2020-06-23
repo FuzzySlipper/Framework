@@ -9,6 +9,7 @@ namespace PixelComrades {
         private ManagedArray<PlayerRaycastTargetTemplate>.RefDelegate _del;
 
         public PlayerRaycastTargetSystem() {
+            TemplateFilter<PlayerRaycastTargetTemplate>.Setup();
             _list = EntityController.GetTemplateList<PlayerRaycastTargetTemplate>();
             _del = Update;
         }
@@ -18,13 +19,8 @@ namespace PixelComrades {
         }
 
         private void Update(ref PlayerRaycastTargetTemplate template) {
-<<<<<<< HEAD
             if (template.Graph.CurrentTag == GraphNodeTags.Action) {
                 template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(template.Raycast.Range));
-=======
-            if (template.Graph.CurrentTag == GraphNodeTags.Action && template.CurrentAction.Value != null) {
-                template.Target.Set(PlayerInputSystem.GetMouseRaycastPosition(DistanceSystem.FromUnitGridDistance(template.CurrentAction.Value.Config.Range)));
->>>>>>> FirstPersonAction
             }
         }
     }

@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<< HEAD:Assets/Framework/Data/Providers/ActionConfigProvider.cs.meta
 guid: e1bd9516d22fa5d418d6cc100c5b757d
-=======
-guid: 1f4d09ac2ed29bf43a7f3be4ea053586
->>>>>>> FirstPersonAction:Assets/Framework/Systems/Player/TravelMap/TravelMapController.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

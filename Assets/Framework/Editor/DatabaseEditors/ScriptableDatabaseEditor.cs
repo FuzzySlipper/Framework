@@ -81,16 +81,9 @@ namespace PixelComrades {
         
         protected override void DrawPropertyLayout(GUIContent label) {
             ICustomPreview item = this.ValueEntry.SmartValue;
-<<<<<<< HEAD
             if (item == null || item.EditorObject == null) {
                 return;
             }
-=======
-            // if (item == null || item.EditorObject == null) {
-            //     base.DrawPropertyLayout(label);
-            //     return;
-            // }
->>>>>>> FirstPersonAction
             var rect = EditorGUILayout.GetControlRect(label != null, 45);
             if (label != null) {
                 rect.xMin = EditorGUI.PrefixLabel(rect.AlignCenterY(15), label).xMin;
@@ -98,22 +91,9 @@ namespace PixelComrades {
             else {
                 rect = EditorGUI.IndentedRect(rect);
             }
-<<<<<<< HEAD
             var texture = GUIHelper.GetAssetThumbnail(item.Preview, typeof(Sprite), true);
             GUI.Label(rect.AddXMin(50).AlignMiddle(16), EditorGUI.showMixedValue ? "-" : item.EditorObject.name);
             ValueEntry.WeakSmartValue = SirenixEditorFields.UnityPreviewObjectField(rect.AlignLeft(45), item.EditorObject, texture, ValueEntry.BaseValueType);
-=======
-            Texture2D texture = null;
-            string labelValue = "None";
-            UnityEngine.Object targetObj = null;
-            if (item != null && item.EditorObject != null) {
-                texture = GUIHelper.GetAssetThumbnail(item.Preview, typeof(Sprite), true);
-                targetObj = item.EditorObject;
-                labelValue = targetObj.name;
-            }
-            GUI.Label(rect.AddXMin(50).AlignMiddle(16), EditorGUI.showMixedValue ? "-" : labelValue);
-            ValueEntry.WeakSmartValue = SirenixEditorFields.UnityPreviewObjectField(rect.AlignLeft(45), targetObj, texture, ValueEntry.BaseValueType);
->>>>>>> FirstPersonAction
         }
     }
 }

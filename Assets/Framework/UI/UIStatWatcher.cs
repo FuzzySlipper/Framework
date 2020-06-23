@@ -39,9 +39,6 @@ namespace PixelComrades {
 
         public void AssignStat(BaseStat stat) {
             _stat = stat;
-            if (_stat == null) {
-                return;
-            }
             _text.text = _stat.ToString();
             _stat.OnStatChanged += RefreshText;
         }

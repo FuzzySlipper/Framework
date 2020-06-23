@@ -36,15 +36,6 @@ namespace PixelComrades {
             return false;
         }
 
-        public bool Contains(string id) {
-            for (int i = 0; i < Count; i++) {
-                if (this[i].Get<TypeId>().Id == id) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
         public void ContainerSystemSet(Entity item, int index) {
             _container.Add(item);
         }

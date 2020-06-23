@@ -1721,21 +1721,6 @@ namespace PixelComrades {
             return DirectionsEight.Front;
         }
 
-        public static DirectionsEight ToDirectionEight(this CornerDirections dir) {
-            switch (dir) {
-                case CornerDirections.NorthWest:
-                    return DirectionsEight.FrontLeft;
-                case CornerDirections.NorthEast:
-                    return DirectionsEight.FrontRight;
-                case CornerDirections.SouthEast:
-                    return DirectionsEight.RearRight;
-                case CornerDirections.SouthWest:
-                    return DirectionsEight.RearLeft;
-                default:
-                    return DirectionsEight.Front;
-            }
-        }
-
         public static Directions ToCardinalDir(this DirectionsEight dir) {
             switch (dir) {
                 case DirectionsEight.Front:
@@ -2182,10 +2167,10 @@ namespace PixelComrades {
             return MathEx.WrapAround(((int) d - rotation), Length2D);
         }
 
-        public const int Length = 6;
-        public const int Length2D = 4;
-        public const int DiagonalLength = 8;
-        public const int DiagonalLength3D = 10;
+        public static int Length = 6;
+        public static int Length2D = 4;
+        public static int DiagonalLength = 8;
+        public static int DiagonalLength3D = 10;
 
         public static Vector3 ToEuler(this Directions d) {
             //return new Vector3(0, (int)d * 90, 0);
@@ -2463,7 +2448,6 @@ namespace PixelComrades {
     }
 
     public static class Point3Extensions {
-        
         public static int DistanceSquared(this Point3 a, Point3 b) {
             int dx = b.x - a.x;
             int dy = b.y - a.y;
@@ -2477,34 +2461,12 @@ namespace PixelComrades {
             return dx * dx + dz * dz;
         }
 
-<<<<<<< HEAD
-=======
-        private const int ManhattanMoveCost = 1;
-
-        public static int DistanceManhattan3D(this Point3 a, Point3 b) {
-            int dx = System.Math.Abs(b.x - a.x);
-            int dy = System.Math.Abs(b.y - a.y);
-            int dz = System.Math.Abs(b.z - a.z);
-            return ManhattanMoveCost * (dx + dy + dz);
-        }
-
-        public static int DistanceManhattan(this Point3 a, Point3 b) {
-            int dx = System.Math.Abs(b.x - a.x);
-            int dz = System.Math.Abs(b.z - a.z);
-            return ManhattanMoveCost * (dx + dz);
-        }
-
->>>>>>> FirstPersonAction
         private const float MoveDouble = 2;
         private const float MoveDouble2 = 3;
 
         private const float Move = 1;
         private const float Move2 = 1.5f;
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> FirstPersonAction
         public static float DistanceChebDouble(this Point3 a, Point3 b) {
             float dx = System.Math.Abs(b.x - a.x);
             float dz = System.Math.Abs(b.z - a.z);
@@ -2517,21 +2479,6 @@ namespace PixelComrades {
             return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
         }
 
-<<<<<<< HEAD
-=======
-        public static float DistanceChebDouble(this Vector3Int a, Vector3Int b) {
-            float dx = System.Math.Abs(b.x - a.x);
-            float dz = System.Math.Abs(b.z - a.z);
-            return MoveDouble * (dx + dz) + (MoveDouble2 - 2 * MoveDouble) * System.Math.Min(dx, dz);
-        }
-
-        public static float DistanceCheb(this Vector3Int a, Vector3Int b) {
-            float dx = System.Math.Abs(b.x - a.x);
-            float dz = System.Math.Abs(b.z - a.z);
-            return Move * (dx + dz) + (Move2 - 2 * Move) * System.Math.Min(dx, dz);
-        }
-
->>>>>>> FirstPersonAction
 
         public static Point3 Reverse(this Point3 pos) {
             Point3 newPos = Point3.zero;
@@ -3585,38 +3532,25 @@ namespace PixelComrades {
 
     public static class GridExtension {
         public static Vector3 GridPositionPlace(this Point3 gridPos) {
-            var ray = new Ray(gridPos.MapGridToWorldV3(), Vector3.down);
+            var ray = new Ray(gridPos.CellToWorldV3(), Vector3.down);
             if (Physics.Raycast(ray, out var hit, Game.MapCellSize * 5, LayerMasks.Floor)) {
                 return hit.point;
             }
             return ray.origin;
         }
 
-        public static Vector3 MapGridToWorldV3(this Point3 p) {
-            return Game.MapGridToWorld(p);
+
+        public static Vector3 CellToWorldV3(this Point3 p) {
+            return Game.GridToWorld(p);
         }
 
-        public static Point3 ToMapGridP3(this Vector3 p) {
-            return Game.WorldToMapGrid(p);
+        public static Point3 ToCellGridP3(this Vector3 p) {
+            return Game.WorldToGrid(p);
         }
 
-        public static Point3 ToMapGridP3ZeroY(this Vector3 p) {
-            return Game.WorldToMapGrid(new Vector3(p.x, 0, p.z));
+        public static Point3 ToCellGridP3ZeroY(this Vector3 p) {
+            return Game.WorldToGrid(new Vector3(p.x, 0, p.z));
         }
-
-        public static Vector3 UnitGridToWorld(this Point3 p) {
-            return Game.UnitGridToWorld(p);
-        }
-
-        public static Point3 ToUnitGrid(this Vector3 p) {
-            return Game.WorldToUnitGrid(p);
-        }
-
-        public static Point3 ToUnitGridZeroY(this Vector3 p) {
-            return Game.WorldToUnitGridZeroY(p);
-        }
-        
-        
         /*
         [16][15][14][13][12]
         [17][ 4][ 3][ 2][11]
@@ -3711,6 +3645,41 @@ namespace PixelComrades {
                 //Then clear & draw the texture to fill the entire RTT.
                 GL.Clear(true,true,new Color(0,0,0,0));
                 Graphics.DrawTexture(new Rect(0,0,1,1),src);
+        }
+    }
+
+    public static class ActionTypeExtensions {
+        public static string GetPowerFromSource(this ActionSource source) {
+            switch (source) {
+                case ActionSource.Melee:
+                    return Stats.BonusPowerMelee;
+                case ActionSource.Ranged:
+                    return Stats.BonusPowerRanged;
+                default:
+                    return Stats.BonusPowerMagic;
+            }
+        }
+
+        public static string GetToHitFromSource(this ActionSource source) {
+            switch (source) {
+                case ActionSource.Melee:
+                    return Stats.BonusToHitMelee;
+                case ActionSource.Ranged:
+                    return Stats.BonusToHitRanged;
+                default:
+                    return Stats.BonusToHitMagic;
+            }
+        }
+
+        public static string GetCritFromSource(this ActionSource source) {
+            switch (source) {
+                case ActionSource.Melee:
+                    return Stats.BonusCritMelee;
+                case ActionSource.Ranged:
+                    return Stats.BonusCritRanged;
+                default:
+                    return Stats.BonusCritMagic;
+            }
         }
     }
 

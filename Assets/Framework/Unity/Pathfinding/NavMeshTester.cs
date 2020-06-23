@@ -6,11 +6,11 @@ using UnityEditor;
 
 namespace PixelComrades {
     public class NavMeshTester : MonoBehaviour {
-#if UNITY_EDITOR
 
         [SerializeField] private float _distance = 5;
         [SerializeField] private int _filterArea = -1;
 
+#if UNITY_EDITOR
         void OnDrawGizmosSelected() {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(transform.position, out hit, _distance, _filterArea)) {

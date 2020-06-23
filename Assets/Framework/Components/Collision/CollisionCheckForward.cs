@@ -9,7 +9,6 @@ namespace PixelComrades {
 
         public float RayDistance { get; }
         public Vector3? LastPos = null;
-        public bool Active = true;
 
         public CollisionCheckForward(float rayDistance) {
             RayDistance = rayDistance;

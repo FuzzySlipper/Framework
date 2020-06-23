@@ -10,12 +10,6 @@ namespace PixelComrades {
 
         public GridPosition(Point3 value) {
             Value = value;
-<<<<<<< HEAD
-=======
-        }
-
-        public GridPosition() {
->>>>>>> FirstPersonAction
         }
 
         public static implicit operator Point3(GridPosition reference) {

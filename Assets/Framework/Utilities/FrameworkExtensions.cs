@@ -257,33 +257,27 @@ namespace PixelComrades {
             return vals[UnityEngine.Random.Range(0, vals.Length)];
         }
 
-        public static T[] Remove<T>(this T[] source, T obj) {
-            // T[] dest = new T[source.Length - 1];
-            // var index = Array.FindIndex(source, o => o.Equals(obj));
-            // if (index > 0) {
-            //     Array.Copy(source, 0, dest, 0, index);
-            // }
-            // if (index < source.Length - 1) {
-            //     Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
-            // }
-            // return dest;
-            var list = source.ToList();
-            list.Remove(obj);
-            return list.ToArray();
+        public static T[] Remove<T>(this T[] source, object obj) {
+            T[] dest = new T[source.Length - 1];
+            var index = Array.FindIndex(source, o => o.Equals(obj));
+            if (index > 0) {
+                Array.Copy(source, 0, dest, 0, index);
+            }
+            if (index < source.Length - 1) {
+                Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
+            }
+            return dest;
         }
 
         public static T[] RemoveAt<T>(this T[] source, int index) {
-            // T[] dest = new T[source.Length - 1];
-            // if (index > 0) {
-            //     Array.Copy(source, 0, dest, 0, index);
-            // }
-            // if (index < source.Length - 1) {
-            //     Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
-            // }
-            // return dest;
-            var list = source.ToList();
-            list.RemoveAt(index);
-            return list.ToArray();
+            T[] dest = new T[source.Length - 1];
+            if (index > 0) {
+                Array.Copy(source, 0, dest, 0, index);
+            }
+            if (index < source.Length - 1) {
+                Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
+            }
+            return dest;
         }
 
         public static int ReturnNearestIndex(this Vector3[] nodes, Vector3 destination) {

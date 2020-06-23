@@ -9,14 +9,21 @@ namespace PixelComrades {
     public class UIRadialMenu : MonoBehaviour {
 #pragma warning disable 649
         [Tooltip("How long do all the layers take to transition on to the screen by default")] [SerializeField] private float _transitionLength = 1.0f;
+        [Tooltip("Does the user have to drag to an element and then click or can they click simply click on an element to proceed")] [SerializeField] private bool _dragAndTouch = true;
         [Tooltip("How big will elements scale when selected")] [SerializeField] private float _elementGrowthFactor = 1.5f;
         [Range(0.0f, 1.0f)] [Tooltip("Maximum size the element can be sized to as a percentage of the menu size")] [SerializeField] private float _elementMaxSize = 0.1f;
         [Tooltip("Does all of the layers have element snapping")] [SerializeField] private bool _elementSnapping;
         [Range(0.0f, 1.0f)] [Tooltip("Joystick axis deadzone")] [SerializeField] private float _inputDeadzone = 0.2f;
+        [Tooltip("Horizontal axis of a joystick used for the radial menu")] [SerializeField] private string _inputHorizontal;
+        [Tooltip("Cancel button of a joystick used for the radial menu")] [SerializeField] private string _inputJoystickCancel;
+        [Tooltip("Confirm button of a joystick used for the radial menu")] [SerializeField] private string _inputJoystickConfirm;
         [Tooltip("How far outside of the radial ring will input be recognised (0.1f is a good value)")] [SerializeField] private float _inputLeeway;
+        [Tooltip("Virtical axis of a joystick used for the radial menu")] [SerializeField] private string _inputVertical;
         [Tooltip("Should this radial menu react to joystick input")] [SerializeField] private bool _joystickInputEnabled;
         [Tooltip("Should this radial menu react to mouse input")] [SerializeField] private bool _mouseInputEnabled;
         [Range(0.0f, 1.0f)] [Tooltip("Radius of the circle that the elements are on as a percentage of the panel size")] [SerializeField] private float _panelOffset = 0.85f;
+        [Tooltip("Delay before a touch is recognised as a drag")] [SerializeField] private float _touchTime = 0.2f;
+        [Tooltip("Should this radial menu react to touch input")] [SerializeField] private bool _touchInputEnabled;
 
         [SerializeField] private TextMeshProUGUI _topText = null;
         [SerializeField] private CanvasGroup _canvasGroup = null;
@@ -122,7 +129,7 @@ namespace PixelComrades {
                 return;
             }
             _currentControl = ControlMethod.None;
-            //TouchInput();
+            TouchInput();
             ControllerInput();
             MouseInput();
         }
@@ -253,140 +260,138 @@ namespace PixelComrades {
                 if (DetermineTargetAngle(ControlMethod.Mouse)) {
                     _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Mouse);
                 }
-                if (!_clickTimer.IsActive && PlayerInputSystem.GetMouseButtonDown(0)) {
+                if (!_clickTimer.IsActive && Input.GetMouseButtonUp(0)) {
                     _clickTimer.StartTimer();
                     _currentLayer.Confirm();
                 }
-                if (!_clickTimer.IsActive && PlayerInputSystem.GetMouseButtonDown(1)) {
+                if (!_clickTimer.IsActive && Input.GetMouseButtonUp(1)) {
                     _clickTimer.StartTimer();
                     _currentLayer.Cancel();
                 }
             }
-            else if (!_clickTimer.IsActive && (PlayerInputSystem.GetMouseButtonDown(0) || PlayerInputSystem.GetMouseButtonDown(1))) {
+            else if (!_clickTimer.IsActive && (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))) {
                 _clickTimer.StartTimer();
                 _currentLayer.Skip();
             }
         }
 
         private void ControllerInput() {
-            if (!_joystickInputEnabled|| _currentControl != ControlMethod.None) {
+            if (!_joystickInputEnabled|| Input.GetJoystickNames().Length <= 0 || _currentControl != ControlMethod.None) {
                 return;
             }
             if (_state == State.Open) {
                 if (DetermineTargetAngle(ControlMethod.Joystick)) {
                     _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Joystick);
                 }
-                if (PlayerInputSystem.GetMouseButtonDown(0)) {
+                if (Input.GetButtonDown(_inputJoystickConfirm)) {
                     _currentControl = ControlMethod.Joystick;
                     _currentLayer.Confirm();
                 }
 
-                if (PlayerInputSystem.GetMouseButtonDown(1)) {
+                if (Input.GetButtonDown(_inputJoystickCancel)) {
                     _currentControl = ControlMethod.Joystick;
                     _currentLayer.Cancel();
                 }
             }
-            else if (PlayerInputSystem.GetMouseButtonDown(0) || PlayerInputSystem.GetMouseButtonDown(1)) {
+            else if (Input.GetButtonDown(_inputJoystickConfirm) || Input.GetButtonDown(_inputJoystickCancel)) {
                 _currentLayer.Skip();
             }
         }
 
-        // private void TouchInput() {
-        //     if (!_touchInputEnabled ||  _currentControl != ControlMethod.None) {
-        //         return;
-        //     }
-        //     if (Input.touchCount <= 0) {
-        //         _touchTimer = 0;
-        //         return;
-        //     }
-        //     _currentControl = ControlMethod.Touch;
-        //     var pointer = new PointerEventData(EventSystem.current);
-        //     pointer.position = Input.GetTouch(0).position;
-        //     var results = new List<RaycastResult>();
-        //     EventSystem.current.RaycastAll(pointer, results);
-        //     if (results.Count <= 0) {
-        //         return;
-        //     }
-        //     var uiCoord = Input.GetTouch(0).position - (Vector2)PanelTransform.position;
-        //     //if the touch is closer to the center of the menu than its radius
-        //     //the radius of the menu is adjusted to compensate for different screen scalings
-        //     float check = 1;
-        //     switch ((byte)_scaler.uiScaleMode) {
-        //         case 1:
-        //             check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) / Mathf.Lerp(ScreenScale.x, ScreenScale.y, _scaler.matchWidthOrHeight) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway);
-        //             break;
-        //         case 2:
-        //             check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway * 2.0f);
-        //             break;
-        //         default:
-        //             check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway);
-        //             break;
-        //     }
-        //     if (new Vector2(uiCoord.x, uiCoord.y).magnitude > check) {
-        //         _touchTimer = 0;
-        //         return;
-        //     }
-        //     if (_state != State.Open) {
-        //         return;
-        //     }
-        //     //Save the mouse position to the observer variable
-        //     _oldMousePosition = PlayerInputSystem.CursorPosition;
-        //     //get the normalised form of the touch coordinates
-        //     var uiDir = uiCoord.normalized;
-        //     //Work out the clockwise angle from up to the UIDir
-        //     var tempTargetAngle = Mathf.Atan2(uiDir.x, uiDir.y) * Mathf.Rad2Deg;
-        //     //if the Direction is toward the left of the screen the angleneeds flipping
-        //     if (uiCoord.x < 0.0f) {
-        //         tempTargetAngle = 360.0f - Mathf.Abs(tempTargetAngle);
-        //     }
-        //
-        //     var angleSet = false;
-        //     //Check how to see how the touch should operate
-        //     if (!_dragAndTouch) {
-        //         _cursorTargetAngle = tempTargetAngle;
-        //         angleSet = true;
-        //     }
-        //     //increment the touch timer by the time since the last frame
-        //     _touchTimer += TimeManager.DeltaUnscaled;
-        //     //if the touch timer is above the threshold
-        //     if (_touchTimer >= _touchTime) {
-        //         if (!angleSet) {
-        //             _cursorTargetAngle = tempTargetAngle;
-        //         }
-        //
-        //         //update the layer
-        //         _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Touch);
-        //     }
-        //     else {
-        //         //if the touch let go this frame
-        //         if (!_clickTimer.IsActive && Input.GetMouseButtonUp(0)) {
-        //             _touchTimer = 0;
-        //             _clickTimer.StartTimer();
-        //             _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Touch);
-        //             _currentLayer.Confirm();
-        //         }
-        //     }
-        // }
+        private void TouchInput() {
+            if (!_touchInputEnabled || !Input.touchSupported || _currentControl != ControlMethod.None) {
+                return;
+            }
+            if (Input.touchCount <= 0) {
+                _touchTimer = 0;
+                return;
+            }
+            _currentControl = ControlMethod.Touch;
+            var pointer = new PointerEventData(EventSystem.current);
+            pointer.position = Input.GetTouch(0).position;
+            var results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer, results);
+            if (results.Count <= 0) {
+                return;
+            }
+            var uiCoord = Input.GetTouch(0).position - (Vector2)PanelTransform.position;
+            //if the touch is closer to the center of the menu than its radius
+            //the radius of the menu is adjusted to compensate for different screen scalings
+            float check = 1;
+            switch ((byte)_scaler.uiScaleMode) {
+                case 1:
+                    check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) / Mathf.Lerp(ScreenScale.x, ScreenScale.y, _scaler.matchWidthOrHeight) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway);
+                    break;
+                case 2:
+                    check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway * 2.0f);
+                    break;
+                default:
+                    check = MathEx.Min(PanelTransform.rect.width, PanelTransform.rect.height) * ((_panelOffset + _elementMaxSize) / 2.0f + _inputLeeway);
+                    break;
+            }
+            if (new Vector2(uiCoord.x, uiCoord.y).magnitude > check) {
+                _touchTimer = 0;
+                return;
+            }
+            if (_state != State.Open) {
+                return;
+            }
+            //Save the mouse position to the observer variable
+            _oldMousePosition = Input.mousePosition;
+            //get the normalised form of the touch coordinates
+            var uiDir = uiCoord.normalized;
+            //Work out the clockwise angle from up to the UIDir
+            var tempTargetAngle = Mathf.Atan2(uiDir.x, uiDir.y) * Mathf.Rad2Deg;
+            //if the Direction is toward the left of the screen the angleneeds flipping
+            if (uiCoord.x < 0.0f) {
+                tempTargetAngle = 360.0f - Mathf.Abs(tempTargetAngle);
+            }
+
+            var angleSet = false;
+            //Check how to see how the touch should operate
+            if (!_dragAndTouch) {
+                _cursorTargetAngle = tempTargetAngle;
+                angleSet = true;
+            }
+            //increment the touch timer by the time since the last frame
+            _touchTimer += TimeManager.DeltaUnscaled;
+            //if the touch timer is above the threshold
+            if (_touchTimer >= _touchTime) {
+                if (!angleSet) {
+                    _cursorTargetAngle = tempTargetAngle;
+                }
+
+                //update the layer
+                _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Touch);
+            }
+            else {
+                //if the touch let go this frame
+                if (!_clickTimer.IsActive && Input.GetMouseButtonUp(0)) {
+                    _touchTimer = 0;
+                    _clickTimer.StartTimer();
+                    _currentLayer.UpdateLayer(_cursorTargetAngle, ControlMethod.Touch);
+                    _currentLayer.Confirm();
+                }
+            }
+        }
 
         private bool DetermineTargetAngle(ControlMethod method) {
             Vector2 input;
             switch (method) {
                 default:
                 case ControlMethod.Mouse:
-                    if (_oldMousePosition == (Vector2) PlayerInputSystem.CursorPosition) {
+                    if (_oldMousePosition == (Vector2) Input.mousePosition) {
                         return false;
                     }
-                    _oldMousePosition = PlayerInputSystem.CursorPosition;
-                    input = ((Vector2) PlayerInputSystem.CursorPosition - (Vector2) PanelTransform.position).normalized;
+                    _oldMousePosition = Input.mousePosition;
+                    input = ((Vector2) Input.mousePosition - (Vector2) PanelTransform.position).normalized;
                     break;
                 case ControlMethod.Joystick:
-                    var horiz = PlayerInputSystem.LookInput.x;
-                    var vert = PlayerInputSystem.LookInput.y;
-                    if ((Mathf.Abs(horiz) < _inputDeadzone) && (Mathf.Abs(vert) < _inputDeadzone)) {
+                    if ((Mathf.Abs(Input.GetAxis(_inputHorizontal)) < _inputDeadzone) && (Mathf.Abs(Input.GetAxis(_inputVertical)) < _inputDeadzone)) {
                         return false;
                     }
                     _currentControl = ControlMethod.Joystick;
-                    input = new Vector2(horiz, vert).normalized;
+                    input = new Vector2(Input.GetAxis(_inputHorizontal), Input.GetAxis(_inputVertical)).normalized;
                     break;
             }
             //work out the clockwise angle from up to the target direction

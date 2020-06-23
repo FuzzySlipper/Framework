@@ -7,7 +7,7 @@ using UnityEditor;
 namespace PixelComrades {
     public class ScriptableSingleton<T> : ScriptableObject where T : ScriptableObject {
 
-        private const string EditorFolder = "Assets/GameData/Resources/";
+        public const string EditorFolder = "Assets/GameData/Resources/";
         private const string FullDirectory = EditorFolder;
 
         private static T _main;
@@ -28,6 +28,9 @@ namespace PixelComrades {
                             AssetDatabase.SaveAssets();
                             AssetDatabase.Refresh();
 #endif
+                            if (_main is ICreationListener creationListener) {
+                                creationListener.OnCreate();
+                            }
                         }
                     }
                     return _main;
@@ -35,5 +38,9 @@ namespace PixelComrades {
             }
             protected set { _main = value; }
         }
+    }
+
+    public interface ICreationListener {
+        void OnCreate();
     }
 }

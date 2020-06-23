@@ -1,21 +1,3 @@
-<<<<<<< HEAD
 ﻿fileFormatVersion: 2
 guid: 567672ed4139433baf74b343d936a375
 timeCreated: 1583622333
-=======
-fileFormatVersion: 2
-<<<<<<< HEAD:Assets/Framework/Components/EntityTagsComponent.cs.meta
-guid: 5677377be4faeca468bac457f17f45a8
-=======
-guid: c93402e90776aeb439e33186ca604769
->>>>>>> FirstPersonAction:Assets/Framework/Actions/Events/EventRollForHit.cs.meta
-MonoImporter:
-  externalObjects: {}
-  serializedVersion: 2
-  defaultReferences: []
-  executionOrder: 0
-  icon: {instanceID: 0}
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
->>>>>>> FirstPersonAction

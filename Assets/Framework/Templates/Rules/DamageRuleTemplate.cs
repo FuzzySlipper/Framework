@@ -4,32 +4,17 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class DamageRuleTemplate : RuleTemplate, IRuleEventRun<PrepareDamageEvent> {
-<<<<<<< HEAD
         
-=======
-
->>>>>>> FirstPersonAction
         private CachedComponent<DamageImpact> _damageImpact = new CachedComponent<DamageImpact>();
-
-        public override List<CachedComponent> GatherComponents
-            => new List<CachedComponent>() {
-                _damageImpact, EntityStats
-            };
-
+        
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _damageImpact, EntityStats
+        };
+        
         public void RuleEventRun(ref PrepareDamageEvent context) {
-<<<<<<< HEAD
             var power = RulesSystem.CalculateImpactTotal(EntityStats, Stats.Power, _damageImpact.Value.NormalizedPercent);
             context.Entries.Add(new DamageEntry(power, _damageImpact.Value.DamageType, _damageImpact.Value.TargetVital,
                 RulesSystem.LastQueryString.ToString()));
-=======
-            var power = RulesSystem.CalculateImpactTotal(EntityStats, Stat.Damage, _damageImpact.Value.NormalizedPercent);
-            context.Entries.Add(
-                new DamageEntry(
-                    power,
-                    _damageImpact.Value.DamageType,
-                    _damageImpact.Value.TargetVital,
-                    RulesSystem.LastQueryString.ToString()));
->>>>>>> FirstPersonAction
         }
 
         public override System.Type[] GetTypes() {

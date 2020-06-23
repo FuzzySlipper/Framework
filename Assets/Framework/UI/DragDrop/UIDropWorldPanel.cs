@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class UIDropWorldPanel : MonoSingleton<UIDropWorldPanel>, IPointerEnterHandler, IPointerExitHandler, IDropHandler, IPointerClickHandler {
@@ -43,7 +42,7 @@ namespace PixelComrades {
         }
 
         public void TryThrow(Entity item) {
-            var mouseRay = PlayerInputSystem.GetLookTargetRay;
+            var mouseRay = Player.Cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(mouseRay, out hit, _dropDistance, LayerMasks.DropPanel)) {
                 var use = hit.transform.GetComponent<EntityIdentifier>();
@@ -54,7 +53,7 @@ namespace PixelComrades {
                         return;
                     }
                 }
-                var screenPnt = CameraSystem.Cam.ScreenToViewportPoint(Mouse.current.position.ReadValue());
+                var screenPnt = Player.Cam.ScreenToViewportPoint(Input.mousePosition);
                 if (screenPnt.y < _maxPlaceScreenY) {
                     var inventoryItem = item.Get<InventoryItem>();
                     if (inventoryItem != null && inventoryItem.Inventory.Remove(item)) {
@@ -69,8 +68,7 @@ namespace PixelComrades {
                 }
             }
             UIDragDropHandler.Take();
-            var mousePos = Mouse.current.position.ReadValue();
-            var pos = CameraSystem.Cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, 20));
+            var pos = Player.Cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 20));
             World.Get<ItemSceneSystem>().Throw(pos);
         }
 

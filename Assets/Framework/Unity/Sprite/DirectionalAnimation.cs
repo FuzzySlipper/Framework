@@ -34,8 +34,7 @@ namespace PixelComrades {
         public Sprite GetSprite(DirectionsEight facing, int spriteIdx) {
             var frames = GetFacingIndices(facing);
             if (frames != null) {
-                //var idx = frames[spriteIdx];
-                var idx = frames.SafeAccess(spriteIdx);
+                var idx = frames[spriteIdx];
                 return Sprites[Mathf.Clamp(idx, 0, Sprites.Length - 1)];
             }
             return GetSprite(spriteIdx);

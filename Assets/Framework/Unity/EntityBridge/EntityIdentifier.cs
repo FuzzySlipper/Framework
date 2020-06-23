@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class EntityIdentifier : MonoBehaviour {
-        [ReadOnly] public int EntityID = -1;
+        public int EntityID = -1;
 
         private Entity _entity;
         public Entity Entity {

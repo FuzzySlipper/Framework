@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
-using UnityEngine.InputSystem;
 
 #if AStarPathfinding
 using Pathfinding;
@@ -31,10 +30,10 @@ namespace PixelComrades {
         }
 
         void Update() {
-            if (_onlyOnInput && !Mouse.current.leftButton.wasPressedThisFrame) {
+            if (_onlyOnInput && !Input.GetMouseButtonDown(0)) {
                 return;
             }
-            _mouseRay = _cam != null ? _cam.ScreenPointToRay(PlayerInputSystem.CursorPosition) : WorldControlMonitor.Cam.ScreenPointToRay(PlayerInputSystem.CursorPosition);
+            _mouseRay = _cam != null ? _cam.ScreenPointToRay(Input.mousePosition) : WorldControlMonitor.Cam.ScreenPointToRay(Input.mousePosition);
             var cnt = Physics.RaycastNonAlloc(_mouseRay, _hits, 1200, LayerMasks.Floor);
             _hits.SortByDistanceAsc(cnt);
             if (cnt <= 0) {

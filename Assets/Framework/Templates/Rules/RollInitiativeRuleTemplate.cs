@@ -22,11 +22,7 @@ namespace PixelComrades {
     }
 
     public struct RollInitiativeEvent : IRuleEvent {
-<<<<<<< HEAD
         public BaseActionTemplate Action { get; }
-=======
-        public ActionTemplate Action { get; }
->>>>>>> FirstPersonAction
         public Entity Source { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }

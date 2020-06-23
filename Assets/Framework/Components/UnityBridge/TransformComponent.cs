@@ -60,20 +60,7 @@ namespace PixelComrades {
             Vector3 relativePos = targetPos - origin;
             return Quaternion.LookRotation(relativePos);
         }
-<<<<<<< HEAD
         
-=======
-
-        public void SetLookAt(Vector3 target, bool ignoreElevation = false) {
-            var origin = position;
-            if (ignoreElevation) {
-                target.y = origin.y;
-            }
-            Vector3 relativePos = target - origin;
-            Value.rotation = Quaternion.LookRotation(relativePos);
-        }
-
->>>>>>> FirstPersonAction
         /// <summary>
         /// Set transform position, use only in TransformSystem
         /// </summary>

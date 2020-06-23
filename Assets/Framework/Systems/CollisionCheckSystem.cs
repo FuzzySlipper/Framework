@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using Sirenix.Utilities;
 
 namespace PixelComrades {
-    [AutoRegister,Priority(Priority.Higher)]
-    public class CollisionCheckSystem : SystemBase<CollisionCheckSystem>, IMainSystemUpdate, IReceiveGlobal<SphereCastEvent> {
+    [Priority(Priority.Higher)]
+    public class CollisionCheckSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<SphereCastEvent> {
 
         private static RaycastHit[] _rayHits = new RaycastHit[25];
         private static Collider[] _colliders = new Collider[25];
@@ -16,6 +16,7 @@ namespace PixelComrades {
         
 
         public CollisionCheckSystem() {
+            TemplateFilter<CollisionCheckForwardTemplate>.Setup();
             _list = EntityController.GetTemplateList<CollisionCheckForwardTemplate>();
             _del = RunUpdate;
         }
@@ -26,7 +27,7 @@ namespace PixelComrades {
 
         private void RunUpdate(ref CollisionCheckForwardTemplate template) {
             var tr = template.Tr;
-            if (tr == null || !template.Forward.Active) {
+            if (tr == null) {
                 template.Forward.LastPos = null;
                 return;
             }
@@ -60,11 +61,9 @@ namespace PixelComrades {
         }
 
         public static void OverlapSphere(Entity entity, Entity ignoreEntity, Vector3 position, float radius, bool limitEnemy) {
-#if UNITY_EDITOR
 #if DEBUG_RAYCAST
             DebugExtension.DebugCircle(position, Color.red, radius, 2.5f);
 #endif
-            #endif
             var limit = Physics.OverlapSphereNonAlloc(position, radius, _colliders, LayerMasks.DefaultCollision);
             CheckColliderList(entity, ignoreEntity, position, limit, limitEnemy);
         }
@@ -79,7 +78,7 @@ namespace PixelComrades {
                 
                 Entity hitEntity = EntityController.GetEntity(UnityToEntityBridge.GetEntityId(hit.collider));
                 bool isEnvironment = hitEntity == null && hit.transform.IsEnvironment();
-#if UNITY_EDITOR
+                
 #if DEBUG_RAYCAST
                     Color pointColor = Color.white;
                     if (isEnvironment) {
@@ -93,13 +92,10 @@ namespace PixelComrades {
                     }
                     DebugExtension.DrawPoint(_rayHits[i].point + (Vector3.up * (i * 0.1f)), pointColor, 0.25f, 2.5f);
 #endif
-                #endif
                 if (isEnvironment) {
-#if UNITY_EDITOR
 #if DEBUG
                     DebugLog.Add(originEntity.DebugId + " hit environment " + _rayHits[i].transform.name);
 #endif
-                    #endif
                     originEntity.Post(new EnvironmentCollisionEvent(originEntity, _rayHits[i].point, _rayHits[i].normal));
                     return null;
                 }
@@ -113,9 +109,7 @@ namespace PixelComrades {
                         var localDir = hit.transform.InverseTransformDirection(ray.direction);
                         var rayCast = new Ray(detailTr.TransformPoint(localPoint), detailTr.TransformDirection(localDir));
                         if (!targetNode.DetailCollider.Collider.Raycast(rayCast, out var childHit, 500)) {
-#if UNITY_EDITOR
                             DebugExtension.DrawPoint(childHit.point, Color.yellow, 0.25f, 2.5f);
-                            #endif
                             continue;
                         }
                     }

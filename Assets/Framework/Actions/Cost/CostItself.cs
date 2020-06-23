@@ -8,9 +8,9 @@ namespace PixelComrades {
     [Serializable]
     public class CostItself : CommandCost, ISerializable {
 
-        public override void ProcessCost(ActionTemplate action, CharacterTemplate owner) {
-            action.Get<InventoryItem>()?.Inventory?.Remove(owner);
-            action.Entity.Destroy();
+        public override void ProcessCost(Entity owner, Entity action) {
+            owner.Get<InventoryItem>()?.Inventory?.Remove(owner);
+            owner.Destroy();
         }
 
         public CostItself() {
@@ -22,7 +22,7 @@ namespace PixelComrades {
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
         }
 
-        public override bool CanAct(ActionTemplate action, CharacterTemplate owner) {
+        public override bool CanAct(Entity owner, Entity action) {
             return true;
         }
     }

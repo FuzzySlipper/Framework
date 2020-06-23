@@ -2,79 +2,38 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 
 namespace PixelComrades {
-    public class GameOptions : SimpleScriptableDatabase<GameOptions> {
+    public static class GameOptions {
         
         private const string SheetName = "GameOptions";
         private const string Row = "Default";
 
-        [SerializeField] private KeyedFloatValue[] _floatValues = new KeyedFloatValue[0];
-        [SerializeField] private KeyedIntValue[] _intValues = new KeyedIntValue[0];
-        [SerializeField] private KeyedBoolValue[] _boolValues = new KeyedBoolValue[0];
-        [SerializeField] private KeyedStringValue[] _stringValues = new KeyedStringValue[0];
-        [SerializeField] private KeyedColorValue[] _colorValues = new KeyedColorValue[0];
+        private static Dictionary<string, int> _dictInt = new Dictionary<string, int>();
+        private static Dictionary<string, float> _dictFloat = new Dictionary<string, float>();
+        private static Dictionary<string, bool> _dictBool = new Dictionary<string, bool>();
+        private static Dictionary<string, string> _dictString = new Dictionary<string, string>();
+        private static Dictionary<string, Color> _dictColor = new Dictionary<string, Color>();
 
-        private static Dictionary<string, KeyedIntValue> _dictInt = new Dictionary<string, KeyedIntValue>();
-        private static Dictionary<string, KeyedFloatValue> _dictFloat = new Dictionary<string, KeyedFloatValue>();
-        private static Dictionary<string, KeyedBoolValue> _dictBool = new Dictionary<string, KeyedBoolValue>();
-        private static Dictionary<string, KeyedStringValue> _dictString = new Dictionary<string, KeyedStringValue>();
-        private static Dictionary<string, KeyedColorValue> _dictColor = new Dictionary<string, KeyedColorValue>();
-
-        [Button, Command("initGameOptions")]
+        [Command("initGameOptions")]
         public static void Init() {
             GameData.AddInit(Init);
-            Main.RebuildDictionaries();
-            Cached.Reset();
-        }
-
-        [Button]
-        public void LoadFromJson() {
-            Init();
             var row = GameData.GetSheet(SheetName)[Row];
-            LoadDictionary<string, KeyedStringValue>(row.Get<DataList>("Text"), _dictString, ref Main._stringValues);
-            LoadDictionary<bool, KeyedBoolValue>(row.Get<DataList>("Bool"), _dictBool, ref Main._boolValues);
-            LoadDictionary<int, KeyedIntValue>(row.Get<DataList>("Int"), _dictInt, ref Main._intValues);
-            LoadDictionary<float, KeyedFloatValue>(row.Get<DataList>("Float"), _dictFloat, ref Main._floatValues);
-            LoadDictionary<Color, KeyedColorValue>(row.Get<DataList>("Color"), _dictColor, ref Main._colorValues);
-        }
-
-        public static Dictionary<string, KeyedIntValue> DictInt { get => _dictInt; set => _dictInt = value; }
-        public static Dictionary<string, KeyedFloatValue> DictFloat { get => _dictFloat; set => _dictFloat = value; }
-        public static Dictionary<string, KeyedBoolValue> DictBool { get => _dictBool; set => _dictBool = value; }
-        public static Dictionary<string, KeyedStringValue> DictString { get => _dictString; set => _dictString = value; }
-        public static Dictionary<string, KeyedColorValue> DictColor { get => _dictColor; set => _dictColor = value; }
-
-        public void OnValidate() {
-            RebuildDictionaries();
-        }
-
-        private void RebuildDictionaries() {
-            FillDictionary(_intValues, _dictInt);
-            FillDictionary(_floatValues, _dictFloat);
-            FillDictionary(_boolValues, _dictBool);
-            FillDictionary(_stringValues, _dictString);
-            FillDictionary(_colorValues, _dictColor);
-        }
-
-        private void FillDictionary<T>(T[] array, Dictionary<string, T> dict) where T : GenericKeyedValue {
-            dict.Clear();
-            for (int i = 0; i < array.Length; i++) {
-                if (array[i] == null || string.IsNullOrEmpty(array[i].Key)) {
-                    continue;
-                }
-                dict.AddOrUpdate(array[i].Key, array[i]);
-            }
+            LoadDictionary(row.Get<DataList>("Text"), _dictString);
+            LoadDictionary(row.Get<DataList>("Bool"), _dictBool);
+            LoadDictionary(row.Get<DataList>("Int"), _dictInt);
+            LoadDictionary(row.Get<DataList>("Float"), _dictFloat);
+            LoadDictionary(row.Get<DataList>("Color"), _dictColor);
+            Cached.Reset();
         }
 
         [Command("SetIntOption")]
         public static void SetIntOption(string key, int value) {
             if (_dictInt.ContainsKey(key)) {
-                _dictInt[key].Value = value;
+                _dictInt[key] = value;
             }
             else {
-                _dictInt.Add(key, new KeyedIntValue());
+                _dictInt.Add(key, value);
             }
             Cached.Reset();
         }
@@ -82,10 +41,10 @@ namespace PixelComrades {
         [Command("SetFloatOption")]
         public static void SetFloatOption(string key, float value) {
             if (_dictFloat.ContainsKey(key)) {
-                _dictFloat[key].Value = value;
+                _dictFloat[key] = value;
             }
             else {
-                _dictFloat.Add(key, new KeyedFloatValue());
+                _dictFloat.Add(key, value);
             }
             Cached.Reset();
         }
@@ -93,10 +52,10 @@ namespace PixelComrades {
         [Command("SetBoolOption")]
         public static void SetBoolOption(string key, bool value) {
             if (_dictBool.ContainsKey(key)) {
-                _dictBool[key].Value = value;
+                _dictBool[key] = value;
             }
             else {
-                _dictBool.Add(key, new KeyedBoolValue());
+                _dictBool.Add(key, value);
             }
             Cached.Reset();
         }
@@ -104,10 +63,10 @@ namespace PixelComrades {
         [Command("SetStringOption")]
         public static void SetStringOption(string key, string value) {
             if (_dictString.ContainsKey(key)) {
-                _dictString[key].Value = value;
+                _dictString[key] = value;
             }
             else {
-                _dictString.Add(key, new KeyedStringValue());
+                _dictString.Add(key, value);
             }
             Cached.Reset();
         }
@@ -115,15 +74,16 @@ namespace PixelComrades {
         [Command("SetColorOption")]
         public static void SetColorOption(string key, Color value) {
             if (_dictColor.ContainsKey(key)) {
-                _dictColor[key].Value = value;
+                _dictColor[key] = value;
             }
             else {
-                _dictColor.Add(key, new KeyedColorValue());
+                _dictColor.Add(key, value);
             }
             Cached.Reset();
         }
 
-        private static void LoadDictionary<T,TV>(DataList data, Dictionary<string, TV> dict, ref TV[] array) where TV : GenericKeyedValue {
+        private static void LoadDictionary<T>(DataList data, Dictionary<string, T> dict) {
+            dict.Clear();
             for (int i = 0; i < data.Count; i++) {
                 if (!data[i].TryGetValue(DatabaseFields.ID, out string id)) {
                     continue;
@@ -131,18 +91,7 @@ namespace PixelComrades {
                 if (!data[i].TryGetValue(DatabaseFields.Value, out T value)) {
                     continue;
                 }
-                if (dict.TryGetValue(id, out var valueHolder)) {
-                    valueHolder.ValueAccess = value;
-                }
-                else {
-                    System.Array.Resize(ref array, array.Length + 1);
-                    valueHolder = (TV) GenericKeyedValue.New(id, value);
-                    array[array.LastIndex()] = valueHolder;
-                    #if UNITY_EDITOR
-                    UnityEditor.EditorUtility.SetDirty(Main);
-                    #endif
-                    dict.Add(id, valueHolder);
-                }
+                dict.Add(id, value);
             }
         }
 
@@ -150,7 +99,7 @@ namespace PixelComrades {
             if (_dictString.Count == 0) {
                 Init();
             }
-            return _dictString.TryGetValue(id, out var value) ? value.Value : defaultValue;
+            return _dictString.TryGetValue(id, out var value) ? value : defaultValue;
         }
 
         public static float Get(string id, float defaultValue) {
@@ -158,10 +107,10 @@ namespace PixelComrades {
                 Init();
             }
             if (_dictFloat.TryGetValue(id, out var value)) {
-                return value.Value;
+                return value;
             }
             if (_dictInt.TryGetValue(id, out var intValue)) {
-                return (float) intValue.Value;
+                return (float) intValue;
             }
             Debug.Log(id);
             return defaultValue;
@@ -172,10 +121,10 @@ namespace PixelComrades {
                 Init();
             }
             if (_dictInt.TryGetValue(id, out var intValue)) {
-                return intValue.Value;
+                return intValue;
             }
             if (_dictFloat.TryGetValue(id, out var fValue)) {
-                return (int) fValue.Value;
+                return (int) fValue;
             }
             Debug.Log(id);
             return defaultValue;
@@ -185,28 +134,35 @@ namespace PixelComrades {
             if (_dictBool.Count == 0) {
                 Init();
             }
-            return _dictBool.TryGetValue(id, out var value) ? value.Value : defaultValue;
+            return _dictBool.TryGetValue(id, out var value) ? value : defaultValue;
         }
 
         public static Color Get(string id, Color defaultValue) {
             if (_dictColor.Count == 0) {
                 Init();
             }
-            return _dictColor.TryGetValue(id, out var value) ? value.Value : defaultValue;
+            return _dictColor.TryGetValue(id, out var value) ? value : defaultValue;
+        }
+
+        public static void Set(string id, string value) {
+            _dictString.AddOrUpdate(id, value);
+        }
+
+        public static void Set(string id, int value) {
+            _dictInt.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, float value) {
-            SetFloatOption(id, value);
+            _dictFloat.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, bool value) {
-            SetBoolOption(id, value);
+            _dictBool.AddOrUpdate(id, value);
         }
 
         public static void Set(string id, Color value) {
-            SetColorOption(id, value);
+            _dictColor.AddOrUpdate(id, value);
         }
-
 
         public static int PriceEstimateSell(Entity item) {
             var inven = item.Get<InventoryItem>();
@@ -221,7 +177,7 @@ namespace PixelComrades {
         }
 
         public static int IdentifyEstimate(Entity item) {
-            return 100 * (int) item.Get<StatsContainer>().Get(Stat.Level).Value;
+            return 100 * item.Get<EntityLevelComponent>().Level;
         }
 
         public static CachedBool UseShaking = new CachedBool("UseShaking");
@@ -248,7 +204,7 @@ namespace PixelComrades {
                 }
                 else if (!value) {
                     Cursor.lockState = CursorLockMode.None;
-                    CameraSystem.CamTr.localRotation = Quaternion.identity;
+                    Player.Cam.transform.localRotation = Quaternion.identity;
                 }
             }
         }
@@ -288,21 +244,21 @@ namespace PixelComrades {
         }
 
         public class CachedInt : Cached {
-            private KeyedIntValue _value;
+            private int _value;
 
             public CachedInt(string key) : base(key) {}
 
             public int Value {
                 get {
                     if (!ValueSet) {
-                        if (_dictInt.TryGetValue(Key, out _value)) {
-                            ValueSet = true;
-                        }
-                        else {
-                            return -1;
-                        }
+                        _value = Get(Key, 0);
+                        ValueSet = true;
                     }
-                    return _value.Value;
+                    return _value;
+                }
+                set {
+                    _value = value;
+                    Set(Key, value);
                 }
             }
 
@@ -338,21 +294,21 @@ namespace PixelComrades {
         }
 
         public class CachedFloat : Cached {
-            private KeyedFloatValue _value;
+            private float _value;
 
             public CachedFloat(string key) : base(key) {}
 
             public float Value {
                 get {
                     if (!ValueSet) {
-                        if (_dictFloat.TryGetValue(Key, out _value)) {
-                            ValueSet = true;
-                        }
-                        else {
-                            return -1;
-                        }
+                        _value = Get(Key, 0f);
+                        ValueSet = true;
                     }
-                    return _value.Value;
+                    return _value;
+                }
+                set {
+                    _value = value;
+                    Set(Key, value);
                 }
             }
 
@@ -390,26 +346,21 @@ namespace PixelComrades {
         }
 
         public class CachedBool : Cached {
-            private KeyedBoolValue _value;
+            private bool _value;
 
             public CachedBool(string key) : base(key) {}
 
             public bool Value {
                 get {
                     if (!ValueSet) {
-                        if (_dictBool.TryGetValue(Key, out _value)) {
-                            ValueSet = true;
-                        }
-                        else {
-                            return false;
-                        }
+                        _value = Get(Key, false);
+                        ValueSet = true;
                     }
-                    return _value.Value;
+                    return _value;
                 }
                 set {
-                    if (_value.Value != value) {
-                        Set(Key, value);
-                    }
+                    _value = value;
+                    Set(Key, value);
                 }
             }
 
@@ -445,21 +396,21 @@ namespace PixelComrades {
         }
 
         public class CachedString : Cached {
-            private KeyedStringValue _value;
+            private string _value;
 
             public CachedString(string key) : base(key) {}
 
             public string Value {
                 get {
                     if (!ValueSet) {
-                        if (_dictString.TryGetValue(Key, out _value)) {
-                            ValueSet = true;
-                        }
-                        else {
-                            return "";
-                        }
+                        _value = Get(Key, "");
+                        ValueSet = true;
                     }
-                    return _value.Value;
+                    return _value;
+                }
+                set {
+                    _value = value;
+                    Set(Key, value);
                 }
             }
 
@@ -520,7 +471,7 @@ namespace PixelComrades {
         }
 
         public class CachedColor : Cached {
-            private KeyedColorValue _value;
+            private Color _value;
 
             public CachedColor(string key) : base(key) {
             }
@@ -528,16 +479,13 @@ namespace PixelComrades {
             public Color Value {
                 get {
                     if (!ValueSet) {
-                        if (_dictColor.TryGetValue(Key, out _value)) {
-                            ValueSet = true;
-                        }
-                        else {
-                            return Color.clear;
-                        }
+                        _value = Get(Key, Color.white);
+                        ValueSet = true;
                     }
-                    return _value.Value;
+                    return _value;
                 }
                 set {
+                    _value = value;
                     Set(Key, value);
                 }
             }
@@ -570,141 +518,6 @@ namespace PixelComrades {
 
             public override int GetHashCode() {
                 return Value.GetHashCode();
-            }
-        }
-    }
-
-    [System.Serializable]
-    public abstract class GenericKeyedValue {
-        public string Key;
-
-        public static GenericKeyedValue New(string key, System.Object value) {
-            if (value is float floatValue) {
-                return new KeyedFloatValue(key, floatValue);
-            }
-            if (value is int intValue) {
-                return new KeyedIntValue(key, intValue);
-            }
-            if (value is string stringValue) {
-                return new KeyedStringValue(key, stringValue);
-            }
-            if (value is bool boolValue) {
-                return new KeyedBoolValue(key, boolValue);
-            }
-            if (value is Color colorValue) {
-                return new KeyedColorValue(key, colorValue);
-            }
-            return null;
-        }
-        public abstract System.Object ValueAccess { get; set; }
-    }
-
-    [System.Serializable]
-    public class KeyedFloatValue : GenericKeyedValue {
-        public float Value;
-        public KeyedFloatValue() { }
-
-        public KeyedFloatValue(string key, float value) {
-            Value = value;
-            Key = key;
-        }
-
-        public override object ValueAccess {
-            get {
-                return Value;
-            }
-            set {
-                if (value is float newValue) {
-                    Value = newValue;
-                }
-            }
-        }
-    }
-
-    [System.Serializable]
-    public class KeyedIntValue : GenericKeyedValue {
-        public int Value;
-        public KeyedIntValue() { }
-
-        public KeyedIntValue(string key, int value) {
-            Value = value;
-            Key = key;
-        }
-
-        public override object ValueAccess {
-            get {
-                return Value;
-            }
-            set {
-                if (value is int newValue) {
-                    Value = newValue;
-                }
-            }
-        }
-    }
-
-    [System.Serializable]
-    public class KeyedBoolValue : GenericKeyedValue {
-        public bool Value;
-        public KeyedBoolValue() { }
-
-        public KeyedBoolValue(string key, bool value) {
-            Value = value;
-            Key = key;
-        }
-
-        public override object ValueAccess {
-            get {
-                return Value;
-            }
-            set {
-                if (value is bool newValue) {
-                    Value = newValue;
-                }
-            }
-        }
-    }
-
-    [System.Serializable]
-    public class KeyedStringValue : GenericKeyedValue {
-        public string Value;
-        public KeyedStringValue() { }
-
-        public KeyedStringValue(string key, string value) {
-            Value = value;
-            Key = key;
-        }
-
-        public override object ValueAccess {
-            get {
-                return Value;
-            }
-            set {
-                if (value is string newValue) {
-                    Value = newValue;
-                }
-            }
-        }
-    }
-
-    [System.Serializable]
-    public class KeyedColorValue : GenericKeyedValue {
-        public Color Value;
-        public KeyedColorValue() { }
-
-        public KeyedColorValue(string key, Color value) {
-            Value = value;
-            Key = key;
-        }
-
-        public override object ValueAccess {
-            get {
-                return Value;
-            }
-            set {
-                if (value is Color newValue) {
-                    Value = newValue;
-                }
             }
         }
     }

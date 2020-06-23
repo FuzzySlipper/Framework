@@ -11,8 +11,8 @@ namespace PixelComrades {
         private Dictionary<int, CachedEntity> _entityLookup = new Dictionary<int, CachedEntity>();
         private static GenericPool<CachedEntity> _cachePool = new GenericPool<CachedEntity>(50, c => c.Clear());
         
-        public bool IsFull { get { return _array?.IsFull ?? false; } }
-        public int Count { get { return _array?.UsedCount ?? 0; } }
+        public bool IsFull { get { return _array.IsFull; } }
+        public int Count { get { return _array == null ? 0 : _array.UsedCount; } }
         public int Max { get; private set; }
         public Entity Owner { get { return this.GetEntity(); } }
         public Entity this[int index] {
@@ -47,9 +47,6 @@ namespace PixelComrades {
         }
 
         public int ContainerSystemAdd(Entity entity) {
-            if (entity == null || _array == null) {
-                return -1;
-            }
             return _array.Add(GetCachedEntity(entity));
         }
         

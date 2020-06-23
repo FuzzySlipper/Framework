@@ -53,7 +53,7 @@ namespace PixelComrades {
                 RemoveActor();
                 return;
             }
-            //_mouseRay = Player.Camera.ScreenPointToRay(PlayerInputSystem.CursorPosition);
+            //_mouseRay = Player.Camera.ScreenPointToRay(Input.mousePosition);
             //var count = Physics.RaycastNonAlloc(_mouseRay, _hits, _actorDistance, LayerMasks.ActorCollision);
             //_hits.SortByDistanceAsc(count);
             //for (int i = 0; i < count; i++) {
@@ -226,8 +226,7 @@ namespace PixelComrades {
             }
             ClearModList();
             _mods.Clear();
-            _mods.Clear();
-            _mods.AddRange(_character.ModList.Mods);
+            World.Get<ModifierSystem>().FillModList(_mods, _character.Entity.Id);
             for (int i = 0; i < _mods.Count; i++) {
                 var mod = _mods[i];
                 if (mod.Icon == null) {

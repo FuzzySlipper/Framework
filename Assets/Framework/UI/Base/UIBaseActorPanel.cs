@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using PixelComrades;
 
 namespace PixelComrades {
     public class UIBaseActorPanel : UIBasicMenu {
 
-        protected PlayerCharacterTemplate Actor;
+        protected CharacterTemplate Actor;
 
-        public virtual void SetActor(PlayerCharacterTemplate actor) {
+        public virtual void SetActor(CharacterTemplate actor) {
             Actor = actor;
         }
     }

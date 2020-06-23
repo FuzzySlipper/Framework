@@ -25,11 +25,7 @@ namespace PixelComrades {
     /// Move Speed default is (MoveDistance) / 5
     /// </summary>
     public struct GatherMoveSpeedEvent : IRuleEvent {
-<<<<<<< HEAD
         public BaseActionTemplate Action { get; }
-=======
-        public ActionTemplate Action { get; }
->>>>>>> FirstPersonAction
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
         public float Base;
@@ -40,11 +36,7 @@ namespace PixelComrades {
             Action = null;
             Origin = origin;
             Target = origin;
-<<<<<<< HEAD
             Base = origin.Stats.GetValue(Stats.MoveSpeed);
-=======
-            Base = origin.Stats.GetValue(Stat.MoveSpeed);
->>>>>>> FirstPersonAction
             Bonus = bonus;
         }
     }

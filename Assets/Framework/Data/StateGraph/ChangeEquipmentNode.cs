@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public sealed class ChangeEquipmentNode : StateGraphNode {
         public float Delay = 0f;
-        public SpriteAnimationReference Default;
+        
         public override bool DrawGui(GUIStyle textStyle, GUIStyle buttonStyle) {
 #if UNITY_EDITOR
 
@@ -13,13 +13,6 @@ namespace PixelComrades {
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Delay)), GUIContent.none, true);
-            so.ApplyModifiedProperties();
-            GUILayout.Space(20);
-            GUILayout.EndHorizontal();
-            
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            UnityEditor.EditorGUILayout.PropertyField(so.FindProperty(nameof(Default)), GUIContent.none, true);
             so.ApplyModifiedProperties();
             GUILayout.Space(20);
             GUILayout.EndHorizontal();
@@ -36,13 +29,13 @@ namespace PixelComrades {
         private class RuntimeNode : RuntimeStateNode {
 
             private ChangeEquipmentNode _changeNode;
+
             public RuntimeNode(ChangeEquipmentNode node, RuntimeStateGraph graph) : base(node, graph) {
                 _changeNode = node;
             }
 
             public override void OnEnter(RuntimeStateNode lastNode) {
                 base.OnEnter(lastNode);
-<<<<<<< HEAD
                 // if (readyActions == null) {
                 //     return;
                 // }
@@ -60,56 +53,6 @@ namespace PixelComrades {
                 //     Graph.SetVariable(GraphVariables.WeaponModel, actionConfig != null ? actionConfig.Config.WeaponModel : "");
                 // }
                 // readyActions.QueuedChange = null;
-=======
-                var readyActions = Graph.Entity.Get<ReadyActions>();
-                if (readyActions == null) {
-                    return;
-                }
-                var instanced = Graph.Entity.Get<SpriteSimpleRendererComponent>();
-                if (instanced == null) {
-                    return;
-                }
-                var actionConfig = readyActions.QueuedChange;
-                var targetIndex = readyActions.QueuedSlot;
-                if (actionConfig == null || readyActions.GetAction(targetIndex) == actionConfig) {
-                    readyActions.RemoveAction(targetIndex);
-                    actionConfig = null;
-                }
-                else {
-                    readyActions.EquipAction(actionConfig, targetIndex);
-                }
-                if (targetIndex == 0) {
-                    // var data = instanced.Sprites[0];
-                    var targetAsset = actionConfig != null && actionConfig.Config.Sprite != null ? actionConfig.Config.Sprite : _changeNode.Default;
-                    if (!targetAsset.IsLoaded) {
-                        targetAsset.LoadAsset(handle => {
-                            var targetAnimation = handle;
-                            if (handle == null) {
-                                Debug.LogError("Error loading " + actionConfig.Config);
-                                return;
-                            }
-                            instanced.SetSprite(
-                                targetAnimation.GetSprite(0),
-                                targetAnimation.NormalMap,
-                                targetAnimation.EmissiveMap,
-                                null,
-                                targetIndex,
-                                false);
-                        });
-                    }
-                    else {
-                        var targetAnimation = targetAsset.LoadedAsset;
-                        instanced.SetSprite(
-                            targetAnimation.GetSprite(0),
-                            targetAnimation.NormalMap,
-                            targetAnimation.EmissiveMap,
-                            null,
-                            targetIndex,
-                            false);
-                    }
-                }
-                readyActions.QueuedChange = null;
->>>>>>> FirstPersonAction
             }
 
             public override void OnExit() {

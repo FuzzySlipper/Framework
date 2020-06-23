@@ -106,7 +106,7 @@ namespace PixelComrades {
                 var stats = target.Stats;
                 var vital = stats.GetVital(dmg.TargetVital);
                 if (vital == null) {
-                    vital = stats.GetVital(dmg.TargetVital);
+                    vital = stats.GetVital(GameData.Vitals.GetID(dmg.TargetVital));
                 }
                 if (vital != null) {
                     dmgHoverMsg.Append(vital.ToLabelString());
@@ -121,11 +121,7 @@ namespace PixelComrades {
                 dmgMsg.Append(" took ");
                 dmgMsg.Append(damageAmount.ToString("F1"));
                 dmgMsg.Append(" damage ");
-<<<<<<< HEAD
                 if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stats.Health) {
-=======
-                if (vital != null && vital.Current <= 0 && dmg.TargetVital == Stat.Health) {
->>>>>>> FirstPersonAction
                     target.Entity.Post(new DeathEvent(msg.Origin, msg.Target, msg.Hit.Point, damageAmount - previousValue));
                 }
             }

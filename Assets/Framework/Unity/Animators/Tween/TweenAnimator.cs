@@ -15,7 +15,6 @@ namespace PixelComrades {
         public TweenAnimator Chain {get { return _chain; } }
         public override float Length { get { return Tween.Length; } }
         public override bool IsPlaying { get { return Tween.Active; } }
-        protected virtual bool IsInvalid { get { return Target == null || gameObject == null || !gameObject.activeInHierarchy; } }
 
         public abstract Tweener Tween { get; }
         public abstract void StartTween();
@@ -28,25 +27,8 @@ namespace PixelComrades {
             _task = TimeManager.StartTask(PlayAnimation(), UnScaled, Finish);
         }
 
-        void OnDisable() {
-            if (_task != null) {
-                _task.Cancel();
-                _task = null;
-            }
-        }
-
-        public override void OnPoolDespawned() {
-            if (_task != null) {
-                _task.Cancel();
-                _task = null;
-            }
-        }
-
         private void Finish() {
             _task = null;
-            if (IsInvalid) {
-                return;
-            }
             if (Repeat == PixelComrades.Tween.TweenRepeat.Loop) {
                 Play();
             }
@@ -56,9 +38,6 @@ namespace PixelComrades {
             StartTween();
             bool flipped = false;
             while (true) {
-                if (IsInvalid) {
-                    break;
-                }
                 UpdateTween();
                 if (Tween.Active) {
                     yield return null;
@@ -73,7 +52,7 @@ namespace PixelComrades {
                 }
                 break;
             }
-            if (!IsInvalid && _chain != null) {
+            if (_chain != null) {
                 yield return TimeManager.StartTask(_chain.PlayAnimation(), _chain.Tween.UnScaled);
             }
         }

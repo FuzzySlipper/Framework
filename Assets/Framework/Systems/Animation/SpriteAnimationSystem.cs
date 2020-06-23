@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [AutoRegister, Priority(Priority.Normal)]
+    [Priority(Priority.Normal)]
     public class SpriteAnimationSystem : SystemBase, IMainSystemUpdate {
 
         private ComponentArray<SpriteAnimationComponent> _arraySpriteAnimation;
@@ -17,7 +17,7 @@ namespace PixelComrades {
                 var time = TimeManager.Time;
                 var timeUnscaled = TimeManager.TimeUnscaled;
                 foreach (SpriteAnimationComponent value in _arraySpriteAnimation) {
-                    if (value.Renderer == null || !value.Active || value.Animation == null) {
+                    if (value.Renderer == null || !value.Active) {
                         continue;
                     }
                     value.Billboard.Apply(value.Renderer.transform, true, ref value.LastAngleHeight);

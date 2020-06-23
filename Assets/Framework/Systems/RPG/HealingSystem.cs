@@ -14,12 +14,12 @@ namespace PixelComrades {
             var stats = context.Target.Stats;
             var vital = stats.GetVital(context.TargetVital);
             if (vital == null) {
-                vital = stats.GetVital(context.TargetVital);
+                vital = stats.GetVital(GameData.Vitals.GetID(context.TargetVital));
             }
             if (vital != null) {
                 vital.Current += context.Amount;
                 if (context.Amount > 0) {
-                    Color color = context.TargetVital == Stat.Health ? Color.green : Color.yellow;
+                    Color color = context.TargetVital == Stats.Health ? Color.green : Color.yellow;
                     context.Target.Post(new CombatStatusUpdate(context.Target, context.Amount.ToString("F1"), color));
                 }
             }

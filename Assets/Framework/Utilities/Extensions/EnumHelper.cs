@@ -12,7 +12,8 @@ public static class EnumHelper {
     private static Dictionary<Type, SortedList<int, string>> _enumDescr = new Dictionary<Type, SortedList<int, string>>();
 
     public static string GetString<T>(int enumIndex) where T : struct, IConvertible {
-        return GetEnumList<T>().TryGetValue(enumIndex, out var value) ? value : "";
+        string value;
+        return GetEnumList<T>().TryGetValue(enumIndex, out value) ? value : "";
     }
 
     public static int GetLength<T>() where T : struct, IConvertible {
@@ -54,15 +55,18 @@ public static class EnumHelper {
     }
 
     public static string GetDescription<T>(T en) where T : struct, IConvertible {
-        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out var value) ? value : "";
+        string value;
+        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out value) ? value : "";
     }
 
     public static string ToDescription<T>(this T en) where T : struct, IConvertible {
-        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out var value) ? value : "";
+        string value;
+        return GetEnumDescrList<T>().TryGetValue(en.ToInt32(CultureInfo.InvariantCulture), out value) ? value : "";
     }
 
     public static string GetDescription<T>(int enumIndex) where T : struct, IConvertible {
-        return GetEnumDescrList<T>().TryGetValue(enumIndex, out var value) ? value : "";
+        string value;
+        return GetEnumDescrList<T>().TryGetValue(enumIndex, out value) ? value : "";
     }
 
     public static SortedList<int, string> GetEnumDescrList<T>() {

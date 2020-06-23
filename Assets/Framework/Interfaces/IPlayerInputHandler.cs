@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public interface IPlayerInputHandler {
@@ -16,6 +15,5 @@ namespace PixelComrades {
         bool GetButtonUp(string action);
         float GetAxis(string axis);
         float GetAxisRaw(string axis);
-        bool GetKeyDown(Key key);
     }
 }

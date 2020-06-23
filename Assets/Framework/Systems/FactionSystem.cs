@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Net.Configuration;
 
 namespace PixelComrades {
-    [AutoRegister]
-    public class FactionSystem : SystemBase<FactionSystem> {
+    public class FactionSystem : SystemBase {
 
         private Dictionary<int, List<int>> _factionToEnemies = new Dictionary<int, List<int>>();
         private Dictionary<int, List<int>> _factionToAllies = new Dictionary<int, List<int>>();

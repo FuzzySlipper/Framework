@@ -3,19 +3,18 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using Random = UnityEngine.Random;
 
 namespace PixelComrades {
 
-    public sealed class RulesSystem : SystemBase<RulesSystem> {
+    public sealed class RulesSystem : SystemBase {
         
         public static readonly FastString LastQueryString = new FastString();
-        
         private Dictionary<System.Type, List<IRuleEventHandler>> _globalHandlers = new Dictionary<System.Type, List<IRuleEventHandler>>();
         private GenericPool<List<IRuleEventHandler>> _listPool = new GenericPool<List<IRuleEventHandler>>(5, t => t.Clear());
         private CircularBuffer<IRuleEvent> _eventLog = new CircularBuffer<IRuleEvent>(10, true);
         
         public RulesSystem() {
+            RegisterRuleTemplates();
         }
 
         [Command("printRuleEventLog")]
@@ -143,7 +142,6 @@ namespace PixelComrades {
             }
         }
 
-<<<<<<< HEAD
         private void RegisterRuleTemplates() {
             TemplateFilter<ApplyModifierRuleTemplate>.Setup();
             TemplateFilter<ApplyTagRuleTemplate>.Setup();
@@ -160,8 +158,6 @@ namespace PixelComrades {
 
         }
 
-=======
->>>>>>> FirstPersonAction
         public static int CalculateD20Roll(BaseStat stat, int numDice, int level = -1) {
             LastQueryString.Clear();
             var roll = CalculateD20Roll(numDice);
@@ -262,18 +258,6 @@ namespace PixelComrades {
             }
             return result;
         }
-
-        public static float CalculateDamageTotal(DiceStat damageStat, ActionCommand cmd, string bonusStatName) {
-            if (damageStat == null) {
-                return 0;
-            }
-            var total = cmd.HitResult.Result == CollisionResult.CriticalHit ? damageStat.GetMax() : damageStat.Value;
-            var bonusStat = cmd.Owner.Stats.Get<DiceStat>(bonusStatName);
-            if (bonusStat != null) {
-                total += bonusStat.D20ModifierValue;
-            }
-            return total;
-        }
         
         public static float GetDefenseAmount(float damage, float stat) {
             return damage * (stat / (damage * 10) * 0.5f);
@@ -307,25 +291,6 @@ namespace PixelComrades {
             return roll;
         }
 
-<<<<<<< HEAD
         
-=======
-        public static bool CheckVisible(CharacterTemplate npc) {
-            return Game.Random.CoinFlip();
-        }
-    }
-
-    public static class RulesSystemConstants {
-        public static void SetDefaultCharacterData(GenericDataComponent genericDataComponent) {
-            genericDataComponent.SetData(GenericDataTypes.MeleeDamageStat, Attributes.Strength);
-            genericDataComponent.SetData(GenericDataTypes.MeleeAccuracyStat, Attributes.Strength);
-            genericDataComponent.SetData(GenericDataTypes.UnarmedDamageStat, Attributes.Strength);
-            genericDataComponent.SetData(GenericDataTypes.UnarmedAccuracyStat, Attributes.Strength);
-            genericDataComponent.SetData(GenericDataTypes.RangedDamageStat, Attributes.Agility);
-            genericDataComponent.SetData(GenericDataTypes.RangedAccuracyStat, Attributes.Agility);
-            genericDataComponent.SetData(GenericDataTypes.AttackDamageBonusStat, GenericDataTypes.UnarmedDamageStat);
-            genericDataComponent.SetData(GenericDataTypes.AttackAccuracyBonusStat, GenericDataTypes.UnarmedAccuracyStat);
-        }
->>>>>>> FirstPersonAction
     }
 }

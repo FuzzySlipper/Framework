@@ -41,7 +41,7 @@ namespace PixelComrades {
             var v3Offset = new Vector3(0, offset, 0);
             while (true) {
                 transform.position = unit.Entity.GetPosition() + v3Offset;
-                CameraSystem.Cam.FaceCamera(transform, false);
+                Player.Cam.FaceCamera(transform, false);
                 if (_state != State.Fading) {
                     CheckSliders(unit);
                 }

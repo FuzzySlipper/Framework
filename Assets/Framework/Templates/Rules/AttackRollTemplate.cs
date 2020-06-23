@@ -21,22 +21,9 @@ namespace PixelComrades {
             RulesSystem.LastQueryString.Append(context.Origin.GetName());
             RulesSystem.LastQueryString.Append(": ");
             var bonus = RulesSystem.CalculateStatsWithLog(context.Origin.Stats.Get(_component.Value.Stat), _component.Value.AddLevel ?
-<<<<<<< HEAD
                 context.Origin.Level : -1);
             context.AttackTotal += bonus;
             RulesSystem.LastQueryString.AppendNewLine();
-=======
-                (int) context.Origin.Stats.GetValue(Stat.Level) : -1);
-            context.AttackTotal += bonus;
-            RulesSystem.LastQueryString.AppendNewLine();
-            if (_component.Value.Uses > 0) {
-                _component.Value.Uses--;
-                if (_component.Value.Uses <= 0) {
-                    Entity.Remove(_component.Value);
-                    _component.Clear();
-                }
-            }
->>>>>>> FirstPersonAction
         }
     }
 
@@ -44,14 +31,8 @@ namespace PixelComrades {
 
         public string Stat;
         public bool AddLevel;
-<<<<<<< HEAD
 
         public AttackBonusComponent(string stat, bool addLevel = true) {
-=======
-        public int Uses;
-
-        public AttackBonusComponent(string stat, int uses = -1,bool addLevel = true) {
->>>>>>> FirstPersonAction
             Stat = stat;
             AddLevel = addLevel;
         }

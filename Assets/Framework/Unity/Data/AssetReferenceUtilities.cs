@@ -50,11 +50,7 @@ namespace PixelComrades {
 
     [System.Serializable]
     public abstract class AssetReferenceEntry {
-<<<<<<< HEAD
         public AssetReference AssetReference = new AssetReference();
-=======
-        public AssetReference AssetReference;
->>>>>>> FirstPersonAction
         public string Path;
         public abstract System.Type Type { get; }
         public abstract UnityEngine.Object Asset { get; }
@@ -97,12 +93,6 @@ namespace PixelComrades {
         }
 
         public void LoadAsset() {
-<<<<<<< HEAD
-=======
-            if (!AssetReference.RuntimeKeyIsValid()) {
-                return;
-            }
->>>>>>> FirstPersonAction
             AssetReference.LoadAssetAsync<T>().Completed += CompleteLoad;
         }
 
@@ -142,7 +132,6 @@ namespace PixelComrades {
             _isLoaded = false;
         }
     }
-<<<<<<< HEAD
 //
 //     [System.Serializable]
 //     public abstract class SubAssetReferenceEntry : AssetReferenceEntry {
@@ -166,8 +155,6 @@ namespace PixelComrades {
 //             AssetReference.ReleaseAsset();
 //         }
 //     }
-=======
->>>>>>> FirstPersonAction
 
     [System.Serializable]
     public class GameObjectReference : AssetReferenceEntry<GameObject> {}
@@ -181,7 +168,6 @@ namespace PixelComrades {
     public class TextureAssetReference : AssetReferenceEntry<Texture2D> {}
     [System.Serializable]
     public class ActionFxReference : AssetReferenceEntry<ActionFx> {}
-<<<<<<< HEAD
     [System.Serializable]
     public class SpriteAnimationFrameReference : AssetReferenceEntry<Sprite> {
         public string SpriteAnimationName;
@@ -200,8 +186,4 @@ namespace PixelComrades {
             return false;
         }
     }
-=======
-    [Serializable]
-    public class SpriteAnimationReference : AssetReferenceEntry<SpriteAnimation> { }
->>>>>>> FirstPersonAction
 }

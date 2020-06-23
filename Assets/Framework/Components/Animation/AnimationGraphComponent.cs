@@ -9,7 +9,6 @@ namespace PixelComrades {
     public sealed class AnimationGraphComponent : IComponent, IDisposable {
         
         public RuntimeStateGraph Value { get; private set; }
-        public RuntimeStateGraph Temporary;
 
         public AnimationGraphComponent(RuntimeStateGraph value) {
             Value = value;

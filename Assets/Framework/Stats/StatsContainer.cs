@@ -42,16 +42,15 @@ namespace PixelComrades {
 
         public BaseStat this[int index] { get { return _list[index]; } }
         public int Count { get { return _list.Count; } }
-        public BaseStat Add(BaseStat item) {
+        public void Add(BaseStat item) {
             if (item == null || _dict.ContainsKey(item.ID)) {
-                return null;
+                return;
             }
             _list.Add(item);
             _dict.Add(item.ID, item);
             if (item is VitalStat vital) {
                 _vitals.Add(vital.ID, vital);
             }
-            return item;
         }
 
         public void AddRange<T>(IList<T> values) where T : BaseStat {
@@ -64,9 +63,6 @@ namespace PixelComrades {
         }
 
         public void Remove(BaseStat item) {
-            if (item == null) {
-                return;
-            }
             _list.Remove(item);
             _dict.Remove(item.ID);
             if (item is VitalStat vital) {

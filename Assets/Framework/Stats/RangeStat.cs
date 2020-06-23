@@ -17,8 +17,8 @@ namespace PixelComrades {
         }
 
         public float MaxModifier { get { return _max; } }
-        public float Min { get { return BaseClassValue; } }
-        public override float Value { get { return Game.Random.NextFloat(BaseClassValue, BaseClassValue + _max); } }
+        public float Min { get { return base.Value; } }
+        public override float Value { get { return Game.Random.NextFloat(base.Value, base.Value + _max); } }
 
         public void SetValue(float rangeMin, float rangeMax) {
             ChangeBase(rangeMin);
@@ -38,11 +38,11 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-            return string.Format("{0}: {1:F0}-{2:F0}", Label, BaseClassValue, BaseClassValue + _max);
+            return string.Format("{0}: {1:F0}-{2:F0}", Label, base.Value, base.Value + _max);
         }
 
         public override string ToLabelString() {
-            return Label.ToBoldLabel(string.Format("{0:F0}-{1:F0}", BaseClassValue, BaseClassValue + _max));
+            return Label.ToBoldLabel(string.Format("{0:F0}-{1:F0}", base.Value, base.Value + _max));
         }
     }
 }

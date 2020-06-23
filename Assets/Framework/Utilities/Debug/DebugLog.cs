@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace PixelComrades {
+#if DEBUG
     public static class DebugLog {
 
         private static StringBuilder _sb = new StringBuilder();
@@ -14,7 +15,6 @@ namespace PixelComrades {
         public static string Current { get { return _sb.ToString(); } }
 
         public static void Add(string msg, bool addStackTrace = true) {
-#if DEBUG
             if (_disableLog) {
                 return;
             }
@@ -27,7 +27,7 @@ namespace PixelComrades {
             }
             _sb.Append(System.Environment.StackTrace);
             _sb.Append(Environment.NewLine);
-#endif
         }
     }
+#endif
 }

@@ -3,6 +3,7 @@ using System.Collections;
 namespace PixelComrades {
     public class FlyCam : MonoSingleton<FlyCam> {
 
+
         [SerializeField] private float _cameraSensitivity = 90;
         [SerializeField] private float _climbSpeed = 4;
         [SerializeField] private float _normalMoveSpeed = 10;
@@ -33,13 +34,13 @@ namespace PixelComrades {
         public void SetIsActive(bool active) {
             _isActive = active;
             if (IsActive) {
-                _oldPos = CameraSystem.Cam.transform.localPosition;
-                _oldRot = CameraSystem.Cam.transform.localRotation;
+                _oldPos = Player.Cam.transform.localPosition;
+                _oldRot = Player.Cam.transform.localRotation;
                 PlayerInputSystem.MoveInputLocked = true;
             }
             else {
-                CameraSystem.Cam.transform.localPosition = _oldPos;
-                CameraSystem.Cam.transform.localRotation = _oldRot;
+                Player.Cam.transform.localPosition = _oldPos;
+                Player.Cam.transform.localRotation = _oldRot;
                 PlayerInputSystem.MoveInputLocked = false;
             }
         }

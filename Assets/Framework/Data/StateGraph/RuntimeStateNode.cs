@@ -25,7 +25,7 @@ namespace PixelComrades {
 
         public virtual void OnEnter(RuntimeStateNode previous) {
             if (!string.IsNullOrEmpty(Node.EnterEvent)){
-                Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(AnimationEvent.Type.StateEnter, Node.EnterEvent)));
+                Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, Node.EnterEvent));
             }
             LastEnter = previous;
             TimeEntered = TimeManager.Time;
@@ -33,8 +33,7 @@ namespace PixelComrades {
 
         public virtual void OnExit() {
             if (!string.IsNullOrEmpty(Node.ExitEvent)) {
-                Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, new AnimationEvent(AnimationEvent.Type.StateExit, Node
-                .ExitEvent)));
+                Graph.Entity.Post(new AnimationEventTriggered(Graph.Entity, Node.ExitEvent));
             }
         }
 

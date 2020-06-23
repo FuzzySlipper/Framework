@@ -29,8 +29,8 @@ namespace PixelComrades {
         }
 
         private void Update() {
-            if (_debug && PlayerInputSystem.GetMouseButtonDown(0)) {
-                Debug.Log(ScreenToWorldPoint(PlayerInputSystem.CursorPosition));
+            if (_debug && Input.GetMouseButtonUp(0)) {
+                Debug.Log(ScreenToWorldPoint(Input.mousePosition));
             }
         }
 

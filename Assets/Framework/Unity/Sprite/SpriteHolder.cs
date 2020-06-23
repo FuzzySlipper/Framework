@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace PixelComrades {
-    public class SpriteHolder : MonoBehaviour, IPoolEvents {
+namespace PixelComrades.DungeonCrawler {
+    public class SpriteHolder : MonoBehaviour {
 
         [SerializeField] private BillboardMode _billboard = BillboardMode.CamFwd;
         [SerializeField] private bool _unscaled = true;
@@ -15,10 +15,7 @@ namespace PixelComrades {
         [SerializeField] private List<Collider> _ignoreColliders = new List<Collider>();
         [SerializeField] private MeshRenderer _meshRenderer = null;
         [SerializeField] private MeshFilter _meshFilter = null;
-        [SerializeField] private SpriteRenderer _spriteRenderer = null;
-        [SerializeField] private bool _isVisible = false;
-        [SerializeField] private SpriteRenderer _facingSprite = null;
-        
+
         public BillboardMode Billboard { get => _billboard; }
         public bool Unscaled { get => _unscaled; }
         //public SpriteRenderer Renderer { get => _renderer; }
@@ -29,38 +26,5 @@ namespace PixelComrades {
         public SpriteFacing Facing { get => _facing; }
         public bool Backwards { get => _backwards; }
         public List<Collider> IgnoreColliders { get => _ignoreColliders; }
-        public bool IsVisible { get => _isVisible; }
-        public SpriteRenderer SpriteRenderer { get => _spriteRenderer; }
-        public SpriteRenderer FacingSprite { get => _facingSprite; }
-        
-        private RenderingVisibilityComponent _renderingComponent;
-
-        public void SetComponent(RenderingVisibilityComponent component) {
-            _renderingComponent = component;
-            _renderingComponent.IsVisible = _isVisible;
-        }
-        
-        private void OnBecameVisible() {
-            _isVisible = true;
-            if (_renderingComponent != null) {
-                _renderingComponent.IsVisible = true;
-            }
-        }
-
-        private void OnBecameInvisible() {
-            _isVisible = false;
-            if (_renderingComponent != null) {
-                _renderingComponent.IsVisible = false;
-            }
-        }
-
-        public void OnPoolSpawned() {
-            _isVisible = false;
-        }
-
-        public void OnPoolDespawned() {
-            _isVisible = false;
-            _renderingComponent = null;
-        }
     }
 }

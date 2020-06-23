@@ -22,10 +22,6 @@ namespace PixelComrades {
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-<<<<<<< HEAD
-=======
-            // info.AddValue(nameof(Set), ItemPool.GetAssetLocation(Set));
->>>>>>> FirstPersonAction
         }
     }
 }

@@ -10,19 +10,11 @@ namespace PixelComrades {
             _targetType = targetType;
         }
 
-<<<<<<< HEAD
         public string Description(BaseActionTemplate template, CharacterTemplate character) {
             return string.Format("Requires: {0}", _targetType);
         }
 
         public bool CanTarget(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public string Description(ActionTemplate template, CharacterTemplate character) {
-            return string.Format("Requires: {0}", _targetType);
-        }
-
-        public bool CanTarget(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             switch (_targetType) {
                 default:
                 case TargetType.Any:
@@ -36,11 +28,7 @@ namespace PixelComrades {
             }
         }
 
-<<<<<<< HEAD
         public bool CanEffect(BaseActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
-=======
-        public bool CanEffect(ActionTemplate template, CharacterTemplate character, CharacterTemplate target) {
->>>>>>> FirstPersonAction
             switch (_targetType) {
                 default:
                 case TargetType.Any:

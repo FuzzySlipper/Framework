@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
-using UnityEngine.InputSystem;
 
 namespace PixelComrades {
     public class UIModalQuestion : MonoSingleton<UIModalQuestion> {
@@ -16,8 +15,6 @@ namespace PixelComrades {
         private System.Action _simpleYes;
         private CanvasGroup _canvasGroup;
         private bool _active = false;
-        
-        public static bool Active { get => main._active; }
 
         void Awake() {
             main = this;
@@ -82,19 +79,19 @@ namespace PixelComrades {
             if (!_active) {
                 return;
             }
-            if (PlayerInputSystem.GetKeyDown(Key.Enter) || PlayerInputSystem.GetKeyDown(Key.Space) ||
-                PlayerInputSystem.GetKeyDown(Key.Digit1) || PlayerInputSystem.GetKeyDown(Key.Y)) {
+            if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space) ||
+                Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Y)) {
                 ButtonAnswer(0);
                 return;
             }
             if (_questionCount > 1) {
-                if (PlayerInputSystem.GetKeyDown(Key.Digit2) || PlayerInputSystem.GetKeyDown(Key.N)) {
+                if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.N)) {
                     ButtonAnswer(1);
                     return;
                 }
             }
             if (_questionCount > 2) {
-                if (PlayerInputSystem.GetKeyDown(Key.Digit3)) {
+                if (Input.GetKeyDown(KeyCode.Alpha3)) {
                     ButtonAnswer(2);
                 }
             }

@@ -93,15 +93,15 @@ namespace PixelComrades {
             //    case GenericValue.Experience:
             //        switch (Type) {
             //            case ValueEventType.AddValue:
-            //                PlayerControllerSystem.Current.AddExperience(IntValue);
+            //                Player.Controller.AddExperience(IntValue);
             //                UIFloatingText.SpawnCentered(string.Format("+{0} XP", IntValue), Color.green);
             //                break;
             //            case ValueEventType.ReduceValue:
-            //                PlayerControllerSystem.Current.AddExperience(-IntValue);
+            //                Player.Controller.AddExperience(-IntValue);
             //                UIFloatingText.SpawnCentered(string.Format("-{0} XP", IntValue), Color.red);
             //                break;
             //            case ValueEventType.SetValue:
-            //                PlayerControllerSystem.Current.SetExperience(IntValue);
+            //                Player.Controller.SetExperience(IntValue);
             //                UIFloatingText.SpawnCentered(string.Format("XP = {0}", IntValue), Color.yellow);
             //                break;
             //        }

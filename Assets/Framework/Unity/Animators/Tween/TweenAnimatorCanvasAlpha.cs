@@ -11,7 +11,6 @@ namespace PixelComrades {
 
         private int _index = -1;
         private TweenFloat _tweener = new TweenFloat();
-        protected override bool IsInvalid { get { return _canvasGroup == null || gameObject == null || !gameObject.activeInHierarchy; } }
 
         public override Tweener Tween { get { return _tweener; } }
 

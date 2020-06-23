@@ -42,10 +42,10 @@ namespace PixelComrades {
             normal = (origin - hitPnt).normalized;
         }
 
-        public static float GetHitMultiplier(CollisionResult hit, CharacterTemplate entity) {
+        public static float GetHitMultiplier(int hit, CharacterTemplate entity) {
             var multi = 1f;
             if (hit == CollisionResult.CriticalHit) {
-                var critStat = entity.Stats.Get(Stat.CriticalMulti);
+                var critStat = entity.Stats.Get(Stats.CriticalMulti);
                 if (critStat != null) {
                     multi = critStat.Value;
                 }

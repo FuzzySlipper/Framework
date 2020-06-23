@@ -6,19 +6,20 @@ using System.Runtime.Serialization;
 namespace PixelComrades {
     [System.Serializable]
 	public sealed class EntityLevelComponent : IComponent {
-        public int Value;
+        public int Level;
+
         public EntityLevelComponent(){}
 
-        public EntityLevelComponent(int value) {
-            Value = value;
+        public EntityLevelComponent(int level) {
+            Level = level;
         }
 
         public EntityLevelComponent(SerializationInfo info, StreamingContext context) {
-            Value = info.GetValue(nameof(Value), 1);
+            Level = info.GetValue(nameof(Level), 1);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue(nameof(Value), Value);
+            info.AddValue(nameof(Level), Level);
         }
     }
 }

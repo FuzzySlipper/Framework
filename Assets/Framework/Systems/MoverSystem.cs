@@ -4,9 +4,7 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
 
-    [AutoRegister]
-    public class MoverSystem : SystemBase<MoverSystem>, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent>,
-        IReceiveGlobal<StartArcMoveEvent> {
+    public class MoverSystem : SystemBase, IMainSystemUpdate, IReceiveGlobal<MoveTweenEvent>, IReceiveGlobal<StartMoveEvent> {
         private const float ReachedDestination = 0.1f;
         private const float ReachedDestinationSquared = ReachedDestination * ReachedDestination;
 
@@ -22,12 +20,16 @@ namespace PixelComrades {
         private ManagedArray<ArcMoverTemplate>.RefDelegate _arcDel;
 
         public MoverSystem() {
+            TemplateFilter<ForwardMoverTemplate>.Setup();
             _forwardMovers = EntityController.GetTemplateList<ForwardMoverTemplate>();
             _forwardDel = HandleForwardMovement;
+            TemplateFilter<RotateToTemplate>.Setup();
             _rotators = EntityController.GetTemplateList<RotateToTemplate>();
             _rotateDel = HandleRotation;
+            TemplateFilter<SimpleMoverTemplate>.Setup();
             _simpleMovers = EntityController.GetTemplateList<SimpleMoverTemplate>();
             _simpleDel = HandleMoveSimple;
+            TemplateFilter<ArcMoverTemplate>.Setup();
             _arcMovers = EntityController.GetTemplateList<ArcMoverTemplate>();
             _arcDel = HandleArcMovement;
         }
@@ -128,7 +130,7 @@ namespace PixelComrades {
                 return;
             }
             var ms = mover.MoveSpeed?.Speed ?? 1;
-            mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * (ms * TimeManager.DeltaTime)));
+            mover.Entity.Post(new MoveTransform(mover.Tr, mover.Tr.forward * ms * TimeManager.DeltaTime));
         }
 
         private void HandleRotation(ref RotateToTemplate r) {
@@ -156,19 +158,6 @@ namespace PixelComrades {
         }
 
         public void HandleGlobal(StartMoveEvent moveEvent) {
-            if (moveEvent.Origin == null) {
-                return;
-            }
-            moveEvent.Origin.Tags.Add(EntityTags.Moving);
-            var target = moveEvent.Origin.Get<MoveTarget>();
-            if (target == null) {
-                target = new MoveTarget();
-                moveEvent.Origin.Add(target);
-            }
-            target.SetMoveTarget(moveEvent.GetPosition);
-        }
-
-        public void HandleGlobal(StartArcMoveEvent moveEvent) {
             if (moveEvent.Origin == null) {
                 return;
             }
@@ -212,26 +201,6 @@ namespace PixelComrades {
         }
 
         public StartMoveEvent(Entity origin, VisibleTemplate follow) {
-            MoveTarget = follow.position;
-            Follow = follow.Tr;
-            Origin = origin;
-        }
-    }
-
-    public struct StartArcMoveEvent : IEntityMessage {
-        public Vector3 MoveTarget;
-        public TransformComponent Follow;
-        public Entity Origin;
-
-        public Vector3 GetPosition => Follow != null ? Follow.position : MoveTarget;
-
-        public StartArcMoveEvent(Entity origin, Vector3 moveTarget, TransformComponent follow) {
-            MoveTarget = moveTarget;
-            Follow = follow;
-            Origin = origin;
-        }
-
-        public StartArcMoveEvent(Entity origin, VisibleTemplate follow) {
             MoveTarget = follow.position;
             Follow = follow.Tr;
             Origin = origin;

@@ -11,38 +11,18 @@ namespace PixelComrades {
         public int DiceSides;
         public int MultiplyResult = 1;
 
-<<<<<<< HEAD
-=======
-        public DiceStat(int entity, string label, DiceValue diceValue) : base(entity, label, diceValue.Bonus) {
-            DiceRolls = diceValue.DiceRolls;
-            DiceSides = (int) diceValue.DiceSides;
-        }
-
-        public DiceStat(int entity, string label, string id, DiceValue diceValue) : base(entity, label, id, diceValue.Bonus) {
-            DiceRolls = diceValue.DiceRolls;
-            DiceSides = (int) diceValue.DiceSides;
-        }
-
->>>>>>> FirstPersonAction
         public DiceStat(int entity, string label, float baseValue, int diceRolls, int diceSides) : base(entity, label, baseValue) {
             DiceRolls = diceRolls;
             DiceSides = diceSides;
         }
 
         private DiceStat(int entity, string label) : base(entity, label, 0) { }
-<<<<<<< HEAD
         
         
 
         public override float Value {
             get {
                 return MultiplyResult * (base.Value + RulesSystem.RollDice(DiceSides, DiceRolls));
-=======
-
-        public override float Value {
-            get {
-                return MultiplyResult * (BaseClassValue + RulesSystem.RollDice(DiceSides, DiceRolls));
->>>>>>> FirstPersonAction
             }
         }
 
@@ -51,26 +31,11 @@ namespace PixelComrades {
         }
 
         public override string ToString() {
-<<<<<<< HEAD
             return string.Format("{0}: {1}d{2}+{3:F0}", Label, DiceRolls, DiceSides, Value);
         }
 
         public override string ToLabelString() {
             return Label.ToBoldLabel(string.Format("{0}d{1}+{2:F0}", DiceRolls, DiceSides, Value));
-=======
-            return string.Format("{0}: {1}d{2}+{3:F0}", Label, DiceRolls, DiceSides, BaseClassValue);
-        }
-
-        public override string ToLabelString() {
-            return Label.ToBoldLabel(string.Format("{0}d{1}+{2:F0}", DiceRolls, DiceSides, BaseClassValue));
-        }
-
-        public void Change(DiceStat stat) {
-            DiceRolls = stat.DiceRolls;
-            DiceSides = stat.DiceSides;
-            MultiplyResult = stat.MultiplyResult;
-            ChangeBase(stat.BaseValue);
->>>>>>> FirstPersonAction
         }
 
         private static Regex _whitespacePattern = new Regex(@"\s+");

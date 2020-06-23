@@ -4,8 +4,8 @@ using System.Linq;
 using UnityEngine;
 
 namespace PixelComrades {
-    [AutoRegister, Priority(Priority.Higher)]
-    public class SensorSystem : SystemBase<SensorSystem>, IPeriodicUpdate, IReceive<ReceivedDamageEvent> {
+    [Priority(Priority.Higher)]
+    public class SensorSystem : SystemBase, IPeriodicUpdate, IReceive<ReceivedDamageEvent> {
 
         public GameOptions.CachedInt MaxTurnsNpcVisible = new GameOptions.CachedInt("MaxTurnsNpcVisible");
         public bool CheckVision = false;
@@ -25,7 +25,9 @@ namespace PixelComrades {
         public SensorSystem() {
             _sensorDel = RunUpdate;
             _unitySensorDel = RunUpdate;
+            TemplateFilter<SensorDetectingTemplate>.Setup();
             _sensorTemplates = EntityController.GetTemplateList<SensorDetectingTemplate>();
+            TemplateFilter<UnitySensorTemplate>.Setup();
             _unitySensorTemplates = EntityController.GetTemplateList<UnitySensorTemplate>();
             EntityController.RegisterReceiver(new EventReceiverFilter(this, new[] {
                 typeof(SensorTargetsComponent)

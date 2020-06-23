@@ -49,7 +49,7 @@ namespace PixelComrades {
         private const float HalfSideOffset = 0.75f;
 
         public static DirectionsEight GetCameraSide(SpriteFacing facing, Transform posTr, Transform forwardTr, float margin, out bool inMargin) {
-            return GetSide(facing, GetAngle(posTr, forwardTr, Game.SpriteCameraTr), margin, out inMargin);
+            return GetSide(facing, GetAngle(posTr, forwardTr, Game.SpriteCamera.transform), margin, out inMargin);
         }
 
         public static DirectionsEight GetSide(Transform posTr, Transform forwardTr, Transform target, float margin, out bool inMargin) {

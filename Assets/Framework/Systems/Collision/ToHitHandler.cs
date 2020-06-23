@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace PixelComrades {
     public class ToHitHandler : ICollisionHandler {
 
-        public CollisionResult CheckHit(CollisionEvent collisionEvent) {
+        public int CheckHit(CollisionEvent collisionEvent) {
             if (collisionEvent.Origin == null || collisionEvent.Target == null) {
                 return CollisionResult.Hit;
             }

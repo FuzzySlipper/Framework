@@ -4,8 +4,10 @@ using System.Collections.Generic;
 
 namespace PixelComrades {
     public class SpriteParticleSystem : SystemBase, IMainSystemUpdate {
+        private const string PrefabName = "ParticleHolder";
         //private const BillboardMode Billboard = BillboardMode.NoYAxis;
         //private const bool Reversed = true;
+        private static GameObject _prefab;
 
         private List<ParticlePlayer> _current = new List<ParticlePlayer>();
         private Transform _poolPivot;
@@ -66,7 +68,10 @@ namespace PixelComrades {
                 player.Renderer.enabled = true;
             }
             else {
-                var newPlayer = UnityEngine.Object.Instantiate(LazyDb.Main.ParticleHolder);
+                if (_prefab == null) {
+                    _prefab = ItemPool.LoadAsset<GameObject>(UnityDirs.Particles, PrefabName);
+                }
+                var newPlayer = UnityEngine.Object.Instantiate(_prefab);
                 player = new ParticlePlayer(newPlayer.GetComponent<SpriteRenderer>());
             }
             player.Tr.SetParent(null);

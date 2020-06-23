@@ -47,17 +47,10 @@ namespace PixelComrades {
         [ShowInInspector]
         public string Name {
             get { return _item.Name; }
-<<<<<<< HEAD
             set {
                 _item.Name = value;
                 EditorUtility.SetDirty(_item);
             }
-=======
-            // set {
-            //     _item.Name = value;
-            //     EditorUtility.SetDirty(_item);
-            // }
->>>>>>> FirstPersonAction
         }
         
         [ShowInInspector, ProgressBar(0, 100)]

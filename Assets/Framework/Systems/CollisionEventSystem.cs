@@ -39,7 +39,7 @@ namespace PixelComrades {
             if (msg.Hit < 0) {
                 msg.Hit = CollisionResult.Hit;
                 for (int h = 0; h < _globalHandlers.Count; h++) {
-                    msg.Hit = (CollisionResult) MathEx.Min((int) _globalHandlers[h].CheckHit(msg), (int) msg.Hit);
+                    msg.Hit = MathEx.Min(_globalHandlers[h].CheckHit(msg), msg.Hit);
                 }
             }
             if (msg.Hit <= 0) {
@@ -71,11 +71,7 @@ namespace PixelComrades {
             }
         }
 
-<<<<<<< HEAD
         public static void PostImpactEvent(CharacterTemplate origin, CharacterTemplate target, BaseActionTemplate action, Vector3 hitPoint, 
-=======
-        public static void PostImpactEvent(CharacterTemplate origin, CharacterTemplate target, ActionTemplate action, Vector3 hitPoint, 
->>>>>>> FirstPersonAction
         Vector3 hitNormal) {
             var hitRotation = hitNormal == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(hitNormal);
             var ae = new ActionEvent(action, origin, target, hitPoint,hitRotation, ActionState.Impact);
@@ -98,40 +94,24 @@ namespace PixelComrades {
 
     public struct HitData {
         public CharacterTemplate Target { get; }
-<<<<<<< HEAD
         public int Result { get; }
         public Vector3 Point { get; }
         public Vector3 Normal { get; }
 
         public HitData(int result, CharacterTemplate target, Vector3 point, Vector3 normal) {
-=======
-        public CollisionResult Result { get; }
-        public Vector3 Point { get; }
-        public Vector3 Normal { get; }
-
-        public HitData(CollisionResult result, CharacterTemplate target, Vector3 point, Vector3 normal) {
->>>>>>> FirstPersonAction
             Result = result;
             Target = target;
             Point = point;
             Normal = normal;
         }
 
-<<<<<<< HEAD
         public static implicit operator int(HitData reference) {
-=======
-        public static implicit operator CollisionResult(HitData reference) {
->>>>>>> FirstPersonAction
             return reference.Result;
         }
     }
 
     public struct ImpactEvent : IRuleEvent {
-<<<<<<< HEAD
         public BaseActionTemplate Action { get; }
-=======
-        public ActionTemplate Action { get; }
->>>>>>> FirstPersonAction
         public Entity Source { get; }
         public CharacterTemplate Origin { get; }
         public CharacterTemplate Target { get; }
@@ -147,11 +127,7 @@ namespace PixelComrades {
             Action = action;
         }
 
-<<<<<<< HEAD
         public ImpactEvent(BaseActionTemplate action, CharacterTemplate origin, CharacterTemplate target, Vector3 hitPoint, Vector3 hitNormal) {
-=======
-        public ImpactEvent(ActionTemplate action, CharacterTemplate origin, CharacterTemplate target, Vector3 hitPoint, Vector3 hitNormal) {
->>>>>>> FirstPersonAction
             Source = action.Entity;
             Hit = new HitData(CollisionResult.Hit, target, hitPoint, hitNormal);
             Origin = origin;
@@ -197,8 +173,8 @@ namespace PixelComrades {
         public CollidableTemplate Target { get; }
         public Vector3 HitPoint { get; }
         public Vector3 HitNormal { get; }
-        public CollisionResult Hit;
-        public CollisionEvent(Entity source, CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, CollisionResult hit = CollisionResult.Miss) {
+        public int Hit;
+        public CollisionEvent(Entity source, CollidableTemplate origin, CollidableTemplate target, Vector3 hitPoint, Vector3 hitNormal, int hit = -1) {
             Source = source;
             Origin = origin;
             Target = target;
@@ -209,13 +185,20 @@ namespace PixelComrades {
     }
 
     public interface ICollisionHandler {
-        CollisionResult CheckHit(CollisionEvent collisionEvent);
+        int CheckHit(CollisionEvent collisionEvent);
     }
 
-    public enum CollisionResult{
-        Miss,
-        Graze,
-        Hit,
-        CriticalHit,
+    public class CollisionResult : GenericEnum<CollisionResult, int> {
+        public static int Miss = 0;
+        public static int Graze = 5;
+        public static int Hit = 10;
+        public static int CriticalHit = 15;
+
+        public override int Parse(string value, int defaultValue) {
+            if (int.TryParse(value, out var val)) {
+                return val;
+            }
+            return TryValueOf(value, out val) ? val : defaultValue;
+        }
     }
 }

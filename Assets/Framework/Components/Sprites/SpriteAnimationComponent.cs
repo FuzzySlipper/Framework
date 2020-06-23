@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using PixelComrades;
+using PixelComrades.DungeonCrawler;
 
 namespace PixelComrades {
     [System.Serializable]
@@ -50,9 +50,6 @@ namespace PixelComrades {
         }
 
         public void UpdateFrame(float comparisonTime) {
-            if (Animation == null) {
-                return;
-            }
             NextUpdateTime = Animation.FrameTime * CurrentFrame.Length + comparisonTime;
             Renderer.sprite = Animation.GetSprite(CurrentFrameIndex);
         }

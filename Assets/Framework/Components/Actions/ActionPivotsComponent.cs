@@ -24,11 +24,7 @@ namespace PixelComrades {
         }
     }
 
-<<<<<<< HEAD
     public partial class PivotTypes : StringEnum<PivotTypes> {
-=======
-    public class ActionPivotTypes : StringEnum<ActionPivotTypes> {
->>>>>>> FirstPersonAction
         public const string Primary = "Primary";
         public const string Secondary = "Secondary";
         public const string Hidden = "Hidden";

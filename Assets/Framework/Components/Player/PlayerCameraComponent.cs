@@ -16,8 +16,7 @@ namespace PixelComrades {
         public Spring FovSpring = new Spring();
         public float RotationX, RotationY;
         public float OriginalFov = 55;
-        public bool Active = true;
-        
+
         public PlayerCameraComponent(Transform followTr, Camera cam) {
             FollowTr = followTr;
             Cam = cam;

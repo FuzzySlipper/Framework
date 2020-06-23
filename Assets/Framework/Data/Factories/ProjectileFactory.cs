@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-<<<<<<< HEAD
 using UnityEditorInternal;
-=======
->>>>>>> FirstPersonAction
 
 namespace PixelComrades {
     public class ProjectileFactory : ScriptableDatabase<ProjectileFactory>, IEntityFactory {
@@ -95,10 +92,6 @@ namespace PixelComrades {
             if (config.Type == ProjectileType.SpriteAnimation) {
                 config.Animation.LoadAsset();
             }
-<<<<<<< HEAD
-=======
-            entity.Get<CollisionCheckForward>().Active = false;
->>>>>>> FirstPersonAction
             projectileEvent.Set(config, entity, target, spawnPos, spawnRot, actionFx);
             ItemPool.Spawn(projectileEvent);
         }
@@ -253,10 +246,6 @@ namespace PixelComrades {
                 if (spawn.Rigidbody != null) {
                     template.Rb.SetRb(spawn.Rigidbody);
                 }
-<<<<<<< HEAD
-=======
-                template.CollisionCheckForward.Active = true;
->>>>>>> FirstPersonAction
                 _entity.Tags.Add(EntityTags.Moving);
                 template.Rendering.Set(spawn);
                 UnityToEntityBridge.RegisterToEntity(NewPrefab.Transform.gameObject, _entity);
@@ -275,15 +264,12 @@ namespace PixelComrades {
 
     }
 
-<<<<<<< HEAD
     public enum ProjectileMovement {
         Forward,
         Arc,
         Force
     }
     
-=======
->>>>>>> FirstPersonAction
     public enum ProjectileType {
         Simple,
         SpriteAnimation,

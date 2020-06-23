@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections;
 using PixelComrades;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
 
 public class UICursor : MonoSingleton<UICursor> {
     
@@ -47,7 +46,7 @@ public class UICursor : MonoSingleton<UICursor> {
             return;
         }
         if (_focused) {
-            transform.position = Mouse.current.position.ReadValue();
+            transform.position = Input.mousePosition;
         }
         //if (UITooltip.Active) {
         //    SetCursor(_useCursor);
@@ -68,13 +67,5 @@ public class UICursor : MonoSingleton<UICursor> {
         _cursorSprite.enabled = false;
         _cursorSprite.sprite = newCursor;
         _cursorSprite.enabled = true;
-    }
-
-    public void SetTarget() {
-        SetCursor(_crossHair);
-    }
-
-    public void SetDefault() {
-        SetCursor(_defaultCursor);
     }
 }

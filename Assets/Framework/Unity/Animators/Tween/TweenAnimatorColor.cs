@@ -12,7 +12,6 @@ namespace PixelComrades {
 
         private int _index = -1;
         private TweenColor _tweener = new TweenColor();
-        protected override bool IsInvalid { get { return gameObject == null || !gameObject.activeInHierarchy; } }
 
         public override Tweener Tween { get { return _tweener; } }
 

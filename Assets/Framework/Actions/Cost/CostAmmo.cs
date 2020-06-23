@@ -21,18 +21,18 @@ namespace PixelComrades {
             info.AddValue(nameof(_ammoComponent), _ammoComponent);
         }
 
-        public override void ProcessCost(ActionTemplate action, CharacterTemplate owner) {
+        public override void ProcessCost(Entity owner, Entity action) {
             _ammoComponent.Value.Amount.ReduceValue(1);
         }
 
-        public override bool CanAct(ActionTemplate action, CharacterTemplate owner) {
-            if (!owner.IsPlayer()) {
+        public override bool CanAct(Entity owner, Entity action) {
+            if (!owner.HasComponent<PlayerComponent>()) {
                 return true;
             }
             if (_ammoComponent.Value.Amount > 0) {
                 return true;
             }
-            owner.Post(new StatusUpdate(owner, "Not enough " + _ammoComponent.Value.Config.Name));
+            owner.PostAll(new StatusUpdate(owner, "Not enough " + _ammoComponent.Value.Config.Name));
             return false;
         }
     }

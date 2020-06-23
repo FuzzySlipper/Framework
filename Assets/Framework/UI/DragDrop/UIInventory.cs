@@ -53,13 +53,13 @@ namespace PixelComrades {
                 IconLoader.New(this, _inventory[i], i);
             }
             _inventory.Owner.AddObserver(this);
+            RefreshInventory();
         }
         
         
 
         private class IconLoader : LoadOperationEvent {
             private static GenericPool<IconLoader> _pool = new GenericPool<IconLoader>(5);
-<<<<<<< HEAD
 
             private Entity _item;
             private int _index;
@@ -73,21 +73,6 @@ namespace PixelComrades {
                 loader._index = index;
             }
 
-=======
-
-            private Entity _item;
-            private int _index;
-            private UIInventory _inventory;
-                
-            public static void New(UIInventory inventory, Entity item, int index) {
-                var loader = _pool.New();
-                loader.SourcePrefab = LazyDb.Main.ItemDragDrop;
-                loader._inventory = inventory;
-                loader._item = item;
-                loader._index = index;
-            }
-
->>>>>>> FirstPersonAction
             public override void OnComplete() {
                 var itemDragDrop = NewPrefab.GetComponent<UIItemDragDrop>();
                 itemDragDrop.RectTransform.SetParent(_inventory._grid);
@@ -138,9 +123,6 @@ namespace PixelComrades {
 
         protected void RefreshInventory() {
             for (int i = 0; i < _slots.Length; i++) {
-                if (_slots[i] == null) {
-                    continue;
-                }
                 if (_slots[i].Data != _inventory[i]) {
                     SetItemStatus(i);
                 }

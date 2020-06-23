@@ -10,7 +10,7 @@ namespace PixelComrades {
                 data.TryGetValue(DatabaseFields.Price, 1),(ItemRarity) 
                 data.TryGetValue(DatabaseFields.Rarity, 0)));
             var stats = entity.Get<StatsContainer>();
-            stats.GetOrAdd(Stat.Weight).ChangeBase(data.GetValue<int>(DatabaseFields.Weight));
+            stats.GetOrAdd(Stats.Weight).ChangeBase(data.GetValue<int>(DatabaseFields.Weight));
         }
     }
 }

@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace PixelComrades {
-    [AutoRegister]
-    public class EntityUIPoolSystem : SystemBase<EntityUIPoolSystem>, IEntityFactory {
+    public class EntityUIPoolSystem : SystemBase, IEntityFactory {
 
         private Stack<Entity> _pooled = new Stack<Entity>();
 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 ﻿using UnityEngine;
-=======
-using UnityEngine;
->>>>>>> FirstPersonAction
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -61,30 +57,12 @@ namespace PixelComrades {
         public const string ItemType = "ItemType";
         public const string WeaponType = "WeaponType";
         public const string Size = "Size";
-<<<<<<< HEAD
     }
 
-=======
-        public const string AttackDamageBonusStat = "AttackDamageStat";
-        public const string AttackAccuracyBonusStat = "AttackAccuracyStat";
-        public const string MeleeDamageStat = "MeleeDamageStat";
-        public const string MeleeAccuracyStat = "MeleeAccuracyStat";
-        public const string RangedDamageStat = "RangedDamageStat";
-        public const string RangedAccuracyStat = "RangedAccuracyStat";
-        public const string UnarmedDamageStat = "MeleeDamageStat";
-        public const string UnarmedAccuracyStat = "MeleeAccuracyStat";
-    }
-
-    
-
->>>>>>> FirstPersonAction
     public class CharacterSizes : StringEnum<CharacterSizes> {
         public const string Small = "Small";
         public const string Medium = "Medium";
         public const string Large = "Large";
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> FirstPersonAction
 }

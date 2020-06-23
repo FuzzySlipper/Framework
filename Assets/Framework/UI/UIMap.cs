@@ -14,7 +14,6 @@ namespace PixelComrades {
         private bool _isLevelCamera = true;
         private Task _animate;
 
-        public virtual string GetTitleText() { return null; }
         public bool IsLevelCamera { get { return _isLevelCamera; } }
         public bool Active { get; private set; }
 

@@ -14,13 +14,6 @@ namespace PixelComrades {
             _requiredTypes = types;
         }
 
-        public void SetTypes(System.Type[] types) {
-            _requiredTypes = types;
-        }
-
-        protected TemplateFilter() {
-        }
-
         public bool TryAdd(Entity entity) {
             if (ContainsEntity(entity)) {
                 return true;
@@ -64,8 +57,6 @@ namespace PixelComrades {
         public TemplateList<T> AllTemplates { get => _allTemplates; }
 
         protected TemplateFilter(System.Type[] types) : base(types) {}
-
-        public TemplateFilter() { }
 
         public static TemplateFilter<T> Setup() {
             var instance = new T();

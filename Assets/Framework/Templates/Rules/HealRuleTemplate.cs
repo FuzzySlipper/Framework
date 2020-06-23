@@ -7,10 +7,9 @@ namespace PixelComrades {
 
         private CachedComponent<HealImpact> _heal = new CachedComponent<HealImpact>();
 
-        public override List<CachedComponent> GatherComponents
-            => new List<CachedComponent>() {
-                _heal, EntityStats
-            };
+        public override List<CachedComponent> GatherComponents => new List<CachedComponent>() {
+            _heal, EntityStats
+        };
 
 
         public override System.Type[] GetTypes() {
@@ -21,7 +20,7 @@ namespace PixelComrades {
 
         public void RuleEventEnded(ref ImpactEvent context) {
             var target = _heal.Value.HealSelf ? context.Origin : context.Target;
-            var power = RulesSystem.CalculateImpactTotal(EntityStats, PixelComrades.Stat.Power, _heal.Value.NormalizedPercent);
+            var power = RulesSystem.CalculateImpactTotal(EntityStats, PixelComrades.Stats.Power, _heal.Value.NormalizedPercent);
             var logSystem = World.Get<GameLogSystem>();
             logSystem.StartNewMessage(out var logMsg, out var hoverMsg);
             logMsg.Append(context.Origin.GetName());
